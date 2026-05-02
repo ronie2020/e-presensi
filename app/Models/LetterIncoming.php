@@ -12,14 +12,16 @@ class LetterIncoming extends Model
     // Nama tabel (opsional jika sesuai standar, tapi biar aman kita tulis)
     protected $table = 'letter_incomings';
 
-    protected $fillable = [
+        protected $fillable = [
+        'nomor_agenda',
         'nomor_surat',
-        'pengirim',
-        'perihal',
+        'sifat_surat',
+        'asal_surat',
         'tgl_surat',
-        'tgl_terima',
+        'tgl_diterima',
+        'perihal',
         'file_path',
-        'status_disposisi',
+        'status_disposisi'
     ];
 
     // Casting agar otomatis jadi objek Carbon (Date)

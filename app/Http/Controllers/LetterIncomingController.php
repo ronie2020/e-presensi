@@ -22,28 +22,43 @@ class LetterIncomingController extends Controller
                   ->orWhere('pengirim', 'like', "%{$search}%");
             });
         }
-
-        // Ambil data, urutkan dari yang terbaru, dan paginate
+        
         $letters = $query->latest()->paginate(10);
 
         return view('letters.incoming.index', compact('letters'));
     }
 
-    public function create()
+     public function create()
     {
-        return view('letters.incoming.create');
-    }
+        // Logika Nomor Agenda Otomatis
+        $lastLetter = LetterIncoming::latest('id')->first();
+        
+        if (!$lastLetter) {
+            // Jika belum ada data sama sekali, mulai dari 0001
+            $nextAgenda = '0001';
+        } else {
+            // Ambil angka dari agenda terakhir, jadikan integer, tambah 1
+            $lastAgendaNumber = intval($lastLetter->nomor_agenda);
+            // Format kembali menjadi 4 digit (contoh: 0002, 0003, dst)
+            $nextAgenda = str_pad($lastAgendaNumber + 1, 4, '0', STR_PAD_LEFT);
+        }
 
+        // Kirim variabel $nextAgenda ke halaman view
+        return view('letters.incoming.create', compact('nextAgenda'));
+    }
+    
     // MENYIMPAN DATA BARU
     public function store(Request $request)
     {
-        $request->validate([
-            'nomor_surat' => 'required|string|max:255',
-            'pengirim'    => 'required|string|max:255',
-            'tgl_surat'   => 'required|date',
-            'tgl_terima'  => 'required|date',
-            'perihal'     => 'required|string',
-            'file_surat'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // Max 2MB
+       $request->validate([
+            'nomor_agenda' => 'required|string',
+            'nomor_surat'  => 'required|string|max:255',
+            'sifat_surat'  => 'required|string',
+            'asal_surat'   => 'required|string|max:255', // Ubah dari 'pengirim'
+            'tgl_surat'    => 'required|date',
+            'tgl_diterima' => 'required|date',           // Ubah dari 'tgl_terima'
+            'perihal'      => 'required|string',
+            'file_surat'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $data = $request->except(['file_surat']);
