@@ -80,7 +80,7 @@
                             </div>
                         </div>
 
-                        <!-- Footer Actions (Disusun Serupa Halaman CBT) -->
+                        <!-- Footer Actions -->
                         <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2">
                             <!-- Baris 1: Kelola Soal (Utama) -->
                             <a href="<?php echo e(route('bank.manage', $bank->id)); ?>" class="col-span-2 flex items-center justify-center p-2.5 bg-elevate-soft text-elevate-primary border border-elevate-accent/30 rounded-xl text-xs font-bold hover:bg-elevate-primary hover:text-white transition-all active:scale-95">
@@ -88,7 +88,7 @@
                             </a>
 
                             <!-- Baris 2: Edit & Hapus -->
-                            <button onclick="editMapel(<?php echo e($bank->id); ?>, '<?php echo e(addslashes($bank->title)); ?>', '<?php echo e(addslashes($bank->subject_name)); ?>', '<?php echo e($bank->class_level); ?>')" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 hover:text-elevate-primary hover:border-elevate-accent/50 transition-all">
+                            <button onclick="editMapel(<?php echo e($bank->id); ?>, '<?php echo e(addslashes($bank->title)); ?>', '<?php echo e(addslashes($bank->subject_name)); ?>', '<?php echo e($bank->class_level); ?>', '<?php echo e($bank->cbt_bank_folder_id); ?>')" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 hover:text-elevate-primary hover:border-elevate-accent/50 transition-all">
                                 <i class="ph-bold ph-pencil-simple text-lg mr-2"></i> Edit
                             </button>
 
@@ -119,6 +119,11 @@
     </div>
 
     
+    <?php
+        $allFolders = \App\Models\CbtBankFolder::orderBy('name', 'asc')->get();
+    ?>
+
+    
     <div id="editMapelModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm p-4 flex items-center justify-center">
         <div class="bg-white rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl relative border border-slate-100">
             <div class="flex items-center justify-center w-12 h-12 mb-4 bg-elevate-peach/20 rounded-2xl text-elevate-peach border border-elevate-peach/50">
@@ -137,11 +142,22 @@
                         <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Mata Pelajaran</label>
                         <input type="text" name="subject_name" id="edit_subject" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent transition-all text-elevate-dark">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kelas</label>
-                        <select name="class_level" id="edit_class" class="w-full rounded-2xl border-slate-200 bg-elevate-soft py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent transition-all text-elevate-dark">
-                            <option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option><option value="Umum">Umum</option>
-                        </select>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kelas</label>
+                            <select name="class_level" id="edit_class" class="w-full rounded-2xl border-slate-200 bg-elevate-soft py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent transition-all text-elevate-dark">
+                                <option value="7">Kelas 7</option><option value="8">Kelas 8</option><option value="9">Kelas 9</option><option value="Umum">Umum</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Pindah Folder</label>
+                            <select name="cbt_bank_folder_id" id="edit_folder" class="w-full rounded-2xl border-slate-200 bg-elevate-soft py-3.5 px-4 focus:bg-white focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent transition-all text-elevate-dark font-medium">
+                                <?php $__currentLoopData = $allFolders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $f): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($f->id); ?>"><?php echo e($f->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-8 flex gap-3">
@@ -155,10 +171,17 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function editMapel(id, title, subject, level) {
+        // Ditambahkan parameter folderId
+        function editMapel(id, title, subject, level, folderId) {
             document.getElementById('edit_title').value = title;
             document.getElementById('edit_subject').value = subject;
             document.getElementById('edit_class').value = level;
+            
+            // Set value dropdown ke folder saat ini
+            if(folderId) {
+                document.getElementById('edit_folder').value = folderId;
+            }
+
             document.getElementById('editMapelForm').action = '/bank-soal/mapel/' + id;
             document.getElementById('editMapelModal').classList.remove('hidden');
         }

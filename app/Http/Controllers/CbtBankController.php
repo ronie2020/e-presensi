@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\QuestionsImport; 
+use App\Imports\QuestionsImport; // <-- Diperbaiki agar sesuai dengan panggilan Excel::import
+use App\Exports\QuestionTemplateExport;
 
 class CbtBankController extends Controller
 {
@@ -22,28 +23,7 @@ class CbtBankController extends Controller
     // =========================================================================
 
     public function indexFolder()
-   {
-        // --- SCRIPT PENYELAMAT DATA LAMA ---
-        // Cek apakah ada bank soal yang cbt_bank_folder_id nya masih kosong/null
-        $orphanedBanks = CbtQuestionBank::whereNull('cbt_bank_folder_id')->count();
-
-        if ($orphanedBanks > 0) {
-            // 1. Buat (atau cari) folder penampung default
-            $defaultFolder = CbtBankFolder::firstOrCreate(
-                ['name' => 'Arsip Bank Soal Lama'], // Nama folder otomatis
-                [
-                    'description' => 'Folder otomatis untuk menampung bank soal yang dibuat sebelum sistem folder diterapkan.',
-                    'author_id' => Auth::id()
-                ]
-            );
-
-            // 2. Pindahkan semua bank soal yatim piatu ke folder ini
-            CbtQuestionBank::whereNull('cbt_bank_folder_id')->update([
-                'cbt_bank_folder_id' => $defaultFolder->id
-            ]);
-        }
-        // --- AKHIR SCRIPT PENYELAMAT ---
-        
+    {
         $bankFolders = CbtBankFolder::withCount('banks')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -144,6 +124,7 @@ class CbtBankController extends Controller
             'title' => 'required|string|max:255',
             'subject_name' => 'required|string',
             'class_level' => 'required',
+            'cbt_bank_folder_id' => 'required|exists:cbt_bank_folders,id',
         ]);
 
         $bank = CbtQuestionBank::findOrFail($id);
@@ -151,6 +132,7 @@ class CbtBankController extends Controller
             'title' => $request->title,
             'subject_name' => $request->subject_name,
             'class_level' => $request->class_level,
+            'cbt_bank_folder_id' => $request->cbt_bank_folder_id,
         ]);
 
         return back()->with('success', 'Informasi Bank Soal diperbarui!');
@@ -417,7 +399,7 @@ class CbtBankController extends Controller
         ]);
         
         return back()->with('success', 'Soal berhasil diperbarui!');
-    } 
+    }
 
     public function destroyQuestion($id)
     {
