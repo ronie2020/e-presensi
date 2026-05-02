@@ -427,30 +427,41 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/minutes', [CbtController::class, 'minutes'])->name('minutes');
     });
 
-     // === BANK SOAL TERPUSAT (Gudang Soal) ===
+     // === BANK SOAL TERPUSAT (Gudang Soal) Berbasis Folder ===
     Route::prefix('bank-soal')->name('bank.')->group(function() {
-        Route::get('/', [CbtBankController::class, 'index'])->name('index');
-        Route::post('/', [CbtBankController::class, 'store'])->name('store');
-        Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
-        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); 
-        Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
-
-        Route::get('/{id}/preview', [CbtBankController::class, 'preview'])->name('preview');
-        Route::get('/{id}/export-word', [CbtBankController::class, 'exportWord'])->name('export_word');
-   
-        Route::get('/{id}/questions/print', [CbtBankController::class, 'printQuestions'])->name('questions.print');
-        Route::post('/{id}/import', [CbtBankController::class, 'importQuestions'])->name('questions.import');
-        Route::get('/questions/template', [CbtBankController::class, 'downloadTemplate'])->name('questions.template');
-        Route::get('/{id}/export', [CbtBankController::class, 'exportQuestions'])->name('questions.export');
-        Route::get('/exam/{id}/export-questions', [CbtController::class, 'exportQuestions'])->name('questions.export_excel');
-       
-        // --- ROUTE BULK ACTION ---
-        Route::delete('/{id}/questions/bulk-delete', [CbtBankController::class, 'bulkDelete'])->name('questions.bulk_delete');
-        Route::put('/{id}/questions/bulk-weight', [CbtBankController::class, 'bulkWeight'])->name('questions.bulk_weight');
         
-        Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');       
+        // 1. MANAJEMEN FOLDER
+        Route::get('/', [CbtBankController::class, 'indexFolder'])->name('index'); // Dashboard Folder
+        Route::post('/folder', [CbtBankController::class, 'storeFolder'])->name('folder.store');
+        Route::put('/folder/{id}', [CbtBankController::class, 'updateFolder'])->name('folder.update'); 
+        Route::delete('/folder/{id}', [CbtBankController::class, 'destroyFolder'])->name('folder.destroy');
+        Route::get('/folder/{id}', [CbtBankController::class, 'showFolder'])->name('show'); // Isi Folder (Daftar Mapel)
+
+        // 2. MANAJEMEN BANK SOAL (MAPEL) DI DALAM FOLDER
+        Route::get('/folder/{folder_id}/create-mapel', [CbtBankController::class, 'createBank'])->name('create');
+        Route::post('/store-mapel', [CbtBankController::class, 'store'])->name('store');
+        Route::put('/mapel/{id}', [CbtBankController::class, 'update'])->name('update'); 
+        Route::delete('/mapel/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
+
+        // 3. MANAJEMEN BUTIR SOAL (Manage, Print, Export, Import)
+        Route::get('/mapel/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
+        Route::post('/mapel/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');       
         Route::put('/questions/{id}', [CbtBankController::class, 'updateQuestion'])->name('questions.update');     
-        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');        
+        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');  
+        
+        // --- BULK ACTION ---
+        Route::delete('/mapel/{id}/questions/bulk-delete', [CbtBankController::class, 'bulkDelete'])->name('questions.bulk_delete');
+        Route::put('/mapel/{id}/questions/bulk-weight', [CbtBankController::class, 'bulkWeight'])->name('questions.bulk_weight');
+        
+        // --- PREVIEW & EXPORT ---
+        Route::get('/mapel/{id}/preview', [CbtBankController::class, 'preview'])->name('preview');
+        Route::get('/mapel/{id}/export-word', [CbtBankController::class, 'exportWord'])->name('export_word');
+        Route::get('/mapel/{id}/questions/print', [CbtBankController::class, 'printQuestions'])->name('questions.print');
+        Route::get('/mapel/{id}/export', [CbtBankController::class, 'exportQuestions'])->name('questions.export');
+        
+        // --- IMPORT ---
+        Route::post('/mapel/{id}/import', [CbtBankController::class, 'importQuestions'])->name('questions.import');
+        Route::get('/questions/template', [CbtBankController::class, 'downloadTemplate'])->name('questions.template');
     });
 
     // Kedisiplinan & Penilaian

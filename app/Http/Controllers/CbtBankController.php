@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\CbtBankFolder;
 use App\Models\CbtQuestionBank;
 use App\Models\CbtQuestion;
 use App\Models\CbtExam;
@@ -12,37 +13,120 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\BankQuestionsImport;
-use App\Exports\QuestionTemplateExport;
+use App\Imports\QuestionsImport; 
 
 class CbtBankController extends Controller
 {
-    /**
-     * Tampilkan Daftar Bank Soal
-     */
-    public function index()
-    {
-        $banks = CbtQuestionBank::withCount('questions')
+    // =========================================================================
+    // 1. MANAJEMEN FOLDER BANK SOAL
+    // =========================================================================
+
+    public function indexFolder()
+   {
+        // --- SCRIPT PENYELAMAT DATA LAMA ---
+        // Cek apakah ada bank soal yang cbt_bank_folder_id nya masih kosong/null
+        $orphanedBanks = CbtQuestionBank::whereNull('cbt_bank_folder_id')->count();
+
+        if ($orphanedBanks > 0) {
+            // 1. Buat (atau cari) folder penampung default
+            $defaultFolder = CbtBankFolder::firstOrCreate(
+                ['name' => 'Arsip Bank Soal Lama'], // Nama folder otomatis
+                [
+                    'description' => 'Folder otomatis untuk menampung bank soal yang dibuat sebelum sistem folder diterapkan.',
+                    'author_id' => Auth::id()
+                ]
+            );
+
+            // 2. Pindahkan semua bank soal yatim piatu ke folder ini
+            CbtQuestionBank::whereNull('cbt_bank_folder_id')->update([
+                'cbt_bank_folder_id' => $defaultFolder->id
+            ]);
+        }
+        // --- AKHIR SCRIPT PENYELAMAT ---
+        
+        $bankFolders = CbtBankFolder::withCount('banks')
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        $subjects = Subject::orderBy('order', 'asc')->get();
             
-        return view('cbt.bank.index', compact('banks', 'subjects'));
+        return view('cbt.bank.index', compact('bankFolders'));
     }
 
-    /**
-     * Simpan Bank Soal Baru (Header)
-     */
+    public function storeFolder(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
+        ]);
+
+        CbtBankFolder::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'author_id' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Folder Bank Soal berhasil dibuat!');
+    }
+
+    public function updateFolder(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
+        ]);
+
+        $folder = CbtBankFolder::findOrFail($id);
+        $folder->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Informasi Folder berhasil diperbarui!');
+    }
+
+    public function destroyFolder($id)
+    {
+        $folder = CbtBankFolder::findOrFail($id);
+        $folder->delete(); // Pastikan cascade di DB berjalan
+        return back()->with('success', 'Folder beserta seluruh isinya berhasil dihapus!');
+    }
+
+    // =========================================================================
+    // 2. MANAJEMEN MAPEL DI DALAM FOLDER
+    // =========================================================================
+
+    public function showFolder($id)
+    {
+        $folder = CbtBankFolder::findOrFail($id);
+        
+        $banks = CbtQuestionBank::where('cbt_bank_folder_id', $id)
+            ->withCount('questions')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $totalQuestions = $banks->sum('questions_count');
+
+        return view('cbt.bank.show', compact('folder', 'banks', 'totalQuestions'));
+    }
+
+    public function createBank($folder_id)
+    {
+        $folder = CbtBankFolder::findOrFail($folder_id);
+        $subjects = Subject::orderBy('order', 'asc')->get();
+
+        return view('cbt.bank.create', compact('folder_id', 'folder', 'subjects'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
+            'folder_id' => 'required|exists:cbt_bank_folders,id',
             'title' => 'required|string|max:255',
             'subject_name' => 'required|string',
             'class_level' => 'required',
         ]);
 
         CbtQuestionBank::create([
+            'cbt_bank_folder_id' => $request->folder_id,
             'code' => strtoupper(Str::random(6)),
             'title' => $request->title,
             'subject_name' => $request->subject_name,
@@ -50,12 +134,10 @@ class CbtBankController extends Controller
             'author_id' => Auth::id(),
         ]);
 
-        return back()->with('success', 'Bank Soal berhasil dibuat!');
+        return redirect()->route('bank.show', $request->folder_id)
+                         ->with('success', 'Bank Soal Mapel berhasil ditambahkan ke dalam folder!');
     }
 
-    /**
-     * Update Bank Soal (Header)
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -65,19 +147,46 @@ class CbtBankController extends Controller
         ]);
 
         $bank = CbtQuestionBank::findOrFail($id);
-        
         $bank->update([
             'title' => $request->title,
             'subject_name' => $request->subject_name,
             'class_level' => $request->class_level,
         ]);
 
-        return back()->with('success', 'Informasi Bank Soal berhasil diperbarui!');
+        return back()->with('success', 'Informasi Bank Soal diperbarui!');
     }
 
-    /**
-     * Kelola Isi Soal di dalam Bank
-     */
+    public function destroy($id)
+    {
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        $folder_id = $bank->cbt_bank_folder_id; 
+        
+        foreach ($bank->questions as $question) {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                    Storage::delete('public/' . $opts["image_$opt"]);
+                }
+            }
+            if(isset($opts['pairs'])) {
+                foreach($opts['pairs'] as $pair) {
+                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) Storage::delete('public/' . $pair['left_image']);
+                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) Storage::delete('public/' . $pair['right_image']);
+                }
+            }
+        }
+
+        $bank->delete();
+        return back()->with('success', 'Bank soal mapel berhasil dihapus.');
+    }
+
+    // =========================================================================
+    // 3. MANAJEMEN BUTIR SOAL 
+    // =========================================================================
+       
     public function manage($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
@@ -86,9 +195,6 @@ class CbtBankController extends Controller
         return view('cbt.bank.questions', compact('bank', 'totalPoints'));
     }
 
-    /**
-     * Simpan Soal Baru ke Bank Soal (Support Multi-Tipe & Gambar Opsi)
-     */
     public function storeQuestion(Request $request, $bank_id)
     {
         $request->validate([
@@ -176,15 +282,12 @@ class CbtBankController extends Controller
             'options' => $options, 
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
-            'tags' => $request->tags // <--- TAMBAHKAN INI
+            'tags' => $request->tags
         ]);
 
         return back()->with('success', 'Soal berhasil ditambahkan ke Bank!');
     }
 
-     /**
-     * Update Soal (Support Hapus/Ganti Gambar Opsi)
-     */
     public function updateQuestion(Request $request, $id)
     {
         $question = CbtQuestion::findOrFail($id);
@@ -261,7 +364,6 @@ class CbtBankController extends Controller
                     $leftImgPath = null;
                     $rightImgPath = null;
 
-                    // Logika replace/hapus Gambar Kiri
                     if (isset($oldPairs[$index]['left_image'])) {
                         $leftImgPath = $oldPairs[$index]['left_image']; 
                     }
@@ -273,7 +375,6 @@ class CbtBankController extends Controller
                         $leftImgPath = $request->file("matches.$index.left_image")->store('soal', 'public');
                     }
 
-                    // Logika replace/hapus Gambar Kanan
                     if (isset($oldPairs[$index]['right_image'])) {
                         $rightImgPath = $oldPairs[$index]['right_image'];
                     }
@@ -312,49 +413,12 @@ class CbtBankController extends Controller
             'options' => $options,
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
-            'tags' => $request->tags // <--- TAMBAHKAN INI
+            'tags' => $request->tags 
         ]);
         
         return back()->with('success', 'Soal berhasil diperbarui!');
-    }
+    } 
 
-    /**
-     * Hapus Bank Soal
-     */
-    public function destroy($id)
-    {
-        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
-        
-        // Bersihkan storage gambar saat Bank Soal dihapus
-        foreach ($bank->questions as $question) {
-            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
-                Storage::delete('public/' . $question->question_image);
-            }
-            $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
-            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
-                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
-                    Storage::delete('public/' . $opts["image_$opt"]);
-                }
-            }
-            if(isset($opts['pairs'])) {
-                foreach($opts['pairs'] as $pair) {
-                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) {
-                        Storage::delete('public/' . $pair['left_image']);
-                    }
-                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) {
-                        Storage::delete('public/' . $pair['right_image']);
-                    }
-                }
-            }
-        }
-
-        $bank->delete();
-        return back()->with('success', 'Bank soal beserta seluruh soal di dalamnya berhasil dihapus.');
-    }
-
-    /**
-     * Hapus Soal di dalam Bank
-     */
     public function destroyQuestion($id)
     {
         $q = CbtQuestion::findOrFail($id);
@@ -387,7 +451,6 @@ class CbtBankController extends Controller
         return back()->with('error', 'Soal tidak valid.');
     }
     
-     // --- FITUR BARU: BULK DELETE & BULK WEIGHT UNTUK BANK SOAL ---
     public function bulkDelete(Request $request, $bank_id)
     {
         if (!$request->question_ids) return back()->with('error', 'Tidak ada soal yang dipilih.');
@@ -396,12 +459,10 @@ class CbtBankController extends Controller
         $questions = CbtQuestion::whereIn('id', $ids)->get();
 
         foreach ($questions as $question) {
-            // Hapus gambar utama soal
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
             }
             
-            // Hapus gambar pada opsi & matching
             $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
             foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
                 if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
@@ -415,7 +476,6 @@ class CbtBankController extends Controller
                 }
             }
             
-            // Hapus record database
             $question->delete();
         }
 
@@ -431,7 +491,6 @@ class CbtBankController extends Controller
         
         return back()->with('success', 'Bobot ' . count($ids) . ' soal di Bank Soal berhasil diubah.');
     }
-    // --- END FITUR BARU ---
 
     public function storeFromExam(Request $request, $exam_id)
     {
@@ -445,9 +504,14 @@ class CbtBankController extends Controller
         try {
             $targetBankId = null;
             if ($request->mode === 'new') {
-                $request->validate(['new_title' => 'required']);
+                // <-- PERBAIKAN: Menambahkan validasi folder_id
+                $request->validate([
+                    'new_title' => 'required',
+                    'folder_id' => 'required|exists:cbt_bank_folders,id' 
+                ]);
                 
                 $newBank = CbtQuestionBank::create([
+                    'cbt_bank_folder_id' => $request->folder_id, // <-- PERBAIKAN: Menambahkan Folder ID agar tidak "Yatim Piatu"
                     'code' => strtoupper(Str::random(6)),
                     'title' => $request->new_title,
                     'subject_name' => $exam->subject_name,
@@ -494,13 +558,10 @@ class CbtBankController extends Controller
             return back()->with('error', 'Bank soal ini kosong.');
         }
 
-        // LOGIKA BARU: Cek mode import, apakah sebagian atau semua
         $questionsToImport = collect();
         if ($request->import_mode === 'partial' && !empty($request->selected_question_ids)) {
-            // Ambil hanya soal yang dicentang
             $questionsToImport = $bank->questions->whereIn('id', $request->selected_question_ids);
         } else {
-            // Ambil seluruh soal dari bank (Default lama)
             $questionsToImport = $bank->questions;
         }
 
@@ -541,9 +602,6 @@ class CbtBankController extends Controller
         return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
     }
 
-    /**
-     * Proses Import Soal dari Excel
-     */
     public function importQuestions(Request $request, $id)
     {
         $request->validate([
@@ -551,7 +609,7 @@ class CbtBankController extends Controller
         ]);
 
         try {
-            // Beri nilai "true" di argumen kedua untuk memberitahu bahwa ini adalah Bank Soal
+            // <-- PERBAIKAN: Menggunakan class QuestionsImport (sesuai namespace di atas)
             Excel::import(new QuestionsImport($id, true), $request->file('file'));
             return back()->with('success', 'Soal-soal dari Excel berhasil diimport ke Bank Soal!');
         } catch (\Exception $e) {
@@ -559,17 +617,11 @@ class CbtBankController extends Controller
         }
     }
 
-    /**
-     * Download Template Import Soal
-    */
     public function downloadTemplate()
     {
         return Excel::download(new QuestionTemplateExport, 'template_bank_soal.xlsx');
     }
 
-    /**
-     * Export Soal dari Bank Soal ke CSV/Excel
-    */
     public function exportQuestions($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
@@ -582,7 +634,6 @@ class CbtBankController extends Controller
             fputcsv($file, $headers);
 
             foreach ($questions as $q) {
-                // Ambil opsi dari json/array
                 $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
                 
                 fputcsv($file, [
@@ -615,18 +666,12 @@ class CbtBankController extends Controller
     // FITUR BARU: PREVIEW & EXPORT WORD
     // =========================================================================
 
-    /**
-     * Mode Pratinjau (Preview) seperti tampilan siswa
-     */
     public function preview($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
         return view('cbt.bank.preview', compact('bank'));
     }
 
-    /**
-     * Export ke format Microsoft Word (.doc)
-     */
     public function exportWord($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);

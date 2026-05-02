@@ -12,12 +12,12 @@ class CbtQuestionBank extends Model
     protected $table = 'cbt_question_banks';
 
     protected $fillable = [
+        'cbt_bank_folder_id', 
         'code',
         'title',
         'subject_name',
         'class_level',
         'author_id',
-        'is_active',
     ];
 
     // Relasi: Satu Bank punya banyak Soal
@@ -30,5 +30,11 @@ class CbtQuestionBank extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+    
+     // TAMBAHKAN RELASI KE FOLDER
+    public function folder()
+    {
+        return $this->belongsTo(CbtBankFolder::class, 'cbt_bank_folder_id');
     }
 }
