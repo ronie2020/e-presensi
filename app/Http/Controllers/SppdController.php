@@ -84,6 +84,12 @@ class SppdController extends Controller
 
         // 1. Simpan SPPD Utama
         $sppd = new Sppd();
+
+        // TAMBAHKAN KODE INI UNTUK MENANGKAP ID SPT
+        if ($request->has('spt_id') && !empty($request->spt_id)) {
+            $sppd->spt_id = $request->spt_id;
+        }
+        
         $sppd->nomor_sppd = $request->nomor_sppd;
         $sppd->user_id = $request->pegawai_id;
         $sppd->maksud_perjalanan = $request->maksud;
@@ -99,7 +105,7 @@ class SppdController extends Controller
         // Pejabat (Bisa dibuat dinamis jika perlu)
         $sppd->pejabat_nama = 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.';
         $sppd->pejabat_nip = '19820928 201101 1 002';
-        $sppd->pejabat_pangkat = 'Penata, III/c';
+        $sppd->pejabat_pangkat = 'Penata, III/d';
         $sppd->pejabat_jabatan = 'Kepala Sekolah';
 
         $sppd->save();
@@ -126,12 +132,65 @@ class SppdController extends Controller
     {
         $sppd = Sppd::with('followers')->findOrFail($id);
         $users = User::orderBy('name', 'asc')->get();
-        // Kita gunakan view create tapi kirim data edit (atau buat view edit terpisah jika kompleks)
-        // Disini saya asumsikan kita pakai create dengan penyesuaian, tapi lebih aman buat edit.blade.php nanti.
-        // Untuk sekarang, saya redirect back atau tampilkan error jika view edit belum ada.
-        return abort(404, 'Halaman Edit belum dibuat. Silakan tambahkan file edit.blade.php'); 
+        
+        // Data SPT hanya perlu dikirim agar struktur Alpine.js (di view) tidak error, 
+        // tapi dalam mode edit kita biasanya fokus edit manual.
+        $spt_json = collect([]); 
+
+        return view('sppd.edit', compact('sppd', 'users', 'spt_json'));
     }
 
+    // UPDATE DATA
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'pegawai_id' => 'required|exists:users,id',
+            'maksud' => 'required',
+            'tujuan' => 'required',
+            'tgl_berangkat' => 'required|date',
+            'tgl_kembali' => 'required|date|after_or_equal:tgl_berangkat',
+            'followers.*.nama' => 'required_with:followers',
+        ]);
+
+        $start = Carbon::parse($request->tgl_berangkat);
+        $end = Carbon::parse($request->tgl_kembali);
+        $lama_hari = $start->diffInDays($end) + 1;
+
+        $sppd = Sppd::findOrFail($id);
+        
+        // Update data utama
+        $sppd->user_id = $request->pegawai_id;
+        $sppd->maksud_perjalanan = $request->maksud;
+        $sppd->alat_angkut = $request->transportasi;
+        $sppd->tempat_tujuan = $request->tujuan;
+        $sppd->tgl_berangkat = $request->tgl_berangkat;
+        $sppd->tgl_kembali = $request->tgl_kembali;
+        $sppd->lama_hari = $lama_hari;
+        $sppd->instansi_pembayar = $request->instansi_biaya ?? 'SMP Negeri 3 Lakbok';
+        $sppd->mata_anggaran = $request->kode_rekening;
+        
+        $sppd->save();
+
+        // Update Pengikut: 
+        // Cara paling aman & bersih: Hapus semua pengikut lama, lalu insert yang baru (jika ada)
+        $sppd->followers()->delete();
+
+        if ($request->has('followers')) {
+            foreach ($request->followers as $followerData) {
+                if (!empty($followerData['nama'])) {
+                    SppdFollower::create([
+                        'sppd_id' => $sppd->id,
+                        'nama' => $followerData['nama'],
+                        'nip' => $followerData['nip'] ?? null,
+                        'keterangan' => $followerData['keterangan'] ?? null,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('sppd.index')->with('success', 'Data SPPD berhasil diperbarui!');
+    }
+    
     // HAPUS DATA
     public function destroy($id)
     {

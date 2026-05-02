@@ -5,28 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LetterIncoming extends Model
+class LetterOutgoing extends Model
 {
     use HasFactory;
 
-    // Nama tabel (opsional jika sesuai standar, tapi biar aman kita tulis)
-    protected $table = 'letter_incomings';
+    protected $table = 'letter_outgoings';
 
-        protected $fillable = [
+    protected $fillable = [
         'nomor_agenda',
         'nomor_surat',
+        'tujuan_surat',
         'sifat_surat',
-        'asal_surat',
         'tgl_surat',
-        'tgl_diterima',
         'perihal',
         'file_path',
-        'status_disposisi'
     ];
 
-    // Casting agar otomatis jadi objek Carbon (Date)
     protected $casts = [
         'tgl_surat' => 'date',
-        'tgl_diterima' => 'date',
     ];
+
+    // Relasi: 1 Surat Keluar bisa memicu 1 atau banyak SPT
+    public function spts()
+    {
+        return $this->hasMany(LetterSpt::class, 'surat_keluar_id');
+    }
 }

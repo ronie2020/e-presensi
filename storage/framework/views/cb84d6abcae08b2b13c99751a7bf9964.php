@@ -1,20 +1,26 @@
-<x-app-layout>
-    {{-- Tambahkan Load SweetAlert --}}
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('letters.spt.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('letters.spt.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
                  x-data="{ 
-                    followers: {{ old('pengikut') ? Js::from(old('pengikut')) : '[]' }},
-                    users: {{ Js::from($users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'nip' => $u->nip])) }},
+                    followers: <?php echo e(old('pengikut') ? Js::from(old('pengikut')) : '[]'); ?>,
+                    users: <?php echo e(Js::from($users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'nip' => $u->nip]))); ?>,
                     addFollower() {
                         this.followers.push({ nama: '', nip: '', keterangan: '' });
                     },
@@ -34,7 +40,7 @@
                     }
                  }">
                 
-                {{-- Card Header Microsoft Elevate --}}
+                
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
@@ -46,25 +52,24 @@
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Isi formulir penugasan dinas pegawai.</p>
                 </div>
 
-                {{-- Form Content --}}
+                
                 <div class="p-8">
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3 shadow-sm">
                             <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
                             <div>
                                 <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
                                 <ul class="list-disc list-inside font-medium">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Tambahkan ID pada Form --}}
-                    <form id="form-create-spt" action="{{ route('letters.spt.store') }}" method="POST" class="space-y-8">
-                        @csrf
+                    <form action="<?php echo e(route('letters.spt.store')); ?>" method="POST" class="space-y-8">
+                        <?php echo csrf_field(); ?>
 
                         <!-- SECTION 1: DASAR & PEGAWAI -->
                         <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
@@ -75,22 +80,22 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPT</label>
-                                    <input type="text" name="nomor_spt" value="{{ old('nomor_spt', $nomor_otomatis) }}" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="nomor_spt" value="<?php echo e(old('nomor_spt', $nomor_otomatis)); ?>" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Dasar Surat / Regulasi (Opsional)</label>
-                                    <input type="text" name="dasar" value="{{ old('dasar') }}" placeholder="Surat Undangan No..." class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="dasar" value="<?php echo e(old('dasar')); ?>" placeholder="Surat Undangan No..." class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pegawai Yang Ditugaskan <span class="text-rose-500">*</span></label>
                                     <div class="relative">
                                         <select name="pejabat_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all cursor-pointer">
                                             <option value="">-- Pilih Pegawai --</option>
-                                            @foreach($users as $user)
-                                                <option value="{{ $user->id }}" {{ old('pejabat_id') == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }} (NIP. {{ $user->nip ?? '-' }})
+                                            <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($user->id); ?>" <?php echo e(old('pejabat_id') == $user->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($user->name); ?> (NIP. <?php echo e($user->nip ?? '-'); ?>)
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
@@ -107,23 +112,23 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Maksud Perjalanan / Perihal <span class="text-rose-500">*</span></label>
-                                    <textarea name="perihal" rows="2" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all">{{ old('perihal') }}</textarea>
+                                    <textarea name="perihal" rows="2" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all"><?php echo e(old('perihal')); ?></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tempat Tujuan <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="tempat_tujuan" value="{{ old('tempat_tujuan') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="tempat_tujuan" value="<?php echo e(old('tempat_tujuan')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Lama Hari <span class="text-rose-500">*</span></label>
-                                    <input type="number" name="lama_hari" value="{{ old('lama_hari', 1) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="number" name="lama_hari" value="<?php echo e(old('lama_hari', 1)); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Berangkat <span class="text-rose-500">*</span></label>
-                                    <input type="date" name="tgl_berangkat" value="{{ old('tgl_berangkat') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_berangkat" value="<?php echo e(old('tgl_berangkat')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Kembali <span class="text-rose-500">*</span></label>
-                                    <input type="date" name="tgl_kembali" value="{{ old('tgl_kembali') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_kembali" value="<?php echo e(old('tgl_kembali')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
@@ -135,7 +140,7 @@
                                     <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
                                     Peserta Tambahan (Pengikut)
                                 </h3>
-                                <button type="button" @click="addFollower()" class="px-4 py-2 bg-elevate-soft text-elevate-primary border border-elevate-accent/30 rounded-xl text-xs font-bold hover:bg-elevate-accent/20 transition-colors flex items-center gap-2 shadow-sm">
+                                <button type="button" @click="addFollower()" class="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-2 shadow-sm">
                                     <i class="ph-bold ph-plus"></i> Tambah
                                 </button>
                             </div>
@@ -172,19 +177,25 @@
                                 <div x-show="followers.length === 0" class="text-center py-8 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 italic text-sm bg-white">
                                     Tidak ada peserta tambahan.
                                 </div>
-                                @error('pengikut')
-                                    <p class="text-rose-500 text-xs mt-2 font-bold">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['pengikut'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-rose-500 text-xs mt-2 font-bold"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
-                        {{-- Action Buttons --}}
+                        
                         <div class="pt-6 mt-4 border-t border-slate-100 flex items-center justify-end gap-4">
-                            <a href="{{ route('letters.spt.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                            <a href="<?php echo e(route('letters.spt.index')); ?>" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
                                 Batal
                             </a>
-                            {{-- Ubah type jadi button dan panggil onclick JS --}}
-                            <button type="button" onclick="confirmSubmit(event)" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
+                            <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
                                 <span>Simpan SPT</span>
                             </button>
@@ -194,45 +205,13 @@
             </div>
         </div>
     </div>
-
-    {{-- Script untuk Alert Konfirmasi --}}
-    <script>
-        function confirmSubmit(e) {
-            e.preventDefault();
-            const form = document.getElementById('form-create-spt');
-            
-            // Trigger validasi bawaan HTML5 sebelum submit
-            if (!form.checkValidity()) { 
-                form.reportValidity(); 
-                return; 
-            }
-
-            Swal.fire({
-                title: 'Simpan Surat Tugas?', 
-                text: 'Pastikan data pegawai dan rincian tugas sudah benar.', 
-                icon: 'question',
-                showCancelButton: true, 
-                confirmButtonText: 'Ya, Simpan!', 
-                cancelButtonText: 'Periksa Lagi',
-                reverseButtons: true, 
-                customClass: {
-                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                    confirmButton: 'bg-elevate-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-primary mx-2 shadow-lg shadow-elevate-dark/20',
-                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 mx-2'
-                }, 
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({ 
-                        title: 'Menyimpan Data...', 
-                        text: 'Mohon tunggu sebentar',
-                        allowOutsideClick: false,
-                        showConfirmButton: false, 
-                        didOpen: () => Swal.showLoading() 
-                    });
-                    form.submit();
-                }
-            });
-        }
-    </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/letters/spt/create.blade.php ENDPATH**/ ?>

@@ -13,7 +13,8 @@ class Sppd extends Model
 
     protected $table = 'sppds';
 
-    protected $fillable = [
+   protected $fillable = [
+        'spt_id', // BARU: Referensi ke SPT Induk
         'nomor_sppd',
         'user_id',
         'maksud_perjalanan',
@@ -36,6 +37,11 @@ class Sppd extends Model
     {
         return $this->belongsTo(User::class);
     }
+        // Relasi ke SPT Induk
+    public function spt()
+    {
+        return $this->belongsTo(LetterSpt::class, 'spt_id');
+    }   
 
     // RELASI BARU: PENGIKUT
     public function followers()

@@ -71,6 +71,7 @@ use App\Http\Controllers\LibraryToolsController;
 
 // Persuratan & Dinas
 use App\Http\Controllers\LetterIncomingController;
+use App\Http\Controllers\LetterOutgoingController;
 use App\Http\Controllers\SptController;
 use App\Http\Controllers\SppdController;
 
@@ -667,8 +668,9 @@ Route::middleware('auth')->group(function () {
     });
 
     // Persuratan
-    Route::prefix('letters')->name('letters.')->group(function () {
+     Route::prefix('letters')->name('letters.')->group(function () {
         Route::resource('incoming', LetterIncomingController::class);
+        Route::resource('outgoing', LetterOutgoingController::class); // Tambahkan baris ini
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
         Route::resource('spt', SptController::class);
     });

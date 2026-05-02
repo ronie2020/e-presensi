@@ -1,4 +1,7 @@
 <x-app-layout>
+    {{-- Tambahkan Load SweetAlert --}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -40,7 +43,8 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('letters.incoming.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    {{-- Tambahkan ID Form --}}
+                    <form id="form-edit-surat" action="{{ route('letters.incoming.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
                         @method('PUT')
 
@@ -137,7 +141,8 @@
                             <a href="{{ route('letters.incoming.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
                                 Batal
                             </a>
-                            <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
+                            {{-- Ubah ke button type button untuk trigger SweetAlert --}}
+                            <button type="button" onclick="confirmSubmit(event)" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
                                 <span>Update Data</span>
                             </button>
@@ -147,4 +152,45 @@
             </div>
         </div>
     </div>
+
+    {{-- Script untuk Alert Konfirmasi --}}
+    <script>
+        function confirmSubmit(e) {
+            e.preventDefault();
+            const form = document.getElementById('form-edit-surat');
+            
+            // Trigger validasi bawaan HTML5 sebelum submit
+            if (!form.checkValidity()) { 
+                form.reportValidity(); 
+                return; 
+            }
+
+            Swal.fire({
+                title: 'Perbarui Data Surat?', 
+                text: 'Pastikan data yang diubah sudah benar.', 
+                icon: 'question',
+                showCancelButton: true, 
+                confirmButtonText: 'Ya, Update!', 
+                cancelButtonText: 'Batal',
+                reverseButtons: true, 
+                customClass: {
+                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-elevate-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-primary mx-2 shadow-lg shadow-elevate-dark/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 mx-2'
+                }, 
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ 
+                        title: 'Memperbarui Data...', 
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        showConfirmButton: false, 
+                        didOpen: () => Swal.showLoading() 
+                    });
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

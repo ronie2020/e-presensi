@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class LetterSpt extends Model
 {
@@ -14,6 +13,7 @@ class LetterSpt extends Model
 
     protected $fillable = [
         'letter_incoming_id',
+        'surat_keluar_id', // BARU: Menampung ID Surat Keluar
         'nomor_spt',
         'untuk',
         'tempat_tujuan',
@@ -29,15 +29,27 @@ class LetterSpt extends Model
         'tgl_kembali' => 'date',
     ];
 
-    // Relasi: SPT punya dasar Surat Masuk
+    // Relasi ke Surat Masuk
     public function letterIncoming()
     {
         return $this->belongsTo(LetterIncoming::class, 'letter_incoming_id');
     }
 
-    // Relasi: SPT menugaskan Banyak Pegawai
+    // BARU: Relasi ke Surat Keluar
+    public function letterOutgoing()
+    {
+        return $this->belongsTo(LetterOutgoing::class, 'surat_keluar_id');
+    }
+
+    // Relasi Pegawai (Pivot)
     public function users()
     {
         return $this->belongsToMany(User::class, 'letter_spt_user', 'letter_spt_id', 'user_id');
+    }
+
+    // BARU: Relasi ke SPPD (1 SPT bisa punya banyak SPPD jika guru nya banyak)
+    public function sppds()
+    {
+        return $this->hasMany(Sppd::class, 'spt_id');
     }
 }

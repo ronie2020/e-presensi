@@ -19,7 +19,7 @@ class LetterIncomingController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nomor_surat', 'like', "%{$search}%")
                   ->orWhere('perihal', 'like', "%{$search}%")
-                  ->orWhere('pengirim', 'like', "%{$search}%");
+                  ->orWhere('asal_surat', 'like', "%{$search}%");
             });
         }
         
@@ -50,13 +50,13 @@ class LetterIncomingController extends Controller
     // MENYIMPAN DATA BARU
     public function store(Request $request)
     {
-       $request->validate([
+        $request->validate([
             'nomor_agenda' => 'required|string',
             'nomor_surat'  => 'required|string|max:255',
             'sifat_surat'  => 'required|string',
-            'asal_surat'   => 'required|string|max:255', // Ubah dari 'pengirim'
+            'asal_surat'   => 'required|string|max:255',
             'tgl_surat'    => 'required|date',
-            'tgl_diterima' => 'required|date',           // Ubah dari 'tgl_terima'
+            'tgl_diterima' => 'required|date',
             'perihal'      => 'required|string',
             'file_surat'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -88,12 +88,12 @@ class LetterIncomingController extends Controller
         $letter = LetterIncoming::findOrFail($id);
 
         $request->validate([
-            'nomor_surat' => 'required|string|max:255',
-            'pengirim'    => 'required|string|max:255',
-            'tgl_surat'   => 'required|date',
-            'tgl_terima'  => 'required|date',
-            'perihal'     => 'required|string',
-            'file_surat'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'nomor_surat'  => 'required|string|max:255',
+            'asal_surat'   => 'required|string|max:255', // Tadinya 'pengirim'
+            'tgl_surat'    => 'required|date',
+            'tgl_diterima' => 'required|date',           // Tadinya 'tgl_terima'
+            'perihal'      => 'required|string',
+            'file_surat'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $data = $request->except(['file_surat', '_token', '_method']);

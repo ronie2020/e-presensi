@@ -1,4 +1,7 @@
 <x-app-layout>
+    {{-- Load SweetAlert --}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -7,49 +10,22 @@
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            {{-- Card Container (Alpine.js State) --}}
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
                  x-data="{ 
-                    mode: 'manual', 
-                    selectedSptId: '',
+                    mode: 'manual', // Saat edit, selalu asumsikan mode manual
                     
-                    // Data Form
-                    pegawaiId: '',
-                    maksud: '',
-                    tujuan: '',
-                    tanggal_berangkat: '',
-                    tanggal_kembali: '',
-
-                    // Data Dinamis
-                    sptList: {{ Js::from($spt_json ?? []) }}, 
-                    availableUsers: [],
+                    // Data Form (Pre-filled dengan data SPPD)
+                    maksud: {{ Js::from($sppd->maksud_perjalanan) }},
+                    tujuan: {{ Js::from($sppd->tempat_tujuan) }},
+                    tanggal_berangkat: {{ Js::from($sppd->tgl_berangkat) }},
+                    tanggal_kembali: {{ Js::from($sppd->tgl_kembali) }},
                     
-                    // LIST PENGIKUT
-                    followers: [], 
+                    // LIST PENGIKUT (Pre-filled)
+                    followers: {{ Js::from($sppd->followers) }}, 
 
-                    // Data User Lengkap
+                    // Data User Lengkap (Untuk Dropdown)
                     allUsers: {{ Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip])) }},
-
-                    init() {},
-
-                    selectSpt() {
-                        const data = this.sptList.find(item => item.id == this.selectedSptId);
-                        if (data) {
-                            this.maksud = data.perihal;
-                            this.tujuan = data.tujuan;
-                            this.tanggal_berangkat = data.tgl_mulai;
-                            this.tanggal_kembali = data.tgl_selesai;
-                            this.availableUsers = data.pegawai;
-                        } else {
-                            this.resetForm();
-                        }
-                    },
-
-                    resetForm() {
-                        this.maksud = ''; this.tujuan = ''; 
-                        this.tanggal_berangkat = ''; this.tanggal_kembali = ''; 
-                        this.selectedSptId = ''; this.availableUsers = []; 
-                    },
 
                     addFollower() {
                         this.followers.push({ nama: '', nip: '', keterangan: '' });
@@ -74,12 +50,12 @@
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
-                        <i class="ph-fill ph-car-profile"></i>
+                        <i class="ph-fill ph-pencil-simple-slash"></i>
                     </div>
                     <h2 class="text-2xl font-black relative z-10 flex items-center gap-3">
-                        <i class="ph-duotone ph-file-text text-elevate-accent"></i> Formulir Perjalanan Dinas
+                        <i class="ph-duotone ph-pencil-simple-slash text-elevate-accent"></i> Edit Perjalanan Dinas
                     </h2>
-                    <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Lengkapi data SPPD di bawah ini secara teliti.</p>
+                    <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Perbarui data Surat Perjalanan Dinas: <span class="text-white font-mono bg-white/10 px-2 rounded">{{ $sppd->nomor_sppd }}</span></p>
                 </div>
 
                 {{-- Form Content --}}
@@ -98,109 +74,61 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('sppd.store') }}" method="POST" class="space-y-8">
+                    <form id="form-edit-sppd" action="{{ route('sppd.update', $sppd->id) }}" method="POST" class="space-y-8">
                         @csrf
+                        @method('PUT')
 
-                        <!-- SECTION 1: DASAR & MODE INPUT -->
-                        <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
-                            <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">1</span>
-                                Dasar Pelaksanaan
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Metode Input Data</label>
-                                    <div class="flex p-1 bg-white rounded-xl border border-slate-200 shadow-sm">
-                                        <button type="button" @click="mode = 'spt'; resetForm()" 
-                                            :class="mode === 'spt' ? 'bg-elevate-dark text-white shadow-md' : 'text-slate-500 hover:text-elevate-dark'" 
-                                            class="px-4 py-2.5 text-sm font-bold rounded-lg flex-1 transition-all">
-                                            Dari Surat Tugas (SPT)
-                                        </button>
-                                        <button type="button" @click="mode = 'manual'; resetForm()" 
-                                            :class="mode === 'manual' ? 'bg-elevate-dark text-white shadow-md' : 'text-slate-500 hover:text-elevate-dark'" 
-                                            class="px-4 py-2.5 text-sm font-bold rounded-lg flex-1 transition-all">
-                                            Input Manual
-                                        </button>
-                                    </div>
-                                </div>
-                                <div x-show="mode === 'spt'" x-transition>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pilih Nomor Surat Tugas</label>
-                                    <div class="relative">
-                                        <select name="spt_id" x-model="selectedSptId" @change="selectSpt()" class="w-full pl-4 pr-10 py-3 rounded-xl border-slate-300 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all shadow-sm">
-                                            <option value="">-- Pilih Surat Tugas --</option>
-                                            <template x-for="spt in sptList" :key="spt.id">
-                                                <option :value="spt.id" x-text="spt.nomor + ' - ' + spt.perihal.substring(0, 30) + '...'"></option>
-                                            </template>
-                                        </select>
-                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- SECTION 2: DETAIL SPPD -->
+                        <!-- SECTION 1: DETAIL SPPD -->
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">2</span>
+                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">1</span>
                                 Detail Perjalanan
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPPD (Otomatis)</label>
-                                    <input type="text" name="nomor_sppd" value="{{ $nomor_otomatis ?? '' }}" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3" readonly>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPPD</label>
+                                    <input type="text" value="{{ $sppd->nomor_sppd }}" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3 cursor-not-allowed" disabled>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pegawai Pelaksana</label>
                                     <div class="relative">
-                                        <!-- Select Manual -->
-                                        <div x-show="mode === 'manual'">
-                                            <select name="pegawai_id" :disabled="mode === 'spt'" class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all">
-                                                <option value="">-- Pilih Pegawai --</option>
-                                                @foreach($users as $user)
-                                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <!-- Select dari SPT -->
-                                        <div x-show="mode === 'spt'">
-                                            <select name="pegawai_id" :disabled="mode === 'manual'" class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all">
-                                                <option value="">-- Pilih Pegawai di SPT --</option>
-                                                <template x-for="user in availableUsers" :key="user.id">
-                                                    <option :value="user.id" x-text="user.name"></option>
-                                                </template>
-                                            </select>
-                                        </div>
+                                        <select name="pegawai_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all">
+                                            <option value="">-- Pilih Pegawai --</option>
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}" {{ $sppd->user_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                            @endforeach
+                                        </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Maksud Perjalanan Dinas</label>
-                                    <textarea name="maksud" rows="2" x-model="maksud" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all"></textarea>
+                                    <textarea name="maksud" rows="2" x-model="maksud" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tempat Tujuan</label>
-                                    <input type="text" name="tujuan" x-model="tujuan" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="tujuan" x-model="tujuan" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Alat Angkutan</label>
-                                    <input type="text" name="transportasi" placeholder="Kendaraan Dinas" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="transportasi" value="{{ $sppd->alat_angkut }}" placeholder="Kendaraan Dinas" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Berangkat</label>
-                                    <input type="date" name="tgl_berangkat" x-model="tanggal_berangkat" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_berangkat" x-model="tanggal_berangkat" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Kembali</label>
-                                    <input type="date" name="tgl_kembali" x-model="tanggal_kembali" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_kembali" x-model="tanggal_kembali" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- SECTION 3: PENGIKUT -->
+                        <!-- SECTION 2: PENGIKUT -->
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider flex items-center gap-2">
-                                    <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
+                                    <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">2</span>
                                     Pengikut / Peserta Tambahan
                                 </h3>
                                 <button type="button" @click="addFollower()" class="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-2">
@@ -219,15 +147,15 @@
                                                     <option :value="u.id" x-text="u.name"></option>
                                                 </template>
                                             </select>
-                                            <input type="text" :name="'followers['+index+'][nama]'" x-model="follower.nama" placeholder="Nama Lengkap" class="block w-full text-sm font-bold border-slate-300 rounded-xl focus:border-elevate-primary focus:ring-elevate-primary text-elevate-dark" required>
+                                            <input type="text" :name="'followers['+index+'][nama]'" x-model="follower.nama" placeholder="Nama Lengkap" class="block w-full text-sm font-bold border-slate-300 rounded-xl focus:border-elevate-primary text-elevate-dark" required>
                                         </div>
                                         <div class="w-full md:w-1/4">
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">NIP / NIK</label>
-                                            <input type="text" :name="'followers['+index+'][nip]'" x-model="follower.nip" class="block w-full text-sm font-mono border-slate-300 rounded-xl focus:border-elevate-primary focus:ring-elevate-primary text-slate-600" placeholder="-">
+                                            <input type="text" :name="'followers['+index+'][nip]'" x-model="follower.nip" class="block w-full text-sm font-mono border-slate-300 rounded-xl focus:border-elevate-primary text-slate-600" placeholder="-">
                                         </div>
                                         <div class="w-full md:w-1/3">
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Keterangan</label>
-                                            <input type="text" :name="'followers['+index+'][keterangan]'" x-model="follower.keterangan" placeholder="Contoh: Guru Pendamping" class="block w-full text-sm border-slate-300 rounded-xl focus:border-elevate-primary focus:ring-elevate-primary text-slate-600">
+                                            <input type="text" :name="'followers['+index+'][keterangan]'" x-model="follower.keterangan" placeholder="Contoh: Guru Pendamping" class="block w-full text-sm border-slate-300 rounded-xl focus:border-elevate-primary text-slate-600">
                                         </div>
                                         <div class="absolute top-2 right-2 md:static">
                                             <button type="button" @click="removeFollower(index)" class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm transition-all">
@@ -243,20 +171,20 @@
                             </div>
                         </div>
 
-                        <!-- SECTION 4: ANGGARAN -->
+                        <!-- SECTION 3: ANGGARAN -->
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">4</span>
+                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
                                 Pembebanan Anggaran
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Instansi Penanggung Biaya</label>
-                                    <input type="text" name="instansi_biaya" value="SMP Negeri 3 Lakbok" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="instansi_biaya" value="{{ $sppd->instansi_pembayar }}" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mata Anggaran / Kode Rekening</label>
-                                    <input type="text" name="kode_rekening" placeholder="Misal: 5.2.2.15.01" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="kode_rekening" value="{{ $sppd->mata_anggaran }}" placeholder="Misal: 5.2.2.15.01" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
@@ -264,11 +192,9 @@
                         {{-- Action Footer --}}
                         <div class="flex items-center justify-end gap-4 pt-6 mt-4 border-t border-slate-100">
                             <a href="{{ route('sppd.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batal</a>
-                            
-                            {{-- FIX: Ubah type submit ke button dan panggil script confirmSubmit --}}
                             <button type="button" onclick="confirmSubmit(event)" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
-                                <span>Simpan SPPD</span>
+                                <span>Perbarui SPPD</span>
                             </button>
                         </div>
                     </form>
@@ -281,20 +207,19 @@
     <script>
         function confirmSubmit(e) {
             e.preventDefault();
-            const form = document.querySelector('form'); // Mengambil form pertama di halaman
+            const form = document.getElementById('form-edit-sppd');
             
-            // Trigger validasi bawaan HTML5 sebelum submit
             if (!form.checkValidity()) { 
                 form.reportValidity(); 
                 return; 
             }
 
             Swal.fire({
-                title: 'Simpan SPPD?', 
-                text: 'Pastikan data perjalanan dinas dan anggaran sudah sesuai.', 
+                title: 'Simpan Perubahan?', 
+                text: 'Pastikan data perjalanan dinas sudah sesuai.', 
                 icon: 'question',
                 showCancelButton: true, 
-                confirmButtonText: 'Ya, Simpan!', 
+                confirmButtonText: 'Ya, Update!', 
                 cancelButtonText: 'Periksa Lagi',
                 reverseButtons: true, 
                 customClass: {
@@ -306,8 +231,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({ 
-                        title: 'Menyimpan Data...', 
-                        text: 'Mohon tunggu sebentar',
+                        title: 'Memperbarui Data...', 
                         allowOutsideClick: false,
                         showConfirmButton: false, 
                         didOpen: () => Swal.showLoading() 

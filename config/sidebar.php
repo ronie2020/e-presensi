@@ -311,6 +311,13 @@ return [
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
             [
+                'name' => 'Surat Keluar',
+                'route' => 'letters.outgoing.index',
+                'active_check' => 'letters.outgoing.*',
+                'icon' => 'ph-paper-plane-tilt',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
                 'name' => 'Surat Tugas (SPT)',
                 'route' => 'letters.spt.index',
                 'active_check' => 'letters.spt.*',
