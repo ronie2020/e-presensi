@@ -1,16 +1,25 @@
-<x-app-layout>
-    {{-- Load SweetAlert & Alpine.js --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" 
          x-data="{ 
-            incomingLetters: {{ $incoming_letters->toJson() }},
-            selectedLetterId: '{{ $selected_letter_id ?? '' }}',
-            perihal: '{{ old('untuk') }}',
-            tempat: '{{ old('tempat') }}',
-            followers: {{ old('pengikut') ? Js::from(old('pengikut')) : '[]' }},
-            users: {{ Js::from($users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'nip' => $u->nip])) }},
+            incomingLetters: <?php echo e($incoming_letters->toJson()); ?>,
+            selectedLetterId: '<?php echo e($selected_letter_id ?? ''); ?>',
+            perihal: '<?php echo e(old('untuk')); ?>',
+            tempat: '<?php echo e(old('tempat')); ?>',
+            followers: <?php echo e(old('pengikut') ? Js::from(old('pengikut')) : '[]'); ?>,
+            users: <?php echo e(Js::from($users->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'nip' => $u->nip]))); ?>,
 
             init() {
                 if(this.selectedLetterId) {
@@ -46,15 +55,15 @@
         
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('letters.spt.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('letters.spt.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
-                {{-- Card Header Microsoft Elevate --}}
+                
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
@@ -66,24 +75,24 @@
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Lengkapi rincian penugasan dinas pegawai.</p>
                 </div>
 
-                {{-- Form Content --}}
+                
                 <div class="p-8">
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3 shadow-sm">
                             <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
                             <div>
                                 <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
                                 <ul class="list-disc list-inside font-medium">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    <form id="form-create-spt" action="{{ route('letters.spt.store') }}" method="POST" class="space-y-8">
-                        @csrf
+                    <form id="form-create-spt" action="<?php echo e(route('letters.spt.store')); ?>" method="POST" class="space-y-8">
+                        <?php echo csrf_field(); ?>
 
                         <!-- SECTION 1: DASAR & IDENTITAS -->
                         <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
@@ -94,16 +103,16 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPT (Otomatis)</label>
-                                    <input type="text" name="nomor_spt" value="{{ old('nomor_spt', $nomor_otomatis) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-slate-50 font-mono font-bold text-elevate-primary shadow-inner text-sm py-3 transition-all">
+                                    <input type="text" name="nomor_spt" value="<?php echo e(old('nomor_spt', $nomor_otomatis)); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-slate-50 font-mono font-bold text-elevate-primary shadow-inner text-sm py-3 transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Berdasarkan Surat Masuk (Opsional)</label>
                                     <div class="relative">
                                         <select name="letter_incoming_id" x-model="selectedLetterId" @change="updateFromLetter()" class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all cursor-pointer">
                                             <option value="">-- Pilih Dasar Surat --</option>
-                                            @foreach($incoming_letters as $letter)
-                                                <option value="{{ $letter->id }}">{{ $letter->nomor_surat }} - {{ $letter->perihal }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $incoming_letters; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $letter): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($letter->id); ?>"><?php echo e($letter->nomor_surat); ?> - <?php echo e($letter->perihal); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
@@ -119,16 +128,16 @@
                             </h3>
                             <div class="pl-9">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-4 bg-white rounded-3xl border border-slate-200 custom-scrollbar shadow-inner">
-                                    @foreach($users as $user)
+                                    <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <label class="flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-elevate-accent/30 hover:bg-elevate-accent/5 transition-all cursor-pointer group/item">
-                                            <input type="checkbox" name="pegawai_ids[]" value="{{ $user->id }}" 
+                                            <input type="checkbox" name="pegawai_ids[]" value="<?php echo e($user->id); ?>" 
                                                 class="rounded-md border-slate-300 text-elevate-primary focus:ring-elevate-primary w-5 h-5 transition-all">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-bold text-elevate-dark group-hover/item:text-elevate-primary">{{ $user->name }}</span>
-                                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">NIP. {{ $user->nip ?? '-' }}</span>
+                                                <span class="text-sm font-bold text-elevate-dark group-hover/item:text-elevate-primary"><?php echo e($user->name); ?></span>
+                                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">NIP. <?php echo e($user->nip ?? '-'); ?></span>
                                             </div>
                                         </label>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                                 <p class="text-[10px] text-slate-400 mt-3 ml-1 italic font-medium">
                                     <i class="ph-fill ph-info text-elevate-primary"></i> Pilih satu atau lebih personil inti penugasan.
@@ -153,11 +162,11 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Berangkat <span class="text-rose-500">*</span></label>
-                                    <input type="date" name="tgl_berangkat" value="{{ old('tgl_berangkat') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_berangkat" value="<?php echo e(old('tgl_berangkat')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Kembali <span class="text-rose-500">*</span></label>
-                                    <input type="date" name="tgl_kembali" value="{{ old('tgl_kembali') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_kembali" value="<?php echo e(old('tgl_kembali')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
@@ -210,9 +219,9 @@
                             </div>
                         </div>
 
-                        {{-- Action Buttons --}}
+                        
                         <div class="pt-8 mt-4 border-t border-slate-100 flex items-center justify-end gap-4">
-                            <a href="{{ route('letters.spt.index') }}" class="px-6 py-3.5 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-colors">
+                            <a href="<?php echo e(route('letters.spt.index')); ?>" class="px-6 py-3.5 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-colors">
                                 Batalkan
                             </a>
                             <button type="button" onclick="confirmSubmit(event)" class="px-10 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
@@ -277,4 +286,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/letters/spt/create.blade.php ENDPATH**/ ?>

@@ -22,12 +22,11 @@
                     <h2 class="text-2xl font-black relative z-10 flex items-center gap-3">
                         <i class="ph-duotone ph-envelope-simple-open text-elevate-accent"></i> Registrasi Surat Masuk
                     </h2>
-                    <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Isi detail surat dinas yang diterima sekolah.</p>
+                    <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Isi detail surat dinas yang diterima dan integrasikan dengan SPT jika memerlukan penugasan dinas luar.</p>
                 </div>
 
                 {{-- Form Content --}}
                 <div class="p-8">
-                    {{-- Form ID ditambahkan untuk dipanggil oleh SweetAlert JS --}}
                     <form id="form-create-surat" action="{{ route('letters.incoming.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
 
@@ -87,11 +86,51 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- SECTION 3: INTEGRASI SPT (MAGIC FEATURE) -->
+                        <div class="p-6 bg-elevate-soft/50 rounded-[2rem] border border-elevate-accent/20 relative overflow-hidden group hover:border-elevate-accent/50 transition-colors">
+                            <div class="flex items-start justify-between gap-4 relative z-10">
+                                <div>
+                                    <h3 class="text-sm font-black text-elevate-primary uppercase tracking-wider mb-1 flex items-center gap-2">
+                                        <i class="ph-fill ph-briefcase text-elevate-primary text-lg"></i>
+                                        Integrasi Penugasan (SPT/SPPD)
+                                    </h3>
+                                    <p class="text-xs text-elevate-dark/70 font-medium pl-6">Aktifkan jika surat ini berupa undangan/panggilan yang memerlukan penugasan Guru/Staf untuk dinas luar.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer mt-1">
+                                    <input type="checkbox" name="is_penugasan" id="toggle_penugasan" class="sr-only peer" onchange="toggleSPTFields()">
+                                    <div class="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-elevate-primary shadow-inner"></div>
+                                </label>
+                            </div>
+
+                            <div id="spt_fields" class="mt-6 pl-6 pr-2 hidden relative z-10 border-t border-elevate-accent/20 pt-5">
+                                <div class="grid grid-cols-1 gap-6">
+                                    <div>
+                                        <label class="block text-xs font-bold text-elevate-dark uppercase mb-2 ml-1">Pilih Pegawai (Tahan CTRL untuk pilih > 1)</label>
+                                        <select name="guru_ditugaskan[]" multiple class="w-full px-4 rounded-2xl border-elevate-accent/30 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-medium text-elevate-dark h-32 transition-all">
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-bold text-elevate-dark uppercase mb-2 ml-1">Tgl Keberangkatan</label>
+                                            <input type="date" name="tgl_berangkat" class="w-full px-4 rounded-2xl border-elevate-accent/30 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-bold text-elevate-dark">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-elevate-dark uppercase mb-2 ml-1">Tgl Kembali</label>
+                                            <input type="date" name="tgl_kembali" class="w-full px-4 rounded-2xl border-elevate-accent/30 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-bold text-elevate-dark">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <!-- SECTION 3: LAMPIRAN -->
+                        <!-- SECTION 4: LAMPIRAN -->
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
-                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
+                                <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">4</span>
                                 Lampiran (Opsional)
                             </h3>
                             <div class="pl-9">
@@ -112,7 +151,6 @@
                             <a href="{{ route('letters.incoming.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
                                 Batal
                             </a>
-                            {{-- Ubah type menjadi "button" dan tambahkan onclick trigger --}}
                             <button type="button" onclick="confirmSubmit(event)" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
                                 <span>Simpan Data</span>
@@ -126,7 +164,26 @@
 
     {{-- Script SweetAlert Logic --}}
     <script>
-        // 1. Tampilkan SweetAlert jika ada error validasi dari Controller (menggantikan alert merah HTML)
+        function toggleSPTFields() {
+            const checkBox = document.getElementById('toggle_penugasan');
+            const sptFields = document.getElementById('spt_fields');
+            const inputs = sptFields.querySelectorAll('select, input[type="date"]');
+            
+            if (checkBox.checked) {
+                sptFields.style.display = 'block';
+                sptFields.classList.remove('hidden');
+                inputs.forEach(input => input.required = true);
+            } else {
+                sptFields.style.display = 'none';
+                sptFields.classList.add('hidden');
+                inputs.forEach(input => {
+                    input.required = false;
+                    input.value = '';
+                });
+            }
+        }
+
+        // Tampilkan error jika validasi controller gagal
         @if ($errors->any())
             let errorMessages = '<div class="text-left"><ul class="list-disc list-inside text-sm font-medium space-y-1 text-slate-600">';
             @foreach ($errors->all() as $error)
@@ -138,7 +195,7 @@
                 icon: 'error',
                 title: 'Periksa Kembali Inputan Anda!',
                 html: errorMessages,
-                confirmButtonColor: '#e11d48', // Tailwind rose-600
+                confirmButtonColor: '#e11d48',
                 confirmButtonText: 'Baik, Saya Perbaiki',
                 customClass: {
                     popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
@@ -148,21 +205,23 @@
             });
         @endif
 
-        // 2. Fungsi Konfirmasi Simpan Data
+        // Fungsi Konfirmasi
         function confirmSubmit(e) {
             e.preventDefault();
             const form = document.getElementById('form-create-surat');
+            const isPenugasan = document.getElementById('toggle_penugasan').checked;
             
-            // Trigger validasi bawaan HTML5 (seperti 'required' popups) sebelum menjalankan SweetAlert
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
+            let textInfo = isPenugasan ? "Sistem juga akan membuatkan SPT dan SPPD untuk pegawai yang ditugaskan." : "Menyimpan data Surat Masuk ini ke dalam arsip.";
+
             Swal.fire({
                 title: 'Simpan Data Surat?',
-                text: "Pastikan seluruh identitas dan file lampiran surat sudah benar.",
-                icon: 'question',
+                text: textInfo,
+                icon: 'info',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Simpan!',
                 cancelButtonText: 'Periksa Lagi',
@@ -175,18 +234,14 @@
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Tampilkan indikator loading saat form dikirim
                     Swal.fire({
                         title: 'Menyimpan Data...',
-                        text: 'Mohon tunggu sebentar',
                         allowOutsideClick: false,
                         showConfirmButton: false,
                         didOpen: () => {
                             Swal.showLoading();
                         }
                     });
-                    
-                    // Submit form
                     form.submit();
                 }
             });

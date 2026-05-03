@@ -1,32 +1,41 @@
-<x-app-layout>
-    {{-- Load SweetAlert --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('sppd.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('sppd.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
                  x-data="{ 
                     mode: 'spt', 
                     // Mengambil nilai 'old' jika validasi gagal
-                    selectedSptId: {{ Js::from(old('spt_id', '')) }},
-                    pegawaiId: {{ Js::from(old('pegawai_id', '')) }},
-                    maksud: {{ Js::from(old('maksud', '')) }},
-                    tujuan: {{ Js::from(old('tujuan', '')) }},
-                    tanggal_berangkat: {{ Js::from(old('tgl_berangkat', '')) }},
-                    tanggal_kembali: {{ Js::from(old('tgl_kembali', '')) }},
-                    followers: {{ Js::from(old('followers', [])) }}, 
+                    selectedSptId: <?php echo e(Js::from(old('spt_id', ''))); ?>,
+                    pegawaiId: <?php echo e(Js::from(old('pegawai_id', ''))); ?>,
+                    maksud: <?php echo e(Js::from(old('maksud', ''))); ?>,
+                    tujuan: <?php echo e(Js::from(old('tujuan', ''))); ?>,
+                    tanggal_berangkat: <?php echo e(Js::from(old('tgl_berangkat', ''))); ?>,
+                    tanggal_kembali: <?php echo e(Js::from(old('tgl_kembali', ''))); ?>,
+                    followers: <?php echo e(Js::from(old('followers', []))); ?>, 
 
                     // Data Dinamis
-                    sptList: {{ Js::from($spt_json ?? []) }}, 
+                    sptList: <?php echo e(Js::from($spt_json ?? [])); ?>, 
                     availableUsers: [],
-                    allUsers: {{ Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip])) }},
+                    allUsers: <?php echo e(Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip]))); ?>,
 
                     init() {
                         // Menentukan mode saat pertama kali load berdasarkan data 'old'
@@ -87,7 +96,7 @@
                     }
                  }">
                 
-                {{-- Card Header Microsoft Elevate --}}
+                
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
@@ -99,25 +108,25 @@
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Lengkapi data SPPD berdasarkan Surat Perintah Tugas (SPT).</p>
                 </div>
 
-                {{-- Form Content --}}
+                
                 <div class="p-8">
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3 shadow-sm">
                             <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
                             <div>
                                 <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
                                 <ul class="list-disc list-inside font-medium">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- PERBAIKAN: Menambahkan ID form-create-sppd --}}
-                    <form id="form-create-sppd" action="{{ route('sppd.store') }}" method="POST" class="space-y-8">
-                        @csrf
+                    
+                    <form id="form-create-sppd" action="<?php echo e(route('sppd.store')); ?>" method="POST" class="space-y-8">
+                        <?php echo csrf_field(); ?>
 
                         <!-- SECTION 1: DASAR & MODE INPUT -->
                         <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
@@ -165,7 +174,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPPD (Otomatis)</label>
-                                    <input type="text" name="nomor_sppd" value="{{ old('nomor_sppd', $nomor_otomatis ?? '') }}" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3 shadow-inner" readonly>
+                                    <input type="text" name="nomor_sppd" value="<?php echo e(old('nomor_sppd', $nomor_otomatis ?? '')); ?>" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3 shadow-inner" readonly>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pegawai Pelaksana <span class="text-rose-500">*</span></label>
@@ -192,7 +201,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Alat Angkutan</label>
-                                    <input type="text" name="transportasi" value="{{ old('transportasi') }}" placeholder="Contoh: Kendaraan Dinas / Mobil Pribadi" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="transportasi" value="<?php echo e(old('transportasi')); ?>" placeholder="Contoh: Kendaraan Dinas / Mobil Pribadi" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Berangkat</label>
@@ -262,18 +271,18 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Instansi Penanggung Biaya</label>
-                                    <input type="text" name="instansi_biaya" value="{{ old('instansi_biaya', 'SMP Negeri 3 Lakbok') }}" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="instansi_biaya" value="<?php echo e(old('instansi_biaya', 'SMP Negeri 3 Lakbok')); ?>" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mata Anggaran / Kode Rekening</label>
-                                    <input type="text" name="kode_rekening" value="{{ old('kode_rekening') }}" placeholder="Misal: 5.2.2.15.01 (Dana BOS)" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="kode_rekening" value="<?php echo e(old('kode_rekening')); ?>" placeholder="Misal: 5.2.2.15.01 (Dana BOS)" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Action Footer --}}
+                        
                         <div class="flex items-center justify-end gap-4 pt-8 mt-4 border-t border-slate-100">
-                            <a href="{{ route('sppd.index') }}" class="px-8 py-4 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batalkan</a>
+                            <a href="<?php echo e(route('sppd.index')); ?>" class="px-8 py-4 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batalkan</a>
                             
                             <button type="button" @click="confirmSubmit($event)" class="px-10 py-4 bg-elevate-dark text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:bg-elevate-primary shadow-xl shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-3 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
@@ -286,7 +295,7 @@
         </div>
     </div>
 
-    {{-- Script untuk Alert Konfirmasi --}}
+    
     <script>
         function confirmSubmit(e) {
             e.preventDefault();
@@ -339,4 +348,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/sppd/create.blade.php ENDPATH**/ ?>

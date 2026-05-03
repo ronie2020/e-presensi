@@ -13,16 +13,16 @@
             {{-- Card Container (Alpine.js State) --}}
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
                  x-data="{ 
-                    mode: 'manual', // Saat edit, selalu asumsikan mode manual
+                    mode: 'manual',
                     
-                    // Data Form (Pre-filled dengan data SPPD)
-                    maksud: {{ Js::from($sppd->maksud_perjalanan) }},
-                    tujuan: {{ Js::from($sppd->tempat_tujuan) }},
-                    tanggal_berangkat: {{ Js::from($sppd->tgl_berangkat) }},
-                    tanggal_kembali: {{ Js::from($sppd->tgl_kembali) }},
+                    // PERBAIKAN: Menggabungkan data existing dengan helper old()
+                    maksud: {{ Js::from(old('maksud', $sppd->maksud_perjalanan)) }},
+                    tujuan: {{ Js::from(old('tujuan', $sppd->tempat_tujuan)) }},
+                    tanggal_berangkat: {{ Js::from(old('tgl_berangkat', \Carbon\Carbon::parse($sppd->tgl_berangkat)->format('Y-m-d'))) }},
+                    tanggal_kembali: {{ Js::from(old('tgl_kembali', \Carbon\Carbon::parse($sppd->tgl_kembali)->format('Y-m-d'))) }},
                     
-                    // LIST PENGIKUT (Pre-filled)
-                    followers: {{ Js::from($sppd->followers) }}, 
+                    // LIST PENGIKUT (Pre-filled dengan gabungan old data)
+                    followers: {{ Js::from(old('followers', $sppd->followers)) }}, 
 
                     // Data User Lengkap (Untuk Dropdown)
                     allUsers: {{ Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip])) }},
@@ -95,7 +95,7 @@
                                         <select name="pegawai_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all">
                                             <option value="">-- Pilih Pegawai --</option>
                                             @foreach($users as $user)
-                                                <option value="{{ $user->id }}" {{ $sppd->user_id == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                <option value="{{ $user->id }}" {{ old('pegawai_id', $sppd->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
@@ -111,7 +111,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Alat Angkutan</label>
-                                    <input type="text" name="transportasi" value="{{ $sppd->alat_angkut }}" placeholder="Kendaraan Dinas" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="transportasi" value="{{ old('transportasi', $sppd->alat_angkut) }}" placeholder="Kendaraan Dinas" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tgl Berangkat</label>
@@ -180,11 +180,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Instansi Penanggung Biaya</label>
-                                    <input type="text" name="instansi_biaya" value="{{ $sppd->instansi_pembayar }}" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="instansi_biaya" value="{{ old('instansi_biaya', $sppd->instansi_pembayar) }}" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mata Anggaran / Kode Rekening</label>
-                                    <input type="text" name="kode_rekening" value="{{ $sppd->mata_anggaran }}" placeholder="Misal: 5.2.2.15.01" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="kode_rekening" value="{{ old('kode_rekening', $sppd->mata_anggaran) }}" placeholder="Misal: 5.2.2.15.01" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>

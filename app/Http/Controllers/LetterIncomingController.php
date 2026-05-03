@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LetterIncoming;
+use App\Models\LetterSpt;
+use App\Models\Sppd;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class LetterIncomingController extends Controller
@@ -43,8 +47,11 @@ class LetterIncomingController extends Controller
             $nextAgenda = str_pad($lastAgendaNumber + 1, 4, '0', STR_PAD_LEFT);
         }
 
-        // Kirim variabel $nextAgenda ke halaman view
-        return view('letters.incoming.create', compact('nextAgenda'));
+        // Ambil data user untuk dropdown "Guru Ditugaskan"
+        $users = User::orderBy('name', 'asc')->get();
+
+        // Kirim variabel $nextAgenda & $users ke halaman view
+        return view('letters.incoming.create', compact('nextAgenda', 'users'));
     }
     
     // MENYIMPAN DATA BARU
@@ -59,9 +66,15 @@ class LetterIncomingController extends Controller
             'tgl_diterima' => 'required|date',
             'perihal'      => 'required|string',
             'file_surat'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+
+            // Validasi khusus jika Toggle Penugasan dihidupkan
+            'guru_ditugaskan' => 'required_if:is_penugasan,on|array',
+            'tgl_berangkat'   => 'required_if:is_penugasan,on|date|nullable',
+            'tgl_kembali'     => 'required_if:is_penugasan,on|date|after_or_equal:tgl_berangkat|nullable',
         ]);
 
-        $data = $request->except(['file_surat']);
+        // Kecualikan atribut temporary dari data Surat Masuk
+        $data = $request->except(['file_surat', 'is_penugasan', 'guru_ditugaskan', 'tgl_berangkat', 'tgl_kembali']);
 
         // Handle Upload File jika ada
         if ($request->hasFile('file_surat')) {
@@ -69,7 +82,71 @@ class LetterIncomingController extends Controller
             $data['file_path'] = $path;
         }
 
-        LetterIncoming::create($data);
+        // Simpan Surat Masuk
+        $suratMasuk = LetterIncoming::create($data);
+
+        // =========================================================================
+        // LOGIKA MAGIC: Jika Checkbox Penugasan di-Centang
+        // =========================================================================
+        if ($request->has('is_penugasan') && $request->is_penugasan === 'on') {
+            
+            $start = Carbon::parse($request->tgl_berangkat);
+            $end = Carbon::parse($request->tgl_kembali);
+            $lama_hari = $start->diffInDays($end) + 1;
+
+            $bulan_romawi = $this->getRomawi(date('n'));
+            $tahun = date('Y');
+            
+            // 1. Generate Nomor SPT
+            $last_spt_count = LetterSpt::whereYear('created_at', $tahun)->count() + 1;
+            $nomor_spt_otomatis = sprintf("094/%03d/SMP.03/Disdik/%s/%s", $last_spt_count, $bulan_romawi, $tahun);
+
+            // 2. Buat SPT Tertaut ke Surat Masuk
+            $spt = LetterSpt::create([
+                'letter_incoming_id' => $suratMasuk->id,
+                'nomor_spt'       => $nomor_spt_otomatis,
+                'untuk'           => 'Memenuhi Undangan/Panggilan: ' . $request->perihal,
+                'tempat_tujuan'   => $request->asal_surat, // Tujuan keberangkatan adalah Instansi Pengirim Surat
+                'tgl_berangkat'   => $request->tgl_berangkat,
+                'tgl_kembali'     => $request->tgl_kembali,
+                'lama_hari'       => $lama_hari,
+                'pejabat_nama'    => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
+                'pejabat_nip'     => '19820928 201101 1 002',
+            ]);
+
+            // 3. Looping guru yang dipilih & Buat SPPD
+            if ($request->has('guru_ditugaskan') && is_array($request->guru_ditugaskan)) {
+                foreach ($request->guru_ditugaskan as $guru_id) {
+                    // Relasi Pivot SPT
+                    $spt->users()->attach($guru_id);
+
+                    // Buat SPPD
+                    $last_sppd_count = Sppd::whereYear('created_at', $tahun)->count() + 1;
+                    $nomor_sppd_otomatis = sprintf("090/%03d/SMP.03/Disdik/%s/%s", $last_sppd_count, $bulan_romawi, $tahun);
+
+                    Sppd::create([
+                        'spt_id'            => $spt->id,
+                        'nomor_sppd'        => $nomor_sppd_otomatis,
+                        'user_id'           => $guru_id,
+                        'maksud_perjalanan' => 'Memenuhi Undangan/Panggilan: ' . $request->perihal,
+                        'tempat_berangkat'  => 'SMP Negeri 3 Lakbok',
+                        'tempat_tujuan'     => $request->asal_surat,
+                        'tgl_berangkat'     => $request->tgl_berangkat,
+                        'tgl_kembali'       => $request->tgl_kembali,
+                        'lama_hari'         => $lama_hari,
+                        'instansi_pembayar' => 'SMP Negeri 3 Lakbok',
+                        'pejabat_nama'      => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
+                        'pejabat_nip'       => '19820928 201101 1 002',
+                        'pejabat_pangkat'   => 'Penata, III/c',
+                        'pejabat_jabatan'   => 'Kepala Sekolah',
+                    ]);
+                }
+            }
+
+            // Arahkan ke halaman SPPD
+            return redirect()->route('sppd.index')
+                ->with('success', 'Surat Masuk disimpan. Draft SPT dan SPPD untuk pegawai terpilih telah otomatis dibuat!');
+        }
 
         return redirect()->route('letters.incoming.index')
             ->with('success', 'Surat Masuk berhasil disimpan!');
@@ -89,9 +166,9 @@ class LetterIncomingController extends Controller
 
         $request->validate([
             'nomor_surat'  => 'required|string|max:255',
-            'asal_surat'   => 'required|string|max:255', // Tadinya 'pengirim'
+            'asal_surat'   => 'required|string|max:255',
             'tgl_surat'    => 'required|date',
-            'tgl_diterima' => 'required|date',           // Tadinya 'tgl_terima'
+            'tgl_diterima' => 'required|date',
             'perihal'      => 'required|string',
             'file_surat'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -130,5 +207,14 @@ class LetterIncomingController extends Controller
 
         return redirect()->route('letters.incoming.index')
             ->with('success', 'Surat berhasil dihapus!');
+    }
+
+    // =============================================
+    // FUNGSI HELPER UNTUK MENGAMBIL BULAN ROMAWI 
+    // =============================================
+    private function getRomawi($bulan)
+    {
+        $map = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];
+        return $map[$bulan];
     }
 }
