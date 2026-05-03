@@ -179,24 +179,25 @@ class TeacherHabitController extends Controller
     /**
      * Cetak Laporan PDF/Print
      */
-    public function print(Request $request)
+     public function print(Request $request)
     {
         $periodType = $request->input('period_type', 'daily');
         $periodValue = $request->input('period_value', $request->input('date', Carbon::now()->format('Y-m-d')));
         $classId = $request->input('class_id');
 
-        if (!$classId) {
-            return redirect()->back()->with('error', 'Silakan pilih kelas terlebih dahulu.');
-        }
-
         // Terapkan helper yang sama untuk halaman PDF
         [$startDate, $endDate] = $this->getPeriodRange($periodType, $periodValue);
         $date = $periodValue; // Teruskan ke view sebagai nilai asli
 
-        $class = SchoolClass::findOrFail($classId);
-        
-        // Mengambil data siswa
-        $students = Student::where('class_id', $classId)->orderBy('name', 'asc')->get();
+        // LOGIKA BARU: Jika kelas dipilih tampilkan kelas tersebut, jika tidak tampilkan SEMUA KELAS
+        if ($classId) {
+            $class = SchoolClass::findOrFail($classId);
+            $students = Student::where('class_id', $classId)->orderBy('name', 'asc')->get();
+        } else {
+            $class = null; // Menandakan mode Cetak Global
+            // Eager load 'schoolClass' agar di tampilan cetak bisa dikelompokkan per kelas
+            $students = Student::with('schoolClass')->orderBy('class_id')->orderBy('name', 'asc')->get();
+        }
         
         // [OPTIMASI N+1 QUERY UNTUK HALAMAN CETAK]
         $studentIds = $students->pluck('id');

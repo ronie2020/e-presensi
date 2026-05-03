@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Karakter - {{ \Carbon\Carbon::parse($date)->format('d-m-Y') }}</title>
+    <title>Laporan Karakter - <?php echo e(\Carbon\Carbon::parse($date)->format('d-m-Y')); ?></title>
     <style>
         @page { size: A4 landscape; margin: 1.5cm; }
         
@@ -86,32 +86,35 @@
             <td class="meta-title">Periode Analisis</td>
             <td width="10">:</td>
             <td width="300">
-                @if($periodType == 'weekly')
-                    Minggu ke-{{ substr($date, 6) }}, Tahun {{ substr($date, 0, 4) }}
-                @elseif($periodType == 'monthly')
-                    Bulan {{ \Carbon\Carbon::parse($date . '-01')->translatedFormat('F Y') }}
-                @else
-                    {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
-                @endif
+                <?php if($periodType == 'weekly'): ?>
+                    Minggu ke-<?php echo e(substr($date, 6)); ?>, Tahun <?php echo e(substr($date, 0, 4)); ?>
+
+                <?php elseif($periodType == 'monthly'): ?>
+                    Bulan <?php echo e(\Carbon\Carbon::parse($date . '-01')->translatedFormat('F Y')); ?>
+
+                <?php else: ?>
+                    <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l, d F Y')); ?>
+
+                <?php endif; ?>
             </td>
             
             <td class="meta-title">Kelas</td>
             <td width="10">:</td>
-            <td>{{ $class->name ?? 'Semua Kelas (Global)' }}</td>
+            <td><?php echo e($class->name ?? 'Semua Kelas (Global)'); ?></td>
         </tr>
         <tr>
             <td class="meta-title">Dicetak Oleh</td>
             <td>:</td>
-            <td>{{ auth()->user()->name ?? 'Administrator' }}</td>
+            <td><?php echo e(auth()->user()->name ?? 'Administrator'); ?></td>
 
             <td class="meta-title">Total Siswa</td>
             <td>:</td>
-            <td>{{ $students->count() }} Siswa</td>
+            <td><?php echo e($students->count()); ?> Siswa</td>
         </tr>
     </table>
 
-    {{-- KALKULASI STATISTIK RINGKASAN --}}
-    @php
+    
+    <?php
         $totalStudents = $students->count();
         $submittedStudents = $students->where('habit_status', 'submitted');
         $missingStudents = $students->where('habit_status', 'missing');
@@ -119,29 +122,29 @@
         $submittedCount = $submittedStudents->count();
         $missingCount = $missingStudents->count();
         $percentage = $totalStudents > 0 ? round(($submittedCount / $totalStudents) * 100) : 0;
-    @endphp
+    ?>
 
     <div class="summary-box">
         <div class="summary-item">
-            <span class="summary-val">{{ $totalStudents }}</span>
+            <span class="summary-val"><?php echo e($totalStudents); ?></span>
             <span class="summary-label">Total Siswa</span>
         </div>
         <div class="summary-item" style="color: #059669;">
-            <span class="summary-val">{{ $submittedCount }}</span>
+            <span class="summary-val"><?php echo e($submittedCount); ?></span>
             <span class="summary-label">Sudah Lapor</span>
         </div>
         <div class="summary-item" style="color: #e11d48;">
-            <span class="summary-val">{{ $missingCount }}</span>
+            <span class="summary-val"><?php echo e($missingCount); ?></span>
             <span class="summary-label">Belum Lapor</span>
         </div>
         <div class="summary-item" style="color: #2563eb;">
-            <span class="summary-val">{{ $percentage }}%</span>
+            <span class="summary-val"><?php echo e($percentage); ?>%</span>
             <span class="summary-label">Partisipasi</span>
         </div>
     </div>
 
-    {{-- BAGIAN A: DAFTAR SISWA SUDAH LAPOR --}}
-    @if($submittedCount > 0)
+    
+    <?php if($submittedCount > 0): ?>
         <div class="section-title">A. Daftar Siswa Sudah Melapor</div>
         <table class="data">
             <thead>
@@ -165,8 +168,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($submittedStudents as $student)
-                    @php 
+                <?php $__currentLoopData = $submittedStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php 
                         $h = $student->habit_data; 
                         
                         // --- LOGIKA CEK STATUS ---
@@ -182,34 +185,35 @@
 
                         $totalScore = count(array_filter($checks));
                         $tglLapor = \Carbon\Carbon::parse($h->report_date)->format('d/m/Y');
-                    @endphp
+                    ?>
                 <tr>
-                    <td class="center">{{ $loop->iteration }}</td>
-                    <td class="center">{{ $tglLapor }}</td> <!-- CETAK TANGGAL LAPOR -->
-                    <td class="left" style="text-transform: uppercase; font-weight: bold;">{{ $student->name }}</td>
-                    <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($loop->iteration); ?></td>
+                    <td class="center"><?php echo e($tglLapor); ?></td> <!-- CETAK TANGGAL LAPOR -->
+                    <td class="left" style="text-transform: uppercase; font-weight: bold;"><?php echo e($student->name); ?></td>
+                    <td class="center"><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                     
-                    {{-- LOOPING KOLOM 1-7 --}}
-                    @for($i = 1; $i <= 7; $i++)
+                    
+                    <?php for($i = 1; $i <= 7; $i++): ?>
                         <td class="center">
-                            <span class="check {{ $checks[$i] ? 'check-yes' : 'check-no' }}">
-                                {!! $checks[$i] ? '&#10003;' : '-' !!}
+                            <span class="check <?php echo e($checks[$i] ? 'check-yes' : 'check-no'); ?>">
+                                <?php echo $checks[$i] ? '&#10003;' : '-'; ?>
+
                             </span>
                         </td>
-                    @endfor
+                    <?php endfor; ?>
 
-                    {{-- KOLOM SKOR --}}
+                    
                     <td class="center" style="font-weight: bold;">
-                        {{ $totalScore }}/7
+                        <?php echo e($totalScore); ?>/7
                     </td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- BAGIAN B: DAFTAR SISWA BELUM LAPOR --}}
-    @if($missingCount > 0)
+    
+    <?php if($missingCount > 0): ?>
         <div class="section-title text-danger">B. Daftar Siswa Belum Melapor</div>
         <table class="data">
             <thead>
@@ -221,36 +225,37 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($missingStudents as $student)
+                <?php $__currentLoopData = $missingStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $loop->iteration }}</td>
-                    <td class="left" style="text-transform: uppercase; font-weight: bold;">{{ $student->name }}</td>
-                    <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($loop->iteration); ?></td>
+                    <td class="left" style="text-transform: uppercase; font-weight: bold;"><?php echo e($student->name); ?></td>
+                    <td class="center"><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                     <td class="center text-danger" style="font-style: italic;">Alfa / Belum Mengisi Jurnal</td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    @if($totalStudents == 0)
+    <?php if($totalStudents == 0): ?>
         <div style="text-align: center; padding: 50px; border: 1px dashed #ccc; margin-top: 20px;">
             Data siswa tidak ditemukan untuk periode/kelas ini.
         </div>
-    @else
+    <?php else: ?>
         <div class="legend" style="page-break-inside: avoid;">
             <strong>Keterangan Tabel Capaian:</strong><br>
             (&#10003;) : Melaksanakan Kebiasaan Baik<br>
             (-) : Tidak Melaksanakan Kebiasaan
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="footer">
         <div class="signature-box">
             <p>
-                Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
+                Lakbok, <?php echo e(\Carbon\Carbon::now()->isoFormat('D MMMM Y')); ?><br>
                 Mengetahui,<br>
-                {{ $class ? 'Wali Kelas / Guru BK' : 'Kepala Sekolah' }}
+                <?php echo e($class ? 'Wali Kelas / Guru BK' : 'Kepala Sekolah'); ?>
+
             </p>
             <div style="font-weight: bold; text-decoration: underline; margin-top: 20px;">
                 ( ........................................... )
@@ -260,4 +265,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/habits/print.blade.php ENDPATH**/ ?>
