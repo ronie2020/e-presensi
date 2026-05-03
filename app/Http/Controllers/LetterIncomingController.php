@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Storage;
 
 class LetterIncomingController extends Controller
 {
-    // MENAMPILKAN DATA DARI DATABASE (DENGAN PENCARIAN)
+    // MENAMPILKAN DATA DARI DATABASE (DENGAN PENCARIAN & FILTER)
     public function index(Request $request)
     {
         $query = LetterIncoming::query();
 
-        // Logika Pencarian
+        // 1. Logika Pencarian Teks
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -26,8 +26,14 @@ class LetterIncomingController extends Controller
                   ->orWhere('asal_surat', 'like', "%{$search}%");
             });
         }
+
+        // 2. Logika Filter Sifat Surat
+        if ($request->has('sifat_surat') && $request->sifat_surat != '') {
+            $query->where('sifat_surat', $request->sifat_surat);
+        }
         
-        $letters = $query->latest()->paginate(10);
+        // Gunakan withQueryString() agar filter/pencarian terbawa saat pagination
+        $letters = $query->latest()->paginate(10)->withQueryString();
 
         return view('letters.incoming.index', compact('letters'));
     }

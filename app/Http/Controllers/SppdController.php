@@ -18,7 +18,7 @@ class SppdController extends Controller
     // MENAMPILKAN DATA
     public function index(Request $request)
     {
-        $query = Sppd::with('user');
+         $query = Sppd::with(['user', 'followers']); 
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;

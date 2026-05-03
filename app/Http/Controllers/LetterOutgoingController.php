@@ -12,9 +12,29 @@ use Illuminate\Support\Facades\Storage;
 
 class LetterOutgoingController extends Controller
 {
-    public function index()
+    // MENAMPILKAN DATA DARI DATABASE (DENGAN PENCARIAN & FILTER)
+    public function index(Request $request)
     {
-        $letters = LetterOutgoing::latest()->paginate(10);
+        $query = LetterOutgoing::query();
+
+        // 1. Logika Pencarian Teks
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_surat', 'like', "%{$search}%")
+                  ->orWhere('perihal', 'like', "%{$search}%")
+                  ->orWhere('tujuan_surat', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Logika Filter Sifat Surat
+        if ($request->has('sifat_surat') && $request->sifat_surat != '') {
+            $query->where('sifat_surat', $request->sifat_surat);
+        }
+        
+        // Gunakan withQueryString() agar saat pindah halaman (pagination), search/filter tidak hilang
+        $letters = $query->latest()->paginate(10)->withQueryString();
+
         return view('letters.outgoing.index', compact('letters'));
     }
 
@@ -27,7 +47,6 @@ class LetterOutgoingController extends Controller
         // 2. Ambil data user untuk dropdown "Guru Ditugaskan"
         $users = User::orderBy('name', 'asc')->get();
 
-        // Menggunakan view create_keluar.blade.php yang sudah saya berikan sebelumnya
         return view('letters.outgoing.create', compact('nextAgendaKeluar', 'users'));
     }
 
@@ -61,23 +80,20 @@ class LetterOutgoingController extends Controller
         // 3. LOGIKA MAGIC: Jika Checkbox Penugasan di-Centang
         if ($request->has('is_penugasan') && $request->is_penugasan === 'on') {
             
-            // Hitung lama hari
             $start = Carbon::parse($request->tgl_berangkat);
             $end = Carbon::parse($request->tgl_kembali);
             $lama_hari = $start->diffInDays($end) + 1;
 
-            // Generate Nomor Induk SPT
             $bulan_romawi = $this->getRomawi(date('n'));
             $tahun = date('Y');
             $last_spt_count = LetterSpt::whereYear('created_at', $tahun)->count() + 1;
             $nomor_spt_otomatis = sprintf("094/%03d/SMP.03/Disdik/%s/%s", $last_spt_count, $bulan_romawi, $tahun);
 
-            // Buat 1 SPT yang terhubung ke Surat Keluar ini
             $spt = LetterSpt::create([
                 'surat_keluar_id' => $suratKeluar->id,
                 'nomor_spt'       => $nomor_spt_otomatis,
-                'untuk'           => $request->perihal,       // Mengambil dari perihal surat
-                'tempat_tujuan'   => $request->tujuan_surat,  // Mengambil dari tujuan surat
+                'untuk'           => $request->perihal,
+                'tempat_tujuan'   => $request->tujuan_surat,
                 'tgl_berangkat'   => $request->tgl_berangkat,
                 'tgl_kembali'     => $request->tgl_kembali,
                 'lama_hari'       => $lama_hari,
@@ -85,14 +101,9 @@ class LetterOutgoingController extends Controller
                 'pejabat_nip'     => '19820928 201101 1 002',
             ]);
 
-            // Looping guru yang dipilih
             foreach ($request->guru_ditugaskan as $guru_id) {
-                
-                // Relasikan Guru ke SPT (Pivot)
                 $spt->users()->attach($guru_id);
 
-                // Otomatis buatkan Draft SPPD untuk Guru ini
-                // Generate Nomor SPPD Draft
                 $last_sppd_count = Sppd::whereYear('created_at', $tahun)->count() + 1;
                 $nomor_sppd_otomatis = sprintf("090/%03d/SMP.03/Disdik/%s/%s", $last_sppd_count, $bulan_romawi, $tahun);
 
@@ -107,7 +118,6 @@ class LetterOutgoingController extends Controller
                     'tgl_kembali'       => $request->tgl_kembali,
                     'lama_hari'         => $lama_hari,
                     'instansi_pembayar' => 'SMP Negeri 3 Lakbok',
-                    // Atribut lainnya biarkan null/default. Admin bisa edit di menu SPPD nanti.
                     'pejabat_nama'      => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
                     'pejabat_nip'       => '19820928 201101 1 002',
                     'pejabat_pangkat'   => 'Penata, III/c',
@@ -115,24 +125,20 @@ class LetterOutgoingController extends Controller
                 ]);
             }
 
-            // Arahkan ke halaman SPPD agar admin bisa melengkapi transportasi, biaya, dll
             return redirect()->route('sppd.index')
                 ->with('success', 'Surat Keluar berhasil disimpan. Draft SPT dan SPPD untuk pegawai terpilih telah otomatis dibuat!');
         }
 
-        // Jika tidak ada penugasan, cukup kembalikan ke daftar Surat Keluar
         return redirect()->route('letters.outgoing.index')
             ->with('success', 'Surat Keluar berhasil disimpan!');
     }
 
-         // MENAMPILKAN FORM EDIT
     public function edit($id)
     {
         $letter = LetterOutgoing::findOrFail($id);
         return view('letters.outgoing.edit', compact('letter'));
     }
 
-    // MEMPROSES UPDATE DATA
     public function update(Request $request, $id)
     {
         $letter = LetterOutgoing::findOrFail($id);
@@ -149,14 +155,10 @@ class LetterOutgoingController extends Controller
 
         $data = $request->except(['file_surat', '_token', '_method']);
 
-        // Handle File Upload saat Update
         if ($request->hasFile('file_surat')) {
-            // 1. Hapus file lama jika ada
             if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
                 Storage::disk('public')->delete($letter->file_path);
             }
-
-            // 2. Upload file baru
             $data['file_path'] = $request->file('file_surat')->store('surat-keluar', 'public');
         }
 
@@ -166,12 +168,10 @@ class LetterOutgoingController extends Controller
             ->with('success', 'Data Surat Keluar berhasil diperbarui!');
     }
 
-    // MENGHAPUS DATA
     public function destroy($id)
     {
         $letter = LetterOutgoing::findOrFail($id);
 
-        // Hapus file fisik jika ada
         if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
             Storage::disk('public')->delete($letter->file_path);
         }

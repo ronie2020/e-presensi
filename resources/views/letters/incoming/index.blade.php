@@ -2,7 +2,7 @@
     {{-- Load SweetAlert --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
+    <div class="py-8 sm:py-10 font-sans text-slate-700 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
@@ -18,12 +18,12 @@
                         </div>
                         <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
                             <div class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center shrink-0">
-                                <i class="ph-bold ph-envelope-simple-open text-xl"></i>
+                                <i class="ph-bold ph-tray-arrow-down text-xl"></i>
                             </div>
                             Arsip Surat Masuk
                         </h1>
                         <p class="text-elevate-dark/80 text-sm font-medium leading-relaxed max-w-lg ml-0 md:ml-12">
-                            Digitalisasi dokumen persuratan masuk. Pantau, catat, dan arsipkan surat resmi untuk kemudahan pencarian.
+                            Kelola dokumen persuratan masuk. Integrasikan surat masuk dengan pembuatan Surat Perintah Tugas (SPT) secara otomatis.
                         </p>
                         
                         <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3 ml-0 md:ml-12">
@@ -31,7 +31,7 @@
                                 <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                                     <i class="ph-bold ph-plus text-sm"></i>
                                 </div>
-                                <span>Input Surat Baru</span>
+                                <span>Catat Surat Masuk</span>
                             </a>
                         </div>
                     </div>
@@ -40,31 +40,45 @@
                     <div class="flex gap-3">
                         <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center min-w-[140px]">
                             <span class="block text-4xl font-black text-elevate-dark mb-1">{{ $letters->total() }}</span>
-                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">Total Surat</span>
+                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">Total Masuk</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Toolbar & Table --}}
+            {{-- Toolbar Pencarian & Tabel --}}
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
                 
-                {{-- Toolbar --}}
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2">
+                {{-- Toolbar (Search & Filter) --}}
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col xl:flex-row gap-4 justify-between items-center">
+                    <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2 whitespace-nowrap">
                         <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Data Surat Masuk
                     </h3>
-
-                    <form action="{{ route('letters.incoming.index') }}" method="GET" class="relative w-full sm:w-80 group">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                        <input type="text" name="search" 
-                               value="{{ request('search') }}" 
-                               placeholder="Cari No Surat / Pengirim / Perihal..." 
-                               class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark transition-all">
+                    
+                    <form action="{{ route('letters.incoming.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor, perihal, pengirim..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-medium text-slate-700 transition-all">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        </div>
+                        <div class="relative w-full sm:w-40">
+                            <select name="sifat_surat" onchange="this.form.submit()" class="w-full pl-4 pr-10 py-2.5 rounded-xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-medium text-slate-700 appearance-none transition-all cursor-pointer">
+                                <option value="">Semua Sifat</option>
+                                <option value="Biasa" {{ request('sifat_surat') == 'Biasa' ? 'selected' : '' }}>Biasa</option>
+                                <option value="Penting" {{ request('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
+                                <option value="Segera" {{ request('sifat_surat') == 'Segera' ? 'selected' : '' }}>Segera</option>
+                                <option value="Rahasia" {{ request('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+                        @if(request('search') || request('sifat_surat'))
+                            <a href="{{ route('letters.incoming.index') }}" class="px-4 py-2.5 bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2" title="Reset Filter">
+                                <i class="ph-bold ph-x"></i>
+                            </a>
+                        @endif
                     </form>
                 </div>
 
-                {{-- Tabel Data --}}
+                {{-- Table Content --}}
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50/80 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
@@ -82,15 +96,12 @@
                                     <div class="font-mono font-black text-elevate-primary bg-elevate-accent/10 px-3 py-1.5 rounded-lg border border-elevate-accent/20 inline-block text-sm mb-2 shadow-sm">
                                         #{{ $letter->nomor_agenda }}
                                     </div>
-                                    <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-1">
-                                        <i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::parse($letter->tgl_diterima)->format('d M Y') }}
+                                    <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-1" title="Tanggal Diterima">
+                                        <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ \Carbon\Carbon::parse($letter->tgl_diterima)->translatedFormat('d M Y') }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-5 align-top">
-                                    <div class="font-bold text-elevate-dark text-sm mb-1 leading-snug">{{ $letter->nomor_surat }}</div>
-                                    <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mb-2">
-                                        <i class="ph-bold ph-calendar-blank text-slate-400"></i> Tgl Surat: {{ \Carbon\Carbon::parse($letter->tgl_surat)->format('d M Y') }}
-                                    </div>
+                                    <div class="font-bold text-elevate-dark text-sm mb-2 leading-snug">{{ $letter->nomor_surat }}</div>
                                     <span class="inline-flex px-2 py-1 rounded border border-slate-200 bg-slate-50 text-[10px] font-bold text-slate-600 tracking-wider">
                                         {{ $letter->sifat_surat }}
                                     </span>
@@ -115,8 +126,12 @@
                                                 <i class="ph-bold ph-file-dashed"></i> No File
                                             </span>
                                         @endif
-                                        
+
+                                        {{-- Tombol Aksi (Detail, Edit, Hapus) --}}
                                         <div class="flex items-center gap-2 mt-1">
+                                            <button type="button" onclick="showDetailModal({{ json_encode($letter) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 hover:shadow-sm transition-all" title="Lihat Detail">
+                                                <i class="ph-bold ph-eye text-lg"></i>
+                                            </button>
                                             <a href="{{ route('letters.incoming.edit', $letter->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 hover:shadow-sm transition-all" title="Edit">
                                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
                                             </a>
@@ -135,10 +150,13 @@
                             <tr>
                                 <td colspan="4" class="px-6 py-20 text-center">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                        <i class="ph-duotone ph-envelope-open text-4xl"></i>
+                                        <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
                                     </div>
-                                    <h3 class="text-elevate-dark font-bold text-lg">Belum ada Arsip Surat</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Silakan input surat masuk baru melalui tombol di atas.</p>
+                                    <h3 class="text-elevate-dark font-bold text-lg">Data Tidak Ditemukan</h3>
+                                    <p class="text-slate-500 text-sm mt-1 mb-6">Belum ada surat masuk atau hasil pencarian Anda tidak cocok.</p>
+                                    <a href="{{ route('letters.incoming.create') }}" class="inline-flex items-center gap-2 px-6 py-3.5 bg-elevate-dark text-white rounded-xl font-bold text-sm hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20">
+                                        <i class="ph-bold ph-plus"></i> Catat Surat Baru
+                                    </a>
                                 </td>
                             </tr>
                             @endforelse
@@ -148,27 +166,99 @@
 
                 {{-- Pagination --}}
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50">
-                    {{ $letters->withQueryString()->links() }}
+                    {{ $letters->links() }}
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- MODAL DETAIL SURAT MASUK --}}
+    <div id="detailModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto custom-scrollbar">
+            {{-- Menggunakan items-start dan padding besar (py-16) agar modal tidak terpotong di layar --}}
+            <div class="flex min-h-full items-start justify-center p-4 py-16 sm:p-6 sm:py-24 text-center">
+                <div id="modalPanel" class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 duration-300">
+                    
+                    {{-- Modal Header --}}
+                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 text-white relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                            <i class="ph-fill ph-tray-arrow-down"></i>
+                        </div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <h3 class="text-xl font-black flex items-center gap-2">
+                                    <i class="ph-duotone ph-info text-elevate-accent"></i> Detail Surat Masuk
+                                </h3>
+                                <p class="text-elevate-accent text-sm font-medium mt-1">
+                                    Agenda: <span id="modal_agenda" class="font-mono bg-white/10 px-2 rounded font-bold"></span>
+                                </p>
+                            </div>
+                            <button onclick="closeDetailModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nomor Surat</span>
+                                <span id="modal_nomor" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Asal / Pengirim</span>
+                                <span id="modal_asal" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tgl Surat Dibuat</span>
+                                <span id="modal_tanggal_surat" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tgl Diterima</span>
+                                <span id="modal_tanggal_diterima" class="font-bold text-elevate-dark text-sm text-elevate-primary"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6 relative">
+                            <div class="absolute top-4 right-4">
+                                <span id="modal_sifat" class="inline-flex px-2.5 py-1 rounded-md border border-slate-200 bg-white text-[10px] font-bold text-slate-600"></span>
+                            </div>
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Perihal / Isi Surat</span>
+                            <p id="modal_perihal" class="text-sm font-medium text-slate-700 leading-relaxed pr-16"></p>
+                        </div>
+
+                        {{-- Modal Footer --}}
+                        <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <div id="modal_lampiran_container">
+                                <!-- Tombol Lampiran diinject via JS -->
+                            </div>
+                            <button onclick="closeDetailModal()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                                Tutup Panel
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script untuk Alert Konfirmasi dan Modal --}}
     <script>
-        // Notifikasi Sukses
         @if(session('success'))
             const Toast = Swal.mixin({
                 toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-                timerProgressBar: true, customClass: { popup: 'rounded-[1.5rem]' }
+                timerProgressBar: true, customClass: { popup: 'rounded-[1.5rem] font-sans' }
             });
             Toast.fire({ icon: 'success', title: '{{ session('success') }}' });
         @endif
 
-        // Konfirmasi Hapus
         function confirmDelete(id) {
             Swal.fire({
-                title: 'Hapus Surat?', 
-                text: "Data surat dan file lampiran akan dihapus permanen.",
+                title: 'Hapus Surat Masuk?', 
+                text: "Data surat beserta lampirannya akan dihapus secara permanen.",
                 icon: 'warning', 
                 showCancelButton: true,
                 confirmButtonColor: '#e11d48', 
@@ -183,8 +273,69 @@
                 },
                 buttonsStyling: false
             }).then((result) => {
-                if (result.isConfirmed) document.getElementById('delete-form-' + id).submit();
-            })
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+
+        // Fungsi JavaScript untuk Modal Detail
+        function showDetailModal(letter) {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Format Tanggal
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const dateSurat = new Date(letter.tgl_surat).toLocaleDateString('id-ID', options);
+            const dateDiterima = new Date(letter.tgl_diterima).toLocaleDateString('id-ID', options);
+
+            // Set Data
+            document.getElementById('modal_agenda').innerText = '#' + letter.nomor_agenda;
+            document.getElementById('modal_nomor').innerText = letter.nomor_surat;
+            document.getElementById('modal_asal').innerText = letter.asal_surat;
+            document.getElementById('modal_tanggal_surat').innerText = dateSurat;
+            document.getElementById('modal_tanggal_diterima').innerText = dateDiterima;
+            document.getElementById('modal_sifat').innerText = letter.sifat_surat;
+            document.getElementById('modal_perihal').innerText = letter.perihal;
+
+            // Set Link Lampiran Jika Ada
+            const lampiranContainer = document.getElementById('modal_lampiran_container');
+            if (letter.file_path) {
+                const fileUrl = '{{ asset("storage/") }}/' + letter.file_path;
+                lampiranContainer.innerHTML = `
+                    <a href="${fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 bg-elevate-accent/10 text-elevate-primary rounded-xl font-bold text-sm hover:bg-elevate-primary hover:text-white transition-all shadow-sm">
+                        <i class="ph-bold ph-download-simple"></i> Unduh Lampiran
+                    </a>
+                `;
+            } else {
+                lampiranContainer.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 text-slate-400 rounded-xl text-xs font-medium border border-slate-100">
+                        <i class="ph-bold ph-file-dashed text-sm"></i> Tidak Ada File
+                    </span>
+                `;
+            }
+
+            // Tampilkan Modal dengan Animasi
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            }, 10);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Sembunyikan dengan Animasi
+            backdrop.classList.add('opacity-0');
+            panel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Tunggu durasi transisi Tailwind (300ms)
         }
     </script>
 </x-app-layout>

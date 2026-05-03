@@ -114,6 +114,11 @@
                                         </a>
                                         
                                         <div class="flex items-center gap-2 mt-1">
+                                            {{-- Tombol Detail Baru --}}
+                                            <button type="button" onclick="showDetailModal({{ json_encode($sppd) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 hover:shadow-sm transition-all" title="Lihat Detail">
+                                                <i class="ph-bold ph-eye text-lg"></i>
+                                            </button>
+
                                             {{-- Tombol Edit Baru --}}
                                             <a href="{{ route('sppd.edit', $sppd->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-elevate-primary hover:border-elevate-accent hover:bg-elevate-soft hover:shadow-sm transition-all" title="Edit Data">
                                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
@@ -153,6 +158,85 @@
         </div>
     </div>
 
+    {{-- MODAL DETAIL SPPD --}}
+    <div id="detailModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto custom-scrollbar">
+            {{-- Padding py-16 dan items-start untuk mencegah layar terpotong --}}
+            <div class="flex min-h-full items-start justify-center p-4 py-16 sm:p-6 sm:py-24 text-center">
+                <div id="modalPanel" class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 duration-300">
+                    
+                    {{-- Modal Header --}}
+                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 text-white relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                            <i class="ph-fill ph-car-profile"></i>
+                        </div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <h3 class="text-xl font-black flex items-center gap-2">
+                                    <i class="ph-duotone ph-info text-elevate-accent"></i> Detail Surat Perjalanan Dinas
+                                </h3>
+                                <p class="text-elevate-accent text-sm font-medium mt-1 flex items-center gap-2">
+                                    Nomor: <span id="modal_nomor" class="font-mono bg-white/10 px-2 rounded font-bold"></span>
+                                </p>
+                            </div>
+                            <button onclick="closeDetailModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="ph-fill ph-user text-elevate-primary"></i> Pegawai Utama</span>
+                                <span id="modal_pegawai" class="font-bold text-elevate-dark text-sm flex flex-col gap-0.5 pl-4"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="ph-fill ph-map-pin text-rose-500"></i> Rute Perjalanan</span>
+                                <span id="modal_rute" class="font-bold text-elevate-dark text-sm flex items-center gap-2 flex-wrap pl-4"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="ph-fill ph-car text-elevate-primary"></i> Transportasi</span>
+                                <span id="modal_angkutan" class="font-bold text-elevate-dark text-sm pl-4"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="ph-fill ph-calendar-blank text-elevate-primary"></i> Waktu (<span id="modal_lama" class="text-elevate-primary"></span>)</span>
+                                <span id="modal_waktu" class="font-bold text-elevate-dark text-sm pl-4"></span>
+                            </div>
+                        </div>
+
+                        {{-- Section Perihal/Maksud --}}
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Maksud / Tujuan Penugasan</span>
+                            <p id="modal_maksud" class="text-sm font-medium text-slate-700 leading-relaxed"></p>
+                        </div>
+
+                        {{-- Section Pengikut (Akan Muncul Jika Ada) --}}
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6 hidden" id="modal_pengikut_container">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="ph-bold ph-users text-elevate-primary"></i> Daftar Pengikut Dalam Perjalanan</span>
+                            <ul id="modal_pengikut_list" class="space-y-2">
+                                <!-- Data pengikut via JS -->
+                            </ul>
+                        </div>
+
+                        {{-- Modal Footer --}}
+                        <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <a href="#" id="modal_btn_cetak" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-dark text-white rounded-xl font-bold text-sm hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20">
+                                <i class="ph-bold ph-printer"></i> Cetak Dokumen SPPD
+                            </a>
+                            <button onclick="closeDetailModal()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                                Tutup Panel
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Notifikasi Sukses
         @if(session('success'))
@@ -184,6 +268,92 @@
             }).then((result) => {
                 if (result.isConfirmed) document.getElementById('delete-form-' + id).submit();
             })
+        }
+
+        // Fungsi JavaScript untuk Modal Detail SPPD
+        function showDetailModal(sppd) {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Set Data Dasar
+            document.getElementById('modal_nomor').innerText = sppd.nomor_sppd;
+            document.getElementById('modal_rute').innerHTML = `${sppd.tempat_berangkat} <i class="ph-bold ph-arrow-right text-slate-400"></i> ${sppd.tempat_tujuan}`;
+            document.getElementById('modal_angkutan').innerText = sppd.alat_angkut || 'Belum Ditentukan';
+            document.getElementById('modal_lama').innerText = sppd.lama_hari + ' Hari';
+            document.getElementById('modal_maksud').innerText = sppd.maksud_perjalanan;
+
+            // Set Data Pegawai Utama
+            if (sppd.user) {
+                document.getElementById('modal_pegawai').innerHTML = `
+                    <span>${sppd.user.name}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">NIP. ${sppd.user.nip || '-'}</span>
+                `;
+            } else {
+                document.getElementById('modal_pegawai').innerHTML = '<span class="text-rose-500 italic text-xs">Data Pegawai Terhapus</span>';
+            }
+
+            // Format Tanggal Keberangkatan & Kembali
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const tglBerangkat = new Date(sppd.tgl_berangkat).toLocaleDateString('id-ID', options);
+            
+            let waktuText = tglBerangkat;
+            if(sppd.tgl_berangkat !== sppd.tgl_kembali && sppd.tgl_kembali) {
+                const tglKembali = new Date(sppd.tgl_kembali).toLocaleDateString('id-ID', options);
+                waktuText += ' <span class="text-[10px] text-slate-400 mx-1">s/d</span> ' + tglKembali;
+            }
+            document.getElementById('modal_waktu').innerHTML = waktuText;
+
+            // Mapping Data Pengikut (Jika Ada)
+            const pengikutContainer = document.getElementById('modal_pengikut_container');
+            const pengikutList = document.getElementById('modal_pengikut_list');
+            
+            if (sppd.followers && sppd.followers.length > 0) {
+                let htmlPengikut = '';
+                sppd.followers.forEach((p, index) => {
+                    htmlPengikut += `
+                        <li class="flex items-center p-3 rounded-xl border border-slate-100 bg-white">
+                            <div class="w-8 h-8 rounded-full bg-elevate-accent/10 text-elevate-primary flex items-center justify-center text-xs font-bold mr-3">${index + 1}</div>
+                            <div class="flex flex-col flex-1">
+                                <span class="text-sm font-bold text-slate-700">${p.nama}</span>
+                                <span class="text-[10px] text-slate-500 font-mono">${p.nip ? 'NIP. ' + p.nip : 'Non-ASN / Honorer'}</span>
+                            </div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded">
+                                ${p.keterangan || 'Anggota'}
+                            </div>
+                        </li>
+                    `;
+                });
+                pengikutList.innerHTML = htmlPengikut;
+                pengikutContainer.classList.remove('hidden');
+            } else {
+                pengikutContainer.classList.add('hidden'); // Sembunyikan bagian pengikut jika kosong
+            }
+
+            // Update Link Tombol Cetak
+            const printUrl = `{{ url('sppd/print') }}/${sppd.id}`;
+            document.getElementById('modal_btn_cetak').href = printUrl;
+
+            // Tampilkan Modal dengan Animasi
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            }, 10);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Sembunyikan dengan Animasi
+            backdrop.classList.add('opacity-0');
+            panel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Tunggu durasi transisi
         }
     </script>
 </x-app-layout>

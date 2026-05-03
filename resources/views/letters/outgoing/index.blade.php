@@ -46,14 +46,38 @@
                 </div>
             </div>
 
-            {{-- Toolbar & Table --}}
+            {{-- Toolbar Pencarian & Tabel --}}
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2">
+                
+                {{-- Toolbar (Search & Filter) --}}
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col xl:flex-row gap-4 justify-between items-center">
+                    <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2 whitespace-nowrap">
                         <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Data Surat Keluar
                     </h3>
+                    
+                    <form action="{{ route('letters.outgoing.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor, perihal..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-medium text-slate-700 transition-all">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        </div>
+                        <div class="relative w-full sm:w-40">
+                            <select name="sifat_surat" onchange="this.form.submit()" class="w-full pl-4 pr-10 py-2.5 rounded-xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-medium text-slate-700 appearance-none transition-all cursor-pointer">
+                                <option value="">Semua Sifat</option>
+                                <option value="Biasa" {{ request('sifat_surat') == 'Biasa' ? 'selected' : '' }}>Biasa</option>
+                                <option value="Penting" {{ request('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
+                                <option value="Segera" {{ request('sifat_surat') == 'Segera' ? 'selected' : '' }}>Segera</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+                        @if(request('search') || request('sifat_surat'))
+                            <a href="{{ route('letters.outgoing.index') }}" class="px-4 py-2.5 bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2" title="Reset Filter">
+                                <i class="ph-bold ph-x"></i>
+                            </a>
+                        @endif
+                    </form>
                 </div>
 
+                {{-- Table Content --}}
                 <div class="overflow-x-auto custom-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50/80 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
@@ -72,7 +96,7 @@
                                         #{{ $letter->nomor_agenda }}
                                     </div>
                                     <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-1">
-                                        <i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::parse($letter->tgl_surat)->format('d M Y') }}
+                                        <i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::parse($letter->tgl_surat)->translatedFormat('d M Y') }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-5 align-top">
@@ -90,7 +114,7 @@
                                         {{ $letter->perihal }}
                                     </p>
                                 </td>
-                                 <td class="px-6 py-5 align-top text-right">
+                                <td class="px-6 py-5 align-top text-right">
                                     <div class="flex flex-col items-end gap-2">
                                         @if($letter->file_path)
                                             <a href="{{ asset('storage/' . $letter->file_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm">
@@ -102,7 +126,11 @@
                                             </span>
                                         @endif
 
+                                        {{-- Tombol Aksi (Detail, Edit, Hapus) --}}
                                         <div class="flex items-center gap-2 mt-1">
+                                            <button type="button" onclick="showDetailModal({{ json_encode($letter) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 hover:shadow-sm transition-all" title="Lihat Detail">
+                                                <i class="ph-bold ph-eye text-lg"></i>
+                                            </button>
                                             <a href="{{ route('letters.outgoing.edit', $letter->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 hover:shadow-sm transition-all" title="Edit">
                                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
                                             </a>
@@ -121,10 +149,13 @@
                             <tr>
                                 <td colspan="4" class="px-6 py-20 text-center">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                        <i class="ph-duotone ph-paper-plane-tilt text-4xl"></i>
+                                        <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
                                     </div>
-                                    <h3 class="text-elevate-dark font-bold text-lg">Belum ada Surat Keluar</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Silakan buat surat keluar baru melalui tombol di atas.</p>
+                                    <h3 class="text-elevate-dark font-bold text-lg">Data Tidak Ditemukan</h3>
+                                    <p class="text-slate-500 text-sm mt-1 mb-6">Belum ada surat keluar atau hasil pencarian Anda tidak cocok.</p>
+                                    <a href="{{ route('letters.outgoing.create') }}" class="inline-flex items-center gap-2 px-6 py-3.5 bg-elevate-dark text-white rounded-xl font-bold text-sm hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20">
+                                        <i class="ph-bold ph-plus"></i> Buat Surat Baru
+                                    </a>
                                 </td>
                             </tr>
                             @endforelse
@@ -139,8 +170,77 @@
             </div>
         </div>
     </div>
-    
-    {{-- Script untuk Alert Konfirmasi dan Notifikasi --}}
+
+    {{-- MODAL DETAIL SURAT --}}
+    <div id="detailModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto custom-scrollbar">
+            <div class="flex min-h-full items-start justify-center p-4 py-16 sm:p-6 sm:py-24 text-center">
+                <div id="modalPanel" class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 duration-300">
+                    
+                    {{-- Modal Header --}}
+                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 text-white relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                            <i class="ph-fill ph-paper-plane-tilt"></i>
+                        </div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <h3 class="text-xl font-black flex items-center gap-2">
+                                    <i class="ph-duotone ph-info text-elevate-accent"></i> Detail Surat Keluar
+                                </h3>
+                                <p class="text-elevate-accent text-sm font-medium mt-1">
+                                    Agenda: <span id="modal_agenda" class="font-mono bg-white/10 px-2 rounded font-bold"></span>
+                                </p>
+                            </div>
+                            <button onclick="closeDetailModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Modal Body --}}
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Nomor Surat</span>
+                                <span id="modal_nomor" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tujuan Surat</span>
+                                <span id="modal_tujuan" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tanggal Surat</span>
+                                <span id="modal_tanggal" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Sifat Surat</span>
+                                <span id="modal_sifat" class="inline-flex px-2.5 py-1 rounded-md border border-slate-200 bg-white text-xs font-bold text-slate-600"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Perihal / Isi Surat</span>
+                            <p id="modal_perihal" class="text-sm font-medium text-slate-700 leading-relaxed"></p>
+                        </div>
+
+                        {{-- Modal Footer --}}
+                        <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <div id="modal_lampiran_container">
+                                <!-- Tombol Lampiran diinject via JS -->
+                            </div>
+                            <button onclick="closeDetailModal()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                                Tutup Panel
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script untuk Alert Konfirmasi dan Modal --}}
     <script>
         @if(session('success'))
             const Toast = Swal.mixin({
@@ -172,6 +272,64 @@
                     document.getElementById('delete-form-' + id).submit();
                 }
             });
+        }
+
+        // Fungsi JavaScript untuk Modal Detail
+        function showDetailModal(letter) {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Format Tanggal
+            const dateObj = new Date(letter.tgl_surat);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+
+            // Set Data
+            document.getElementById('modal_agenda').innerText = '#' + letter.nomor_agenda;
+            document.getElementById('modal_nomor').innerText = letter.nomor_surat;
+            document.getElementById('modal_tujuan').innerText = letter.tujuan_surat;
+            document.getElementById('modal_tanggal').innerText = formattedDate;
+            document.getElementById('modal_sifat').innerText = letter.sifat_surat;
+            document.getElementById('modal_perihal').innerText = letter.perihal;
+
+            // Set Link Lampiran Jika Ada
+            const lampiranContainer = document.getElementById('modal_lampiran_container');
+            if (letter.file_path) {
+                const fileUrl = '{{ asset("storage/") }}/' + letter.file_path;
+                lampiranContainer.innerHTML = `
+                    <a href="${fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 bg-elevate-accent/10 text-elevate-primary rounded-xl font-bold text-sm hover:bg-elevate-primary hover:text-white transition-all shadow-sm">
+                        <i class="ph-bold ph-download-simple"></i> Unduh Lampiran
+                    </a>
+                `;
+            } else {
+                lampiranContainer.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 text-slate-400 rounded-xl text-xs font-medium border border-slate-100">
+                        <i class="ph-bold ph-file-dashed text-sm"></i> Tidak Ada File
+                    </span>
+                `;
+            }
+
+            // Tampilkan Modal dengan Animasi
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            }, 10);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Sembunyikan dengan Animasi
+            backdrop.classList.add('opacity-0');
+            panel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Tunggu durasi transisi Tailwind (300ms)
         }
     </script>
 </x-app-layout>

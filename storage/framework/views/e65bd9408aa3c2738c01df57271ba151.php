@@ -67,12 +67,19 @@
                         <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Data Surat Perintah Tugas
                     </h3>
 
-                    <form action="<?php echo e(route('letters.spt.index')); ?>" method="GET" class="relative w-full sm:w-80 group">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                        <input type="text" name="search" 
-                               value="<?php echo e(request('search')); ?>" 
-                               placeholder="Cari No SPT / Pegawai / Perihal..." 
-                               class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark transition-all">
+                    <form action="<?php echo e(route('letters.spt.index')); ?>" method="GET" class="flex items-center gap-3 w-full sm:w-auto">
+                        <div class="relative w-full sm:w-80 group">
+                            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
+                            <input type="text" name="search" 
+                                   value="<?php echo e(request('search')); ?>" 
+                                   placeholder="Cari No SPT / Pegawai / Perihal..." 
+                                   class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark transition-all">
+                        </div>
+                        <?php if(request('search')): ?>
+                            <a href="<?php echo e(route('letters.spt.index')); ?>" class="w-12 h-12 flex items-center justify-center shrink-0 bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-600 rounded-2xl text-lg font-bold transition-colors" title="Reset Pencarian">
+                                <i class="ph-bold ph-x"></i>
+                            </a>
+                        <?php endif; ?>
                     </form>
                 </div>
 
@@ -81,10 +88,10 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50/80 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
                             <tr>
-                                <th class="px-6 py-5">Identitas SPT & Pegawai</th>
+                                <th class="px-6 py-5 w-[28%]">Identitas SPT & Pegawai</th>
                                 <th class="px-6 py-5">Tempat & Waktu</th>
-                                <th class="px-6 py-5 w-1/3">Perihal Penugasan</th>
-                                <th class="px-6 py-5 text-right">Aksi</th>
+                                <th class="px-6 py-5 w-[30%]">Perihal Penugasan</th>
+                                <th class="px-6 py-5 text-right w-[15%]">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
@@ -113,7 +120,7 @@
                                                         </span>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <span class="text-rose-400 italic">Belum dipilih</span>
+                                                    <span class="text-rose-400 italic text-xs">Belum dipilih</span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -155,7 +162,11 @@
                                             <i class="ph-bold ph-printer text-base group-hover/btn:scale-110 transition-transform"></i> Cetak SPT
                                         </a>
                                         
+                                        
                                         <div class="flex items-center gap-2 mt-1">
+                                            <button type="button" onclick="showDetailModal(<?php echo e(json_encode($spt)); ?>)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50 hover:shadow-sm transition-all" title="Lihat Detail">
+                                                <i class="ph-bold ph-eye text-lg"></i>
+                                            </button>
                                             <a href="<?php echo e(route('letters.spt.edit', $spt->id)); ?>" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 hover:shadow-sm transition-all" title="Edit">
                                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
                                             </a>
@@ -176,8 +187,11 @@
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                                         <i class="ph-duotone ph-paper-plane-tilt text-4xl"></i>
                                     </div>
-                                    <h3 class="text-elevate-dark font-bold text-lg">Belum ada data SPT</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Silakan buat SPT baru melalui tombol di atas.</p>
+                                    <h3 class="text-elevate-dark font-bold text-lg">Data Tidak Ditemukan</h3>
+                                    <p class="text-slate-500 text-sm mt-1 mb-6">Belum ada SPT atau hasil pencarian Anda tidak cocok.</p>
+                                    <a href="<?php echo e(route('letters.spt.create')); ?>" class="inline-flex items-center gap-2 px-6 py-3.5 bg-elevate-dark text-white rounded-xl font-bold text-sm hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20">
+                                        <i class="ph-bold ph-plus"></i> Buat SPT Baru
+                                    </a>
                                 </td>
                             </tr>
                             <?php endif; ?>
@@ -187,6 +201,77 @@
 
                 <div class="p-6 border-t border-slate-50 bg-slate-50/50">
                     <?php echo e($spts->withQueryString()->links()); ?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="detailModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modalBackdrop" onclick="closeDetailModal()"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto custom-scrollbar">
+            
+            <div class="flex min-h-full items-start justify-center p-4 py-16 sm:p-6 sm:py-24 text-center">
+                <div id="modalPanel" class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95 duration-300">
+                    
+                    
+                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 text-white relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                            <i class="ph-fill ph-briefcase"></i>
+                        </div>
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <h3 class="text-xl font-black flex items-center gap-2">
+                                    <i class="ph-duotone ph-info text-elevate-accent"></i> Detail Surat Perintah Tugas
+                                </h3>
+                                <p class="text-elevate-accent text-sm font-medium mt-1 flex items-center gap-2">
+                                    Nomor: <span id="modal_nomor" class="font-mono bg-white/10 px-2 rounded font-bold"></span>
+                                </p>
+                            </div>
+                            <button onclick="closeDetailModal()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tempat Tujuan</span>
+                                <span id="modal_tempat" class="font-bold text-elevate-dark text-sm flex items-center gap-1.5"><i class="ph-fill ph-map-pin text-rose-500"></i> <span id="modal_tempat_text"></span></span>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Waktu Penugasan (<span id="modal_lama" class="text-elevate-primary"></span>)</span>
+                                <span id="modal_waktu" class="font-bold text-elevate-dark text-sm"></span>
+                            </div>
+                        </div>
+
+                        
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="ph-bold ph-users"></i> Pegawai Yang Ditugaskan</span>
+                            <div id="modal_pegawai" class="flex flex-wrap gap-2">
+                                <!-- Data pegawai masuk via JS -->
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Maksud Penugasan / Untuk</span>
+                            <p id="modal_untuk" class="text-sm font-medium text-slate-700 leading-relaxed"></p>
+                        </div>
+
+                        
+                        <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                            <a href="#" id="modal_btn_cetak" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-dark text-white rounded-xl font-bold text-sm hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20">
+                                <i class="ph-bold ph-printer"></i> Cetak Dokumen SPT
+                            </a>
+                            <button onclick="closeDetailModal()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
+                                Tutup Panel
+                            </button>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -220,6 +305,79 @@
             }).then((result) => {
                 if (result.isConfirmed) document.getElementById('delete-form-' + id).submit();
             })
+        }
+
+        // Fungsi JavaScript untuk Modal Detail
+        function showDetailModal(spt) {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Set Data Teks
+            document.getElementById('modal_nomor').innerText = spt.nomor_spt;
+            document.getElementById('modal_tempat_text').innerText = spt.tempat_tujuan;
+            document.getElementById('modal_lama').innerText = spt.lama_hari + ' Hari';
+            document.getElementById('modal_untuk').innerText = spt.untuk;
+
+            // Format Tanggal Waktu Penugasan
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const tglBerangkat = new Date(spt.tgl_berangkat).toLocaleDateString('id-ID', options);
+            
+            let waktuText = tglBerangkat;
+            if(spt.tgl_berangkat !== spt.tgl_kembali && spt.tgl_kembali) {
+                const tglKembali = new Date(spt.tgl_kembali).toLocaleDateString('id-ID', options);
+                waktuText += ' <span class="text-[10px] text-slate-400 mx-1">s/d</span> ' + tglKembali;
+            }
+            document.getElementById('modal_waktu').innerHTML = waktuText;
+
+            // Mapping Pegawai (Relasi Users)
+            let pegawaiHtml = '';
+            if (spt.users && spt.users.length > 0) {
+                spt.users.forEach(user => {
+                    pegawaiHtml += `
+                        <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 shadow-sm rounded-lg px-3 py-1.5 text-xs font-bold text-slate-700">
+                            <i class="ph-fill ph-user text-elevate-primary"></i> ${user.name}
+                        </span>
+                    `;
+                });
+            } else {
+                pegawaiHtml = '<span class="text-rose-500 italic text-xs font-medium">Pegawai belum ditugaskan.</span>';
+            }
+            
+            // Cek jika ada pengikut luar
+            if (spt.pengikut && Array.isArray(spt.pengikut) && spt.pengikut.length > 0) {
+                pegawaiHtml += `
+                    <span class="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-500">
+                        <i class="ph-fill ph-users text-slate-400"></i> +${spt.pengikut.length} Pengikut
+                    </span>
+                `;
+            }
+            document.getElementById('modal_pegawai').innerHTML = pegawaiHtml;
+
+            // Update Link Tombol Cetak
+            const printUrl = `<?php echo e(url('letters/spt/print')); ?>/${spt.id}`;
+            document.getElementById('modal_btn_cetak').href = printUrl;
+
+            // Tampilkan Modal dengan Animasi
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            }, 10);
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModal');
+            const backdrop = document.getElementById('modalBackdrop');
+            const panel = document.getElementById('modalPanel');
+
+            // Sembunyikan dengan Animasi
+            backdrop.classList.add('opacity-0');
+            panel.classList.add('opacity-0', 'translate-y-4', 'sm:translate-y-0', 'sm:scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Tunggu durasi transisi Tailwind
         }
     </script>
  <?php echo $__env->renderComponent(); ?>
