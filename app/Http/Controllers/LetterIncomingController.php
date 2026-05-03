@@ -165,6 +165,8 @@ class LetterIncomingController extends Controller
         $letter = LetterIncoming::findOrFail($id);
 
         $request->validate([
+            'nomor_agenda' => 'required|string', // Validasi Ditambahkan
+            'sifat_surat'  => 'required|string', // Validasi Ditambahkan
             'nomor_surat'  => 'required|string|max:255',
             'asal_surat'   => 'required|string|max:255',
             'tgl_surat'    => 'required|date',

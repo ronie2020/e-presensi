@@ -90,7 +90,7 @@
                                         {{ $letter->perihal }}
                                     </p>
                                 </td>
-                                <td class="px-6 py-5 align-top text-right">
+                                 <td class="px-6 py-5 align-top text-right">
                                     <div class="flex flex-col items-end gap-2">
                                         @if($letter->file_path)
                                             <a href="{{ asset('storage/' . $letter->file_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm">
@@ -101,6 +101,19 @@
                                                 <i class="ph-bold ph-file-dashed"></i> No File
                                             </span>
                                         @endif
+
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <a href="{{ route('letters.outgoing.edit', $letter->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 hover:shadow-sm transition-all" title="Edit">
+                                                <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                            </a>
+                                            <button type="button" onclick="confirmDelete('{{ $letter->id }}')" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm transition-all" title="Hapus">
+                                                <i class="ph-bold ph-trash text-lg"></i>
+                                            </button>
+                                        </div>
+
+                                        <form id="delete-form-{{ $letter->id }}" action="{{ route('letters.outgoing.destroy', $letter->id) }}" method="POST" class="hidden">
+                                            @csrf @method('DELETE')
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -126,4 +139,39 @@
             </div>
         </div>
     </div>
+    
+    {{-- Script untuk Alert Konfirmasi dan Notifikasi --}}
+    <script>
+        @if(session('success'))
+            const Toast = Swal.mixin({
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                timerProgressBar: true, customClass: { popup: 'rounded-[1.5rem] font-sans' }
+            });
+            Toast.fire({ icon: 'success', title: '{{ session('success') }}' });
+        @endif
+
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Hapus Surat Keluar?', 
+                text: "Data surat beserta lampirannya akan dihapus secara permanen.",
+                icon: 'warning', 
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48', 
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!', 
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

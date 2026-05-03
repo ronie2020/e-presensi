@@ -125,6 +125,63 @@ class LetterOutgoingController extends Controller
             ->with('success', 'Surat Keluar berhasil disimpan!');
     }
 
+         // MENAMPILKAN FORM EDIT
+    public function edit($id)
+    {
+        $letter = LetterOutgoing::findOrFail($id);
+        return view('letters.outgoing.edit', compact('letter'));
+    }
+
+    // MEMPROSES UPDATE DATA
+    public function update(Request $request, $id)
+    {
+        $letter = LetterOutgoing::findOrFail($id);
+
+        $request->validate([
+            'nomor_agenda'  => 'required|string',
+            'nomor_surat'   => 'required|string|max:255',
+            'tujuan_surat'  => 'required|string|max:255',
+            'sifat_surat'   => 'required|string',
+            'tgl_surat'     => 'required|date',
+            'perihal'       => 'required|string',
+            'file_surat'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        $data = $request->except(['file_surat', '_token', '_method']);
+
+        // Handle File Upload saat Update
+        if ($request->hasFile('file_surat')) {
+            // 1. Hapus file lama jika ada
+            if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
+                Storage::disk('public')->delete($letter->file_path);
+            }
+
+            // 2. Upload file baru
+            $data['file_path'] = $request->file('file_surat')->store('surat-keluar', 'public');
+        }
+
+        $letter->update($data);
+
+        return redirect()->route('letters.outgoing.index')
+            ->with('success', 'Data Surat Keluar berhasil diperbarui!');
+    }
+
+    // MENGHAPUS DATA
+    public function destroy($id)
+    {
+        $letter = LetterOutgoing::findOrFail($id);
+
+        // Hapus file fisik jika ada
+        if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
+            Storage::disk('public')->delete($letter->file_path);
+        }
+
+        $letter->delete();
+
+        return redirect()->route('letters.outgoing.index')
+            ->with('success', 'Surat Keluar berhasil dihapus!');
+    }
+
     private function getRomawi($bulan)
     {
         $map = [1=>'I', 2=>'II', 3=>'III', 4=>'IV', 5=>'V', 6=>'VI', 7=>'VII', 8=>'VIII', 9=>'IX', 10=>'X', 11=>'XI', 12=>'XII'];

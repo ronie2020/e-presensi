@@ -6,8 +6,8 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Tombol Kembali --}}
-            <a href="{{ route('letters.incoming.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
-                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
+            <a href="{{ route('letters.outgoing.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Surat Keluar
             </a>
 
             {{-- Card Container --}}
@@ -20,24 +20,24 @@
                         <i class="ph-fill ph-pencil-simple-slash"></i>
                     </div>
                     <h2 class="text-2xl font-black relative z-10 flex items-center gap-3">
-                        <i class="ph-duotone ph-pencil-simple-slash text-elevate-accent"></i> Perbarui Data Surat
+                        <i class="ph-duotone ph-pencil-simple-slash text-elevate-accent"></i> Perbarui Surat Keluar
                     </h2>
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">
-                        Edit informasi surat masuk: <span class="text-white font-mono bg-white/10 px-2 rounded font-bold">#{{ $letter->nomor_agenda }}</span>
+                        Edit informasi surat keluar: <span class="text-white font-mono bg-white/10 px-2 rounded font-bold">#{{ $letter->nomor_agenda }}</span>
                     </p>
                 </div>
 
                 {{-- Form Content --}}
                 <div class="p-8">
-                    <form id="form-edit-surat" action="{{ route('letters.incoming.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    <form id="form-edit-keluar" action="{{ route('letters.outgoing.update', $letter->id) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
                         @method('PUT')
 
                         <!-- SECTION 1: IDENTITAS SURAT -->
-                        <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
+                        <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">1</span>
-                                Identitas Surat
+                                Identitas Surat Keluar
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
@@ -46,33 +46,21 @@
                                     <p class="text-[10px] text-slate-400 mt-2 ml-1 flex items-center gap-1 font-medium"><i class="ph-fill ph-lock-key"></i> Terkunci</p>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Sifat Surat</label>
-                                    <div class="relative">
-                                        <select name="sifat_surat" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all cursor-pointer">
-                                            <option value="Biasa" {{ old('sifat_surat', $letter->sifat_surat) == 'Biasa' ? 'selected' : '' }}>Biasa</option>
-                                            <option value="Penting" {{ old('sifat_surat', $letter->sifat_surat) == 'Penting' ? 'selected' : '' }}>Penting</option>
-                                            <option value="Segera" {{ old('sifat_surat', $letter->sifat_surat) == 'Segera' ? 'selected' : '' }}>Segera</option>
-                                            <option value="Rahasia" {{ old('sifat_surat', $letter->sifat_surat) == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                                        </select>
-                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Surat Asli</label>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Surat</label>
                                     <input type="text" name="nomor_surat" value="{{ old('nomor_surat', $letter->nomor_surat) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Asal / Pengirim Surat</label>
-                                    <input type="text" name="asal_surat" value="{{ old('asal_surat', $letter->asal_surat) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tujuan / Penerima Surat</label>
+                                    <input type="text" name="tujuan_surat" value="{{ old('tujuan_surat', $letter->tujuan_surat) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- SECTION 2: DETAIL WAKTU & ISI -->
+                        <!-- SECTION 2: WAKTU & PERIHAL -->
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">2</span>
-                                Detail Waktu & Isi
+                                Waktu & Perihal
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
@@ -80,8 +68,15 @@
                                     <input type="date" name="tgl_surat" value="{{ old('tgl_surat', $letter->tgl_surat) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Diterima</label>
-                                    <input type="date" name="tgl_diterima" value="{{ old('tgl_diterima', $letter->tgl_diterima) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Sifat Surat</label>
+                                    <div class="relative">
+                                        <select name="sifat_surat" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all cursor-pointer">
+                                            <option value="Biasa" {{ old('sifat_surat', $letter->sifat_surat) == 'Biasa' ? 'selected' : '' }}>Biasa</option>
+                                            <option value="Penting" {{ old('sifat_surat', $letter->sifat_surat) == 'Penting' ? 'selected' : '' }}>Penting</option>
+                                            <option value="Segera" {{ old('sifat_surat', $letter->sifat_surat) == 'Segera' ? 'selected' : '' }}>Segera</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
+                                    </div>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Perihal / Maksud Surat</label>
@@ -94,7 +89,7 @@
                         <div class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative group hover:border-slate-200 transition-colors">
                             <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <span class="bg-elevate-accent/20 text-elevate-primary rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
-                                Lampiran (Opsional)
+                                Lampiran Digital (Opsional)
                             </h3>
                             <div class="pl-9">
                                 @if($letter->file_path)
@@ -124,7 +119,7 @@
 
                         {{-- Action Buttons --}}
                         <div class="pt-6 mt-4 border-t border-slate-100 flex items-center justify-end gap-4">
-                            <a href="{{ route('letters.incoming.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                            <a href="{{ route('letters.outgoing.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
                                 Batal
                             </a>
                             <button type="button" onclick="confirmSubmit(event)" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
@@ -164,7 +159,7 @@
 
         function confirmSubmit(e) {
             e.preventDefault();
-            const form = document.getElementById('form-edit-surat');
+            const form = document.getElementById('form-edit-keluar');
             
             // Trigger validasi bawaan HTML5 sebelum submit
             if (!form.checkValidity()) { 
@@ -173,7 +168,7 @@
             }
 
             Swal.fire({
-                title: 'Perbarui Data Surat?', 
+                title: 'Perbarui Surat Keluar?', 
                 text: 'Pastikan data yang diubah sudah benar.', 
                 icon: 'question',
                 showCancelButton: true, 
