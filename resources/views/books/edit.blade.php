@@ -115,11 +115,21 @@
                                         </div>
                                         <p class="text-[10px] text-elevate-dark/50 mt-1 ml-1 leading-relaxed"><i class="ph-bold ph-info text-elevate-primary"></i> Isi angka pada kolom <b>Tambah Eksemplar</b> untuk men-generate barcode buku lama atau penambahan fisik baru.</p>
 
-                                        {{-- Tahun Terbit --}}
-                                        <div class="mt-2">
-                                            <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tahun Terbit</label>
-                                            <input type="number" name="year" value="{{ old('year', $book->year) }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
-                                                class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
+                                        {{-- Tahun Terbit & Tanggal Pembelian (Grid 2 Kolom) --}}
+                                        <div class="grid grid-cols-2 gap-4 mt-2">
+                                            <div>
+                                                <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tahun Terbit</label>
+                                                <input type="number" name="year" value="{{ old('year', $book->year) }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
+                                                    class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tanggal Pembelian</label>
+                                                <div class="relative group">
+                                                    <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
+                                                    <input type="date" name="purchase_date" value="{{ old('purchase_date', $book->purchase_date) }}"
+                                                        class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm uppercase">
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                          {{-- Buku Paket Checkbox --}}

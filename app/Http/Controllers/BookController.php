@@ -54,7 +54,8 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'category_id' => 'nullable|exists:book_categories,id',
             'author' => 'nullable|string|max:255',
-            'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),       
+            'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1), 
+            'purchase_date' => 'nullable|date',     
             'cover' => 'nullable|image|max:5120',        
             'ebook_file' => 'nullable|mimes:pdf|max:51200', 
         ]);
@@ -108,6 +109,7 @@ class BookController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'purchase_date' => 'nullable|date', 
             'cover' => 'nullable|image|max:5120',
             'ebook_file' => 'nullable|mimes:pdf|max:51200',
             'tambah_eksemplar' => 'nullable|integer|min:0|max:500', // Validasi input baru

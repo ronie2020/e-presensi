@@ -5,7 +5,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
-    {{-- FONT TEXT --}}
+    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -133,72 +133,76 @@
 
     <!-- AREA KERTAS -->
     <div class="page mt-24">
-        {{-- KITA MELOOPING $copies (Fisik Buku / Eksemplar) --}}
-        @foreach($copies as $copy)
         
-        @php
+        <?php $__currentLoopData = $copies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $copy): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        
+        <?php
             $ddc = substr($copy->book->category->code ?? '000', 0, 3);
             // Fallback jika kode copy kebetulan kosong di database lama
             $copyCode = $copy->copy_code ?? 'TIDAK-ADA-KODE'; 
-        @endphp
+        ?>
 
         <div class="sticker" :class="showBorder ? 'show-border' : 'no-border'">
             
-            {{-- 1. BAGIAN KIRI: LABEL PUNGGUNG (SPINE) --}}
+            
             <div class="spine-label">
                 <div class="text-[6px] font-black uppercase tracking-tighter mb-0.5 text-slate-400">
                     PERPUS
                 </div>
                 
-                {{-- DDC / Kategori Klasifikasi --}}
+                
                 <h3 class="text-base font-black text-slate-900 leading-none">
-                    {{ $ddc }}
+                    <?php echo e($ddc); ?>
+
                 </h3>
                 
-                {{-- Pengarang (3 Huruf) --}}
+                
                 <h3 class="text-[10px] font-bold text-slate-900 leading-none mt-1 uppercase font-mono">
-                    {{ substr($copy->book->author ?? 'XXX', 0, 3) }}
+                    <?php echo e(substr($copy->book->author ?? 'XXX', 0, 3)); ?>
+
                 </h3>
                 
-                {{-- Judul (1 Huruf) --}}
+                
                 <h3 class="text-[10px] font-bold text-slate-900 leading-none mt-0.5 lowercase font-mono">
-                    {{ substr($copy->book->title ?? 'x', 0, 1) }}
+                    <?php echo e(substr($copy->book->title ?? 'x', 0, 1)); ?>
+
                 </h3>
             </div>
 
-            {{-- 2. BAGIAN KANAN: BARCODE KOTAK / QR CODE EKSEMPLAR --}}
+            
             <div class="cover-label">
-                {{-- Judul Buku Induk (DIPERBESAR & LEBIH TEBAL) --}}
+                
                 <p class="text-[11px] font-extrabold text-slate-800 text-center leading-tight mb-1 w-full line-clamp-2 px-1">
-                    {{ $copy->book->title ?? 'Judul Tidak Diketahui' }}
+                    <?php echo e($copy->book->title ?? 'Judul Tidak Diketahui'); ?>
+
                 </p>
                 
-                {{-- QR CODE SPESIFIK EKSEMPLAR (DIPERBAIKI AGAR MUDAH DISCAN) --}}
+                
                 <div class="flex-1 flex items-center justify-center w-full">
-                    {{-- 
-                        Ubah margin(0) menjadi margin(1) untuk "Quiet Zone". 
-                        Scanner SANGAT membutuhkan batas putih ini agar bisa membaca dengan cepat.
-                    --}}
-                    {!! QrCode::size(50)->margin(1)->generate($copyCode) !!}
+                    
+                    <?php echo QrCode::size(50)->margin(1)->generate($copyCode); ?>
+
                 </div>
                 
-                {{-- Kode Teks di Bawah QR Code & Tanggal Pembelian --}}
+                
                 <div class="w-full text-center px-1 mt-0.5">
                     <p class="text-[9.5px] font-mono font-bold text-slate-800 truncate w-full">
-                        {{ $copyCode }}
+                        <?php echo e($copyCode); ?>
+
                     </p>
                     
-                    {{-- TAMPILAN TANGGAL PEMBELIAN --}}
-                    @if($copy->book->purchase_date)
+                    
+                    <?php if($copy->book->purchase_date): ?>
                         <p class="text-[6.5px] font-bold text-slate-500 mt-[1px] uppercase tracking-widest leading-none">
-                            {{ \Carbon\Carbon::parse($copy->book->purchase_date)->format('d/m/Y') }}
+                            <?php echo e(\Carbon\Carbon::parse($copy->book->purchase_date)->format('d/m/Y')); ?>
+
                         </p>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/tools/print-book-label.blade.php ENDPATH**/ ?>

@@ -17,12 +17,13 @@ class Book extends Model
         'author',         // Pengarang
         'publisher',      // Penerbit
         'year',           // Tahun Terbit
+        'purchase_date',  // Tanggal Pembelian
         'isbn',
         'stock',          // Jumlah Stok
         'shelf_location', // Lokasi Rak
         'description',
         'cover_path',     // Foto Cover
-        'ebook_path',     // <--- WAJIB DITAMBAHKAN DI SINI
+        'ebook_path',     // e_book 
     ];
 
     /**

@@ -1,35 +1,44 @@
-<x-app-layout>
-    {{-- Scripts External --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
-        {{-- Efek Latar Belakang Halus --}}
+        
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('library.books.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-elevate-dark/60 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('library.books.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-elevate-dark/60 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Katalog
             </a>
 
-            {{-- ERROR HANDLER --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3 shadow-sm">
                     <i class="ph-fill ph-warning-circle text-rose-500 text-xl mt-0.5"></i>
                     <div>
                         <h3 class="text-sm font-bold text-rose-700">Terdapat Kesalahan Input</h3>
                         <ul class="list-disc list-inside text-xs text-rose-600 mt-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- HEADER HALAMAN (ELEVATED THEME) --}}
+            
             <div class="bg-elevate-gradient-main rounded-[2.5rem] p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 relative overflow-hidden border border-white/60">
                 <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/40 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
@@ -41,12 +50,12 @@
                 </div>
             </div>
 
-            {{-- FORM UTAMA --}}
-            <form action="{{ route('library.books.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100">
-                @csrf
+            
+            <form action="<?php echo e(route('library.books.store')); ?>" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <?php echo csrf_field(); ?>
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
-                    {{-- KOLOM KIRI (7 Kolom) --}}
+                    
                     <div class="lg:col-span-7 space-y-6">
                         <div class="bg-elevate-soft p-6 rounded-[2rem] border border-slate-200">
                             <h3 class="text-xs font-black text-elevate-dark uppercase tracking-widest mb-6 flex items-center gap-2">
@@ -55,13 +64,13 @@
                             </h3>
                             
                             <div class="space-y-5">
-                                {{-- Kode Buku / ISBN Induk --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kode Buku / ISBN (Induk) <span class="text-rose-500">*</span></label>
                                     <div class="flex gap-2">
                                         <div class="relative flex-1 group">
                                             <i class="ph-bold ph-barcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                                            <input type="text" name="book_code" id="book_code" required value="{{ old('book_code') }}"
+                                            <input type="text" name="book_code" id="book_code" required value="<?php echo e(old('book_code')); ?>"
                                                 class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-mono font-bold text-elevate-dark shadow-sm transition-all" placeholder="Misal: 9786022828">
                                         </div>
                                         <button type="button" onclick="startScanner()" class="px-4 bg-white border border-slate-200 text-elevate-dark/60 hover:text-elevate-primary hover:border-elevate-primary rounded-2xl transition shadow-sm" title="Scan pakai Kamera">
@@ -71,64 +80,65 @@
                                     <p class="text-[10px] text-elevate-dark/50 mt-2 ml-1 font-medium"><i class="ph-bold ph-info text-elevate-primary"></i> Ketik manual atau scan barcode dari sampul buku. Sistem akan men-generate kode eksemplar tambahan (-01, -02).</p>
                                 </div>
 
-                                {{-- Judul Buku --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Judul Buku <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="title" required value="{{ old('title') }}" placeholder="Contoh: Laskar Pelangi"
+                                    <input type="text" name="title" required value="<?php echo e(old('title')); ?>" placeholder="Contoh: Laskar Pelangi"
                                         class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                 </div>
 
-                                {{-- Kategori Buku --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kategori / DDC <span class="text-rose-500">*</span></label>
                                     <div class="relative">
                                         <select name="category_id" required class="w-full pl-4 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer appearance-none">
                                             <option value="">-- Pilih Kategori --</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                    {{ $category->code }} - {{ $category->name }}
+                                            <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($category->id); ?>" <?php echo e(old('category_id') == $category->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($category->code); ?> - <?php echo e($category->name); ?>
+
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
                                 </div>
 
-                                {{-- Pengarang & Penerbit --}}
+                                
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Pengarang</label>
-                                        <input type="text" name="author" value="{{ old('author') }}" placeholder="Nama Penulis"
+                                        <input type="text" name="author" value="<?php echo e(old('author')); ?>" placeholder="Nama Penulis"
                                             class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Penerbit</label>
-                                        <input type="text" name="publisher" value="{{ old('publisher') }}" placeholder="Nama Penerbit"
+                                        <input type="text" name="publisher" value="<?php echo e(old('publisher')); ?>" placeholder="Nama Penerbit"
                                             class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                 </div>
 
-                                {{-- Tahun & Tanggal Pembelian (Grid 2 Kolom) --}}
+                                
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tahun Terbit</label>
-                                        <input type="number" name="year" value="{{ old('year') }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
+                                        <input type="number" name="year" value="<?php echo e(old('year')); ?>" placeholder="YYYY" min="1900" max="<?php echo e(date('Y') + 1); ?>"
                                             class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tanggal Pembelian</label>
                                         <div class="relative group">
                                             <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                                            <input type="date" name="purchase_date" value="{{ old('purchase_date') }}"
+                                            <input type="date" name="purchase_date" value="<?php echo e(old('purchase_date')); ?>"
                                                 class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm uppercase">
                                         </div>
                                     </div>
                                 </div>                               
 
-                                {{-- Buku Paket Checkbox --}}
+                                
                                 <div class="mt-4">
                                     <label class="flex items-center gap-3 p-4 border border-slate-200 bg-white rounded-2xl cursor-pointer hover:border-elevate-accent transition shadow-sm">
-                                        <input type="checkbox" name="is_textbook" value="1" {{ old('is_textbook') ? 'checked' : '' }} class="w-5 h-5 text-elevate-primary border-slate-300 rounded focus:ring-elevate-accent cursor-pointer">
+                                        <input type="checkbox" name="is_textbook" value="1" <?php echo e(old('is_textbook') ? 'checked' : ''); ?> class="w-5 h-5 text-elevate-primary border-slate-300 rounded focus:ring-elevate-accent cursor-pointer">
                                         <div>
                                             <span class="block text-sm font-bold text-elevate-dark">Ini Buku Paket / Pelajaran</span>
                                             <span class="block text-xs text-elevate-dark/60 mt-0.5">Buku paket bisa dipinjam massal selama 1 tahun.</span>
@@ -139,10 +149,10 @@
                         </div>
                     </div>
 
-                    {{-- KOLOM KANAN (5 Kolom) --}}
+                    
                     <div class="lg:col-span-5 space-y-6">
                         
-                        {{-- Blok Eksemplar Fisik --}}
+                        
                         <div class="bg-elevate-soft p-6 rounded-[2rem] border border-slate-200">
                             <h3 class="text-xs font-black text-elevate-dark uppercase tracking-widest mb-6 flex items-center gap-2">
                                 <span class="w-6 h-6 rounded-full bg-white text-elevate-primary flex items-center justify-center text-[10px] shadow-sm">2</span>
@@ -150,37 +160,37 @@
                             </h3>
                             
                             <div class="space-y-5">
-                                {{-- JUMLAH BUKU (Otomatis Generate Barcode Fisik) --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Jumlah Fisik Buku / Eksemplar <span class="text-rose-500">*</span></label>
                                     <div class="relative group">
                                         <i class="ph-bold ph-stack absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                                        <input type="number" name="jumlah_buku" required min="1" max="500" value="{{ old('jumlah_buku', 1) }}"
+                                        <input type="number" name="jumlah_buku" required min="1" max="500" value="<?php echo e(old('jumlah_buku', 1)); ?>"
                                             class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark shadow-sm transition-all" placeholder="Misal: 32">
                                     </div>
                                     <p class="text-[10px] text-elevate-dark/50 mt-2 ml-1"><i class="ph-bold ph-info"></i> Sistem otomatis memproduksi barcode tambahan sebanyak ini untuk stiker.</p>
                                 </div>
 
-                                {{-- Lokasi Rak --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Lokasi Rak <span class="text-rose-500">*</span></label>
                                     <div class="relative group">
                                         <i class="ph-bold ph-bookshelf absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                                        <input type="text" name="shelf_location" required value="{{ old('shelf_location') }}" placeholder="Misal: Rak A1 / Fiksi 2"
+                                        <input type="text" name="shelf_location" required value="<?php echo e(old('shelf_location')); ?>" placeholder="Misal: Rak A1 / Fiksi 2"
                                             class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                 </div>
                                 
-                                {{-- Sinopsis / Deskripsi --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Sinopsis / Ringkasan</label>
                                     <textarea name="description" rows="3" placeholder="Tuliskan deskripsi singkat tentang isi buku..."
-                                        class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-medium text-elevate-dark transition-all shadow-sm custom-scrollbar text-sm resize-none">{{ old('description') }}</textarea>
+                                        class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-medium text-elevate-dark transition-all shadow-sm custom-scrollbar text-sm resize-none"><?php echo e(old('description')); ?></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Blok Media (Cover & E-book) --}}
+                        
                         <div class="bg-elevate-peach-light/40 p-6 rounded-[2rem] border border-elevate-peach/30">
                             <h3 class="text-xs font-black text-elevate-peach-dark uppercase tracking-widest mb-6 flex items-center gap-2">
                                 <span class="w-6 h-6 rounded-full bg-white text-elevate-peach-dark flex items-center justify-center text-[10px] shadow-sm border border-elevate-peach/50">3</span>
@@ -188,7 +198,7 @@
                             </h3>
                             
                             <div class="space-y-5">
-                                {{-- Upload Cover --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-peach-dark uppercase mb-2 ml-1">Foto Sampul (Maks 5MB)</label>
                                     <div class="relative border-2 border-dashed border-elevate-peach rounded-2xl bg-white hover:bg-elevate-peach-light/50 transition-colors group">
@@ -206,7 +216,7 @@
                                     </div>
                                 </div>
 
-                                {{-- Upload E-Book --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-peach-dark uppercase mb-2 ml-1">File E-Book PDF (Opsional)</label>
                                     <div class="relative group">
@@ -222,7 +232,7 @@
                 </div>
 
                 <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end gap-3">
-                    <a href="{{ route('library.books.index') }}" class="px-6 py-3.5 bg-slate-100 text-elevate-dark/60 font-bold rounded-2xl hover:bg-slate-200 hover:text-elevate-dark transition-colors">Batal</a>
+                    <a href="<?php echo e(route('library.books.index')); ?>" class="px-6 py-3.5 bg-slate-100 text-elevate-dark/60 font-bold rounded-2xl hover:bg-slate-200 hover:text-elevate-dark transition-colors">Batal</a>
                     <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 border border-transparent active:scale-95">
                         <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan ke Katalog
                     </button>
@@ -231,7 +241,7 @@
         </div>
     </div>
 
-    {{-- MODAL SCANNER BARCODE --}}
+    
     <div id="scannerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
         <div class="absolute inset-0 bg-elevate-dark/80 backdrop-blur-sm" onclick="stopScanner()"></div>
         <div class="bg-white rounded-[2rem] shadow-2xl p-6 w-full max-w-sm relative z-10 animate-fade-in-down border border-slate-100">
@@ -246,7 +256,7 @@
         </div>
     </div>
 
-    {{-- SCRIPT JAVASCRIPT --}}
+    
     <script>
         // --- LOGIKA PREVIEW GAMBAR COVER ---
         function previewCover(event) {
@@ -295,4 +305,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/books/create.blade.php ENDPATH**/ ?>
