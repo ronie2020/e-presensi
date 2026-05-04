@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Nilai - {{ $exam->title }}</title>
+    <title>Laporan Nilai - <?php echo e($exam->title); ?></title>
     <style>
         @page { size: A4; margin: 1.5cm; }
         
@@ -69,11 +69,11 @@
         </button>
     </div>
 
-    {{-- KOP SURAT --}}
+    
     <table class="kop-table">
         <tr>
             <td width="15%" align="left">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto;" onerror="this.style.display='none'">
             </td>
             <td class="kop-teks">
                 <div style="font-size: 14pt; margin-bottom: 4px;">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -87,7 +87,7 @@
                 </div>
             </td>
             <td width="15%" align="right">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" style="width: 85px; height: auto;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" style="width: 85px; height: auto;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
@@ -103,27 +103,27 @@
             <tr>
                 <td width="35%"><strong>Mata Pelajaran</strong></td>
                 <td width="5%">:</td>
-                <td>{{ $exam->subject_name }}</td>
+                <td><?php echo e($exam->subject_name); ?></td>
             </tr>
             <tr>
                 <td><strong>Judul Ujian</strong></td>
                 <td>:</td>
-                <td>{{ $exam->title }}</td>
+                <td><?php echo e($exam->title); ?></td>
             </tr>
             <tr>
                 <td><strong>Kelas / Tingkat</strong></td>
                 <td>:</td>
-                <td>{{ $exam->class_level }}</td>
+                <td><?php echo e($exam->class_level); ?></td>
             </tr>
             <tr>
                 <td><strong>KKM / Passing Grade</strong></td>
                 <td>:</td>
-                <td>{{ $exam->passing_grade }}</td>
+                <td><?php echo e($exam->passing_grade); ?></td>
             </tr>
             <tr>
                 <td><strong>Tanggal Cetak</strong></td>
                 <td>:</td>
-                <td>{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</td>
+                <td><?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?></td>
             </tr>
         </table>
     </div>
@@ -142,47 +142,47 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($results as $index => $row)
+            <?php $__empty_1 = true; $__currentLoopData = $results; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
+                <td class="text-center"><?php echo e($index + 1); ?></td>
                 <td>
-                    <strong>{{ $row->student_name }}</strong>
+                    <strong><?php echo e($row->student_name); ?></strong>
                 </td>
-                <td class="text-center">{{ $row->student_nisn ?? '-' }}</td>
-                <td class="text-center">{{ $row->class_name ?? '-' }}</td>
-                <td class="text-center" style="color: green;">{{ $row->correct_answers }}</td>
-                <td class="text-center" style="color: red;">{{ $row->wrong_answers }}</td>
-                <td class="text-center font-bold" style="font-size: 11pt;">{{ $row->total_score }}</td>
+                <td class="text-center"><?php echo e($row->student_nisn ?? '-'); ?></td>
+                <td class="text-center"><?php echo e($row->class_name ?? '-'); ?></td>
+                <td class="text-center" style="color: green;"><?php echo e($row->correct_answers); ?></td>
+                <td class="text-center" style="color: red;"><?php echo e($row->wrong_answers); ?></td>
+                <td class="text-center font-bold" style="font-size: 11pt;"><?php echo e($row->total_score); ?></td>
                 <td class="text-center">
-                    @if($row->total_score >= $exam->passing_grade)
+                    <?php if($row->total_score >= $exam->passing_grade): ?>
                         <span style="font-weight: bold;">LULUS</span>
-                    @else
+                    <?php else: ?>
                         <span>REMEDIAL</span>
-                    @endif
+                    <?php endif; ?>
                 </td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="8" class="text-center" style="padding: 20px;">Belum ada data nilai masuk.</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
-    {{-- Ringkasan Statistik --}}
+    
     <div style="margin-top: 15px; font-size: 10pt; width: 40%;">
         <table class="data">
             <tr>
                 <td style="background: #f0f0f0;"><strong>Rata-rata Nilai</strong></td>
-                <td class="text-center"><strong>{{ number_format($stats['average'], 1) }}</strong></td>
+                <td class="text-center"><strong><?php echo e(number_format($stats['average'], 1)); ?></strong></td>
             </tr>
             <tr>
                 <td style="background: #f0f0f0;"><strong>Nilai Tertinggi</strong></td>
-                <td class="text-center">{{ $stats['max_score'] }}</td>
+                <td class="text-center"><?php echo e($stats['max_score']); ?></td>
             </tr>
             <tr>
                 <td style="background: #f0f0f0;"><strong>Nilai Terendah</strong></td>
-                <td class="text-center">{{ $stats['min_score'] }}</td>
+                <td class="text-center"><?php echo e($stats['min_score']); ?></td>
             </tr>
         </table>
     </div>
@@ -199,10 +199,10 @@
                 </td>
                 <td></td>
                 <td>
-                    Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+                    Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?><br>
                     Guru Mata Pelajaran
                     <br><br><br><br><br>
-                    <strong>{{ Auth::user()->name }}</strong><br>
+                    <strong><?php echo e(Auth::user()->name); ?></strong><br>
                     NIP. .........................
                 </td>
             </tr>
@@ -210,4 +210,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/pdf_export.blade.php ENDPATH**/ ?>
