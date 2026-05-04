@@ -176,4 +176,4 @@
             <i class="ph-bold ph-plugs text-xl text-slate-400 group-hover:text-elevate-accent transition-colors" :class="!sidebarExpanded ? 'block' : 'hidden'"></i>
         </div>
     </div>
-</nav><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>
+</nav><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>

@@ -383,7 +383,7 @@ Route::middleware('auth')->group(function () {
         // --- 3. KARTU & HASIL GLOBAL ---
         Route::get('/cards', [CbtController::class, 'cardIndex'])->name('cards.index');
         Route::get('/cards/print', [CbtController::class, 'printCards'])->name('cards.print');
-        Route::get('/results', [CbtController::class, 'results'])->name('results');     
+        Route::get('/results', [CbtAnalysisController::class, 'results'])->name('results');
 
         // --- 4. REKAP & ANALISIS ---
         Route::get('/recap/{id}', [CbtAnalysisController::class, 'recap'])->name('recap');
@@ -413,11 +413,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/exam/{exam}/export-word', [CbtController::class, 'exportWord'])->name('export_word');
         
         // --- 7. MONITORING ---
-        Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
-        Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');
-        Route::get('/monitoring/{id}/data', [CbtController::class, 'getMonitoringData'])->name('monitoring_data');
-        Route::post('/monitoring/{id}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
-        Route::get('/monitoring/{exam}/{student}/photos', [CbtController::class, 'getStudentPhotos'])->name('monitoring.photos');
+        Route::get('/monitoring/{exam_id}', [CbtMonitoringController::class, 'monitoring'])->name('monitoring');
+        Route::post('/reset/{exam}/{student}', [CbtMonitoringController::class, 'resetExam'])->name('reset');
+        Route::get('/monitoring/{id}/data', [CbtMonitoringController::class, 'getMonitoringData'])->name('monitoring_data');
+        Route::post('/monitoring/{id}/auto-token', [CbtMonitoringController::class, 'autoRotateToken'])->name('auto_token');
+        Route::get('/monitoring/{exam}/{student}/photos', [CbtMonitoringController::class, 'getStudentPhotos'])->name('monitoring.photos');
 
         // --- 8. BANK SOAL INTEGRASI ---        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
