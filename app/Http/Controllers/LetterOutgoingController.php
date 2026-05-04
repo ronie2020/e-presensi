@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\Storage;
 
 class LetterOutgoingController extends Controller
 {
-    // MENAMPILKAN DATA DARI DATABASE (DENGAN PENCARIAN & FILTER)
     public function index(Request $request)
     {
         $query = LetterOutgoing::query();
 
-        // 1. Logika Pencarian Teks
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -27,24 +25,18 @@ class LetterOutgoingController extends Controller
             });
         }
 
-        // 2. Logika Filter Sifat Surat
         if ($request->has('sifat_surat') && $request->sifat_surat != '') {
             $query->where('sifat_surat', $request->sifat_surat);
         }
         
-        // Gunakan withQueryString() agar saat pindah halaman (pagination), search/filter tidak hilang
         $letters = $query->latest()->paginate(10)->withQueryString();
-
         return view('letters.outgoing.index', compact('letters'));
     }
 
     public function create()
     {
-        // 1. Generate Nomor Agenda Keluar
         $lastLetter = LetterOutgoing::latest('id')->first();
         $nextAgendaKeluar = $lastLetter ? str_pad(intval($lastLetter->nomor_agenda) + 1, 4, '0', STR_PAD_LEFT) : '0001';
-
-        // 2. Ambil data user untuk dropdown "Guru Ditugaskan"
         $users = User::orderBy('name', 'asc')->get();
 
         return view('letters.outgoing.create', compact('nextAgendaKeluar', 'users'));
@@ -52,9 +44,7 @@ class LetterOutgoingController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi Input Surat Keluar & Dynamic Validation untuk SPT
         $request->validate([
-            // Tambahkan rule unique untuk letter_outgoings
             'nomor_agenda'  => 'required|string|unique:letter_outgoings,nomor_agenda',
             'nomor_surat'   => 'required|string|max:255',
             'tujuan_surat'  => 'required|string|max:255',
@@ -62,14 +52,11 @@ class LetterOutgoingController extends Controller
             'tgl_surat'     => 'required|date',
             'perihal'       => 'required|string',
             'file_surat'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            
-            // Validasi khusus jika Toggle SPT dihidupkan
             'guru_ditugaskan' => 'required_if:is_penugasan,on|array',
             'tgl_berangkat'   => 'required_if:is_penugasan,on|date|nullable',
             'tgl_kembali'     => 'required_if:is_penugasan,on|date|after_or_equal:tgl_berangkat|nullable',
         ]);
 
-        // 2. Simpan Data Surat Keluar
         $dataSurat = $request->only(['nomor_agenda', 'nomor_surat', 'tujuan_surat', 'sifat_surat', 'tgl_surat', 'perihal']);
         
         if ($request->hasFile('file_surat')) {
@@ -78,21 +65,91 @@ class LetterOutgoingController extends Controller
 
         $suratKeluar = LetterOutgoing::create($dataSurat);
 
-        // 3. LOGIKA MAGIC: Jika Checkbox Penugasan di-Centang
         if ($request->has('is_penugasan') && $request->is_penugasan === 'on') {
-            
-            $start = Carbon::parse($request->tgl_berangkat);
-            $end = Carbon::parse($request->tgl_kembali);
-            $lama_hari = $start->diffInDays($end) + 1;
+            $this->syncPenugasan($suratKeluar, $request);
+            return redirect()->route('sppd.index')
+                ->with('success', 'Surat Keluar disimpan. Draft SPT dan SPPD telah otomatis dibuat!');
+        }
 
-            $bulan_romawi = $this->getRomawi(date('n'));
-            $tahun = date('Y');
+        return redirect()->route('letters.outgoing.index')
+            ->with('success', 'Surat Keluar berhasil disimpan!');
+    }
+
+    public function edit($id)
+    {
+        $letter = LetterOutgoing::with('spt.users')->findOrFail($id);
+        $users = User::orderBy('name', 'asc')->get();
+        return view('letters.outgoing.edit', compact('letter', 'users'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $letter = LetterOutgoing::findOrFail($id);
+
+        $request->validate([
+            'nomor_agenda'  => 'required|string|unique:letter_outgoings,nomor_agenda,' . $id,
+            'nomor_surat'   => 'required|string|max:255',
+            'tujuan_surat'  => 'required|string|max:255',
+            'sifat_surat'   => 'required|string',
+            'tgl_surat'     => 'required|date',
+            'perihal'       => 'required|string',
+            'file_surat'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'guru_ditugaskan' => 'required_if:is_penugasan,on|array',
+            'tgl_berangkat'   => 'required_if:is_penugasan,on|date|nullable',
+            'tgl_kembali'     => 'required_if:is_penugasan,on|date|after_or_equal:tgl_berangkat|nullable',
+        ]);
+
+        $data = $request->except(['file_surat', '_token', '_method', 'is_penugasan', 'guru_ditugaskan', 'tgl_berangkat', 'tgl_kembali']);
+
+        if ($request->hasFile('file_surat')) {
+            if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
+                Storage::disk('public')->delete($letter->file_path);
+            }
+            $data['file_path'] = $request->file('file_surat')->store('surat-keluar', 'public');
+        }
+
+        $letter->update($data);
+
+        if ($request->has('is_penugasan') && $request->is_penugasan === 'on') {
+            $this->syncPenugasan($letter, $request);
+            return redirect()->route('letters.outgoing.index')
+                ->with('success', 'Data Surat dan Penugasan berhasil diperbarui!');
+        }
+
+        return redirect()->route('letters.outgoing.index')
+            ->with('success', 'Data Surat Keluar berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $letter = LetterOutgoing::findOrFail($id);
+        if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
+            Storage::disk('public')->delete($letter->file_path);
+        }
+        $letter->delete();
+        return redirect()->route('letters.outgoing.index')->with('success', 'Surat Keluar berhasil dihapus!');
+    }
+
+    /**
+     * HELPER: Sinkronisasi SPT & SPPD untuk Surat Keluar
+     */
+    private function syncPenugasan($letter, $request)
+    {
+        $start = Carbon::parse($request->tgl_berangkat);
+        $end = Carbon::parse($request->tgl_kembali);
+        $lama_hari = $start->diffInDays($end) + 1;
+        $bulan_romawi = $this->getRomawi(date('n'));
+        $tahun = date('Y');
+
+        $spt = LetterSpt::where('surat_keluar_id', $letter->id)->first();
+
+        if (!$spt) {
             $last_spt_count = LetterSpt::whereYear('created_at', $tahun)->count() + 1;
-            $nomor_spt_otomatis = sprintf("094/%03d/SMP.03/Disdik/%s/%s", $last_spt_count, $bulan_romawi, $tahun);
-
+            $nomor_spt = sprintf("094/%03d/SMP.03/Disdik/%s/%s", $last_spt_count, $bulan_romawi, $tahun);
+            
             $spt = LetterSpt::create([
-                'surat_keluar_id' => $suratKeluar->id,
-                'nomor_spt'       => $nomor_spt_otomatis,
+                'surat_keluar_id' => $letter->id,
+                'nomor_spt'       => $nomor_spt,
                 'untuk'           => $request->perihal,
                 'tempat_tujuan'   => $request->tujuan_surat,
                 'tgl_berangkat'   => $request->tgl_berangkat,
@@ -101,16 +158,27 @@ class LetterOutgoingController extends Controller
                 'pejabat_nama'    => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
                 'pejabat_nip'     => '19820928 201101 1 002',
             ]);
+        } else {
+            $spt->update([
+                'untuk'         => $request->perihal,
+                'tempat_tujuan' => $request->tujuan_surat,
+                'tgl_berangkat' => $request->tgl_berangkat,
+                'tgl_kembali'   => $request->tgl_kembali,
+                'lama_hari'     => $lama_hari,
+            ]);
+            Sppd::where('spt_id', $spt->id)->delete();
+            $spt->users()->detach();
+        }
 
+        if ($request->has('guru_ditugaskan') && is_array($request->guru_ditugaskan)) {
             foreach ($request->guru_ditugaskan as $guru_id) {
                 $spt->users()->attach($guru_id);
-
                 $last_sppd_count = Sppd::whereYear('created_at', $tahun)->count() + 1;
-                $nomor_sppd_otomatis = sprintf("090/%03d/SMP.03/Disdik/%s/%s", $last_sppd_count, $bulan_romawi, $tahun);
+                $nomor_sppd = sprintf("090/%03d/SMP.03/Disdik/%s/%s", $last_sppd_count, $bulan_romawi, $tahun);
 
                 Sppd::create([
                     'spt_id'            => $spt->id,
-                    'nomor_sppd'        => $nomor_sppd_otomatis,
+                    'nomor_sppd'        => $nomor_sppd,
                     'user_id'           => $guru_id,
                     'maksud_perjalanan' => $request->perihal,
                     'tempat_berangkat'  => 'SMP Negeri 3 Lakbok',
@@ -125,63 +193,7 @@ class LetterOutgoingController extends Controller
                     'pejabat_jabatan'   => 'Kepala Sekolah',
                 ]);
             }
-
-            return redirect()->route('sppd.index')
-                ->with('success', 'Surat Keluar berhasil disimpan. Draft SPT dan SPPD untuk pegawai terpilih telah otomatis dibuat!');
         }
-
-        return redirect()->route('letters.outgoing.index')
-            ->with('success', 'Surat Keluar berhasil disimpan!');
-    }
-
-    public function edit($id)
-    {
-        $letter = LetterOutgoing::findOrFail($id);
-        return view('letters.outgoing.edit', compact('letter'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $letter = LetterOutgoing::findOrFail($id);
-
-        $request->validate([
-            // Rule unique ditambahkan dengan pengecualian ID saat ini
-            'nomor_agenda'  => 'required|string|unique:letter_outgoings,nomor_agenda,' . $id,
-            'nomor_surat'   => 'required|string|max:255',
-            'tujuan_surat'  => 'required|string|max:255',
-            'sifat_surat'   => 'required|string',
-            'tgl_surat'     => 'required|date',
-            'perihal'       => 'required|string',
-            'file_surat'    => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-
-        $data = $request->except(['file_surat', '_token', '_method']);
-
-        if ($request->hasFile('file_surat')) {
-            if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
-                Storage::disk('public')->delete($letter->file_path);
-            }
-            $data['file_path'] = $request->file('file_surat')->store('surat-keluar', 'public');
-        }
-
-        $letter->update($data);
-
-        return redirect()->route('letters.outgoing.index')
-            ->with('success', 'Data Surat Keluar berhasil diperbarui!');
-    }
-
-    public function destroy($id)
-    {
-        $letter = LetterOutgoing::findOrFail($id);
-
-        if ($letter->file_path && Storage::disk('public')->exists($letter->file_path)) {
-            Storage::disk('public')->delete($letter->file_path);
-        }
-
-        $letter->delete();
-
-        return redirect()->route('letters.outgoing.index')
-            ->with('success', 'Surat Keluar berhasil dihapus!');
     }
 
     private function getRomawi($bulan)

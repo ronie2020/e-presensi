@@ -29,4 +29,10 @@ class LetterIncoming extends Model
         'tgl_surat' => 'date',
         'tgl_diterima' => 'date',
     ];
+
+    public function spt()
+    {
+        // Parameter kedua adalah foreign key yang ada di tabel letter_spts
+        return $this->hasOne(LetterSpt::class, 'letter_incoming_id');
+    }
 }

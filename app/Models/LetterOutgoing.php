@@ -25,7 +25,15 @@ class LetterOutgoing extends Model
         'tgl_surat' => 'date',
     ];
 
-    // Relasi: 1 Surat Keluar bisa memicu 1 atau banyak SPT
+    public function spt()
+    {
+        return $this->hasOne(LetterSpt::class, 'surat_keluar_id')->latestOfMany();
+    }
+
+    /**
+     * Relasi Jamak (hasMany)
+     * Digunakan jika Anda ingin menampilkan daftar semua SPT/SPPD yang terkait.
+     */
     public function spts()
     {
         return $this->hasMany(LetterSpt::class, 'surat_keluar_id');
