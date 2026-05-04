@@ -64,7 +64,7 @@ class LetterIncomingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nomor_agenda' => 'required|string',
+            'nomor_agenda' => 'required|string|unique:letter_incomings,nomor_agenda',
             'nomor_surat'  => 'required|string|max:255',
             'sifat_surat'  => 'required|string',
             'asal_surat'   => 'required|string|max:255',
@@ -171,7 +171,7 @@ class LetterIncomingController extends Controller
         $letter = LetterIncoming::findOrFail($id);
 
         $request->validate([
-            'nomor_agenda' => 'required|string', // Validasi Ditambahkan
+            'nomor_agenda' => 'required|string|unique:letter_incomings,nomor_agenda,' . $id, 
             'sifat_surat'  => 'required|string', // Validasi Ditambahkan
             'nomor_surat'  => 'required|string|max:255',
             'asal_surat'   => 'required|string|max:255',

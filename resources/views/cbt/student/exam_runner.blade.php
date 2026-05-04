@@ -177,6 +177,18 @@
                         
                         try { this.loadLocalProgress(); } catch (e) {}
                         
+                        // Jika saat memuat ulang halaman pelanggaran sudah >= batas, usir langsung
+                        if (this.violationCount >= this.maxViolations) {
+                            this.showSecurityOverlay = true;
+                            // Auto-submit bila di-refresh tapi sisa pelanggaran habis
+                            setTimeout(() => {
+                                if(this.saveStatus !== 'finished') {
+                                    this.submitExam(true);
+                                }
+                            }, 3000);
+                            return;
+                        }
+                        
                         if (this.examType !== 'google_form') {
                             this.questions.forEach(q => { 
                                 if(q.saved_answer && !this.answers[q.id]) {
@@ -384,20 +396,17 @@
                     if (this.showSecurityOverlay || this.timeLeft <= 0) return; 
                     this.violationCount++; 
                     try { this.saveToLocal(); } catch(e){} 
-                    this.showSecurityOverlay = true;
                     
-                    if(this.violationCount >= this.maxViolations) { 
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'PELANGGARAN TERDETEKSI',
-                            text: 'Anda telah melanggar batas aturan keamanan ujian (Pindah Tab/Window). Jawaban akan dikumpulkan otomatis.',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            confirmButtonText: 'Mengerti',
-                            confirmButtonColor: '#e11d48'
-                        }).then(() => {
-                            this.submitExam(true); 
-                        });
+                    // Tampilkan Overlay Biru Keamanan
+                    this.showSecurityOverlay = true;
+
+                    // Jika Pelanggaran Habis, usir otomatis (Tanpa Swal yang berbentrokan)
+                    if(this.violationCount >= this.maxViolations) {
+                        setTimeout(() => {
+                            if(this.saveStatus !== 'finished') {
+                                this.submitExam(true);
+                            }
+                        }, 3000);
                     }
                 },
 
@@ -427,12 +436,9 @@
                 },
 
                 finishExam() {
-                    // MENGUBAH LOGIKA DARI 50% MENJADI 75%
-                    // Jika siswa harus mengerjkan 75% waktu, maka tombol baru aktif jika SISA WAKTU (timeLeft) <= 25% dari total durasi
-                    const lockThreshold = this.totalDuration * 0.25; 
-
-                    if (this.timeLeft > lockThreshold) {
-                        const waitSec = Math.floor(this.timeLeft - lockThreshold);
+                    const halfTime = this.totalDuration / 2;
+                    if (this.timeLeft > halfTime) {
+                        const waitSec = Math.floor(this.timeLeft - halfTime);
                         const m = Math.floor(waitSec / 60);
                         const s = waitSec % 60;
                         let waitText = (m > 0 ? m + " menit " : "") + s + " detik";
@@ -440,7 +446,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Waktu Minimal Belum Tercapai!',
-                            html: `Sistem mengunci pengumpulan karena Anda belum mengerjakan selama minimal <b>75%</b> dari durasi ujian.<br><br>Sisa waktu tunggu: <b class='text-rose-600'>${waitText}</b>.`,
+                            html: `Sistem mengunci pengumpulan karena Anda belum mengerjakan selama minimal setengah dari durasi ujian.<br><br>Sisa waktu tunggu: <b class='text-rose-600'>${waitText}</b>.`,
                             confirmButtonText: '<i class="ph-bold ph-arrow-u-up-left"></i> Kembali Mengerjakan',
                             confirmButtonColor: '#172554', // Tema Blue-950
                             customClass: { popup: 'rounded-[2rem]' }
@@ -473,6 +479,9 @@
                 },
 
                 async submitExam(forced = false) {
+                    // Mencegah overlay biru menutupi loading penyelesaian ujian
+                    this.showSecurityOverlay = false; 
+                    
                     clearInterval(this.timerInterval);
                     if(this.backgroundSyncInterval) clearInterval(this.backgroundSyncInterval);
                     
@@ -488,9 +497,18 @@
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
                     form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
+                    
                     const t = document.createElement('input'); 
                     t.type = 'hidden'; t.name = '_token'; t.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     form.appendChild(t); 
+
+                    // Inject Sinyal "Forced" (Apabila ada validasi batas 75% waktu di Controller, ini akan mem-bypass-nya)
+                    if (forced) {
+                        const f = document.createElement('input'); 
+                        f.type = 'hidden'; f.name = 'forced'; f.value = '1';
+                        form.appendChild(f); 
+                    }
+
                     document.body.appendChild(form); 
                     form.submit();
                 },
@@ -592,7 +610,6 @@
     </script>
 </head>
 
-{{-- PERBAIKAN 1: Ganti h-screen menjadi h-[100dvh] agar menyesuaikan address bar HP --}}
 <body class="h-[100dvh] flex flex-col"
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
@@ -614,13 +631,29 @@
         <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
     </div>
 
-    {{-- OVERLAY PELANGGARAN --}}
+    {{-- OVERLAY PELANGGARAN (PERBAIKAN FULL DINAMIS) --}}
     <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-blue-950/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
         <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
             <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
             <h2 class="text-xl font-black text-slate-900 mb-2 uppercase">Pelanggaran Terdeteksi</h2>
-            <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-600" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
-            <button @click="showSecurityOverlay = false" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-cyan-600/30">Lanjutkan Mengerjakan</button>
+            
+            {{-- KONDISI 1: JIKA PELANGGARAN MASIH DI BAWAH BATAS --}}
+            <template x-if="violationCount < maxViolations">
+                <div>
+                    <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-600" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
+                    <button @click="showSecurityOverlay = false" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-cyan-600/30">Lanjutkan Mengerjakan</button>
+                </div>
+            </template>
+
+            {{-- KONDISI 2: JIKA PELANGGARAN SUDAH MENCAPAI BATAS (TIDAK BISA KEMBALI) --}}
+            <template x-if="violationCount >= maxViolations">
+                <div>
+                    <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda telah melewati batas maksimal pelanggaran.<br><b class="text-rose-600">Sistem menghentikan ujian Anda secara otomatis.</b></p>
+                    <button @click="submitExam(true)" class="w-full bg-rose-600 hover:bg-rose-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-rose-600/30">
+                        Kumpulkan Sekarang
+                    </button>
+                </div>
+            </template>
         </div>
     </div>
 
@@ -689,7 +722,6 @@
         <div class="h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
-    {{-- PERBAIKAN 2: Tambahkan min-h-0 pada wrapper utama --}}
     <div class="flex-1 flex overflow-hidden relative min-h-0">
         
         {{-- KONDISI 1: GOOGLE FORM --}}
@@ -721,15 +753,11 @@
         @else
 
         {{-- KONDISI 2: CBT INTERNAL (Engine Asli) --}}
-        {{-- PERBAIKAN 3: Buang overflow-y-auto dari main, pindahkan full ke dalam Card. Tambahkan min-h-0 --}}
         <main class="flex-1 flex flex-col bg-slate-50 relative z-0 min-h-0">
-            {{-- PERBAIKAN 4: Hilangkan padding di HP agar layar soal lebih luas, gunakan p-0 --}}
             <div class="w-full max-w-4xl mx-auto p-0 sm:p-4 md:p-6 lg:p-8 flex-1 flex flex-col min-h-0">
-                {{-- PERBAIKAN 5: Buat lengkungan border hilang di HP, tapi tetap melengkung di PC. Tambahkan min-h-0 --}}
                 <div class="bg-white sm:rounded-[2rem] shadow-sm border-0 sm:border border-slate-200 flex-1 flex flex-col overflow-hidden relative min-h-0">
                     
                     {{-- Header Soal --}}
-                    {{-- PERBAIKAN 6: Tambahkan shrink-0 agar header tidak mengecil, sesuaikan padding HP --}}
                     <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                         <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
                         
@@ -752,7 +780,6 @@
                     </div>
 
                     {{-- Isi Soal --}}
-                    {{-- PERBAIKAN 7: Posisikan fitur scroll HANYA di bagian konten ini (overflow-y-auto) --}}
                     <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto custom-scroll relative">
                         <template x-if="questions.length > 0 && questions[currentQuestion]">
                             <div>
@@ -894,7 +921,6 @@
                     </div>
 
                     {{-- Tombol Navigasi Bawah --}}
-                    {{-- PERBAIKAN 8: Tambahkan shrink-0 agar tombol selau terkunci/pinned di bagian bawah layar HP --}}
                     <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10 shrink-0">
                         <button @click="prevQuestion" :disabled="currentQuestion === 0" 
                                 class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900">

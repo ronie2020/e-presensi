@@ -49,14 +49,16 @@
         }
         
         body {
+            /* Font default web (khusus toolbar dll yang diluar kertas) */
             font-family: 'Times New Roman', serif;
             font-size: 11pt;
             background-color: #f8fafc; /* Slate-50 */
             -webkit-print-color-adjust: exact;
         }
 
-        /* TAMPILAN KERTAS DI LAYAR */
+        /* TAMPILAN KERTAS DI LAYAR & FONT BOOKMAN OLD STYLE */
         .sheet {
+            font-family: 'Bookman Old Style', Bookman, Georgia, serif; /* Ubah font jadi Bookman */
             background: white;
             width: 21.5cm;
             min-height: 33cm;
@@ -65,6 +67,16 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             position: relative;
             page-break-after: always; 
+        }
+
+        /* MODIFIKASI GARIS KOP SURAT */
+        .garis-kop {
+            border-bottom: 3px solid black;
+            margin-bottom: 2px;
+        }
+        .garis-kop-bawah {
+            border-bottom: 1px solid black;
+            margin-bottom: 24px;
         }
         
         /* MODE PRINT */
@@ -76,12 +88,6 @@
         }
 
         /* TYPOGRAPHY SURAT */
-        .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
-        .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
-        .header-text p { margin: 0; font-size: 10pt; }
-        
-        .double-line { border-top: 4px double #000; margin-top: 8px; margin-bottom: 20px; }
-        
         .judul-surat { text-align: center; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
         .judul-surat h2 { margin: 0; text-decoration: underline; font-size: 12pt; }
         .judul-surat p { margin: 0; font-size: 11pt; font-weight: normal; text-transform: none; }
@@ -127,20 +133,33 @@
         </div>
     </div>
 
-    <!-- HALAMAN 1: SPPD DEPAN -->
+    <!-- ==============================================
+         HALAMAN 1: SPPD DEPAN
+         ============================================== -->
     <div class="sheet">
-         <!-- KOP SURAT -->
-        <div class="relative py-2">
-            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
-            <div class="text-center header-text mx-auto w-3/4">
-                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
-                <h3>DINAS PENDIDIKAN</h3>
-                <h4>SMP NEGERI 3 LAKBOK</h4>
-                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+        
+        <!-- KOP SURAT -->
+        <div class="kop-surat garis-kop pb-2 pt-2 flex justify-between items-center px-1">
+            <!-- Logo Kiri -->
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'"> 
+            
+            <!-- Teks Tengah -->
+            <div class="text-center flex-1 px-4 leading-tight">
+                <div class="text-[14pt] tracking-wide mb-1">PEMERINTAH KABUPATEN CIAMIS</div>
+                <div class="font-bold text-[22pt] tracking-wider mb-1">SMP NEGERI 3 LAKBOK</div>
+                <div class="text-[12pt]">Jalan Mekarjaya No.199, Sidaharja</div>
+                <div class="text-[12pt]">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                <div class="text-[11pt] mt-1">
+                    Laman: <a href="http://www.smpn3lakbok.sch.id" class="text-blue-700 underline">www.smpn3lakbok.sch.id</a> 
+                    <span class="mx-3"></span> 
+                    E-mail: netila.smp@gmail.com
+                </div>
             </div>
-            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+
+            <!-- Logo Kanan -->
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'">
         </div>
-        <div class="double-line"></div>
+        <div class="garis-kop-bawah"></div>
 
         <div class="judul-surat">
             <h2>SURAT PERINTAH PERJALANAN DINAS</h2>
@@ -192,7 +211,10 @@
         <div class="clear"></div>
     </div>
 
-    <!-- HALAMAN 2: VISUM -->
+
+    <!-- ==============================================
+         HALAMAN 2: VISUM
+         ============================================== -->
     <div class="sheet">
         <table class="visum">
             <tr>
@@ -256,20 +278,34 @@
         </table>
     </div>
 
-    <!-- HALAMAN 3: LAPORAN -->
+
+    <!-- ==============================================
+         HALAMAN 3: LAPORAN
+         ============================================== -->
     <div class="sheet">
-        <!-- KOP SURAT -->
-        <div class="relative py-2">
-            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
-            <div class="text-center header-text mx-auto w-3/4">
-                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
-                <h3>DINAS PENDIDIKAN</h3>
-                <h4>SMP NEGERI 3 LAKBOK</h4>
-                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+        
+        <!-- KOP SURAT (Sama dengan Halaman 1) -->
+        <div class="kop-surat garis-kop pb-2 pt-2 flex justify-between items-center px-1">
+            <!-- Logo Kiri -->
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'"> 
+            
+            <!-- Teks Tengah -->
+            <div class="text-center flex-1 px-4 leading-tight">
+                <div class="text-[14pt] tracking-wide mb-1">PEMERINTAH KABUPATEN CIAMIS</div>
+                <div class="font-bold text-[22pt] tracking-wider mb-1">SMP NEGERI 3 LAKBOK</div>
+                <div class="text-[12pt]">Jalan Mekarjaya No.199, Sidaharja</div>
+                <div class="text-[12pt]">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                <div class="text-[11pt] mt-1">
+                    Laman: <a href="http://www.smpn3lakbok.sch.id" class="text-blue-700 underline">www.smpn3lakbok.sch.id</a> 
+                    <span class="mx-3"></span> 
+                    E-mail: netila.smp@gmail.com
+                </div>
             </div>
-            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+
+            <!-- Logo Kanan -->
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'">
         </div>
-        <div class="double-line"></div>
+        <div class="garis-kop-bawah"></div>
         
         <div class="judul-surat" style="margin-bottom: 30px;"><h2>LAPORAN PERJALANAN DINAS</h2></div>
         

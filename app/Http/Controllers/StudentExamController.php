@@ -258,7 +258,7 @@ public function showStart($exam_id)
         return response()->json(['status' => 'success']);
     }
 
-   public function finish($exam_id)
+    public function finish(Request $request, $exam_id)
     {
         $session = CbtStudentExam::where('student_id', $this->getStudentId())
             ->where('cbt_exam_id', $exam_id)
@@ -268,21 +268,19 @@ public function showStart($exam_id)
         if ($session) {
             $exam = CbtExam::find($exam_id);
             
-            // --- LOGIKA 75% WAKTU ---
-            $startTime = Carbon::parse($session->created_at);
-            $now = Carbon::now();
-            
-            // Hitung sudah berapa lama siswa mengerjakan (dalam menit)
-            $minutesElapsed = $startTime->diffInMinutes($now);
-            
-            // Hitung 75% dari total durasi ujian
-            $minimumMinutesRequired = $exam->duration_minutes * 0.75;
+            // --- LOGIKA 75% WAKTU (Bypass jika forced/pelanggaran) ---
+            // Jika BUKAN paksaan, sistem akan mengecek waktu
+            if (!$request->has('forced')) {
+                $startTime = Carbon::parse($session->created_at);
+                $now = Carbon::now();
+                
+                $minutesElapsed = $startTime->diffInMinutes($now);
+                $minimumMinutesRequired = $exam->duration_minutes * 0.75;
 
-            // Jika waktu pengerjaan masih di bawah 75%
-            if ($minutesElapsed < $minimumMinutesRequired) {
-                // Jangan diselesaikan, kembalikan dengan error
-                return redirect()->route('student.exam.run', $exam_id)
-                    ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
+                if ($minutesElapsed < $minimumMinutesRequired) {
+                    return redirect()->route('student.exam.run', $exam_id)
+                        ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
+                }
             }
             // --- AKHIR LOGIKA 75% ---
 

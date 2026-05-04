@@ -36,9 +36,15 @@
         }
         
         body {
+            /* Font default untuk elemen web / non-cetak */
             font-family: 'Times New Roman', serif;
             background-color: #f8fafc; /* Slate-50 */
             -webkit-print-color-adjust: exact;
+        }
+
+        /* FONT KHUSUS KOP & ISI SURAT (BOOKMAN OLD STYLE) */
+        .area-surat {
+            font-family: 'Bookman Old Style', Bookman, Georgia, serif;
         }
 
         /* TAMPILAN KERTAS DI LAYAR */
@@ -50,6 +56,16 @@
             padding: 1.5cm 2cm;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             position: relative;
+        }
+
+        /* MODIFIKASI GARIS KOP SURAT (Garis Tebal & Tipis) */
+        .garis-kop {
+            border-bottom: 3px solid black;
+            margin-bottom: 2px;
+        }
+        .garis-kop-bawah {
+            border-bottom: 1px solid black;
+            margin-bottom: 24px; /* Jarak dari garis ke judul surat */
         }
 
         /* MODIFIKASI TABEL */
@@ -82,7 +98,7 @@
     <!-- DEKORASI BACKGROUND (Hanya tampil di layar) -->
     <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-elevate-primary/10 to-transparent pointer-events-none no-print -z-10"></div>
 
-    <!-- TOOLBAR AKSI (Tidak tercetak) - Tema Microsoft Elevate -->
+    <!-- TOOLBAR AKSI -->
     <div class="w-[21.5cm] mx-auto mt-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg shadow-elevate-dark/5 border border-white/60 sticky top-4 z-50">
         <div>
             <h2 class="font-black text-elevate-dark font-sans flex items-center gap-2">
@@ -107,28 +123,38 @@
     </div>
 
     <!-- AREA KERTAS -->
-    <div class="sheet">
-        <!-- KOP SURAT -->
-        <div class="text-center border-b-4 border-black pb-4 mb-4" style="border-bottom-style: double;">
-            <div class="relative py-2">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
-                <div class="text-center header-text mx-auto w-3/4">
-                    <h3 class="font-bold">PEMERINTAH KABUPATEN CIAMIS</h3>
-                    <h3 class="font-bold">DINAS PENDIDIKAN</h3>
-                    <h4 class="font-bold text-lg">SMP NEGERI 3 LAKBOK</h4>
-                    <p class="text-sm">Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+    <div class="sheet area-surat text-[12pt]">
+        
+        <!-- KOP SURAT (FLEXBOX BIKIN LEBIH RAPI) -->
+        <div class="kop-surat garis-kop pb-2 pt-2 flex justify-between items-center px-1">
+            <!-- Logo Kiri -->
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'"> 
+            
+            <!-- Teks Tengah -->
+            <div class="text-center flex-1 px-4 leading-tight">
+                <div class="text-[14pt] tracking-wide mb-1">PEMERINTAH KABUPATEN CIAMIS</div>
+                <div class="font-bold text-[22pt] tracking-wider mb-1">SMP NEGERI 3 LAKBOK</div>
+                <div class="text-[12pt]">Jalan Mekarjaya No.199, Sidaharja</div>
+                <div class="text-[12pt]">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                <div class="text-[10pt] mt-1">
+                    Laman: <a href="http://www.smpn3lakbok.sch.id" class="text-blue-700 underline">www.smpn3lakbok.sch.id</a> 
+                    <span class="mx-3"></span> 
+                    E-mail: netila.smp@gmail.com
                 </div>
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
             </div>
-        </div>
 
-        <!-- JUDUL SURAT -->
+            <!-- Logo Kanan -->
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[85px] h-auto object-contain" onerror="this.style.display='none'">
+        </div>
+        <!-- Garis tipis pelengkap batas kop -->
+        <div class="garis-kop-bawah"></div>
+
+        <!-- ISI SURAT -->
         <div class="text-center mb-6">
             <h2 class="text-lg font-bold uppercase underline underline-offset-4 mb-1">SURAT PERINTAH TUGAS</h2>
             <p>Nomor : {{ $spt->nomor_spt }}</p>
         </div>
 
-        <!-- ISI SURAT -->
         <table class="spt-table">
             <tr>
                 <td class="col-label">Dasar</td>
@@ -169,7 +195,7 @@
                         @endif
                         @empty
                         <tr>
-                            <td colspan="3" class="text-rose-500 italic">Data pegawai belum dipilih.</td>
+                            <td colspan="3" class="text-rose-500 italic font-sans">Data pegawai belum dipilih.</td>
                         </tr>
                         @endforelse
                     </table>
@@ -234,8 +260,8 @@
 
         <!-- TANDA TANGAN -->
         <div class="ttd-box print-break">
-            <p>Ditetapkan di: Lakbok</p>
-            <p class="mb-6">Pada tanggal: {{ \Carbon\Carbon::parse($spt->created_at)->isoFormat('D MMMM Y') }}</p>
+            <p>Ditetapkan di : Lakbok</p>
+            <p class="mb-6">Pada tanggal &nbsp;: {{ \Carbon\Carbon::parse($spt->created_at)->isoFormat('D MMMM Y') }}</p>
             
             <p class="font-bold">Kepala Sekolah,</p>
             

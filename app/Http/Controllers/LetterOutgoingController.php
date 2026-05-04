@@ -54,7 +54,8 @@ class LetterOutgoingController extends Controller
     {
         // 1. Validasi Input Surat Keluar & Dynamic Validation untuk SPT
         $request->validate([
-            'nomor_agenda'  => 'required',
+            // Tambahkan rule unique untuk letter_outgoings
+            'nomor_agenda'  => 'required|string|unique:letter_outgoings,nomor_agenda',
             'nomor_surat'   => 'required|string|max:255',
             'tujuan_surat'  => 'required|string|max:255',
             'sifat_surat'   => 'required|string',
@@ -144,7 +145,8 @@ class LetterOutgoingController extends Controller
         $letter = LetterOutgoing::findOrFail($id);
 
         $request->validate([
-            'nomor_agenda'  => 'required|string',
+            // Rule unique ditambahkan dengan pengecualian ID saat ini
+            'nomor_agenda'  => 'required|string|unique:letter_outgoings,nomor_agenda,' . $id,
             'nomor_surat'   => 'required|string|max:255',
             'tujuan_surat'  => 'required|string|max:255',
             'sifat_surat'   => 'required|string',

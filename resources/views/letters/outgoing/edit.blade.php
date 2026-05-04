@@ -42,8 +42,8 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Agenda</label>
-                                    <input type="text" name="nomor_agenda" value="{{ old('nomor_agenda', $letter->nomor_agenda) }}" readonly class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 shadow-inner focus:outline-none text-sm py-3 font-bold text-slate-500 cursor-not-allowed transition-all" title="Nomor Agenda tidak dapat diubah">
-                                    <p class="text-[10px] text-slate-400 mt-2 ml-1 flex items-center gap-1 font-medium"><i class="ph-fill ph-lock-key"></i> Terkunci</p>
+                                    {{-- ATRIBUT READONLY & TEXT TERKUNCI DIHAPUS --}}
+                                    <input type="text" name="nomor_agenda" value="{{ old('nomor_agenda', $letter->nomor_agenda) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all" placeholder="Masukkan nomor agenda">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Surat</label>
@@ -65,7 +65,8 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Surat</label>
-                                    <input type="date" name="tgl_surat" value="{{ old('tgl_surat', $letter->tgl_surat) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    {{-- DITAMBAHKAN CARBON PARSE FORMAT Y-m-d --}}
+                                    <input type="date" name="tgl_surat" value="{{ old('tgl_surat', \Carbon\Carbon::parse($letter->tgl_surat)->format('Y-m-d')) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Sifat Surat</label>
