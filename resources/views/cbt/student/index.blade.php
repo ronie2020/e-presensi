@@ -147,7 +147,7 @@
                             $statusClass = 'bg-slate-100 text-slate-500 border-slate-200';
                         }
 
-                        // Logika Lulus/Tidak Lulus
+                        // Logika Lulus/Tidak Lulus (Tetap dipertahankan meskipun tidak ditampilkan)
                         $kkm = $examItem->passing_grade ?? 0;
                         $score = $examItem->student_score ?? 0;
                         $isPassed = $score >= $kkm;
@@ -211,14 +211,13 @@
                                     </p>
                                 </div>
                                 
+                                {{-- PERUBAHAN DI SINI: Nilai disembunyikan, diganti dengan kotak Info Terekam --}}
                                 @if($status == 'finished')
-                                    <div class="p-4 rounded-2xl border {{ $isPassed ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100' }}">
-                                        <p class="text-[10px] uppercase font-bold {{ $isPassed ? 'text-emerald-600' : 'text-rose-600' }} mb-1">
-                                            Nilai (KKM: {{ $kkm }})
-                                        </p>
-                                        <p class="text-sm font-black {{ $isPassed ? 'text-emerald-800' : 'text-rose-800' }} flex items-center gap-1.5">
-                                            <i class="ph-fill {{ $isPassed ? 'ph-medal text-emerald-500' : 'ph-warning-circle text-rose-500' }}"></i>
-                                            {{ $score }}
+                                    <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
+                                        <p class="text-[10px] uppercase font-bold text-emerald-600 mb-1">Status Nilai</p>
+                                        <p class="text-xs font-black text-emerald-800 flex items-center gap-1.5">
+                                            <i class="ph-fill ph-check-circle text-emerald-500"></i>
+                                            Terekam
                                         </p>
                                     </div>
                                 @else
@@ -230,6 +229,7 @@
                                         </p>
                                     </div>
                                 @endif
+                                
                             </div>
                         </div>
 

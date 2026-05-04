@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Ujian - {{ $exam->title }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Ujian - <?php echo e($exam->title); ?></title>
     
-    {{-- CSS & JS Utama --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    {{-- Icons & Alerts --}}
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    
+    
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" async></script>
 
-    {{-- KONFIGURASI MATHJAX (Rumus Matematika) --}}
+    
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -84,14 +84,15 @@
         }
 
         window.examData = { 
-            questions: @json($questions), 
-            timeLeft: {{ $timeLeft ?? 0 }}, 
-            sessionId: {{ $sessionId }}, 
-            examId: {{ $exam->id }},
-            examType: '{{ $exam->exam_type ?? 'cbt' }}', 
-            totalDuration: {{ ($exam->duration_minutes ?? 0) * 60 }},
-            randomizeQuestions: {{ $exam->randomize_questions ? 'true' : 'false' }},
-            randomizeOptions: {{ $exam->randomize_options ? 'true' : 'false' }}
+            questions: <?php echo json_encode($questions, 15, 512) ?>, 
+            timeLeft: <?php echo e($timeLeft ?? 0); ?>, 
+            sessionId: <?php echo e($sessionId); ?>, 
+            examId: <?php echo e($exam->id); ?>,
+            examType: '<?php echo e($exam->exam_type ?? 'cbt'); ?>', 
+            totalDuration: <?php echo e(($exam->duration_minutes ?? 0) * 60); ?>,
+            randomizeQuestions: <?php echo e($exam->randomize_questions ? 'true' : 'false'); ?>,
+            randomizeOptions: <?php echo e($exam->randomize_options ? 'true' : 'false'); ?>
+
         };
 
         window.examApp = function() {
@@ -252,7 +253,7 @@
                     
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
+                        const response = await fetch("<?php echo e(route('student.exam.saveAnswer')); ?>", {
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
                             body: JSON.stringify({ 
@@ -487,7 +488,7 @@
 
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
-                    form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
+                    form.action = "<?php echo e(route('student.exam.finish', ':id')); ?>".replace(':id', this.examId);
                     const t = document.createElement('input'); 
                     t.type = 'hidden'; t.name = '_token'; t.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     form.appendChild(t); 
@@ -566,7 +567,7 @@
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.3); 
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                         
-                        fetch("{{ route('student.exam.photo') }}", { 
+                        fetch("<?php echo e(route('student.exam.photo')); ?>", { 
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                             body: JSON.stringify({ session_id: this.sessionId, photo: dataUrl })
@@ -592,7 +593,7 @@
     </script>
 </head>
 
-{{-- PERBAIKAN 1: Ganti h-screen menjadi h-[100dvh] agar menyesuaikan address bar HP --}}
+
 <body class="h-[100dvh] flex flex-col"
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
@@ -600,21 +601,21 @@
     @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'error', title: 'Koneksi Terputus!', text: 'Jawaban disimpan di browser.', showConfirmButton: false, timer: 4000, customClass: {popup: 'rounded-xl mb-4'} })"
     @focus.window="syncPendingAnswers()">
 
-    {{-- VIDEO KAMERA HIDDEN --}}
+    
     <video id="webcam-video" autoplay playsinline muted style="position: fixed; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: -100;"></video>
 
-    {{-- LOADING OVERLAY --}}
+    
     <div id="loading-overlay">
         <div class="spinner"></div>
         <span class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Memuat Ruangan...</span>
     </div>
     
-    {{-- MODAL ZOOM GAMBAR --}}
+    
     <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-blue-950/95 flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
         <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
     </div>
 
-    {{-- OVERLAY PELANGGARAN --}}
+    
     <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-blue-950/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
         <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
             <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
@@ -624,7 +625,7 @@
         </div>
     </div>
 
-    {{-- NAVBAR ATAS (TEMA BIRU GELAP / BLUE-950) --}}
+    
     <nav class="bg-blue-950 text-white h-16 shrink-0 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-blue-900/50 z-50 relative">
         <div class="flex items-center gap-4 min-w-0 flex-1">
             <div class="flex items-center gap-3 shrink-0">
@@ -632,8 +633,8 @@
                     <i class="ph-bold ph-graduation-cap text-xl"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px] text-white">{{ $exam->title }}</h1>
-                    <p class="text-[10px] lg:text-xs text-cyan-300 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
+                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px] text-white"><?php echo e($exam->title); ?></h1>
+                    <p class="text-[10px] lg:text-xs text-cyan-300 font-bold uppercase tracking-wider truncate"><?php echo e($exam->subject_name); ?></p>
                 </div>
             </div>
 
@@ -641,21 +642,24 @@
 
             <div class="hidden md:flex items-center gap-3 min-w-0">
                  <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold border border-cyan-400/50 shrink-0 shadow-sm">
-                     {{ substr($student->name ?? 'S', 0, 1) }}
+                     <?php echo e(substr($student->name ?? 'S', 0, 1)); ?>
+
                  </div>
                  <div class="truncate">
                      <p class="font-bold text-sm text-white truncate max-w-[150px]">
-                         {{ $student->name ?? 'Peserta' }}
+                         <?php echo e($student->name ?? 'Peserta'); ?>
+
                      </p>
                      <p class="text-[10px] text-cyan-200 font-bold truncate">
-                         {{ $student->nis ?? $student->username ?? '' }}
+                         <?php echo e($student->nis ?? $student->username ?? ''); ?>
+
                      </p>
                  </div>
             </div>
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
-            {{-- Tombol Ukuran Font --}}
+            
             <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg mr-2">
                 <span class="text-[10px] text-cyan-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
                 <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1" :class="fontSize === 1 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
@@ -663,37 +667,37 @@
                 <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1" :class="fontSize === 3 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
             </div>
 
-            {{-- Indikator Offline --}}
+            
             <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
             
-            {{-- Indikator No Camera --}}
+            
             <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-white/10 text-cyan-200 px-3 py-1.5 rounded-lg text-xs font-bold" title="Kamera Tidak Aktif">
                 <i class="ph-fill ph-video-camera-slash"></i>
             </div>
 
-            {{-- Timer --}}
+            
             <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition-colors" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-cyan-50'">
                 <i class="ph-bold ph-timer text-lg"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg"></span>
             </div>
             
-            {{-- Tombol Hamburger Map Soal --}}
+            
             <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition">
                 <i class="ph-bold" :class="showMobileMap ? 'ph-x' : 'ph-squares-four'"></i>
             </button>
         </div>
     </nav>
 
-    {{-- PROGRESS BAR HORIZONTAL (TEMA CYAN CERAH) --}}
+    
     <div x-show="examType !== 'google_form'" class="h-1.5 w-full bg-blue-900 shrink-0 relative z-40 overflow-hidden">
         <div class="h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
-    {{-- PERBAIKAN 2: Tambahkan min-h-0 pada wrapper utama --}}
+    
     <div class="flex-1 flex overflow-hidden relative min-h-0">
         
-        {{-- KONDISI 1: GOOGLE FORM --}}
-        @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
+        
+        <?php if(isset($exam->exam_type) && $exam->exam_type == 'google_form'): ?>
             <main class="flex-1 flex flex-col h-full bg-slate-100 relative z-0">
                 <div class="bg-cyan-50/80 backdrop-blur-sm border-b border-cyan-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
                     <p class="text-xs font-bold text-cyan-800 flex items-center gap-2">
@@ -703,7 +707,7 @@
                 </div>
                 
                 <div class="flex-1 w-full h-full relative">
-                    <iframe src="{{ $exam->google_form_url }}" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
+                    <iframe src="<?php echo e($exam->google_form_url); ?>" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
                 </div>
                 
                 <div class="p-4 bg-white border-t border-slate-200 flex justify-between items-center relative z-10 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
@@ -718,28 +722,28 @@
                     </button>
                 </div>
             </main>
-        @else
+        <?php else: ?>
 
-        {{-- KONDISI 2: CBT INTERNAL (Engine Asli) --}}
-        {{-- PERBAIKAN 3: Buang overflow-y-auto dari main, pindahkan full ke dalam Card. Tambahkan min-h-0 --}}
+        
+        
         <main class="flex-1 flex flex-col bg-slate-50 relative z-0 min-h-0">
-            {{-- PERBAIKAN 4: Hilangkan padding di HP agar layar soal lebih luas, gunakan p-0 --}}
+            
             <div class="w-full max-w-4xl mx-auto p-0 sm:p-4 md:p-6 lg:p-8 flex-1 flex flex-col min-h-0">
-                {{-- PERBAIKAN 5: Buat lengkungan border hilang di HP, tapi tetap melengkung di PC. Tambahkan min-h-0 --}}
+                
                 <div class="bg-white sm:rounded-[2rem] shadow-sm border-0 sm:border border-slate-200 flex-1 flex flex-col overflow-hidden relative min-h-0">
                     
-                    {{-- Header Soal --}}
-                    {{-- PERBAIKAN 6: Tambahkan shrink-0 agar header tidak mengecil, sesuaikan padding HP --}}
+                    
+                    
                     <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                         <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
                         
-                        {{-- Status Indikator --}}
+                        
                         <div class="flex items-center gap-4">
                             <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-cyan-600 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan</span>
                             <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check"></i> Tersimpan</span>
                             <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Error / Offline</span>
                             
-                            {{-- Checkbox Ragu-Ragu --}}
+                            
                             <label class="flex items-center gap-2 cursor-pointer select-none group">
                                 <div class="relative">
                                     <input type="checkbox" class="peer sr-only" x-model="markedQuestions[questions[currentQuestion]?.id]" @change="saveToLocal()">
@@ -751,12 +755,12 @@
                         </div>
                     </div>
 
-                    {{-- Isi Soal --}}
-                    {{-- PERBAIKAN 7: Posisikan fitur scroll HANYA di bagian konten ini (overflow-y-auto) --}}
+                    
+                    
                     <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto custom-scroll relative">
                         <template x-if="questions.length > 0 && questions[currentQuestion]">
                             <div>
-                                {{-- Gambar Soal --}}
+                                
                                 <template x-if="questions[currentQuestion].question_image">
                                     <div class="mb-6 relative group w-fit">
                                         <img :src="'/storage/' + questions[currentQuestion].question_image" 
@@ -769,16 +773,16 @@
                                     </div>
                                 </template>
                                 
-                                {{-- Teks Soal --}}
+                                
                                 <div class="prose prose-slate max-w-none mb-8 select-none trix-content">
                                     <div class="font-medium text-slate-800 leading-relaxed transition-all duration-300" 
                                          :class="{'text-base': fontSize === 1, 'text-xl': fontSize === 2, 'text-2xl': fontSize === 3}"
                                          x-html="questions[currentQuestion].question_text"></div>
                                 </div>
 
-                                {{-- === AREA JAWABAN (DENGAN LOGIKA ACAK OPSI) === --}}
                                 
-                                {{-- TIPE 1: PILIHAN GANDA --}}
+                                
+                                
                                 <template x-if="!questions[currentQuestion].question_type || questions[currentQuestion].question_type === 'choice'">
                                     <div class="space-y-3">
                                         <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
@@ -793,7 +797,7 @@
                                                 <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
                                                      :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-cyan-400 group-hover:text-cyan-600'">
                                                     
-                                                    {{-- SOLUSI: Secara visual huruf akan selalu berurutan A, B, C, D, E berdasarkan index posisinya --}}
+                                                    
                                                     <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
                                                           x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
                                                     
@@ -810,7 +814,7 @@
                                                     <span class="font-medium transition-colors block" 
                                                           :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-cyan-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
                                                         
-                                                        {{-- Teks Jawaban asli yang sudah teracak --}}
+                                                        
                                                         <span x-text="parsedOptions[optionKey]"></span>
                                                     </span>
                                                     
@@ -823,7 +827,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 2: BENAR / SALAH --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'true_false'">
                                     <div class="grid grid-cols-2 gap-4">
                                         <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99]" 
@@ -846,7 +850,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 3: ESSAY --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'essay'">
                                     <div class="relative">
                                         <textarea x-model="answers[questions[currentQuestion].id]" 
@@ -865,7 +869,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 4: MENJODOHKAN --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'matching'">
                                     <div class="space-y-4">
                                         <p class="text-sm text-slate-500 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
@@ -893,8 +897,8 @@
                         </template>
                     </div>
 
-                    {{-- Tombol Navigasi Bawah --}}
-                    {{-- PERBAIKAN 8: Tambahkan shrink-0 agar tombol selau terkunci/pinned di bagian bawah layar HP --}}
+                    
+                    
                     <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10 shrink-0">
                         <button @click="prevQuestion" :disabled="currentQuestion === 0" 
                                 class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900">
@@ -917,7 +921,7 @@
             </div>
         </main>
 
-        {{-- SIDEBAR NAVIGASI SOAL --}}
+        
         <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col" 
                :class="showMobileMap ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
             
@@ -933,10 +937,11 @@
             <div class="p-4 bg-blue-950/5 border-b border-blue-900/10 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-cyan-100 font-bold shadow-md border border-blue-800">
-                        {{ substr($student->name ?? 'S', 0, 1) }}
+                        <?php echo e(substr($student->name ?? 'S', 0, 1)); ?>
+
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">{{ $student->name ?? 'Peserta' }}</p>
+                        <p class="text-sm font-bold text-slate-800 truncate"><?php echo e($student->name ?? 'Peserta'); ?></p>
                         <p class="text-[10px] text-cyan-600 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
                     </div>
                 </div>
@@ -979,7 +984,7 @@
         
         <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-blue-950/50 z-30 lg:hidden"></div>
         
-        @endif
+        <?php endif; ?>
     </div>
 </body>
-</html>
+</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/student/exam_runner.blade.php ENDPATH**/ ?>
