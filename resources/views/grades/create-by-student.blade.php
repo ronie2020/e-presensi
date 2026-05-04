@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            <form id="gradeForm" action="{{ route('grades.store_by_student') }}" method="POST" @submit="isDirty = false">
+            <form id="gradeForm" action="{{ route('grades.store_by_student') }}" method="POST" @submit="isDirty = false; isSubmitting = true">
                 @csrf
                 <input type="hidden" name="class_id" value="{{ $class->id }}">
                 <input type="hidden" name="student_id" value="{{ $student->id }}">
@@ -125,10 +125,15 @@
                     </div>
 
                     <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center sticky bottom-0 z-20">
-                        <span x-show="isDirty" class="text-[#f9a282] font-bold text-xs flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Perubahan belum disimpan</span>
+                        <span x-show="isDirty" style="display: none;" class="text-[#f9a282] font-bold text-xs flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Perubahan belum disimpan</span>
                         <div class="flex gap-3">
                             <a href="{{ route('grades.index') }}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</a>
-                            <button type="submit" class="px-8 py-3 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] shadow-lg shadow-[#2c3f61]/20 transition">Simpan Nilai</button>
+                            
+                            {{-- BUTTON DENGAN ANIMASI LOADING --}}
+                            <button type="submit" :class="{'opacity-75 cursor-not-allowed': isSubmitting}" class="px-8 py-3 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] shadow-lg shadow-[#2c3f61]/20 transition flex items-center gap-2">
+                                <i x-show="isSubmitting" style="display: none;" class="ph-bold ph-spinner animate-spin"></i>
+                                <span x-text="isSubmitting ? 'Menyimpan...' : 'Simpan Nilai'">Simpan Nilai</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -136,18 +141,44 @@
         </div>
     </div>
 
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('gradeForm', (config) => ({
                 isDirty: false,
+                isSubmitting: false,
                 totalRows: {{ count($subjects) }},
                 kkm: config.kkm,
                 intervals: config.intervals,
 
                 init() {
                     window.addEventListener('beforeunload', (e) => {
-                        if (this.isDirty) { e.preventDefault(); e.returnValue = ''; }
+                        if (this.isDirty && !this.isSubmitting) { e.preventDefault(); e.returnValue = ''; }
                     });
+
+                    // NOTIFIKASI SUKSES (Muncul setelah halaman direload)
+                    @if(session('success'))
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tersimpan!',
+                            text: '{{ session('success') }}',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
+                    @endif
+                    
+                    // NOTIFIKASI ERROR
+                    @if($errors->any())
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            html: '{!! implode("<br>", $errors->all()) !!}',
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
+                    @endif
                 },
 
                 calculatePredicate(val) {

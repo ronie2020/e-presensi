@@ -238,14 +238,117 @@ class Student extends Authenticatable
         return $this->hasMany(Borrowing::class, 'student_id');
     }
 
-     /**
+ /**
      * Relasi ke Riwayat Akademik / Kenaikan Kelas
      */
     public function classHistories(): HasMany
     {       
         return $this->hasMany(StudentClassHistory::class, 'student_id')->latest('created_at');
     }
-    
+
+    // ====================================================================
+    // TAMBAHAN BARU UNTUK BUKU INDUK (RAPORT)
+    // ====================================================================
+
+    protected $loadedGrades = null;
+
+    /**
+     * Relasi ke Data Raport (GradeRecord)
+     */
+    public function gradeRecords(): HasMany
+    {
+        return $this->hasMany(GradeRecord::class, 'student_id');
+    }
+
+    /**
+     * Helper untuk mengambil Nilai berdasarkan Nama Mapel, Kelas, dan Semester
+     */
+    public function getScore($subjectName, $kelas, $semester)
+    {
+        // Load data raport HANYA SEKALI untuk menghemat query database
+        if ($this->loadedGrades === null) {
+            $this->loadedGrades = GradeRecord::with(['items.subject'])
+                ->where('student_id', $this->id)
+                ->get();
+        }
+
+        // Cari record yang cocok dengan Kelas dan Semester
+        $record = $this->loadedGrades->first(function ($r) use ($kelas, $semester) {
+            
+            // NORMALISASI SEMESTER: Menyamakan 'Ganjil' = 1, 'Genap' = 2
+            $dbSemester = strtolower(trim($r->semester));
+            $isMatchSemester = false;
+            
+            if ($semester == 1 && in_array($dbSemester, ['1', 'ganjil'])) {
+                $isMatchSemester = true;
+            } elseif ($semester == 2 && in_array($dbSemester, ['2', 'genap'])) {
+                $isMatchSemester = true;
+            }
+
+            if (!$isMatchSemester) return false;
+            
+            // Deteksi nama kelas (misal: "7A", "VII-A", "Kelas 8", "IX")
+            $cn = strtoupper($r->class_name);
+            $isKelas7 = str_contains($cn, '7') || (str_contains($cn, 'VII') && !str_contains($cn, 'VIII'));
+            $isKelas8 = str_contains($cn, '8') || str_contains($cn, 'VIII');
+            $isKelas9 = str_contains($cn, '9') || str_contains($cn, 'IX');
+            
+            if ($kelas == 7 && $isKelas7) return true;
+            if ($kelas == 8 && $isKelas8) return true;
+            if ($kelas == 9 && $isKelas9) return true;
+            
+            return false;
+        });
+
+        if (!$record) return '-';
+
+        // Cari mapel yang namanya mengandung $subjectName (Toleransi beda penulisan)
+        $item = $record->items->first(function ($i) use ($subjectName) {
+            return stripos($i->subject->name ?? '', $subjectName) !== false;
+        });
+
+        return $item ? $item->score : '-';
+    }
+
+    /**
+     * Helper untuk mengambil data Ketidakhadiran (S/I/A)
+     */
+    public function getAbsence($kelas, $semester)
+    {
+        if ($this->loadedGrades === null) {
+            $this->loadedGrades = GradeRecord::with(['items.subject'])->where('student_id', $this->id)->get();
+        }
+
+        $record = $this->loadedGrades->first(function ($r) use ($kelas, $semester) {
+            
+            // NORMALISASI SEMESTER: Menyamakan 'Ganjil' = 1, 'Genap' = 2
+            $dbSemester = strtolower(trim($r->semester));
+            $isMatchSemester = false;
+            
+            if ($semester == 1 && in_array($dbSemester, ['1', 'ganjil'])) {
+                $isMatchSemester = true;
+            } elseif ($semester == 2 && in_array($dbSemester, ['2', 'genap'])) {
+                $isMatchSemester = true;
+            }
+
+            if (!$isMatchSemester) return false;
+
+            $cn = strtoupper($r->class_name);
+            if ($kelas == 7 && (str_contains($cn, '7') || (str_contains($cn, 'VII') && !str_contains($cn, 'VIII')))) return true;
+            if ($kelas == 8 && (str_contains($cn, '8') || str_contains($cn, 'VIII'))) return true;
+            if ($kelas == 9 && (str_contains($cn, '9') || str_contains($cn, 'IX'))) return true;
+            return false;
+        });
+
+        if (!$record) return '- / - / -';
+
+        $s = $record->absent_s ?: '-';
+        $i = $record->absent_i ?: '-';
+        $a = $record->absent_a ?: '-';
+
+        return "{$s} / {$i} / {$a}";
+    }
+
     /**
      * Helper Static untuk Generate NIS Otomatis     
      */

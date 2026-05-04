@@ -101,10 +101,10 @@
 </head>
 <body class="min-h-screen py-8 text-elevate-text ui-sans relative">
 
-    <!-- DEKORASI BACKGROUND (Hanya tampil di layar, hilang saat dicetak) -->
+    <!-- DEKORASI BACKGROUND -->
     <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-elevate-primary/10 to-transparent pointer-events-none no-print -z-10"></div>
 
-    <!-- TOOLBAR AKSI (Tidak tercetak) - Tema Microsoft Elevate -->
+    <!-- TOOLBAR AKSI (Tidak tercetak) -->
     <div class="max-w-[210mm] mx-auto mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg shadow-elevate-dark/5 border border-white/60 sticky top-4 z-50">
         <div>
             <h2 class="font-black text-elevate-dark flex items-center gap-2">
@@ -114,27 +114,24 @@
         </div>
 
         <div class="flex flex-wrap gap-3 items-center">
-            {{-- Tombol Kembali --}}
             <a href="{{ route('students.index', request()->query()) }}" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-elevate-primary transition-colors shadow-sm flex items-center gap-2 group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
             </a>
             
-            {{-- Tombol Edit --}}
             <a href="{{ route('students.edit', array_merge(['student' => $student->id], request()->query())) }}" class="px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl shadow-sm text-xs font-bold hover:bg-elevate-accent/20 hover:text-elevate-dark transition-colors flex items-center gap-2">
                 <i class="ph-bold ph-pencil-simple text-sm"></i> Edit Data
             </a>
             
-            {{-- Tombol Cetak --}}
             <button onclick="window.print()" class="px-5 py-2.5 bg-elevate-primary text-white font-bold rounded-xl hover:bg-elevate-dark shadow-lg shadow-elevate-primary/30 transition-transform active:scale-95 flex items-center gap-2 text-xs group">
                 <i class="ph-bold ph-printer text-sm group-hover:scale-110 transition-transform"></i> Cetak / PDF
             </button>
         </div>
     </div>
 
-    <!-- KERTAS A4 (Area yang akan dicetak) -->
+    <!-- KERTAS A4 -->
     <div class="a4-paper-container max-w-[210mm] mx-auto bg-white shadow-2xl shadow-slate-300/50 rounded-lg p-[15mm] min-h-[297mm] relative border border-slate-200 text-black">
         
-        <div class="font-serif"> <!-- Memaksa font serif untuk bagian dalam dokumen cetak -->
+        <div class="font-serif"> 
             
             <!-- KOP -->
             <div class="text-center border-b-2 border-black pb-4 mb-4">
@@ -143,7 +140,7 @@
                 <p class="text-xs mt-1">Jalan Raya Lakbok, Kabupaten Ciamis, Jawa Barat</p>
             </div>
 
-            <!-- INFO SISWA -->
+            <!-- INFO SISWA (Ditambahkan NIK agar sinkron dengan Edit) -->
             <div class="flex justify-between items-start mb-6">
                 <div class="w-2/3">
                     <table class="w-full text-sm font-serif">
@@ -153,9 +150,9 @@
                             <td class="py-1">{{ $student->nis ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="font-bold py-1">NISN</td>
+                            <td class="font-bold py-1">NISN / NIK</td>
                             <td class="py-1">:</td>
-                            <td class="py-1">{{ $student->student_id }}</td>
+                            <td class="py-1">{{ $student->student_id }} / {{ $student->nik ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td class="font-bold py-1">Nama Peserta Didik</td>
@@ -177,236 +174,76 @@
             <!-- A. PRIBADI -->
             <div class="header-section">A. KETERANGAN PRIBADI SISWA</div>
             <table class="table-induk">
-                <tr>
-                    <td class="label-col">1. Nama Lengkap</td>
-                    <td class="separator">:</td>
-                    <td class="value-col uppercase font-bold">{{ $student->name }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">2. Nama Panggilan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->nickname ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">3. Jenis Kelamin</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">4. Tempat dan Tanggal Lahir</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->pob ?? '.......' }}, 
-                        {{ $student->dob ? \Carbon\Carbon::parse($student->dob)->translatedFormat('d F Y') : '.......' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label-col">5. Agama</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->religion ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">6. Kewarganegaraan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->citizenship ?? 'Indonesia' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">7. Anak ke</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->birth_order ?? '...' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">8. Jumlah Saudara (Kandung/Tiri/Angkat)</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->siblings_count ?? '-' }} / 
-                        {{ $student->step_siblings_count ?? '-' }} / 
-                        {{ $student->adoptive_siblings_count ?? '-' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label-col">9. Status Yatim/Piatu</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->orphan_status ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">10. Bahasa Sehari-hari</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->daily_language ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">1. Nama Lengkap</td><td class="separator">:</td><td class="value-col uppercase font-bold">{{ $student->name }}</td></tr>
+                <tr><td class="label-col">2. Nama Panggilan</td><td class="separator">:</td><td class="value-col">{{ $student->nickname ?? '-' }}</td></tr>
+                <tr><td class="label-col">3. Jenis Kelamin</td><td class="separator">:</td><td class="value-col">{{ $student->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}</td></tr>
+                <tr><td class="label-col">4. Tempat dan Tanggal Lahir</td><td class="separator">:</td><td class="value-col">{{ $student->pob ?? '.......' }}, {{ $student->dob ? \Carbon\Carbon::parse($student->dob)->translatedFormat('d F Y') : '.......' }}</td></tr>
+                <tr><td class="label-col">5. Agama</td><td class="separator">:</td><td class="value-col">{{ $student->religion ?? '-' }}</td></tr>
+                <tr><td class="label-col">6. Kewarganegaraan</td><td class="separator">:</td><td class="value-col">{{ $student->citizenship ?? 'Indonesia' }}</td></tr>
+                <tr><td class="label-col">7. Anak ke</td><td class="separator">:</td><td class="value-col">{{ $student->birth_order ?? '...' }}</td></tr>
+                <tr><td class="label-col">8. Jumlah Saudara (Kandung/Tiri/Angkat)</td><td class="separator">:</td><td class="value-col">{{ $student->siblings_count ?? '-' }} / {{ $student->step_siblings_count ?? '-' }} / {{ $student->adoptive_siblings_count ?? '-' }}</td></tr>
+                <tr><td class="label-col">9. Status Yatim/Piatu</td><td class="separator">:</td><td class="value-col">{{ $student->orphan_status ?? '-' }}</td></tr>
+                <tr><td class="label-col">10. Bahasa Sehari-hari</td><td class="separator">:</td><td class="value-col">{{ $student->daily_language ?? '-' }}</td></tr>
             </table>
 
             <!-- B. TEMPAT TINGGAL -->
             <div class="header-section">B. KETERANGAN TEMPAT TINGGAL</div>
             <table class="table-induk">
-                <tr>
-                    <td class="label-col">11. Alamat Peserta Didik</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->address ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">12. Nomor Telepon / HP</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->phone ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">13. Tinggal Dengan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->living_with ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">14. Jarak ke Sekolah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->distance_to_school ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">15. Transportasi ke Sekolah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->transport_mode ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">11. Alamat Peserta Didik</td><td class="separator">:</td><td class="value-col">{{ $student->address ?? '-' }}</td></tr>
+                <tr><td class="label-col">12. Nomor Telepon / HP</td><td class="separator">:</td><td class="value-col">{{ $student->phone ?? '-' }}</td></tr>
+                <tr><td class="label-col">13. Tinggal Dengan</td><td class="separator">:</td><td class="value-col">{{ $student->living_with ?? '-' }}</td></tr>
+                <tr><td class="label-col">14. Jarak ke Sekolah</td><td class="separator">:</td><td class="value-col">{{ $student->distance_to_school ?? '-' }}</td></tr>
+                <tr><td class="label-col">15. Transportasi ke Sekolah</td><td class="separator">:</td><td class="value-col">{{ $student->transport_mode ?? '-' }}</td></tr>
             </table>
 
             <!-- C. KESEHATAN -->
             <div class="header-section">C. KETERANGAN KESEHATAN</div>
             <table class="table-induk">
-                <tr>
-                    <td class="label-col">16. Golongan Darah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->blood_type ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">17. Penyakit Pernah Diderita</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->history_disease ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">18. Kelainan Jasmani</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->physical_abnormalities ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">19. Tinggi / Berat Badan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->height ?? '...' }} cm / {{ $student->weight ?? '...' }} kg</td>
-                </tr>
+                <tr><td class="label-col">16. Golongan Darah</td><td class="separator">:</td><td class="value-col">{{ $student->blood_type ?? '-' }}</td></tr>
+                <tr><td class="label-col">17. Penyakit Pernah Diderita</td><td class="separator">:</td><td class="value-col">{{ $student->history_disease ?? '-' }}</td></tr>
+                <tr><td class="label-col">18. Kelainan Jasmani</td><td class="separator">:</td><td class="value-col">{{ $student->physical_abnormalities ?? '-' }}</td></tr>
+                <tr><td class="label-col">19. Tinggi / Berat Badan</td><td class="separator">:</td><td class="value-col">{{ $student->height ?? '...' }} cm / {{ $student->weight ?? '...' }} kg</td></tr>
             </table>
 
             <!-- D. PENDIDIKAN -->
             <div class="header-section">D. KETERANGAN PENDIDIKAN SEBELUMNYA</div>
             <table class="table-induk">
-                <tr>
-                    <td class="label-col">20. Asal Sekolah (SD/MI)</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->school_origin ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">21. No. Ijazah / Tanggal</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->prev_diploma_no ?? '-' }} 
-                        @if($student->prev_exam_date) 
-                            / {{ \Carbon\Carbon::parse($student->prev_exam_date)->format('d-m-Y') }}
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label-col">22. Diterima di Sekolah ini Tgl</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->accepted_date ? \Carbon\Carbon::parse($student->accepted_date)->translatedFormat('d F Y') : '-' }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label-col">23. Pindahan Dari Sekolah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->transfer_from_school ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">20. Asal Sekolah Dasar (SD/MI)</td><td class="separator">:</td><td class="value-col">{{ $student->school_origin ?? '-' }}</td></tr>
+                <tr><td class="label-col">21. No. Ijazah / Tanggal</td><td class="separator">:</td><td class="value-col">{{ $student->prev_diploma_no ?? '-' }} @if($student->prev_exam_date) / {{ \Carbon\Carbon::parse($student->prev_exam_date)->format('d-m-Y') }} @endif</td></tr>
+                <tr><td class="label-col">22. Diterima di Sekolah ini Tgl</td><td class="separator">:</td><td class="value-col">{{ $student->accepted_date ? \Carbon\Carbon::parse($student->accepted_date)->translatedFormat('d F Y') : '-' }}</td></tr>
+                <tr><td class="label-col">23. Pindahan Dari Sekolah</td><td class="separator">:</td><td class="value-col">{{ $student->transfer_from_school ?? '-' }}</td></tr>
             </table>
 
-            <!-- E. ORANG TUA & WALI -->
+            <!-- E. ORANG TUA & WALI (Penomoran Lanjut + Pendidikan & No HP) -->
             <div class="header-section print-break">E. KETERANGAN ORANG TUA & WALI</div>
             <table class="table-induk">
                 <!-- AYAH -->
                 <tr><td colspan="3" class="sub-header">Data Ayah Kandung</td></tr>
-                <tr>
-                    <td class="label-col">24. Nama Ayah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->father_name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">25. Tempat, Tanggal Lahir</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->father_pob ?? '' }}, {{ $student->father_birth_year ? \Carbon\Carbon::parse($student->father_birth_year)->format('Y') : '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">26. Pekerjaan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->father_job ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">27. Penghasilan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->father_income ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">24. Nama Ayah</td><td class="separator">:</td><td class="value-col">{{ $student->father_name ?? '-' }}</td></tr>
+                <tr><td class="label-col">25. Tempat, Tanggal Lahir</td><td class="separator">:</td><td class="value-col">{{ $student->father_pob ?? '' }}, {{ $student->father_birth_year ? \Carbon\Carbon::parse($student->father_birth_year)->format('Y') : '' }}</td></tr>
+                <tr><td class="label-col">26. Pendidikan Tertinggi</td><td class="separator">:</td><td class="value-col">{{ $student->father_education ?? '-' }}</td></tr>
+                <tr><td class="label-col">27. Pekerjaan</td><td class="separator">:</td><td class="value-col">{{ $student->father_job ?? '-' }}</td></tr>
+                <tr><td class="label-col">28. Penghasilan</td><td class="separator">:</td><td class="value-col">{{ $student->father_income ?? '-' }}</td></tr>
 
                 <!-- IBU -->
                 <tr><td colspan="3" class="sub-header">Data Ibu Kandung</td></tr>
-                <tr>
-                    <td class="label-col">28. Nama Ibu</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->mother_name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">29. Tempat, Tanggal Lahir</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->mother_pob ?? '' }}, {{ $student->mother_birth_year ? \Carbon\Carbon::parse($student->mother_birth_year)->format('Y') : '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">30. Pekerjaan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->mother_job ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">31. Penghasilan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->mother_income ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">29. Nama Ibu</td><td class="separator">:</td><td class="value-col">{{ $student->mother_name ?? '-' }}</td></tr>
+                <tr><td class="label-col">30. Tempat, Tanggal Lahir</td><td class="separator">:</td><td class="value-col">{{ $student->mother_pob ?? '' }}, {{ $student->mother_birth_year ? \Carbon\Carbon::parse($student->mother_birth_year)->format('Y') : '' }}</td></tr>
+                <tr><td class="label-col">31. Pendidikan Tertinggi</td><td class="separator">:</td><td class="value-col">{{ $student->mother_education ?? '-' }}</td></tr>
+                <tr><td class="label-col">32. Pekerjaan</td><td class="separator">:</td><td class="value-col">{{ $student->mother_job ?? '-' }}</td></tr>
+                <tr><td class="label-col">33. Penghasilan</td><td class="separator">:</td><td class="value-col">{{ $student->mother_income ?? '-' }}</td></tr>
+                <tr><td class="label-col">34. No. Telepon / WA Ortu</td><td class="separator">:</td><td class="value-col">{{ $student->parent_wa_number ?? '-' }} {{ $student->parent_phone ? ' / ' . $student->parent_phone : '' }}</td></tr>
 
                 <!-- WALI -->
                 <tr><td colspan="3" class="sub-header">Data Wali (Jika Ada)</td></tr>
-                <tr>
-                    <td class="label-col">32. Nama Wali</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->guardian_name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">33. Tempat, Tanggal Lahir</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->guardian_pob ?? '' }}
-                        @if($student->guardian_dob), {{ \Carbon\Carbon::parse($student->guardian_dob)->translatedFormat('d F Y') }} @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label-col">34. Kewarganegaraan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->guardian_citizenship ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">35. Hubungan Keluarga</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->guardian_relationship ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">36. Pekerjaan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->guardian_job ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">37. Alamat</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->guardian_address ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">35. Nama Wali</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_name ?? '-' }}</td></tr>
+                <tr><td class="label-col">36. Tempat, Tanggal Lahir</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_pob ?? '' }} @if($student->guardian_dob), {{ \Carbon\Carbon::parse($student->guardian_dob)->translatedFormat('d F Y') }} @endif</td></tr>
+                <tr><td class="label-col">37. Kewarganegaraan</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_citizenship ?? '-' }}</td></tr>
+                <tr><td class="label-col">38. Hubungan Keluarga</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_relationship ?? '-' }}</td></tr>
+                <tr><td class="label-col">39. Pekerjaan</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_job ?? '-' }}</td></tr>
+                <tr><td class="label-col">40. Penghasilan</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_income ?? '-' }}</td></tr>
+                <tr><td class="label-col">41. No. Telepon / HP Wali</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_phone ?? '-' }}</td></tr>
+                <tr><td class="label-col">42. Alamat</td><td class="separator">:</td><td class="value-col">{{ $student->guardian_address ?? '-' }}</td></tr>
             </table>
 
             <!-- F. MENINGGALKAN SEKOLAH -->
@@ -414,74 +251,122 @@
             <table class="table-induk">
                 <!-- TAMAT -->
                 <tr><td colspan="3" class="sub-header">A. Tamat Belajar</td></tr>
-                <tr>
-                    <td class="label-col">38. Tanggal Tamat</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->graduated_date ? \Carbon\Carbon::parse($student->graduated_date)->translatedFormat('d F Y') : '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">39. Nomor Ijazah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->graduated_diploma_no ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">40. Melanjutkan Ke</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->continuing_to_school ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">43. Tanggal Tamat</td><td class="separator">:</td><td class="value-col">{{ $student->graduated_date ? \Carbon\Carbon::parse($student->graduated_date)->translatedFormat('d F Y') : '-' }}</td></tr>
+                <tr><td class="label-col">44. Nomor Ijazah</td><td class="separator">:</td><td class="value-col">{{ $student->graduated_diploma_no ?? '-' }}</td></tr>
+                <tr><td class="label-col">45. Melanjutkan Ke</td><td class="separator">:</td><td class="value-col">{{ $student->continuing_to_school ?? '-' }}</td></tr>
+                <tr><td class="label-col">46. Alamat Sekolah Lanjutan</td><td class="separator">:</td><td class="value-col">{{ $student->continuing_school_address ?? '-' }}</td></tr>
 
                 <!-- PINDAH -->
                 <tr><td colspan="3" class="sub-header">B. Pindah Sekolah (Mutasi)</td></tr>
-                <tr>
-                    <td class="label-col">41. Tanggal Pindah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->leaving_date ? \Carbon\Carbon::parse($student->leaving_date)->translatedFormat('d F Y') : '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">42. Dari Kelas</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->leaving_class ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">43. Ke Sekolah</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->leaving_to_school ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">44. Alasan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->leaving_reason ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">47. Tanggal Pindah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_date ? \Carbon\Carbon::parse($student->leaving_date)->translatedFormat('d F Y') : '-' }}</td></tr>
+                <tr><td class="label-col">48. Dari Kelas</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_class ?? '-' }}</td></tr>
+                <tr><td class="label-col">49. Ke Sekolah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_to_school ?? '-' }}</td></tr>
+                <tr><td class="label-col">50. Alasan Pindah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_reason ?? '-' }}</td></tr>
 
                 <!-- PUTUS -->
                 <tr><td colspan="3" class="sub-header">C. Putus Sekolah</td></tr>
-                <tr>
-                    <td class="label-col">45. Tanggal / Alasan</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">
-                        {{ $student->dropout_date ? \Carbon\Carbon::parse($student->dropout_date)->translatedFormat('d F Y') : '-' }} 
-                        / {{ $student->dropout_reason ?? '-' }}
-                    </td>
-                </tr>
+                <tr><td class="label-col">51. Tanggal / Alasan Putus</td><td class="separator">:</td><td class="value-col">{{ $student->dropout_date ? \Carbon\Carbon::parse($student->dropout_date)->translatedFormat('d F Y') : '-' }} / {{ $student->dropout_reason ?? '-' }}</td></tr>
             </table>
 
             <!-- G. LAIN-LAIN -->
             <div class="header-section print-break">G. LAIN-LAIN</div>
             <table class="table-induk">
-                <tr>
-                    <td class="label-col">46. Beasiswa</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->scholarship_info ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td class="label-col">47. Catatan Penting</td>
-                    <td class="separator">:</td>
-                    <td class="value-col">{{ $student->general_notes ?? '-' }}</td>
-                </tr>
+                <tr><td class="label-col">52. Prestasi Siswa</td><td class="separator">:</td><td class="value-col">{{ $student->achievements ?? '-' }}</td></tr>
+                <tr><td class="label-col">53. Beasiswa</td><td class="separator">:</td><td class="value-col">{{ $student->scholarship_info ?? '-' }}</td></tr>
+                <tr><td class="label-col">54. Catatan Penting</td><td class="separator">:</td><td class="value-col">{{ $student->general_notes ?? '-' }}</td></tr>
+            </table>
+
+            <!-- F. MENINGGALKAN SEKOLAH -->
+            <div class="header-section print-break">F. KETERANGAN MENINGGALKAN SEKOLAH</div>
+            <table class="table-induk">
+                <!-- TAMAT -->
+                <tr><td colspan="3" class="sub-header">A. Tamat Belajar</td></tr>
+                <tr><td class="label-col">42. Tanggal Tamat</td><td class="separator">:</td><td class="value-col">{{ $student->graduated_date ? \Carbon\Carbon::parse($student->graduated_date)->translatedFormat('d F Y') : '-' }}</td></tr>
+                <tr><td class="label-col">43. Nomor Ijazah</td><td class="separator">:</td><td class="value-col">{{ $student->graduated_diploma_no ?? '-' }}</td></tr>
+                <tr><td class="label-col">44. Melanjutkan Ke</td><td class="separator">:</td><td class="value-col">{{ $student->continuing_to_school ?? '-' }}</td></tr>
+                <tr><td class="label-col">45. Alamat Sekolah Lanjutan</td><td class="separator">:</td><td class="value-col">{{ $student->continuing_school_address ?? '-' }}</td></tr>
+
+                <!-- PINDAH -->
+                <tr><td colspan="3" class="sub-header">B. Pindah Sekolah (Mutasi)</td></tr>
+                <tr><td class="label-col">46. Tanggal Pindah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_date ? \Carbon\Carbon::parse($student->leaving_date)->translatedFormat('d F Y') : '-' }}</td></tr>
+                <tr><td class="label-col">47. Dari Kelas</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_class ?? '-' }}</td></tr>
+                <tr><td class="label-col">48. Ke Sekolah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_to_school ?? '-' }}</td></tr>
+                <tr><td class="label-col">49. Alasan Pindah</td><td class="separator">:</td><td class="value-col">{{ $student->leaving_reason ?? '-' }}</td></tr>
+
+                <!-- PUTUS -->
+                <tr><td colspan="3" class="sub-header">C. Putus Sekolah</td></tr>
+                <tr><td class="label-col">50. Tanggal / Alasan Putus</td><td class="separator">:</td><td class="value-col">{{ $student->dropout_date ? \Carbon\Carbon::parse($student->dropout_date)->translatedFormat('d F Y') : '-' }} / {{ $student->dropout_reason ?? '-' }}</td></tr>
+            </table>
+
+            <!-- G. LAIN-LAIN -->
+            <div class="header-section print-break">G. LAIN-LAIN</div>
+            <table class="table-induk">
+                <tr><td class="label-col">51. Prestasi Siswa</td><td class="separator">:</td><td class="value-col">{{ $student->achievements ?? '-' }}</td></tr>
+                <tr><td class="label-col">52. Beasiswa</td><td class="separator">:</td><td class="value-col">{{ $student->scholarship_info ?? '-' }}</td></tr>
+                <tr><td class="label-col">53. Catatan Penting</td><td class="separator">:</td><td class="value-col">{{ $student->general_notes ?? '-' }}</td></tr>
+            </table>
+
+            <!-- H. PRESTASI BELAJAR (RAPORT) -->
+            <div class="header-section" style="page-break-before: always; margin-top: 20px;">H. PRESTASI BELAJAR (NILAI RAPORT)</div>
+            <table class="w-full text-center text-[11px] font-serif mb-6" style="border-collapse: collapse; border: 1.5px solid #000;">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="border: 1px solid #000; padding: 4px; width: 5%;">No</th>
+                        <th rowspan="2" style="border: 1px solid #000; padding: 4px; width: 35%; text-align: left;">Mata Pelajaran</th>
+                        <th colspan="2" style="border: 1px solid #000; padding: 4px;">Kelas VII</th>
+                        <th colspan="2" style="border: 1px solid #000; padding: 4px;">Kelas VIII</th>
+                        <th colspan="2" style="border: 1px solid #000; padding: 4px;">Kelas IX</th>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
+                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        // MENGAMBIL DATA MATA PELAJARAN LANGSUNG DARI DATABASE
+                        // Diurutkan berdasarkan kolom 'order' yang sudah Anda atur di Master Data
+                        $mapelInduk = \App\Models\Subject::orderBy('order')->get();
+                        $no = 1;
+                    @endphp
+
+                    @foreach($mapelInduk as $mapel)
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $no++ }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: left;">{{ $mapel->name }}</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 7, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 7, 2) }}</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 8, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 8, 2) }}</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 9, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $student->getScore($mapel->name, 9, 2) }}</td>
+                    </tr>
+                    @endforeach
+                    
+                    <tr>
+                        <td colspan="2" style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: right;">Ketidakhadiran (Sakit / Izin / Alfa)</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(7, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(7, 2) }}</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(8, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(8, 2) }}</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(9, 1) }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; font-size: 10px;">{{ $student->getAbsence(9, 2) }}</td>
+                    </tr>
+                </tbody>
             </table>
 
             <!-- TTD -->
-            <div class="mt-12 flex justify-end text-sm print-break">
+            <div class="mt-8 flex justify-end text-sm print-break">
                 <div class="text-center w-56 font-serif">
                     <p>Lakbok, {{ now()->translatedFormat('d F Y') }}</p>
                     <p class="mb-20">Kepala Sekolah,</p>
@@ -490,8 +375,8 @@
                 </div>
             </div>
 
-        </div> <!-- End Font Serif Wrapper -->
-    </div> <!-- End Kertas A4 -->
+        </div> 
+    </div>
 
 </body>
 </html>
