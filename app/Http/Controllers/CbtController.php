@@ -95,11 +95,15 @@ class CbtController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi diperketat terutama untuk tanggal dan durasi waktu
         $request->validate([
             'cbt_event_id' => 'required|exists:cbt_events,id', // Wajib pilih kegiatan
             'title' => 'required|string|max:255',
             'exam_type' => 'required|in:cbt,google_form',
             'subject_name' => 'required|string',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'duration_minutes' => 'required|integer|min:1',
         ]);
 
         $data = [
@@ -139,11 +143,15 @@ class CbtController extends Controller
     {
         $exam = CbtExam::findOrFail($id);
 
+        // Validasi diperketat terutama untuk tanggal dan durasi waktu
         $request->validate([
             'cbt_event_id' => 'required|exists:cbt_events,id', // Validasi Event
             'title' => 'required|string|max:255',
             'exam_type' => 'required|in:cbt,google_form',
             'subject_name' => 'required|string',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'duration_minutes' => 'required|integer|min:1',
         ]);
        
         $data = [

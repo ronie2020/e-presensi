@@ -69,38 +69,38 @@ class StudentExamController extends Controller
                 }
             }
             
-                $exam->session_id = $session ? $session->id : null;
-                $exam->student_score = $session ? $session->total_score : 0;
-            }
+            $exam->session_id = $session ? $session->id : null;
+            $exam->student_score = $session ? $session->total_score : 0;
+        }
 
         return view('cbt.student.index', compact('exams'));
     }
 
-public function showStart($exam_id)
-{
-    $exam = CbtExam::findOrFail($exam_id);
-    $student = Auth::guard('student')->user();
-    $className = $student->schoolClass->name ?? '';
-    
-    if (!$this->checkClassMatch($className, $exam->class_level)) {
-        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
-    }
+    public function showStart($exam_id)
+    {
+        $exam = CbtExam::findOrFail($exam_id);
+        $student = Auth::guard('student')->user();
+        $className = $student->schoolClass->name ?? '';
+        
+        if (!$this->checkClassMatch($className, $exam->class_level)) {
+            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
+        }
 
-    // PENGECEKAN WAKTU
-    $now = Carbon::now();
-    $startTime = Carbon::parse($exam->start_time);
-    $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
+        // PENGECEKAN WAKTU
+        $now = Carbon::now();
+        $startTime = Carbon::parse($exam->start_time);
+        $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
 
-    if ($now->lessThan($startTime)) {
-        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian belum dimulai.');
-    }
-    if ($endTime && $now->greaterThan($endTime)) {
-        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian sudah berakhir.');
-    }
+        if ($now->lessThan($startTime)) {
+            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian belum dimulai.');
+        }
+        if ($endTime && $now->greaterThan($endTime)) {
+            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian sudah berakhir.');
+        }
 
-    $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
-        ->where('cbt_exam_id', $exam_id)
-        ->first();
+        $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
+            ->where('cbt_exam_id', $exam_id)
+            ->first();
 
         if ($existingSession && $existingSession->status == 'finished') {
             return redirect()->route('student.exam.index')->with('error', 'Anda sudah menyelesaikan ujian ini.');
@@ -166,13 +166,23 @@ public function showStart($exam_id)
             return redirect()->route('student.exam.index');
         }
 
-        // Logika Hitung Waktu
+        // PERBAIKAN LOGIKA HITUNG WAKTU (Cegah Bug End Time Null)
         $startTime = Carbon::parse($session->created_at);
         $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
-        $endTimeBySchedule = Carbon::parse($exam->end_time);
         
-        $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
+        if (!empty($exam->end_time)) {
+            $endTimeBySchedule = Carbon::parse($exam->end_time);
+            // Ambil waktu mana yang lebih dulu habis (Durasi vs Jadwal)
+            $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
+        } else {
+            // Jika jadwal bersifat open (tidak ada batas akhir), maka murni pakai durasi
+            $finalEndTime = $endTimeByDuration;
+        }
+        
         $timeLeft = Carbon::now()->diffInSeconds($finalEndTime, false);
+        
+        // DURASI EFEKTIF: Waktu asli (dalam detik) yang siswa dapatkan (Penting untuk perhitungan 75%)
+        $effectiveDuration = $startTime->diffInSeconds($finalEndTime);
 
         if ($timeLeft <= 0) {
             return $this->finishProcess($session, $exam);
@@ -209,7 +219,7 @@ public function showStart($exam_id)
         // Query dasar mengambil soal
         $query = CbtQuestion::where('cbt_exam_id', $exam_id)
             ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
-            ->inRandomOrder($session->id); // <--- Kunci utama, acak berdasarkan ID sesi
+            ->inRandomOrder($session->id);
 
         // LOGIKA ANDA: Jika guru menyetel limit (misal 40), maka potong soalnya!
         if (isset($exam->question_limit) && $exam->question_limit > 0) {
@@ -220,9 +230,9 @@ public function showStart($exam_id)
         $questions = $query->get();
         
         if (view()->exists('cbt.student.exam_runner')) {
-             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId', 'student'));
+             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
         } else {
-             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId', 'student'));
+             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
         }
     }
 
@@ -268,18 +278,30 @@ public function showStart($exam_id)
         if ($session) {
             $exam = CbtExam::find($exam_id);
             
-            // --- LOGIKA 75% WAKTU (Bypass jika forced/pelanggaran) ---
-            // Jika BUKAN paksaan, sistem akan mengecek waktu
+            // --- LOGIKA 75% WAKTU DINAMIS (Bypass jika forced/pelanggaran) ---
             if (!$request->has('forced')) {
                 $startTime = Carbon::parse($session->created_at);
                 $now = Carbon::now();
                 
+                // Kalkulasi ulang batas waktu sesungguhnya
+                $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
+                if (!empty($exam->end_time)) {
+                    $endTimeBySchedule = Carbon::parse($exam->end_time);
+                    $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
+                } else {
+                    $finalEndTime = $endTimeByDuration;
+                }
+
+                // Hitung durasi EFEKTIF (menit) yang dimiliki siswa, lalu ambil 75%-nya
+                $effectiveDurationMinutes = $startTime->diffInMinutes($finalEndTime);
                 $minutesElapsed = $startTime->diffInMinutes($now);
-                $minimumMinutesRequired = $exam->duration_minutes * 0.75;
+                
+                // Syarat: Siswa WAJIB mengerjakan 75% dari waktu yang TERSEDIA BAGI MEREKA
+                $minimumMinutesRequired = $effectiveDurationMinutes * 0.75;
 
                 if ($minutesElapsed < $minimumMinutesRequired) {
                     return redirect()->route('student.exam.run', $exam_id)
-                        ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
+                        ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu pengerjaan (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
                 }
             }
             // --- AKHIR LOGIKA 75% ---
