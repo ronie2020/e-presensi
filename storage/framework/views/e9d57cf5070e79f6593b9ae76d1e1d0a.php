@@ -181,9 +181,8 @@
                         // Jika saat memuat ulang halaman pelanggaran sudah >= batas, usir langsung
                         if (this.violationCount >= this.maxViolations) {
                             this.showSecurityOverlay = true;
-                            // Auto-submit bila di-refresh tapi sisa pelanggaran habis
                             setTimeout(() => {
-                                if(this.saveStatus !== 'finished') {
+                                if(this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') {
                                     this.submitExam(true);
                                 }
                             }, 3000);
@@ -200,9 +199,9 @@
                         this.updateProgress();
                         this.checkPendingAnswers();
 
-                        // Background Sync
+                        // Background Sync - Diperkuat
                         this.backgroundSyncInterval = setInterval(() => {
-                            if(this.isOnline && this.unsavedQuestions.size > 0 && this.saveStatus !== 'saving') {
+                            if(this.isOnline && this.unsavedQuestions.size > 0 && this.saveStatus !== 'saving' && this.saveStatus !== 'submitting') {
                                 this.syncPendingAnswers();
                             }
                         }, 5000);
@@ -339,12 +338,18 @@
                     }
                 },
 
+                // LOGIKA SINKRONISASI DIPERKUAT (Return Boolean)
                 async syncPendingAnswers() {
-                    if (this.unsavedQuestions.size === 0) { this.saveStatus = 'saved'; return; }
+                    if (this.unsavedQuestions.size === 0) { 
+                        this.saveStatus = 'saved'; 
+                        this.checkAutoSubmitAfterSync();
+                        return true; 
+                    }
+                    
                     this.saveStatus = 'saving';
                     const pendingIds = Array.from(this.unsavedQuestions);
-                    
                     let allSuccess = true;
+
                     for (const qId of pendingIds) { 
                         if (this.answers[qId]) {
                             await this.pushAnswerToServer(qId, this.answers[qId]);
@@ -355,7 +360,21 @@
                     }
                     
                     if(allSuccess) {
-                        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Data tersinkron!', showConfirmButton: false, timer: 2000, customClass: { popup: 'rounded-xl mb-4' }});
+                        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Seluruh Data Tersinkron!', showConfirmButton: false, timer: 2000, customClass: { popup: 'rounded-xl mb-4' }});
+                        this.checkAutoSubmitAfterSync();
+                        return true;
+                    }
+
+                    this.saveStatus = 'error';
+                    return false;
+                },
+
+                checkAutoSubmitAfterSync() {
+                    // Jika waktu habis atau pelanggaran max, submit otomatis saat internet kembali jalan
+                    if (this.saveStatus !== 'submitting' && this.saveStatus !== 'finished') {
+                        if (this.timeLeft <= 0 || this.violationCount >= this.maxViolations) {
+                            this.submitExam(true);
+                        }
                     }
                 },
 
@@ -401,10 +420,10 @@
                     // Tampilkan Overlay Biru Keamanan
                     this.showSecurityOverlay = true;
 
-                    // Jika Pelanggaran Habis, usir otomatis (Tanpa Swal yang berbentrokan)
+                    // Jika Pelanggaran Habis, usir otomatis
                     if(this.violationCount >= this.maxViolations) {
                         setTimeout(() => {
-                            if(this.saveStatus !== 'finished') {
+                            if(this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') {
                                 this.submitExam(true);
                             }
                         }, 3000);
@@ -428,8 +447,8 @@
                             clearInterval(this.timerInterval); 
                             this.timeLeft = 0; 
                             this.formattedTime = "00:00:00"; 
-                            if(this.saveStatus !== 'finished') { 
-                                Swal.fire({ icon: 'info', title: 'Waktu Habis!', text: 'Sistem akan menyelesaikan sesi otomatis.', allowOutsideClick: false }); 
+                            if(this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') { 
+                                Swal.fire({ icon: 'info', title: 'Waktu Habis!', text: 'Sistem sedang menyimpan dan menyelesaikan sesi otomatis.', showConfirmButton: false, allowOutsideClick: false }); 
                                 this.submitExam(true); 
                             } 
                         }
@@ -437,11 +456,10 @@
                 },
 
                 finishExam() {
-                    // LOGIKA BARU EFEKTIF (Memperhitungkan durasi riil siswa yang terlambat)
+                    // LOGIKA 75%
                     const waitThreshold = this.effectiveDuration * 0.25; 
 
                     if (this.timeLeft > waitThreshold) {
-                        // Hitung waktu tunggunya
                         const waitSec = Math.floor(this.timeLeft - waitThreshold);
                         const m = Math.floor(waitSec / 60);
                         const s = waitSec % 60;
@@ -452,10 +470,10 @@
                             title: 'Waktu Minimal Belum Tercapai!',
                             html: `Sistem mengunci pengumpulan karena Anda harus mengerjakan minimal <b>75%</b> dari sisa waktu efektif ujian Anda.<br><br>Sisa waktu tunggu agar bisa dikumpulkan: <b class='text-rose-600'>${waitText}</b>.`,
                             confirmButtonText: '<i class="ph-bold ph-arrow-u-up-left"></i> Kembali Mengerjakan',
-                            confirmButtonColor: '#172554', // Tema Blue-950
+                            confirmButtonColor: '#172554',
                             customClass: { popup: 'rounded-[2rem]' }
                         });
-                        return; // Return menghentikan proses, siswa TETAP DI HALAMAN ujian
+                        return; 
                     }
 
                     let htmlContent = "";
@@ -476,28 +494,62 @@
                         icon: 'question', 
                         showCancelButton: true, 
                         confirmButtonText: 'Ya, Selesaikan', 
-                        confirmButtonColor: '#172554', // Tema Blue-950
+                        confirmButtonColor: '#172554',
                         cancelButtonText: 'Batal', 
                         customClass: { popup: 'rounded-[2rem]' }
                     }).then((result) => { if (result.isConfirmed) this.submitExam(); });
                 },
 
+                // PENGAMANAN SUBMIT TOTAL (GATEKEEPER)
                 async submitExam(forced = false) {
-                    // Mencegah overlay biru menutupi loading penyelesaian ujian
-                    this.showSecurityOverlay = false; 
+                    if (this.saveStatus === 'submitting' || this.saveStatus === 'finished') return;
+
+                    // 1. CEK INTERNET DULUAN: Jika offline, Tahan Siswa!
+                    if (!this.isOnline && this.examType !== 'google_form') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Koneksi Internet Terputus!',
+                            html: 'Sistem mendeteksi Anda sedang offline.<br>Jawaban Anda <b>Aman Tersimpan di Perangkat Ini</b>.<br><br>Mohon hubungkan kembali perangkat Anda ke internet. Sistem akan <b>otomatis mengumpulkan jawaban</b> ketika koneksi stabil.',
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        });
+                        return; // Hentikan di sini. Jangan biarkan local storage dihapus!
+                    }
+
+                    const prevStatus = this.saveStatus;
+                    this.saveStatus = 'submitting';
+
+                    Swal.fire({ title: 'Menyelesaikan Sesi...', html: 'Sistem sedang memastikan 100% jawaban Anda tersimpan ke server. Mohon tunggu.', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rounded-[2rem]' } });
+
+                    // 2. PAKSA SINKRONISASI JIKA ADA YANG TERTINGGAL
+                    if(this.examType !== 'google_form' && this.unsavedQuestions.size > 0) {
+                        const syncSuccess = await this.syncPendingAnswers();
+                        
+                        // Jika ternyata koneksi buruk dan server gagal membalas saat disinkron:
+                        if (!syncSuccess) {
+                            this.saveStatus = prevStatus; // Kembalikan statusnya
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Gagal Sinkronisasi!',
+                                html: 'Server gagal merespon. Jawaban Anda <b>MASIH AMAN</b> di browser ini.<br><br>Jangan tutup halaman ini, periksa koneksi Anda dan coba kumpulkan lagi.',
+                                confirmButtonText: 'Saya Mengerti',
+                                confirmButtonColor: '#172554'
+                            });
+                            return; // Hentikan di sini. Data tidak hilang!
+                        }
+                    }
+
+                    // 3. AMAN. DATA 100% SUDAH DI SERVER.
+                    this.saveStatus = 'finished';
+                    this.showSecurityOverlay = false; // Boleh hilangkan layar blokir pelanggaran
                     
                     clearInterval(this.timerInterval);
                     if(this.backgroundSyncInterval) clearInterval(this.backgroundSyncInterval);
-                    
-                    Swal.fire({ title: 'Menyelesaikan Sesi...', html: 'Mohon tunggu sesaat.', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rounded-[2rem]' } });
 
-                    if(this.examType !== 'google_form' && this.unsavedQuestions.size > 0) {
-                        await this.syncPendingAnswers();
-                    }
-
-                    this.saveStatus = 'finished';
+                    // BARULAH KITA MENGHAPUS LOKAL STORAGE
                     localStorage.removeItem(`exam_${this.sessionId}`);
 
+                    // 4. SUBMIT FORM KE BACKEND
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
                     form.action = "<?php echo e(route('student.exam.finish', ':id')); ?>".replace(':id', this.examId);
@@ -506,7 +558,6 @@
                     t.type = 'hidden'; t.name = '_token'; t.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     form.appendChild(t); 
 
-                    // Inject Sinyal "Forced" (Apabila ada validasi batas 75% waktu di Controller, ini akan mem-bypass-nya)
                     if (forced) {
                         const f = document.createElement('input'); 
                         f.type = 'hidden'; f.name = 'forced'; f.value = '1';
