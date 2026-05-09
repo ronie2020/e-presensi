@@ -559,9 +559,10 @@ Route::middleware('auth')->group(function () {
     });
         
         // ROUTE ADMIN LITERASI (MONITORING)      
-        Route::prefix('admin/literacy')->name('admin.literacy.')->group(function() {
+         Route::prefix('admin/literacy')->name('admin.literacy.')->group(function() {
             Route::get('/', [App\Http\Controllers\AdminLiteracyController::class, 'index'])->name('index');
             Route::post('/{id}/verify', [App\Http\Controllers\AdminLiteracyController::class, 'verify'])->name('verify');
+            Route::post('/{id}/reject', [App\Http\Controllers\AdminLiteracyController::class, 'reject'])->name('reject');
             Route::delete('/{id}', [App\Http\Controllers\AdminLiteracyController::class, 'destroy'])->name('destroy');
     });
 

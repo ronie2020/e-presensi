@@ -493,6 +493,8 @@ class StudentPortalController extends Controller
             $literacy_journals = LiteracyJournal::where('student_id', $id)->latest()->take(20)->get();
             $total_entries = LiteracyJournal::where('student_id', $id)->count();
             $total_pages = LiteracyJournal::where('student_id', $id)->sum('pages_read');
+            
+            // Hitung skor tambahan jika ada fitur rating di database, tapi amannya menggunakan entries + pages seperti lama
             $points = ($total_entries * 50) + $total_pages;
             
             $level = 'Pemula'; $next_target = 100;
@@ -627,6 +629,7 @@ class StudentPortalController extends Controller
         return back()->with('success', 'Terima kasih! Ulasanmu membantu kami meningkatkan kualitas layanan bimbingan sekolah.');
     }
     
+    // METHOD UNTUK MENYIMPAN JURNAL LITERASI YANG SUDAH DIPERBARUI
     public function storeLiteracy(Request $request)
     {
         $request->validate([
@@ -634,6 +637,9 @@ class StudentPortalController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'nullable|string|max:150',
             'pages' => 'required|numeric|min:1',
+            'rating' => 'required|integer|min:1|max:5', // Tambahan Rating
+            'favorite_character' => 'nullable|string|max:255', // Tambahan Tokoh Favorit
+            'new_vocabulary' => 'nullable|string|max:255', // Tambahan Kosakata
             'summary' => 'required|string|min:10',
             'proof' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
@@ -648,7 +654,11 @@ class StudentPortalController extends Controller
                 'title' => $request->title,
                 'author' => $request->author,
                 'pages_read' => $request->pages,
+                'rating' => $request->rating,
+                'favorite_character' => $request->favorite_character,
+                'new_vocabulary' => $request->new_vocabulary,
                 'summary' => $request->summary,
+                'status' => 'pending', // Menambahkan status default
                 'verified_at' => null 
             ];
 

@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- Scripts & Styles --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
@@ -19,7 +28,7 @@
             }
          }">
     
-        {{-- LOADING OVERLAY --}}
+        
         <div x-show="loading" style="display: none;" 
              class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
             <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center">
@@ -30,12 +39,12 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HEADER SECTION (HERO + FILTER) --}}
+            
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 
-                {{-- Hero Card Elevate Theme --}}
+                
                 <div class="animate-enter lg:col-span-1 bg-elevate-gradient-main rounded-[2.5rem] p-6 lg:p-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 relative overflow-hidden flex flex-col justify-between min-h-[200px] border border-white/60 group">
-                    {{-- Decorative Blobs --}}
+                    
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-elevate-primary/10 rounded-full blur-2xl group-hover:bg-elevate-primary/20 transition-all duration-700 pointer-events-none"></div>
                     <div class="absolute -left-10 bottom-0 w-32 h-32 bg-elevate-peach/20 rounded-full blur-xl group-hover:bg-elevate-peach/30 transition-all duration-700 pointer-events-none"></div>
                     
@@ -53,17 +62,18 @@
                         <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm text-elevate-dark">
                             <i class="ph-bold ph-calendar-blank text-elevate-primary text-lg"></i>
                             <span>
-                                @if(request('date'))
-                                    {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d M Y') }}
-                                @else
+                                <?php if(request('date')): ?>
+                                    <?php echo e(\Carbon\Carbon::parse(request('date'))->translatedFormat('d M Y')); ?>
+
+                                <?php else: ?>
                                     Semua Waktu
-                                @endif
+                                <?php endif; ?>
                             </span>
                         </div>
                     </div>
                 </div>
 
-                {{-- Filter Card --}}
+                
                 <div class="animate-enter lg:col-span-2 bg-white rounded-[2.5rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden" style="animation-delay: 100ms">
                     <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
                     
@@ -76,23 +86,23 @@
                         </div>
 
                         <form method="GET" class="flex flex-col md:flex-row gap-4 w-full" @submit.prevent="submitFilter">
-                            {{-- Class Select --}}
+                            
                             <div class="flex-1 relative">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pilih Kelas</label>
                                 <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 focus:ring-elevate-primary focus:border-elevate-primary text-elevate-dark shadow-sm transition-all cursor-pointer appearance-none">
                                     <option value="">-- Semua Kelas --</option>
-                                    @foreach($classes as $c)
-                                        <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($c->id); ?>" <?php echo e(request('class_id') == $c->id ? 'selected' : ''); ?>><?php echo e($c->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                                 <div class="absolute bottom-3 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                             </div>
 
-                            {{-- Date Picker --}}
+                            
                             <div class="flex-1">
                                 <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pilih Tanggal</label>
                                 <div class="relative">
-                                    <input type="date" name="date" value="{{ request('date') }}" 
+                                    <input type="date" name="date" value="<?php echo e(request('date')); ?>" 
                                            class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 pl-11 focus:ring-elevate-primary focus:border-elevate-primary text-elevate-dark shadow-sm placeholder-slate-400 transition-all">
                                     <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -102,7 +112,7 @@
                                 <button type="submit" class="flex-[3] md:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-8 rounded-2xl h-12 font-bold text-sm shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2 transition-all active:scale-95 group">
                                     <i class="ph-bold ph-magnifying-glass text-lg group-hover:scale-110 transition-transform"></i> <span class="md:hidden">Terapkan</span>
                                 </button>
-                                <a href="{{ route('admin.literacy.index') }}" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
+                                <a href="<?php echo e(route('admin.literacy.index')); ?>" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
                                     <i class="ph-bold ph-arrow-counter-clockwise text-lg"></i>
                                 </a>
                             </div>
@@ -111,10 +121,10 @@
                 </div>
             </div>
 
-            {{-- DASHBOARD / KPI CARDS --}}
+            
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 
-                {{-- 1. Partisipasi Siswa --}}
+                
                 <div class="animate-enter bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between group hover:shadow-lg transition-all relative overflow-hidden" style="animation-delay: 200ms">
                     <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 pointer-events-none">
                         <i class="ph-fill ph-chart-pie-slice text-[10rem] text-elevate-primary"></i>
@@ -126,28 +136,28 @@
                         </h3>
                         
                         <div class="flex items-baseline gap-2 mb-4">
-                            <span class="text-5xl lg:text-6xl font-black text-elevate-dark tracking-tight">{{ $participationRate }}<span class="text-2xl text-slate-400 ml-1">%</span></span>
+                            <span class="text-5xl lg:text-6xl font-black text-elevate-dark tracking-tight"><?php echo e($participationRate); ?><span class="text-2xl text-slate-400 ml-1">%</span></span>
                         </div>
 
-                        {{-- Progress Bar --}}
+                        
                         <div class="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden flex shadow-inner">
-                            <div class="bg-elevate-primary h-full rounded-full transition-all duration-1000" style="width: {{ $participationRate }}%"></div>
+                            <div class="bg-elevate-primary h-full rounded-full transition-all duration-1000" style="width: <?php echo e($participationRate); ?>%"></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="px-3 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-[11px] font-bold flex items-center gap-2">
                                 <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div> 
-                                <span class="truncate">Sudah: {{ $submittedStudentCount }}</span>
+                                <span class="truncate">Sudah: <?php echo e($submittedStudentCount); ?></span>
                             </div>
                             <div class="px-3 py-2.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-xl text-[11px] font-bold flex items-center gap-2">
                                 <div class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></div> 
-                                <span class="truncate">Belum: {{ $notSubmittedCount }}</span>
+                                <span class="truncate">Belum: <?php echo e($notSubmittedCount); ?></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- 2. Buku Terpopuler (List) --}}
+                
                 <div class="animate-enter lg:col-span-2 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 group hover:shadow-lg transition-all relative overflow-hidden flex flex-col" style="animation-delay: 300ms">
                     <div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition transform group-hover:scale-110 pointer-events-none">
                         <i class="ph-fill ph-books text-[12rem] text-elevate-dark"></i>
@@ -161,57 +171,60 @@
                             <span class="px-3 py-1 bg-elevate-accent/10 text-elevate-primary rounded-lg text-[10px] font-black uppercase tracking-wider border border-elevate-accent/20">Top 5</span>
                         </div>
 
-                        @if($topBooks->count() > 0)
+                        <?php if($topBooks->count() > 0): ?>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                @foreach($topBooks as $index => $book)
-                                    <div class="flex items-center gap-4 p-3 rounded-2xl border transition-colors {{ $index == 0 ? 'bg-elevate-accent/5 border-elevate-accent/20 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-elevate-accent/30 hover:shadow-sm' }}">
-                                        {{-- Rank Badge --}}
-                                        <div class="w-10 h-10 rounded-[0.8rem] flex items-center justify-center font-black text-sm shrink-0 {{ $index == 0 ? 'bg-elevate-primary text-white shadow-md shadow-elevate-primary/30' : 'bg-white text-slate-500 border border-slate-200' }}">
-                                            #{{ $index + 1 }}
+                                <?php $__currentLoopData = $topBooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="flex items-center gap-4 p-3 rounded-2xl border transition-colors <?php echo e($index == 0 ? 'bg-elevate-accent/5 border-elevate-accent/20 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-elevate-accent/30 hover:shadow-sm'); ?>">
+                                        
+                                        <div class="w-10 h-10 rounded-[0.8rem] flex items-center justify-center font-black text-sm shrink-0 <?php echo e($index == 0 ? 'bg-elevate-primary text-white shadow-md shadow-elevate-primary/30' : 'bg-white text-slate-500 border border-slate-200'); ?>">
+                                            #<?php echo e($index + 1); ?>
+
                                         </div>
                                         
                                         <div class="min-w-0 flex-1 py-1">
-                                            <h4 class="font-black text-elevate-dark text-sm truncate" title="{{ $book->title }}">
-                                                {{ $book->title }}
+                                            <h4 class="font-black text-elevate-dark text-sm truncate" title="<?php echo e($book->title); ?>">
+                                                <?php echo e($book->title); ?>
+
                                             </h4>
                                             <p class="text-[10px] font-bold text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
-                                                <i class="ph-fill ph-pen-nib text-elevate-primary"></i> {{ $book->author ?? 'Tanpa Penulis' }}
+                                                <i class="ph-fill ph-pen-nib text-elevate-primary"></i> <?php echo e($book->author ?? 'Tanpa Penulis'); ?>
+
                                             </p>
                                         </div>
                                         
                                         <div class="text-right pl-2 shrink-0 pr-2">
-                                            <span class="block font-black text-elevate-primary text-lg leading-none">{{ $book->total_read }}</span>
+                                            <span class="block font-black text-elevate-primary text-lg leading-none"><?php echo e($book->total_read); ?></span>
                                             <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">Pembaca</span>
                                         </div>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="flex-1 flex flex-col items-center justify-center text-center py-8">
                                 <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-3 border border-slate-100 shadow-inner">
                                     <i class="ph-bold ph-books text-2xl"></i>
                                 </div>
                                 <p class="text-slate-500 text-sm font-bold">Belum ada data tren buku.</p>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
-            {{-- TABEL DATA JURNAL --}}
+            
             <div class="animate-enter bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden min-h-[400px]" style="animation-delay: 400ms">
-                {{-- Table Header Custom --}}
+                
                 <div class="px-6 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <h3 class="font-black text-elevate-dark flex items-center gap-2 text-lg">
                         <i class="ph-fill ph-list-dashes text-elevate-primary text-xl"></i>
                         Daftar Jurnal Masuk
                     </h3>
                     <div class="text-xs font-black uppercase tracking-widest text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
-                        Total: {{ $journals->total() }} Data
+                        Total: <?php echo e($journals->total()); ?> Data
                     </div>
                 </div>
 
-                @if($journals->count() > 0)
+                <?php if($journals->count() > 0): ?>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -223,20 +236,22 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50">
-                                @foreach($journals as $item)
+                                <?php $__currentLoopData = $journals; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr class="group hover:bg-slate-50/80 transition-colors">
                                     <td class="p-5 pl-8 align-top">
                                         <div class="flex items-center gap-3.5">
-                                            {{-- Avatar Initials --}}
+                                            
                                             <div class="w-10 h-10 rounded-2xl bg-elevate-accent/10 text-elevate-primary flex items-center justify-center font-black text-sm shrink-0 border border-elevate-accent/20 group-hover:bg-elevate-primary group-hover:text-white transition-colors shadow-sm">
-                                                {{ substr($item->student->name, 0, 1) }}
+                                                <?php echo e(substr($item->student->name, 0, 1)); ?>
+
                                             </div>
                                             <div>
-                                                <p class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors leading-tight line-clamp-2">{{ $item->student->name }}</p>
-                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{{ $item->student->schoolClass->name ?? '-' }}</p>
+                                                <p class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors leading-tight line-clamp-2"><?php echo e($item->student->name); ?></p>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1"><?php echo e($item->student->schoolClass->name ?? '-'); ?></p>
                                                 <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400 font-medium">
                                                     <i class="ph-bold ph-calendar-blank"></i>
-                                                    {{ \Carbon\Carbon::parse($item->created_at)->format('d M, H:i') }}
+                                                    <?php echo e(\Carbon\Carbon::parse($item->created_at)->format('d M, H:i')); ?>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -244,82 +259,82 @@
                                     <td class="p-5 align-top max-w-sm lg:max-w-md">
                                         <div class="flex flex-wrap gap-2 mb-2">
                                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[10px] font-bold shadow-sm">
-                                                <i class="ph-bold ph-book-open text-elevate-primary text-sm"></i> {{ $item->pages_read }} Halaman
+                                                <i class="ph-bold ph-book-open text-elevate-primary text-sm"></i> <?php echo e($item->pages_read); ?> Halaman
                                             </span>
                                             <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-[10px] font-bold shadow-sm">
-                                                @for($i=1; $i<=5; $i++)
-                                                    @if($i <= ($item->rating ?? 0)) ★ @else ☆ @endif
-                                                @endfor
+                                                <?php for($i=1; $i<=5; $i++): ?>
+                                                    <?php if($i <= ($item->rating ?? 0)): ?> ★ <?php else: ?> ☆ <?php endif; ?>
+                                                <?php endfor; ?>
                                             </span>
                                         </div>
-                                        <h4 class="font-black text-elevate-dark text-sm mb-1 leading-snug line-clamp-2">{{ $item->title }}</h4>
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Penulis: {{ $item->author ?? '-' }}</p>
+                                        <h4 class="font-black text-elevate-dark text-sm mb-1 leading-snug line-clamp-2"><?php echo e($item->title); ?></h4>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Penulis: <?php echo e($item->author ?? '-'); ?></p>
                                         
-                                        @if($item->favorite_character || $item->new_vocabulary)
+                                        <?php if($item->favorite_character || $item->new_vocabulary): ?>
                                             <div class="grid grid-cols-2 gap-2 mb-3">
-                                                @if($item->favorite_character)
+                                                <?php if($item->favorite_character): ?>
                                                     <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
                                                         <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Tokoh Favorit</p>
-                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="{{ $item->favorite_character }}">{{ $item->favorite_character }}</p>
+                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="<?php echo e($item->favorite_character); ?>"><?php echo e($item->favorite_character); ?></p>
                                                     </div>
-                                                @endif
-                                                @if($item->new_vocabulary)
+                                                <?php endif; ?>
+                                                <?php if($item->new_vocabulary): ?>
                                                     <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
                                                         <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Kosakata</p>
-                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="{{ $item->new_vocabulary }}">{{ $item->new_vocabulary }}</p>
+                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="<?php echo e($item->new_vocabulary); ?>"><?php echo e($item->new_vocabulary); ?></p>
                                                     </div>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
 
                                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed relative group-hover:bg-white group-hover:border-elevate-accent/30 transition-all font-medium">
                                             <i class="ph-fill ph-quotes text-elevate-accent/20 absolute -top-1 -left-1 text-2xl"></i>
-                                            <span class="relative z-10 break-words">{{ Str::limit($item->summary, 150) }}</span>
+                                            <span class="relative z-10 break-words"><?php echo e(Str::limit($item->summary, 150)); ?></span>
                                         </div>
                                     </td>
                                     <td class="p-5 align-top text-center">
-                                        @if($item->proof_image)
-                                            <a href="{{ asset('storage/'.$item->proof_image) }}" target="_blank" class="inline-block relative group/img">
-                                                <img src="{{ asset('storage/'.$item->proof_image) }}" class="h-16 w-16 object-cover rounded-xl border border-slate-200 shadow-sm transition transform group-hover/img:scale-105">
+                                        <?php if($item->proof_image): ?>
+                                            <a href="<?php echo e(asset('storage/'.$item->proof_image)); ?>" target="_blank" class="inline-block relative group/img">
+                                                <img src="<?php echo e(asset('storage/'.$item->proof_image)); ?>" class="h-16 w-16 object-cover rounded-xl border border-slate-200 shadow-sm transition transform group-hover/img:scale-105">
                                                 <div class="absolute inset-0 bg-elevate-dark/60 opacity-0 group-hover/img:opacity-100 rounded-xl flex items-center justify-center transition-all backdrop-blur-[2px]">
                                                     <i class="ph-bold ph-eye text-white text-xl"></i>
                                                 </div>
                                             </a>
-                                        @else
+                                        <?php else: ?>
                                             <div class="h-16 w-16 mx-auto rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-slate-300 bg-slate-50">
                                                 <i class="ph-bold ph-image-broken text-xl"></i>
                                             </div>
                                             <span class="text-[9px] text-slate-400 font-bold block mt-2 uppercase tracking-widest">Tanpa Bukti</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="p-5 pr-8 align-top text-right">
                                         <div class="flex flex-col gap-2 items-end">
-                                            @if($item->status === 'rejected')
-                                                <div class="w-full px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1" title="{{ $item->rejection_reason }}">
+                                            <?php if($item->status === 'rejected'): ?>
+                                                <div class="w-full px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1" title="<?php echo e($item->rejection_reason); ?>">
                                                     <i class="ph-fill ph-x-circle text-sm"></i> Ditolak
                                                 </div>
-                                            @elseif(!$item->verified_at)
-                                                <form action="{{ route('admin.literacy.verify', $item->id) }}" method="POST" class="w-full">
-                                                    @csrf
+                                            <?php elseif(!$item->verified_at): ?>
+                                                <form action="<?php echo e(route('admin.literacy.verify', $item->id)); ?>" method="POST" class="w-full">
+                                                    <?php echo csrf_field(); ?>
                                                     <button type="submit" class="w-full px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 mb-1">
                                                         <i class="ph-bold ph-check-circle text-base"></i> Verifikasi
                                                     </button>
                                                 </form>
                                                 
-                                                {{-- Tombol Tolak dengan SweetAlert untuk input alasan --}}
-                                                <form id="form-reject-{{ $item->id }}" action="{{ route('admin.literacy.reject', $item->id) }}" method="POST" class="w-full">
-                                                    @csrf
-                                                    <button type="button" onclick="rejectJournal({{ $item->id }})" class="w-full px-5 py-2 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                                
+                                                <form id="form-reject-<?php echo e($item->id); ?>" action="<?php echo e(route('admin.literacy.reject', $item->id)); ?>" method="POST" class="w-full">
+                                                    <?php echo csrf_field(); ?>
+                                                    <button type="button" onclick="rejectJournal(<?php echo e($item->id); ?>)" class="w-full px-5 py-2 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
                                                         <i class="ph-bold ph-x text-base"></i> Tolak
                                                     </button>
                                                 </form>
-                                            @else
+                                            <?php else: ?>
                                                 <div class="w-full px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1">
                                                     <i class="ph-fill ph-check-circle text-sm"></i> Selesai
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
 
-                                            <form action="{{ route('admin.literacy.destroy', $item->id) }}" method="POST" 
+                                            <form action="<?php echo e(route('admin.literacy.destroy', $item->id)); ?>" method="POST" 
                                                   onsubmit="event.preventDefault(); 
                                                             const form = this;
                                                             Swal.fire({
@@ -341,7 +356,7 @@
                                                             }).then((result) => {
                                                                 if (result.isConfirmed) form.submit();
                                                             });">
-                                                @csrf @method('DELETE')
+                                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                                 <button type="submit" class="text-[10px] font-black text-slate-400 hover:text-rose-500 flex items-center gap-1.5 mt-1 transition-colors uppercase tracking-wider py-1 w-full justify-end">
                                                     <i class="ph-bold ph-trash text-sm"></i> Hapus
                                                 </button>
@@ -349,14 +364,15 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
                     <div class="p-6 border-t border-slate-50 bg-slate-50/30">
-                        {{ $journals->withQueryString()->links() }}
+                        <?php echo e($journals->withQueryString()->links()); ?>
+
                     </div>
-                @else
+                <?php else: ?>
                     <div class="text-center py-24">
                         <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300 shadow-inner border border-slate-100">
                             <i class="ph-duotone ph-books text-5xl"></i>
@@ -364,7 +380,7 @@
                         <h3 class="font-black text-elevate-dark text-xl mb-2">Belum ada data jurnal</h3>
                         <p class="text-sm font-medium text-slate-500 max-w-sm mx-auto">Belum ada siswa yang mengisi jurnal literasi yang sesuai dengan filter pencarian ini.</p>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -413,15 +429,24 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: '{{ session('success') }}',
+                    text: '<?php echo e(session('success')); ?>',
                     confirmButtonColor: '#3b5889',
                     customClass: { popup: 'rounded-[2.5rem] shadow-xl border border-slate-100' }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/literacy/index.blade.php ENDPATH**/ ?>
