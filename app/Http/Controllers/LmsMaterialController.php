@@ -341,23 +341,25 @@ class LmsMaterialController extends Controller
         $syllabus = [];
 
         foreach ($combined as $item) {
-            // JIKA TIPE MATERI
-            if ($item instanceof \App\Models\LmsMaterial) {
-                $groupTitle = clone $item->title; // Judul Induk (Group)
+    // JIKA TIPE MATERI
+    if ($item instanceof \App\Models\LmsMaterial) {
+        
+        // Hapus 'clone' karena title adalah string
+        $groupTitle = $item->title ?? 'Materi Tanpa Judul'; 
 
-                // A. Item ke-1: Pengantar Materi (Jika guru mengisi teks resume)
-                if (!empty($item->resume)) {
-                    $syllabus[] = [
-                        'id' => 'm_' . $item->id . '_intro',
-                        'db_id' => $item->id,
-                        'group_title' => $groupTitle,
-                        'title' => 'Pengantar Materi',
-                        'type' => 'text',
-                        'content' => $item->resume,
-                        'completed' => true,
-                        'locked' => false,
-                    ];
-                }
+        // A. Item ke-1: Pengantar Materi
+        if (!empty($item->resume)) {
+            $syllabus[] = [
+                'id' => 'm_' . $item->id . '_intro',
+                'db_id' => $item->id,
+                'group_title' => $groupTitle,
+                'title' => 'Pengantar Materi',
+                'type' => 'text',
+                'content' => $item->resume,
+                'completed' => true,
+                'locked' => false,
+            ];
+        }
 
                 // B. Item ke-2 dst: Lampiran (Video, PDF, Link)
                 foreach ($item->attachments as $att) {
