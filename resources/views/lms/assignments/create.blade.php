@@ -33,10 +33,10 @@
                 </div>
             </div>
 
-            {{-- ERROR BLOCK --}}
+            {{-- ERROR BLOCK (Jika ada validasi gagal dari backend) --}}
             @if ($errors->any())
-                <div class="mb-8 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm animate-pulse">
-                    <div class="w-10 h-10 bg-white text-[#D13438] border border-[#F4C3C9] rounded-xl shrink-0 shadow-sm flex items-center justify-center">
+                <div class="animate-enter mb-8 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
+                    <div class="w-10 h-10 bg-white text-[#D13438] rounded-xl shrink-0 shadow-sm border border-[#F4C3C9] flex items-center justify-center">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
                     </div>
                     <div>
@@ -50,12 +50,25 @@
                 </div>
             @endif
 
+            {{-- INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) --}}
+            <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
+                    <i class="ph-duotone ph-info"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-black text-blue-900 mb-1">Pro-Tip: Urutan Belajar Siswa</h3>
+                    <p class="text-xs font-medium text-blue-700 leading-relaxed">
+                        Tugas yang Anda buat akan otomatis masuk ke <b>Alur Belajar Siswa (Learning Player)</b> secara berurutan. Pastikan Anda telah mengunggah <i>Materi Pembelajaran</i> terlebih dahulu jika tugas ini membutuhkan referensi bacaan sebelum dikerjakan.
+                    </p>
+                </div>
+            </div>
+
             {{-- FORM CARD --}}
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                 <form action="{{ route('lms.assignments.store') }}" method="POST" id="createAssignmentForm" 
                       x-data="{ 
-                          targetType: 'class', 
-                          assignmentType: 'file_upload', 
+                          targetType: '{{ old('target_type', 'class') }}', 
+                          assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
                           questions: [] 
                       }">
                     @csrf
@@ -121,7 +134,6 @@
                                         </div>
                                         <div>
                                             <span class="block font-black text-elevate-dark peer-checked:text-elevate-primary text-base">Upload File/Foto</span>
-                                            <span class="block text-xs text-slate-500 font-medium mt-1">Siswa mengunggah bukti/jawaban</span>
                                         </div>
                                         <div class="absolute top-4 right-4 text-elevate-primary opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-2xl"></i></div>
                                     </div>
@@ -136,7 +148,6 @@
                                         </div>
                                         <div>
                                             <span class="block font-black text-elevate-dark peer-checked:text-purple-700 text-base">Kuis Online (CBT)</span>
-                                            <span class="block text-xs text-slate-500 font-medium mt-1">Buat soal PG atau Essai</span>
                                         </div>
                                         <div class="absolute top-4 right-4 text-purple-600 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-2xl"></i></div>
                                     </div>
@@ -151,7 +162,6 @@
                                         </div>
                                         <div>
                                             <span class="block font-black text-elevate-dark peer-checked:text-[#D83B01] text-base">Link Eksternal</span>
-                                            <span class="block text-xs text-slate-500 font-medium mt-1">GForm, Quizizz, YouTube, dll</span>
                                         </div>
                                         <div class="absolute top-4 right-4 text-[#D83B01] opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-2xl"></i></div>
                                     </div>
@@ -159,13 +169,17 @@
                             </div>
                         </div>
 
-                        <!-- 3. KONTEN DINAMIS -->
+                        <!-- 3. KONTEN DINAMIS (DENGAN FIX DISABLED & REQUIRED) -->
                         <div class="bg-elevate-soft/30 rounded-[2rem] p-6 md:p-8 border border-slate-100">
                             
                             <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
-                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal</label>
-                                <textarea name="description_file" rows="5" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
+                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal <span class="text-[#D13438]">*</span></label>
+                                <textarea name="description_file" rows="5" 
+                                          :required="assignmentType === 'file_upload'" 
+                                          :disabled="assignmentType !== 'file_upload'"
+                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors shadow-sm" 
+                                          placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
@@ -174,24 +188,39 @@
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
                                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-link text-lg"></i></div>
-                                        <input type="url" name="link_url" value="{{ old('link_url') }}" class="w-full rounded-2xl border-slate-200 bg-white pl-12 font-bold text-elevate-primary focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 transition-colors shadow-sm" placeholder="https://...">
+                                        <input type="url" name="link_url" value="{{ old('link_url') }}" 
+                                               :required="assignmentType === 'link'" 
+                                               :disabled="assignmentType !== 'link'"
+                                               class="w-full rounded-2xl border-slate-200 bg-white pl-12 font-bold text-elevate-primary focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 transition-colors shadow-sm" 
+                                               placeholder="https://...">
                                     </div>
                                 </div>
-                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan</label>
-                                <textarea name="description_link" rows="4" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-[#D83B01]/30 focus:border-[#D83B01] p-5 font-medium transition-colors shadow-sm" placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
+                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan <span class="text-[#D13438]">*</span></label>
+                                <textarea name="description_link" rows="4" 
+                                          :required="assignmentType === 'link'" 
+                                          :disabled="assignmentType !== 'link'"
+                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-[#D83B01]/30 focus:border-[#D83B01] p-5 font-medium transition-colors shadow-sm" 
+                                          placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
                             </div>
 
                             <!-- C. JIKA KUIS ONLINE -->
                             <div x-show="assignmentType === 'quiz'" style="display: none;">
                                 <div class="mb-8 flex flex-col md:flex-row gap-5">
                                     <div class="flex-1">
-                                        <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis</label>
-                                        <textarea name="description_quiz" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm" placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
+                                        <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis <span class="text-[#D13438]">*</span></label>
+                                        <textarea name="description_quiz" rows="2" 
+                                                  :required="assignmentType === 'quiz'" 
+                                                  :disabled="assignmentType !== 'quiz'"
+                                                  class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm" 
+                                                  placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
                                     </div>
                                     <div class="w-full md:w-1/3">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Durasi (Menit) <span class="text-[#D13438]">*</span></label>
                                         <div class="relative group">
-                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 pr-12 transition-colors shadow-sm">
+                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" 
+                                                   :required="assignmentType === 'quiz'" 
+                                                   :disabled="assignmentType !== 'quiz'"
+                                                   class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 pr-12 transition-colors shadow-sm">
                                             <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400 text-[10px] font-black tracking-widest">MIN</div>
                                         </div>
                                     </div>
@@ -216,9 +245,8 @@
                                                     </div>
                                                     
                                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pertanyaan / Soal</label>
-                                                    <textarea :name="'questions['+index+'][text]'" x-model="q.text" rows="3" class="w-full rounded-2xl border-slate-200 text-base mb-5 focus:ring-purple-500/30 focus:border-purple-500 font-medium shadow-sm p-4 bg-slate-50 focus:bg-white transition-colors" placeholder="Tuliskan pertanyaan..."></textarea>
+                                                    <textarea :name="'questions['+index+'][text]'" x-model="q.text" required rows="3" class="w-full rounded-2xl border-slate-200 text-base mb-5 focus:ring-purple-500/30 focus:border-purple-500 font-medium shadow-sm p-4 bg-slate-50 focus:bg-white transition-colors" placeholder="Tuliskan pertanyaan..."></textarea>
                                                     
-                                                    <!-- UI UNTUK PILIHAN GANDA -->
                                                     <div x-show="q.type === 'multiple_choice'" class="space-y-3">
                                                         <template x-for="opt in ['A', 'B', 'C', 'D', 'E']">
                                                             <div class="flex items-center gap-3">
@@ -230,8 +258,6 @@
                                                             </div>
                                                         </template>
                                                     </div>
-
-                                                    <!-- UI UNTUK ESSAY -->
                                                     <div x-show="q.type === 'essay'" class="mt-5">
                                                         <div class="bg-[#FFEFD6] border border-[#FFD8A8] rounded-2xl p-5 shadow-sm">
                                                             <div class="flex items-start gap-4">
@@ -240,17 +266,11 @@
                                                                 </div>
                                                                 <div class="w-full">
                                                                     <h4 class="font-black text-[#D83B01] text-sm mb-1">Referensi Jawaban (Opsional)</h4>
-                                                                    <p class="text-xs text-[#D83B01]/80 mb-3 font-semibold">Anda dapat memasukkan poin-poin penting dari jawaban yang diharapkan. (Hanya terlihat oleh Guru)</p>
-                                                                    <textarea 
-                                                                        :name="'questions['+index+'][answer_key]'" 
-                                                                        rows="3" 
-                                                                        class="w-full rounded-xl border-[#FFD8A8] bg-white text-sm focus:ring-[#D83B01] focus:border-[#D83B01] text-[#2A3B52] p-4 transition-colors shadow-sm"
-                                                                        placeholder="Contoh: Jawaban harus mencakup definisi fotosintesis dan menyebutkan peran klorofil..."></textarea>
+                                                                    <textarea :name="'questions['+index+'][answer_key]'" rows="3" class="w-full rounded-xl border-[#FFD8A8] bg-white text-sm focus:ring-[#D83B01] focus:border-[#D83B01] text-[#2A3B52] p-4 transition-colors shadow-sm" placeholder="Contoh: Jawaban harus mencakup..."></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                 </div>
                                             </div>
                                         </div>
@@ -291,7 +311,8 @@
                                     <div x-show="targetType === 'class'">
                                         <div class="relative group">
                                             <select name="class_id" 
-                                                    :required="targetType === 'class'"
+                                                    :required="targetType === 'class'" 
+                                                    :disabled="targetType !== 'class'"
                                                     class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none shadow-sm cursor-pointer text-elevate-dark transition-colors">
                                                 <option value="">-- Pilih Kelas --</option>
                                                 @foreach($classes as $class)
@@ -304,7 +325,8 @@
                                     <div x-show="targetType === 'grade'" style="display: none;">
                                         <div class="relative group">
                                             <select name="target_grade" 
-                                                    :required="targetType === 'grade'"
+                                                    :required="targetType === 'grade'" 
+                                                    :disabled="targetType !== 'grade'"
                                                     class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none shadow-sm cursor-pointer text-elevate-dark transition-colors">
                                                 <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Kelas 7</option>
                                                 <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Kelas 8</option>
@@ -321,10 +343,8 @@
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-elevate-soft/30 px-6 py-6 md:px-10 md:py-8 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-100">
                         <a href="{{ route('lms.assignments.index') }}" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm shadow-sm btn-cancel-confirm active:scale-95">Batal</a>
-                        
                         <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 text-sm border border-transparent active:scale-95">
-                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
-                            <span>Terbitkan Tugas</span>
+                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i> <span>Terbitkan Tugas</span>
                         </button>
                     </div>
                 </form>
@@ -337,14 +357,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // 1. Proteksi Tombol Batal/Kembali
             const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
             cancelButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const href = this.getAttribute('href');
-
                     Swal.fire({
                         title: 'Batalkan Tugas?',
                         text: "Data yang sudah diisi akan hilang jika Anda keluar.",
@@ -354,46 +371,29 @@
                         cancelButtonColor: '#e5eff5', 
                         confirmButtonText: 'Ya, Batalkan',
                         cancelButtonText: '<span class="text-elevate-dark">Lanjut Mengisi</span>',
-                        customClass: {
-                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm',
-                            cancelButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = href;
-                        }
-                    });
+                        customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', confirmButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm', cancelButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm' }
+                    }).then((result) => { if (result.isConfirmed) { window.location.href = href; } });
                 });
             });
 
-            // 2. Loading saat Submit
             const form = document.getElementById('createAssignmentForm');
             if(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    if (!this.checkValidity()) {
-                        this.reportValidity();
-                        return;
+                    // Fallback manual validity check
+                    if (!this.checkValidity()) { 
+                        this.reportValidity(); 
+                        return; 
                     }
-
                     Swal.fire({
                         title: 'Sedang Menerbitkan...',
                         text: 'Mohon tunggu sebentar.',
                         allowOutsideClick: false,
                         showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                            title: 'text-xl font-black text-elevate-dark'
-                        }
+                        didOpen: () => { Swal.showLoading(); },
+                        customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', title: 'text-xl font-black text-elevate-dark' }
                     });
-
-                    setTimeout(() => {
-                        this.submit();
-                    }, 500);
+                    setTimeout(() => { this.submit(); }, 500);
                 });
             }
         });

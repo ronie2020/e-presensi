@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
-            {{ __('Tugas & PR') }}
+            {{ __('Tugas & Latihan') }}
         </h2>
     </x-slot>
 
@@ -18,7 +18,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- HERO SECTION ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
+            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-6 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
                 {{-- Dekorasi Background --}}
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -33,10 +33,10 @@
                             <i class="ph-bold ph-chalkboard-teacher"></i> Area Guru
                         </div>
                         <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3 text-elevate-dark">
-                            Manajemen Tugas
+                            Manajemen Latihan
                         </h2>
                         <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">
-                            Buat tugas, kuis online, atau ulangan harian dan pantau hasil pengerjaan siswa secara real-time.
+                            Buat tugas, latihan soal, kuis online, atau ulangan dan pantau hasil pengerjaan siswa secara real-time.
                         </p>
                     </div>
                     
@@ -45,8 +45,21 @@
                         <div class="bg-white/20 text-white w-8 h-8 rounded-xl flex items-center justify-center group-hover/add:bg-white group-hover/add:text-elevate-primary transition-colors">
                             <i class="ph-bold ph-plus"></i>
                         </div>
-                        <span>Buat Tugas Baru</span>
+                        <span>Buat Latihan Baru</span>
                     </a>
+                </div>
+            </div>
+
+            {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) --}}
+            <div class="animate-enter mb-10 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
+                    <i class="ph-duotone ph-info"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-black text-blue-900 mb-1">Pro-Tip: Urutan Belajar Siswa</h3>
+                    <p class="text-xs font-medium text-blue-700 leading-relaxed">
+                        Tugas/Latihan yang Anda buat akan otomatis digabungkan dengan Materi menjadi sebuah alur belajar yang runtut. Gunakan tombol <b>Preview</b> <i class="ph-bold ph-presentation-chart"></i> pada masing-masing tugas untuk melihat tampilannya di sisi siswa.
+                    </p>
                 </div>
             </div>
 
@@ -66,14 +79,14 @@
 
                             // LOGIKA TEMA WARNA BISA DISESUAIKAN (Pakai Standar Elevate Semantic)
                             $subjectName = strtolower($task->subject->name ?? 'umum');
-                            $theme = ['bg' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-slate-200', 'ring' => 'hover:border-elevate-accent/50']; // Default Elevate Blue
+                            $theme = ['bg' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-slate-200', 'ring' => 'hover:border-elevate-accent/50'];
 
                             if (str_contains($subjectName, 'indonesia') || str_contains($subjectName, 'inggris') || str_contains($subjectName, 'pkn')) {
-                                $theme = ['bg' => 'bg-[#FDE7E9]', 'text' => 'text-[#D13438]', 'border' => 'border-[#F4C3C9]', 'ring' => 'hover:border-[#F4C3C9]']; // Elevate Red
+                                $theme = ['bg' => 'bg-[#FDE7E9]', 'text' => 'text-[#D13438]', 'border' => 'border-[#F4C3C9]', 'ring' => 'hover:border-[#F4C3C9]']; 
                             } elseif (str_contains($subjectName, 'ipa') || str_contains($subjectName, 'biologi') || str_contains($subjectName, 'pjok')) {
-                                $theme = ['bg' => 'bg-[#DFF6DD]', 'text' => 'text-[#107C10]', 'border' => 'border-[#B7DFB9]', 'ring' => 'hover:border-[#B7DFB9]']; // Elevate Green
+                                $theme = ['bg' => 'bg-[#DFF6DD]', 'text' => 'text-[#107C10]', 'border' => 'border-[#B7DFB9]', 'ring' => 'hover:border-[#B7DFB9]']; 
                             } elseif (str_contains($subjectName, 'ips') || str_contains($subjectName, 'sejarah')) {
-                                $theme = ['bg' => 'bg-[#FFEFD6]', 'text' => 'text-[#D83B01]', 'border' => 'border-[#FFD8A8]', 'ring' => 'hover:border-[#FFD8A8]']; // Elevate Orange
+                                $theme = ['bg' => 'bg-[#FFEFD6]', 'text' => 'text-[#D83B01]', 'border' => 'border-[#FFD8A8]', 'ring' => 'hover:border-[#FFD8A8]']; 
                             }
                         @endphp
 
@@ -144,29 +157,33 @@
                                         <span class="text-elevate-primary">{{ $task->is_bulk ? $task->global_submissions_count : $task->submissions_count }} Siswa</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner">
-                                        {{-- Progress bar --}}
                                         <div class="bg-elevate-primary h-2.5 rounded-full" style="width: 10%"></div>
                                     </div>
                                 </div>
 
                                 {{-- Footer Actions --}}
-                                <div class="pt-5 border-t border-slate-100 mt-auto flex items-center justify-between gap-3 relative z-10">
+                                <div class="pt-5 border-t border-slate-100 mt-auto flex items-center justify-between gap-2 relative z-10">
                                     
                                     {{-- Tombol Periksa (Utama) --}}
-                                    <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-elevate-dark hover:bg-elevate-primary text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn border border-transparent active:scale-95">
+                                    <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-elevate-dark hover:bg-elevate-primary text-white px-3 py-3 rounded-2xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn border border-transparent active:scale-95" title="Periksa Jawaban Siswa">
                                         <i class="ph-bold ph-list-checks text-lg text-elevate-accent"></i>
-                                        <span>Periksa Jawaban</span>
+                                        <span class="hidden sm:inline">Periksa</span>
+                                    </a>
+
+                                    {{-- UPDATE ROUTE: Tombol Preview Mode Guru Menggunakan Route Baru --}}
+                                    <a href="{{ route('lms.preview.player', ['subject' => $task->subject_id, 'class' => $task->class_id]) }}" target="_blank" class="w-12 h-12 shrink-0 rounded-2xl bg-slate-50 text-slate-500 hover:bg-elevate-primary hover:text-white transition-all flex items-center justify-center border border-slate-200 shadow-sm active:scale-95" title="Preview Tampilan Siswa">
+                                        <i class="ph-bold ph-presentation-chart text-xl"></i>
                                     </a>
 
                                     {{-- Tombol Edit (Kuning/Orange) --}}
-                                    <a href="{{ route('lms.assignments.edit', $task->id) }}" class="w-12 h-12 rounded-2xl bg-white border border-[#FFD8A8] text-[#D83B01] hover:bg-[#FFEFD6] transition-all flex items-center justify-center shadow-sm active:scale-95" title="Edit Tugas">
+                                    <a href="{{ route('lms.assignments.edit', $task->id) }}" class="w-12 h-12 shrink-0 rounded-2xl bg-white border border-[#FFD8A8] text-[#D83B01] hover:bg-[#FFEFD6] transition-all flex items-center justify-center shadow-sm active:scale-95" title="Edit Latihan">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </a>
 
                                     {{-- Tombol Hapus (Merah) --}}
-                                    <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task">
+                                    <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task shrink-0">
                                         @csrf @method('DELETE')
-                                        <button type="button" class="btn-delete w-12 h-12 rounded-2xl bg-white border border-[#F4C3C9] text-[#D13438] hover:bg-[#FDE7E9] transition-all flex items-center justify-center shadow-sm active:scale-95" title="Hapus Tugas">
+                                        <button type="button" class="btn-delete w-12 h-12 rounded-2xl bg-white border border-[#F4C3C9] text-[#D13438] hover:bg-[#FDE7E9] transition-all flex items-center justify-center shadow-sm active:scale-95" title="Hapus Latihan">
                                             <i class="ph-bold ph-trash text-xl"></i>
                                         </button>
                                     </form>
@@ -186,12 +203,12 @@
                     <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center text-elevate-primary mb-6 group-hover:bg-elevate-primary group-hover:text-white transition-all duration-500 border border-slate-100 shadow-sm">
                         <i class="ph-duotone ph-clipboard-text text-5xl"></i>
                     </div>
-                    <h3 class="font-black text-elevate-dark text-2xl mb-2">Belum Ada Tugas</h3>
+                    <h3 class="font-black text-elevate-dark text-2xl mb-2">Belum Ada Latihan</h3>
                     <p class="text-slate-500 text-sm max-w-md mx-auto font-medium leading-relaxed mb-8">
-                        Anda belum membuat tugas apapun. Mulailah dengan membuat tugas baru untuk dikerjakan siswa.
+                        Anda belum membuat tugas atau latihan apapun. Mulailah dengan membuat latihan baru untuk dikerjakan siswa.
                     </p>
                     <a href="{{ route('lms.assignments.create') }}" class="px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/30 transform flex items-center gap-2 active:scale-95 border border-transparent">
-                        <i class="ph-bold ph-plus text-lg"></i> Buat Tugas Pertama
+                        <i class="ph-bold ph-plus text-lg"></i> Buat Latihan Pertama
                     </a>
                 </div>
             @endif
@@ -213,7 +230,7 @@
                     const form = this.closest('.form-delete-task');
                     
                     Swal.fire({
-                        title: 'Hapus Tugas Ini?',
+                        title: 'Hapus Latihan Ini?',
                         text: "Data nilai dan pengumpulan siswa akan ikut terhapus permanen!",
                         icon: 'warning',
                         showCancelButton: true,

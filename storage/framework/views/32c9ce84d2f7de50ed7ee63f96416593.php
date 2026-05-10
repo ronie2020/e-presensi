@@ -1,8 +1,17 @@
-<x-student-learning-layout>
-    {{-- CDN SweetAlert2 --}}
+<?php if (isset($component)) { $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.student-learning-layout','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('student-learning-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES --}}
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -21,9 +30,9 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         
-        {{-- HEADER DASHBOARD MENGGUNAKAN TEMA ELEVATE --}}
+        
         <div class="animate-enter bg-elevate-dark rounded-[2.5rem] p-8 md:p-12 mb-12 relative overflow-hidden shadow-2xl shadow-elevate-dark/20 border border-elevate-primary/20 group">
-            {{-- Decoration --}}
+            
             <div class="absolute inset-0 bg-gradient-to-br from-elevate-dark via-elevate-dark to-elevate-primary/40"></div>
             <div class="absolute top-0 right-0 w-80 h-80 bg-elevate-accent/20 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none group-hover:bg-elevate-accent/30 transition-all duration-1000"></div>
             <div class="absolute bottom-0 left-0 w-64 h-64 bg-elevate-peach/20 rounded-full blur-[80px] -ml-10 -mb-10 pointer-events-none group-hover:bg-elevate-peach/30 transition-all duration-1000"></div>
@@ -40,7 +49,7 @@
                     </div>
                     
                     <h1 class="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight leading-tight">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-accent via-white to-elevate-peach-light animate-gradient">{{ explode(' ', Auth::guard('student')->user()->name)[0] }}!</span>
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-accent via-white to-elevate-peach-light animate-gradient"><?php echo e(explode(' ', Auth::guard('student')->user()->name)[0]); ?>!</span>
                     </h1>
                     
                     <p class="text-elevate-soft font-medium text-base md:text-lg max-w-xl mb-8 leading-relaxed opacity-90">
@@ -50,16 +59,16 @@
                     <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-white text-sm font-bold">
                         <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/20 transition-colors">
                             <i class="ph-fill ph-student text-elevate-peach-light text-lg"></i>
-                            <span>Kelas {{ Auth::guard('student')->user()->schoolClass->name ?? 'Umum' }}</span>
+                            <span>Kelas <?php echo e(Auth::guard('student')->user()->schoolClass->name ?? 'Umum'); ?></span>
                         </div>
                         <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/20 transition-colors">
                             <i class="ph-fill ph-calendar text-elevate-accent text-lg"></i>
-                            <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+                            <span><?php echo e(now()->translatedFormat('l, d F Y')); ?></span>
                         </div>
                     </div>
                 </div>
                 
-                {{-- Ilustrasi 3D Sederhana --}}
+                
                 <div class="hidden md:block relative transform hover:scale-105 transition-transform duration-700">
                     <div class="relative w-40 h-40">
                         <div class="absolute inset-0 bg-gradient-to-tr from-elevate-primary to-elevate-accent rounded-[2rem] rotate-6 opacity-60 blur-lg"></div>
@@ -74,8 +83,8 @@
             </div>
         </div>
 
-        {{-- BAGIAN PRIORITAS (Tugas/Materi Baru) --}}
-        @if(isset($prioritySubjects) && $prioritySubjects->count() > 0)
+        
+        <?php if(isset($prioritySubjects) && $prioritySubjects->count() > 0): ?>
             <div class="animate-enter mb-16" style="animation-delay: 100ms">
                 <div class="flex items-end justify-between mb-8 px-2">
                     <div>
@@ -90,50 +99,52 @@
                 </div>
 
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($prioritySubjects as $index => $subject)
-                        <a href="{{ route('students.learning.play', $subject->id) }}" class="group relative bg-elevate-surface rounded-[2rem] p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 {{ $subject->active_tasks_count > 0 ? 'hover:shadow-elevate-peach-dark/10' : 'hover:shadow-elevate-primary/10' }}">
+                    <?php $__currentLoopData = $prioritySubjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <a href="<?php echo e(route('students.learning.play', $subject->id)); ?>" class="group relative bg-elevate-surface rounded-[2rem] p-1 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 <?php echo e($subject->active_tasks_count > 0 ? 'hover:shadow-elevate-peach-dark/10' : 'hover:shadow-elevate-primary/10'); ?>">
                             
-                            <div class="absolute inset-0 bg-gradient-to-br {{ $subject->active_tasks_count > 0 ? 'from-elevate-peach-light/50 to-white' : 'from-elevate-soft to-white' }} rounded-[2rem] opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                            <div class="absolute inset-0 bg-gradient-to-br <?php echo e($subject->active_tasks_count > 0 ? 'from-elevate-peach-light/50 to-white' : 'from-elevate-soft to-white'); ?> rounded-[2rem] opacity-50 group-hover:opacity-100 transition-opacity"></div>
                             
-                            <div class="relative bg-elevate-surface rounded-[1.8rem] p-6 h-full border {{ $subject->active_tasks_count > 0 ? 'border-elevate-peach/30' : 'border-elevate-soft' }} flex flex-col">
-                                {{-- Header Kartu --}}
+                            <div class="relative bg-elevate-surface rounded-[1.8rem] p-6 h-full border <?php echo e($subject->active_tasks_count > 0 ? 'border-elevate-peach/30' : 'border-elevate-soft'); ?> flex flex-col">
+                                
                                 <div class="flex justify-between items-start mb-4">
-                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br {{ $subject->active_tasks_count > 0 ? 'from-elevate-peach-light/40 to-white text-elevate-peach-dark border-elevate-peach/30' : 'from-elevate-soft to-white text-elevate-primary border-elevate-soft' }} border flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
-                                        <i class="ph-duotone {{ $subject->active_tasks_count > 0 ? 'ph-warning-circle' : 'ph-book-open' }}"></i>
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br <?php echo e($subject->active_tasks_count > 0 ? 'from-elevate-peach-light/40 to-white text-elevate-peach-dark border-elevate-peach/30' : 'from-elevate-soft to-white text-elevate-primary border-elevate-soft'); ?> border flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                        <i class="ph-duotone <?php echo e($subject->active_tasks_count > 0 ? 'ph-warning-circle' : 'ph-book-open'); ?>"></i>
                                     </div>
-                                    @if($subject->active_tasks_count > 0)
+                                    <?php if($subject->active_tasks_count > 0): ?>
                                         <span class="relative overflow-hidden bg-elevate-peach-dark text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-md shadow-elevate-peach/30 uppercase tracking-wider">
-                                            <span class="relative z-10">{{ $subject->active_tasks_count }} Tugas</span>
+                                            <span class="relative z-10"><?php echo e($subject->active_tasks_count); ?> Tugas</span>
                                             <div class="absolute inset-0 -translate-x-full animate-shimmer z-0"></div>
                                         </span>
-                                    @elseif($subject->new_materials_count > 0)
+                                    <?php elseif($subject->new_materials_count > 0): ?>
                                         <span class="relative overflow-hidden bg-elevate-primary text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-md shadow-elevate-primary/30 uppercase tracking-wider">
                                             <span class="relative z-10">Materi Baru</span>
                                             <div class="absolute inset-0 -translate-x-full animate-shimmer z-0"></div>
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 
-                                <h3 class="font-bold text-lg text-elevate-dark mb-1 group-hover:{{ $subject->active_tasks_count > 0 ? 'text-elevate-peach-dark' : 'text-elevate-primary' }} transition-colors line-clamp-1">{{ $subject->name }}</h3>
+                                <h3 class="font-bold text-lg text-elevate-dark mb-1 group-hover:<?php echo e($subject->active_tasks_count > 0 ? 'text-elevate-peach-dark' : 'text-elevate-primary'); ?> transition-colors line-clamp-1"><?php echo e($subject->name); ?></h3>
                                 <p class="text-xs text-elevate-dark/50 font-bold mb-4">
-                                    {{ $subject->active_tasks_count > 0 ? 'Deadline semakin dekat!' : 'Ada materi baru di kelas ini.' }}
+                                    <?php echo e($subject->active_tasks_count > 0 ? 'Deadline semakin dekat!' : 'Ada materi baru di kelas ini.'); ?>
+
                                 </p>
                                 
-                                {{-- Footer Action --}}
+                                
                                 <div class="mt-auto pt-4 border-t border-elevate-soft/50 flex items-center justify-between">
-                                    <span class="text-xs font-bold {{ $subject->active_tasks_count > 0 ? 'text-elevate-peach-dark' : 'text-elevate-primary' }} group-hover:underline">
-                                        {{ $subject->active_tasks_count > 0 ? 'Kerjakan Sekarang' : 'Pelajari Sekarang' }}
+                                    <span class="text-xs font-bold <?php echo e($subject->active_tasks_count > 0 ? 'text-elevate-peach-dark' : 'text-elevate-primary'); ?> group-hover:underline">
+                                        <?php echo e($subject->active_tasks_count > 0 ? 'Kerjakan Sekarang' : 'Pelajari Sekarang'); ?>
+
                                     </span>
-                                    <i class="ph-bold ph-arrow-right {{ $subject->active_tasks_count > 0 ? 'text-elevate-peach' : 'text-elevate-accent' }} group-hover:translate-x-1 transition-transform"></i>
+                                    <i class="ph-bold ph-arrow-right <?php echo e($subject->active_tasks_count > 0 ? 'text-elevate-peach' : 'text-elevate-accent'); ?> group-hover:translate-x-1 transition-transform"></i>
                                 </div>
                             </div>
                         </a>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
-        @endif
+        <?php endif; ?>
 
-        {{-- BAGIAN SEMUA MATA PELAJARAN --}}
+        
         <div class="animate-enter" style="animation-delay: 200ms">
             <div class="flex items-end justify-between mb-8 px-2">
                 <div>
@@ -147,7 +158,7 @@
                 </div>
             </div>
             
-            @if(!isset($allSubjects) || $allSubjects->isEmpty())
+            <?php if(!isset($allSubjects) || $allSubjects->isEmpty()): ?>
                 <div class="bg-elevate-surface rounded-[2.5rem] p-12 text-center border-2 border-dashed border-elevate-soft">
                     <div class="w-24 h-24 bg-elevate-soft/50 rounded-full flex items-center justify-center mx-auto mb-6 text-elevate-dark/30">
                         <i class="ph-duotone ph-books text-5xl"></i>
@@ -155,10 +166,10 @@
                     <h3 class="text-xl font-bold text-elevate-dark mb-2">Belum Ada Mata Pelajaran</h3>
                     <p class="text-elevate-dark/60 font-medium max-w-md mx-auto">Data mata pelajaran belum ditambahkan oleh admin atau kamu belum terdaftar di kelas manapun.</p>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    @foreach($allSubjects as $index => $subject)
-                        @php
+                    <?php $__currentLoopData = $allSubjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             // Palet disesuaikan agar cocok dengan tema Elevate
                             $palettes = [
                                 'blue'    => ['bg' => 'from-elevate-primary to-blue-500', 'light' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-elevate-soft', 'shadow' => 'shadow-elevate-primary/20'],
@@ -194,29 +205,30 @@
                             }
 
                             $t = $palettes[$selectedTheme];
-                        @endphp
+                        ?>
 
-                         <a href="{{ route('students.learning.play', $subject->id) }}" class="group relative flex flex-col bg-elevate-surface rounded-[2rem] p-1.5 shadow-sm hover:shadow-2xl hover:shadow-elevate-dark/10 transition-all duration-300 hover:-translate-y-1.5 h-full border border-elevate-soft/50">
+                         <a href="<?php echo e(route('students.learning.play', $subject->id)); ?>" class="group relative flex flex-col bg-elevate-surface rounded-[2rem] p-1.5 shadow-sm hover:shadow-2xl hover:shadow-elevate-dark/10 transition-all duration-300 hover:-translate-y-1.5 h-full border border-elevate-soft/50">
                             
-                            <div class="flex-1 bg-elevate-surface rounded-[1.7rem] p-5 border {{ $t['border'] }} relative overflow-hidden">
+                            <div class="flex-1 bg-elevate-surface rounded-[1.7rem] p-5 border <?php echo e($t['border']); ?> relative overflow-hidden">
                                 
-                                <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-gradient-to-br {{ $t['bg'] }} opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500"></div>
+                                <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-gradient-to-br <?php echo e($t['bg']); ?> opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500"></div>
 
                                 <div class="flex justify-between items-start mb-5 relative z-10">
-                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br {{ $t['bg'] }} text-white flex items-center justify-center text-2xl shadow-lg {{ $t['shadow'] }} group-hover:scale-110 transition-transform duration-300">
-                                        <i class="ph-duotone {{ $selectedIcon }}"></i>
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br <?php echo e($t['bg']); ?> text-white flex items-center justify-center text-2xl shadow-lg <?php echo e($t['shadow']); ?> group-hover:scale-110 transition-transform duration-300">
+                                        <i class="ph-duotone <?php echo e($selectedIcon); ?>"></i>
                                     </div>
                                     
-                                    @if($subject->new_materials_count > 0)
+                                    <?php if($subject->new_materials_count > 0): ?>
                                         <span class="inline-flex items-center gap-1 bg-elevate-accent/10 text-elevate-primary border border-elevate-accent/20 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
                                             <span class="w-1.5 h-1.5 rounded-full bg-elevate-accent animate-pulse"></span>
-                                            {{ $subject->new_materials_count }} Materi
+                                            <?php echo e($subject->new_materials_count); ?> Materi
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 
-                                <h4 class="font-bold text-lg text-elevate-dark leading-snug mb-1 group-hover:{{ $t['text'] }} transition-colors line-clamp-2">
-                                    {{ $subject->name }}
+                                <h4 class="font-bold text-lg text-elevate-dark leading-snug mb-1 group-hover:<?php echo e($t['text']); ?> transition-colors line-clamp-2">
+                                    <?php echo e($subject->name); ?>
+
                                 </h4>
                                 <p class="text-xs font-bold text-elevate-dark/40">Guru Pengampu</p>
                                 
@@ -229,26 +241,26 @@
                             </div>
 
                             <div class="px-5 py-3 flex items-center justify-between">
-                                <span class="text-[10px] font-black text-elevate-dark/30 uppercase tracking-widest group-hover:{{ $t['text'] }} transition-colors">Masuk Kelas</span>
-                                <div class="w-8 h-8 rounded-full {{ $t['light'] }} {{ $t['text'] }} flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                                <span class="text-[10px] font-black text-elevate-dark/30 uppercase tracking-widest group-hover:<?php echo e($t['text']); ?> transition-colors">Masuk Kelas</span>
+                                <div class="w-8 h-8 rounded-full <?php echo e($t['light']); ?> <?php echo e($t['text']); ?> flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
                                     <i class="ph-bold ph-arrow-right"></i>
                                 </div>
                             </div>
                         </a>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
 
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil',
-                    text: "{{ session('success') }}",
+                    text: "<?php echo e(session('success')); ?>",
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
@@ -258,13 +270,13 @@
                         popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white'
                     }
                 });
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: "{{ session('error') }}",
+                    text: "<?php echo e(session('error')); ?>",
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
@@ -274,7 +286,16 @@
                         popup: 'rounded-xl shadow-lg border border-rose-100 bg-white'
                     }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-</x-student-learning-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $attributes = $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $component = $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/lms/index.blade.php ENDPATH**/ ?>

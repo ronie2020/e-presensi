@@ -112,7 +112,7 @@
                                 <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-3 flex items-center gap-1.5"><i class="ph-fill ph-lock-key text-slate-400 text-sm"></i> Target Penerima</label>
                                 <div class="flex items-center gap-3 text-elevate-dark font-black bg-white px-5 py-4 rounded-xl border border-slate-200 shadow-sm text-sm">
                                     <i class="ph-fill ph-users-three text-elevate-primary text-xl"></i>
-                                    @if($isBulk)
+                                    @if($assignment->is_bulk)
                                         Semua Kelas {{ $assignment->schoolClass ? substr($assignment->schoolClass->name, 0, 1) : 'Jenjang' }} (Mode Massal)
                                     @else
                                         Kelas {{ $assignment->schoolClass->name ?? '-' }}
@@ -136,13 +136,16 @@
 
                         <div class="h-px bg-slate-100"></div>
 
-                        <!-- 3. KONTEN DINAMIS -->
+                        <!-- 3. KONTEN DINAMIS (FIX DISABLED) -->
                         <div class="bg-slate-50/50 rounded-[2rem] p-6 md:p-8 border border-slate-100">
                             
                             <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
-                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal</label>
-                                <textarea name="description" rows="5" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
+                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal <span class="text-[#D13438]">*</span></label>
+                                <textarea name="description" rows="5" 
+                                          :required="assignmentType === 'file_upload'"
+                                          :disabled="assignmentType !== 'file_upload'"
+                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
@@ -151,24 +154,36 @@
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
                                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-link text-lg"></i></div>
-                                        <input type="url" name="link_url" value="{{ old('link_url', $assignment->link_url) }}" class="w-full rounded-2xl border-slate-200 bg-white pl-12 font-bold text-elevate-primary focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 transition-colors shadow-sm">
+                                        <input type="url" name="link_url" value="{{ old('link_url', $assignment->link_url) }}" 
+                                               :required="assignmentType === 'link'"
+                                               :disabled="assignmentType !== 'link'"
+                                               class="w-full rounded-2xl border-slate-200 bg-white pl-12 font-bold text-elevate-primary focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 transition-colors shadow-sm">
                                     </div>
                                 </div>
-                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan</label>
-                                <textarea name="description" rows="4" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 font-medium transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
+                                <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan <span class="text-[#D13438]">*</span></label>
+                                <textarea name="description" rows="4" 
+                                          :required="assignmentType === 'link'"
+                                          :disabled="assignmentType !== 'link'"
+                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 font-medium transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
                             </div>
 
                             <!-- C. JIKA KUIS ONLINE -->
                             <div x-show="assignmentType === 'quiz'">
                                 <div class="mb-8 flex flex-col md:flex-row gap-5">
                                     <div class="flex-1">
-                                        <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis</label>
-                                        <textarea name="description" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
+                                        <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis <span class="text-[#D13438]">*</span></label>
+                                        <textarea name="description" rows="2" 
+                                                  :required="assignmentType === 'quiz'"
+                                                  :disabled="assignmentType !== 'quiz'"
+                                                  class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
                                     </div>
                                     <div class="w-full md:w-1/3">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Durasi (Menit) <span class="text-[#D13438]">*</span></label>
                                         <div class="relative group">
-                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $assignment->duration_minutes) }}" class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 pr-12 transition-colors shadow-sm">
+                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', $assignment->duration_minutes) }}" 
+                                                   :required="assignmentType === 'quiz'"
+                                                   :disabled="assignmentType !== 'quiz'"
+                                                   class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 pr-12 transition-colors shadow-sm">
                                             <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400 text-[10px] font-black tracking-widest">MIN</div>
                                         </div>
                                     </div>
@@ -208,14 +223,11 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
-            // 1. Proteksi Tombol Batal/Kembali
             const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
             cancelButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const href = this.getAttribute('href');
-
                     Swal.fire({
                         title: 'Batalkan Edit?',
                         text: "Perubahan yang belum disimpan akan hilang.",
@@ -225,46 +237,28 @@
                         cancelButtonColor: '#e5eff5', 
                         confirmButtonText: 'Ya, Batalkan',
                         cancelButtonText: '<span class="text-elevate-dark">Lanjut Edit</span>',
-                        customClass: {
-                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm',
-                            cancelButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = href;
-                        }
-                    });
+                        customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', confirmButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm', cancelButton: 'rounded-xl px-5 py-2.5 font-bold shadow-sm' }
+                    }).then((result) => { if (result.isConfirmed) { window.location.href = href; } });
                 });
             });
 
-            // 2. Loading saat Submit
             const form = document.getElementById('editAssignmentForm');
             if(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    if (!this.checkValidity()) {
-                        this.reportValidity();
-                        return;
+                    if (!this.checkValidity()) { 
+                        this.reportValidity(); 
+                        return; 
                     }
-
                     Swal.fire({
                         title: 'Menyimpan Perubahan...',
                         text: 'Mohon tunggu sebentar.',
                         allowOutsideClick: false,
                         showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                            title: 'text-xl font-black text-elevate-dark'
-                        }
+                        didOpen: () => { Swal.showLoading(); },
+                        customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', title: 'text-xl font-black text-elevate-dark' }
                     });
-
-                    setTimeout(() => {
-                        this.submit();
-                    }, 500);
+                    setTimeout(() => { this.submit(); }, 500);
                 });
             }
         });

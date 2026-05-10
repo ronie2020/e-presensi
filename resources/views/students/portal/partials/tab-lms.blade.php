@@ -101,14 +101,19 @@
                 @endphp
 
                 <div class="mb-10 animate-enter">
-                    <div class="flex items-center gap-4 mb-5 pl-2">
-                        <div class="h-10 w-1.5 rounded-full {{ $t['bg'] }} border {{ $t['border'] }}"></div>
-                        <h3 class="text-xl font-black text-elevate-dark tracking-tight flex items-center gap-2">
-                            {{ $subjectName }}
-                            <span class="text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-lg {{ $t['bg'] }} {{ $t['text'] }} border {{ $t['border'] }}">
-                                {{ count($assignments) }} Tugas
-                            </span>
-                        </h3>
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-5 pl-2 pr-2">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-1.5 rounded-full {{ $t['bg'] }} border {{ $t['border'] }}"></div>
+                            <h3 class="text-xl font-black text-elevate-dark tracking-tight flex items-center gap-2">
+                                {{ $subjectName }}
+                                <span class="text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-lg {{ $t['bg'] }} {{ $t['text'] }} border {{ $t['border'] }}">
+                                    {{ count($assignments) }} Tugas
+                                </span>
+                            </h3>
+                        </div>
+                        <a href="{{ route('students.learning.play', $assignments->first()->subject_id) }}" class="px-5 py-2.5 bg-elevate-primary text-white text-xs font-bold rounded-xl shadow-md shadow-elevate-primary/20 hover:bg-elevate-dark transition-all flex items-center gap-2 w-full md:w-auto justify-center">
+                            <i class="ph-bold ph-play-circle text-lg"></i> Mulai Belajar Terstruktur
+                        </a>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -283,14 +288,19 @@
                 @endphp
 
                 <div class="mb-10 animate-enter">
-                    <div class="flex items-center gap-4 mb-5 pl-2">
-                        <div class="h-10 w-1.5 rounded-full {{ $t['bg'] }} border {{ $t['border'] }}"></div>
-                        <h3 class="text-xl font-black text-elevate-dark tracking-tight flex items-center gap-2">
-                            {{ $subjectName }}
-                            <span class="text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-lg {{ $t['bg'] }} {{ $t['text'] }} border {{ $t['border'] }}">
-                                {{ count($materials) }} Materi
-                            </span>
-                        </h3>
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-5 pl-2 pr-2">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-1.5 rounded-full {{ $t['bg'] }} border {{ $t['border'] }}"></div>
+                            <h3 class="text-xl font-black text-elevate-dark tracking-tight flex items-center gap-2">
+                                {{ $subjectName }}
+                                <span class="text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-lg {{ $t['bg'] }} {{ $t['text'] }} border {{ $t['border'] }}">
+                                    {{ count($materials) }} Materi
+                                </span>
+                            </h3>
+                        </div>
+                        <a href="{{ route('students.learning.play', $materials->first()->subject_id) }}" class="px-5 py-2.5 bg-elevate-primary text-white text-xs font-bold rounded-xl shadow-md shadow-elevate-primary/20 hover:bg-elevate-dark transition-all flex items-center gap-2 w-full md:w-auto justify-center">
+                            <i class="ph-bold ph-play-circle text-lg"></i> Mulai Belajar Terstruktur
+                        </a>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -321,14 +331,14 @@
                                         <p class="text-xs text-slate-500 mt-2 line-clamp-2 font-medium">{{ $material->resume ?? 'Tidak ada deskripsi.' }}</p>
                                     </div>
 
-                                    <div class="pt-4 border-t border-slate-100 mt-auto relative z-10 flex gap-2">
+                                     <div class="pt-4 border-t border-slate-100 mt-auto relative z-10 flex gap-2">
                                         @if($hasFile || $hasLink)
                                             <a href="{{ $fileUrl }}" target="_blank" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 transition-colors">
                                                 <i class="ph-bold {{ $btnIcon }}"></i> {{ $btnText }}
                                             </a>
                                         @endif
-                                        <a href="{{ route('students.learning.subject.show', $material->subject_id) }}" class="flex-1 py-2.5 rounded-xl bg-elevate-soft/50 hover:bg-elevate-soft text-elevate-primary border border-elevate-accent/30 font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm">
-                                            <i class="ph-bold ph-eye"></i> Detail
+                                        <a href="{{ route('students.learning.play', $material->subject_id) }}" class="flex-1 py-2.5 rounded-xl bg-elevate-soft/50 hover:bg-elevate-soft text-elevate-primary border border-elevate-accent/30 font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-sm">
+                                            <i class="ph-bold ph-presentation-chart"></i> Buka Player
                                         </a>
                                     </div>
                                 </div>

@@ -233,7 +233,7 @@ Route::middleware(['auth:student'])->prefix('alumni')->name('alumni.')->group(fu
 // =========================================================================
 Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     
-    // A. LMS SISWA (Belajar & Tugas)  
+     // A. LMS SISWA (Belajar & Tugas)  
     Route::prefix('students/learning')->name('students.learning.')->group(function () {
         Route::get('/', [StudentLmsController::class, 'index'])->name('index');
         Route::get('/subject/{subject_id}', [StudentLmsController::class, 'showSubject'])->name('subject.show');
@@ -243,6 +243,12 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         Route::post('/assignment/{id}/submit', [StudentLmsController::class, 'submitAssignment'])->name('assignment.submit');
         Route::get('/assignment/{id}/quiz', [StudentLmsController::class, 'startQuiz'])->name('assignment.quiz');
         Route::post('/assignment/{id}/quiz', [StudentQuizController::class, 'submit'])->name('assignment.quiz.submit');
+        
+        // Route untuk memanggil halaman Learning Player Moodle-style
+        Route::get('/{subjectId}/play', [\App\Http\Controllers\StudentLearningController::class, 'play'])->name('play');
+       
+        // Route AJAX untuk auto-save / menandai materi selesai dibaca
+        Route::post('/mark-material', [\App\Http\Controllers\StudentLearningController::class, 'markMaterialComplete'])->name('mark-material');
     });
 
     // B. UJIAN SISWA (CBT)    
@@ -294,8 +300,12 @@ Route::middleware('auth')->group(function () {
 
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {
+        Route::get('/preview-player/{subject}/{class}', [\App\Http\Controllers\LmsMaterialController::class, 'previewPlayer'])->name('preview.player');
+
         Route::resource('materials', LmsMaterialController::class);
         Route::resource('assignments', LmsAssignmentController::class);
+         // --- ROUTE BARU: PREVIEW MODE GURU ---
+        Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');      
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
         Route::delete('/submissions/{id}', [LmsAssignmentController::class, 'destroySubmission'])->name('submissions.destroy');

@@ -25,7 +25,9 @@ class StudentLmsController extends Controller
         foreach ($allSubjects as $subject) {
             // Cek Tugas Aktif
             $activeTasksCount = LmsAssignment::where('subject_id', $subject->id)
-                ->where('class_id', $student->class_id)
+                ->where(function($q) use ($student) {
+                    $q->where('class_id', $student->class_id)->orWhereNull('class_id');
+                })
                 ->whereDoesntHave('submissions', function($q) use ($student) {
                     $q->where('student_id', $student->id);
                 })

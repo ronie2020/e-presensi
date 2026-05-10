@@ -1,11 +1,21 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
-            {{ __('Upload Materi Baru') }}
-        </h2>
-    </x-slot>
+            <?php echo e(__('Upload Materi Baru')); ?>
 
-    {{-- CUSTOM STYLES --}}
+        </h2>
+     <?php $__env->endSlot(); ?>
+
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -13,12 +23,12 @@
 
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
-        {{-- Efek Latar Belakang Halus --}}
+        
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER ELEVATE --}}
+            
             <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -28,14 +38,14 @@
                         <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight text-elevate-dark">Upload Materi Baru</h1>
                         <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">Lengkapi formulir di bawah ini untuk membagikan materi ke siswa.</p>
                     </div>
-                    <a href="{{ route('lms.materials.index') }}" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm btn-cancel-confirm active:scale-95 shrink-0">
+                    <a href="<?php echo e(route('lms.materials.index')); ?>" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm btn-cancel-confirm active:scale-95 shrink-0">
                         <i class="ph-bold ph-arrow-left text-lg"></i> Kembali
                     </a>
                 </div>
             </div>
 
-            {{-- ERROR BLOCK --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div class="animate-enter mb-8 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
                     <div class="w-10 h-10 bg-white text-[#D13438] rounded-xl shrink-0 shadow-sm border border-[#F4C3C9] flex items-center justify-center">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
@@ -43,15 +53,15 @@
                     <div>
                         <h3 class="text-xs font-black text-[#D13438] uppercase tracking-wider mb-1 mt-1">Gagal Mengupload</h3>
                         <ul class="list-disc list-inside text-sm text-[#D13438] space-y-1 font-bold">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) DITAMBAHKAN DI SINI --}}
+            
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">
                 <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
                     <i class="ph-duotone ph-info"></i>
@@ -64,23 +74,23 @@
                 </div>
             </div>
 
-            {{-- LOGIKA PENGAMAN STATE ALPINE.JS --}}
-            @php               
+            
+            <?php               
                 $oldAttachments = old('attachments', [['id' => time(), 'type' => 'file', 'link' => '', 'name' => '']]);   
                 foreach($oldAttachments as $k => &$att) {
                     if(!isset($att['id'])) $att['id'] = time() + $k;
                 }
-            @endphp
+            ?>
 
-            {{-- FORM CARD --}}
+            
             <div class="animate-enter bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden" style="animation-delay: 100ms">
-                <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" 
+                <form action="<?php echo e(route('lms.materials.store')); ?>" method="POST" enctype="multipart/form-data" 
                       x-data="{ 
-                          targetType: '{{ old('target_type', 'class') }}', 
-                          attachments: {{ json_encode($oldAttachments) }} 
+                          targetType: '<?php echo e(old('target_type', 'class')); ?>', 
+                          attachments: <?php echo e(json_encode($oldAttachments)); ?> 
                       }"
                       id="uploadForm">
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <div class="p-6 md:p-10 space-y-8">
                         
@@ -94,7 +104,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="col-span-1 md:col-span-2">
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul Materi <span class="text-[#D13438]">*</span></label>
-                                    <input type="text" name="title" value="{{ old('title') }}" required 
+                                    <input type="text" name="title" value="<?php echo e(old('title')); ?>" required 
                                            class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors focus:bg-white shadow-sm" 
                                            placeholder="Contoh: Bab 1 - Ekosistem">
                                 </div>
@@ -104,15 +114,15 @@
                                     <div class="relative group">
                                         <select name="subject_id" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors focus:bg-white cursor-pointer shadow-sm">
                                             <option value="">-- Pilih Mapel --</option>
-                                            @foreach($subjects as $subject)
-                                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $subjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($subject->id); ?>" <?php echo e(old('subject_id') == $subject->id ? 'selected' : ''); ?>><?php echo e($subject->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down text-lg"></i></div>
                                     </div>
                                 </div>
 
-                                {{-- Pilihan Target Siswa --}}
+                                
                                 <div class="bg-elevate-soft/50 p-5 rounded-2xl border border-slate-100">
                                     <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-3 flex items-center gap-2">
                                         <i class="ph-fill ph-users-three text-lg"></i> Bagikan Kepada:
@@ -142,9 +152,9 @@
                                                         :required="targetType === 'class'"
                                                         class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-12 px-4 appearance-none shadow-sm cursor-pointer text-elevate-dark transition-colors">
                                                     <option value="">-- Pilih Kelas Spesifik --</option>
-                                                    @foreach($classes as $class)
-                                                        <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
-                                                    @endforeach
+                                                    <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($class->id); ?>" <?php echo e(old('class_id') == $class->id ? 'selected' : ''); ?>><?php echo e($class->name); ?></option>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                                 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down"></i></div>
                                             </div>
@@ -156,9 +166,9 @@
                                                 <select name="target_grade" 
                                                         :required="targetType === 'grade'"
                                                         class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-12 px-4 appearance-none shadow-sm cursor-pointer text-elevate-dark transition-colors">
-                                                    <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Semua Kelas 7</option>
-                                                    <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Semua Kelas 8</option>
-                                                    <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Semua Kelas 9</option>
+                                                    <option value="7" <?php echo e(old('target_grade') == '7' ? 'selected' : ''); ?>>Semua Kelas 7</option>
+                                                    <option value="8" <?php echo e(old('target_grade') == '8' ? 'selected' : ''); ?>>Semua Kelas 8</option>
+                                                    <option value="9" <?php echo e(old('target_grade') == '9' ? 'selected' : ''); ?>>Semua Kelas 9</option>
                                                 </select>
                                                 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down"></i></div>
                                             </div>
@@ -177,7 +187,7 @@
                                 Pengantar & Resume Materi
                             </label>
                             <div class="relative">
-                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm p-5 text-elevate-dark leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa...">{{ old('resume') }}</textarea>
+                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm p-5 text-elevate-dark leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa..."><?php echo e(old('resume')); ?></textarea>
                                 <div class="absolute bottom-4 right-4 text-slate-300 pointer-events-none"><i class="ph-bold ph-text-aa text-xl"></i></div>
                             </div>
                         </div>
@@ -243,7 +253,7 @@
 
                      <!-- FOOTER ACTIONS -->
                     <div class="bg-elevate-soft/30 px-6 md:px-10 py-6 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-4">
-                        <a href="{{ route('lms.materials.index') }}" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm btn-cancel-confirm active:scale-95 shadow-sm">Batal</a>
+                        <a href="<?php echo e(route('lms.materials.index')); ?>" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm btn-cancel-confirm active:scale-95 shadow-sm">Batal</a>
                         
                         <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 text-sm active:scale-95 border border-transparent">
                             <i class="ph-bold ph-check-circle text-lg"></i>
@@ -256,8 +266,8 @@
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT2 --}}
-    @push('scripts')
+    
+    <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {            
@@ -312,7 +322,7 @@
             }
 
             // 3. Notifikasi Error PHP (Jika validasi server gagal)
-           @if($errors->any())
+           <?php if($errors->any()): ?>
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal Mengupload',
@@ -321,8 +331,17 @@
                     confirmButtonColor: '#D13438',
                     customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', confirmButton: 'rounded-xl px-6 py-3 font-bold shadow-sm' }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/lms/materials/create.blade.php ENDPATH**/ ?>

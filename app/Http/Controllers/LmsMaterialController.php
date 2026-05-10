@@ -318,4 +318,112 @@ class LmsMaterialController extends Controller
 
         return back()->with('error', 'File tidak ditemukan.');
     }
+
+  /**
+     * TAMPILAN PREVIEW UNTUK GURU
+     */
+    public function previewPlayer($subjectId, $classId)
+    {
+        $subject = \App\Models\Subject::findOrFail($subjectId);
+        
+        // 1. Ambil Semua Materi & Tugas, lalu gabungkan dan urutkan sesuai waktu pembuatan
+        $materials = \App\Models\LmsMaterial::with('attachments')
+            ->where('subject_id', $subjectId)
+            ->where('class_id', $classId)
+            ->get();
+
+        $assignments = \App\Models\LmsAssignment::where('subject_id', $subjectId)
+            ->where('class_id', $classId)
+            ->get();
+            
+        $combined = $materials->concat($assignments)->sortBy('created_at')->values();
+
+        $syllabus = [];
+
+        foreach ($combined as $item) {
+            // JIKA TIPE MATERI
+            if ($item instanceof \App\Models\LmsMaterial) {
+                $groupTitle = clone $item->title; // Judul Induk (Group)
+
+                // A. Item ke-1: Pengantar Materi (Jika guru mengisi teks resume)
+                if (!empty($item->resume)) {
+                    $syllabus[] = [
+                        'id' => 'm_' . $item->id . '_intro',
+                        'db_id' => $item->id,
+                        'group_title' => $groupTitle,
+                        'title' => 'Pengantar Materi',
+                        'type' => 'text',
+                        'content' => $item->resume,
+                        'completed' => true,
+                        'locked' => false,
+                    ];
+                }
+
+                // B. Item ke-2 dst: Lampiran (Video, PDF, Link)
+                foreach ($item->attachments as $att) {
+                    $type = 'file';
+                    
+                    // Format URL Lampiran
+                    $cleanPath = str_replace(['public\\', 'public/'], '', $att->file_path);
+                    $attachmentUrl = str_starts_with($cleanPath, 'http') ? $cleanPath : asset('storage/' . $cleanPath);
+
+                    if ($att->file_type == 'video' || str_contains($att->file_path, 'youtube') || str_contains($att->file_path, 'youtu.be')) {
+                        $type = 'video';
+                        $attachmentUrl = $att->file_path; 
+                    } elseif ($att->file_type == 'link') {
+                        $type = 'link';
+                        $attachmentUrl = $att->file_path; 
+                    }
+
+                    $syllabus[] = [
+                        'id' => 'm_' . $item->id . '_att_' . $att->id,
+                        'db_id' => $item->id,
+                        'group_title' => $groupTitle,
+                        'title' => $att->file_name ?? 'Lampiran ' . strtoupper($type),
+                        'type' => $type,
+                        'file_url' => $attachmentUrl,
+                        'completed' => true,
+                        'locked' => false,
+                    ];
+                }
+
+                // C. Fallback: Jika materi kosong (tanpa teks dan tanpa file)
+                if (empty($item->resume) && $item->attachments->isEmpty()) {
+                    $syllabus[] = [
+                        'id' => 'm_' . $item->id . '_empty',
+                        'db_id' => $item->id,
+                        'group_title' => $groupTitle,
+                        'title' => 'Materi Kosong',
+                        'type' => 'text',
+                        'content' => 'Tidak ada konten.',
+                        'completed' => true,
+                        'locked' => false,
+                    ];
+                }
+            } 
+            // JIKA TIPE TUGAS / KUIS
+            else {
+                $syllabus[] = [
+                    'id' => 'a_' . $item->id,
+                    'db_id' => $item->id,
+                    'group_title' => 'Tugas: ' . $item->title,
+                    'title' => 'Kerjakan Latihan',
+                    'type' => 'assignment', 
+                    'assignment_type' => $item->assignment_type,
+                    'content' => $item->description,
+                    'duration' => $item->duration_minutes,
+                    'link_url' => $item->link_url,
+                    'grade' => null,
+                    'completed' => false,
+                    'locked' => false,
+                ];
+            }
+        }
+
+        return view('students.lms.learning-player', [
+            'subject' => $subject,
+            'syllabusJson' => json_encode($syllabus),
+            'isPreview' => true 
+        ]);
+    }
 }
