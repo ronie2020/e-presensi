@@ -1,4 +1,13 @@
-<x-student-learning-layout>
+<?php if (isset($component)) { $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.student-learning-layout','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('student-learning-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -14,17 +23,17 @@
 
     <div x-data="learningPlayer()" x-init="initPlayer()" class="h-screen flex flex-col bg-elevate-surface font-sans overflow-hidden">
         
-        {{-- HEADER ELEVATE THEME --}}
+        
         <header class="h-16 bg-white border-b border-elevate-soft flex items-center justify-between px-4 sm:px-6 shrink-0 z-20 shadow-sm relative">
-            {{-- Aksen gradient tipis di atas header --}}
+            
             <div class="absolute top-0 left-0 w-full h-1 bg-elevate-gradient-main opacity-80"></div>
             
             <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0 mt-1">
-                <a href="{{ isset($isPreview) && $isPreview ? route('lms.assignments.index') : route('students.learning.index') }}" class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white flex items-center justify-center transition-colors border border-transparent shrink-0 active:scale-95">
+                <a href="<?php echo e(isset($isPreview) && $isPreview ? route('lms.assignments.index') : route('students.learning.index')); ?>" class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white flex items-center justify-center transition-colors border border-transparent shrink-0 active:scale-95">
                     <i class="ph-bold ph-arrow-left text-lg"></i>
                 </a>
                 <div class="flex-1 min-w-0">
-                    <h1 class="text-sm font-black text-elevate-dark leading-tight truncate">{{ $subject->name ?? 'Mata Pelajaran' }}</h1>
+                    <h1 class="text-sm font-black text-elevate-dark leading-tight truncate"><?php echo e($subject->name ?? 'Mata Pelajaran'); ?></h1>
                     <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest truncate">Alur Belajar Terstruktur</p>
                 </div>
             </div>
@@ -43,10 +52,10 @@
             </button>
         </header>
 
-        {{-- MAIN CONTENT --}}
+        
         <div class="flex-1 flex overflow-hidden relative">
             
-            {{-- MOBILE BACKDROP OVERLAY --}}
+            
             <div x-show="sidebarOpen" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0"
@@ -58,7 +67,7 @@
                  class="absolute inset-0 bg-elevate-dark/60 backdrop-blur-sm z-30 md:hidden" x-cloak>
             </div>
 
-            {{-- SIDEBAR SILABUS HIERARKIS (GROUPED) --}}
+            
             <aside class="absolute md:static inset-y-0 left-0 w-[85%] max-w-[320px] md:w-80 bg-white border-r border-elevate-soft z-40 md:z-10 transform transition-transform duration-300 md:transform-none flex flex-col shadow-2xl md:shadow-none"
                    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
                 
@@ -74,13 +83,13 @@
                 <div class="flex-1 overflow-y-auto no-scrollbar smooth-scroll p-3 space-y-5 bg-white">
                     <template x-for="(group, gIndex) in groupedSyllabus" :key="'group-'+gIndex">
                         <div>
-                            {{-- Nama Induk Materi / Tugas --}}
+                            
                             <div class="px-3 mb-2 flex items-center gap-2">
                                 <div class="w-1.5 h-1.5 rounded-full bg-elevate-primary/30 shrink-0"></div>
                                 <h3 class="text-[10px] font-black text-elevate-dark/50 uppercase tracking-widest line-clamp-1" x-text="group.title"></h3>
                             </div>
                             
-                            {{-- Sub Item (Pengantar, Video, PDF) --}}
+                            
                             <div class="space-y-1">
                                 <template x-for="(item, index) in group.items" :key="item.id">
                                     <button @click="selectItem(item.id)" :disabled="item.locked" class="w-full text-left p-3 rounded-2xl transition-all duration-200 flex gap-3 relative group"
@@ -115,16 +124,16 @@
                 </div>
             </aside>
 
-            {{-- KONTEN TENGAH DINAMIS --}}
+            
             <main class="flex-1 bg-elevate-soft/20 flex flex-col relative overflow-hidden smooth-scroll">
                 <div class="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center w-full relative">
-                    {{-- Dekorasi background tengah --}}
+                    
                     <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-elevate-gradient-main opacity-5 blur-[100px] pointer-events-none rounded-full"></div>
 
                     <div class="w-full max-w-5xl relative min-h-full z-10" x-show="activeItem" x-cloak>
                         <div x-show="!isTransitioning" x-transition.opacity.duration.300ms class="pb-24">
 
-                            {{-- 1. RENDER TEKS PENGANTAR --}}
+                            
                             <template x-if="activeItem.type === 'text'">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-6 md:p-10">
                                     <h2 class="text-xl md:text-2xl font-black text-elevate-dark mb-6 leading-tight" x-text="activeItem.group_title"></h2>
@@ -132,7 +141,7 @@
                                 </div>
                             </template>
 
-                            {{-- 2. RENDER VIDEO YOUTUBE --}}
+                            
                             <template x-if="activeItem.type === 'video'">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <h2 class="text-lg md:text-xl font-black text-elevate-dark mb-4 ml-1 md:ml-2 leading-tight" x-text="activeItem.title"></h2>
@@ -143,7 +152,7 @@
                                 </div>
                             </template>
 
-                            {{-- 3. RENDER PDF / DOKUMEN --}}
+                            
                             <template x-if="activeItem.type === 'file'">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 ml-1 md:ml-2">
@@ -159,7 +168,7 @@
                                 </div>
                             </template>
 
-                            {{-- 4. RENDER TAUTAN LINK LUAR (EMBEDDED) --}}
+                            
                             <template x-if="activeItem.type === 'link'">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 ml-1 md:ml-2">
@@ -172,7 +181,7 @@
                                         </a>
                                     </div>
 
-                                    {{-- Banner Informasi --}}
+                                    
                                     <div class="mb-5 p-3.5 bg-elevate-soft/30 border border-elevate-soft rounded-xl flex items-start gap-3">
                                         <i class="ph-fill ph-info text-elevate-primary text-xl shrink-0 mt-0.5"></i>
                                         <p class="text-xs sm:text-sm text-elevate-dark/70 font-medium">Beberapa website mungkin menolak untuk ditampilkan di dalam halaman ini demi keamanan privasi. Jika kotak di bawah berwarna putih/kosong, silakan gunakan tombol <b>Buka di Tab Baru</b>.</p>
@@ -185,13 +194,13 @@
                                                 <span class="text-xs font-bold text-elevate-primary">Memuat Halaman...</span>
                                             </div>
                                         </div>
-                                        {{-- Iframe dengan atribut sandbox untuk keamanan ekstra --}}
+                                        
                                         <iframe :src="activeItem.file_url" class="w-full h-full embed-iframe border-0 bg-white" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" allowfullscreen></iframe>
                                     </div>
                                 </div>
                             </template>
 
-                            {{-- 5. RENDER TUGAS / KUIS --}}
+                            
                             <template x-if="activeItem.type === 'assignment'">
                                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-elevate-soft overflow-hidden">
                                     <div class="bg-elevate-dark text-white p-6 md:p-8 relative overflow-hidden">
@@ -206,7 +215,7 @@
                                         <div class="prose max-w-none text-elevate-dark/80 mb-8 bg-elevate-soft/30 p-5 md:p-6 rounded-2xl border border-elevate-soft text-sm md:text-base" x-text="activeItem.content"></div>
                                         
                                         <template x-if="activeItem.completed">
-                                            {{-- SUCCESS CARD MENGGUNAKAN WARNA #107C10 DARI DAILY.BLADE.PHP --}}
+                                            
                                             <div class="bg-[#DFF6DD] text-[#107C10] p-5 md:p-6 rounded-2xl border border-[#B7DFB9] flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
                                                 <i class="ph-fill ph-check-circle text-4xl hidden sm:block"></i>
                                                 <div class="flex items-center gap-3 sm:hidden mb-2">
@@ -232,7 +241,7 @@
                                                 </template>
                                                 <template x-if="activeItem.assignment_type !== 'quiz'">
                                                     <form :action="'/students/learning/assignment/' + activeItem.db_id + '/submit'" method="POST" enctype="multipart/form-data" class="space-y-5 p-5 md:p-6 border-2 border-dashed border-elevate-primary/30 rounded-2xl bg-elevate-soft/30">
-                                                        @csrf
+                                                        <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="submission_type" :value="activeItem.assignment_type === 'link' ? 'link' : 'file'">
                                                         <template x-if="activeItem.assignment_type === 'link'">
                                                             <div>
@@ -258,7 +267,7 @@
                     </div>
                 </div>
 
-                {{-- TOMBOL KONTROL BAWAH --}}
+                
                 <div class="bg-white border-t border-elevate-soft p-4 shadow-[0_-10px_40px_rgba(44,63,97,0.05)] z-20">
                     <div class="max-w-4xl mx-auto flex flex-row items-center justify-between gap-3 md:gap-4">
                         
@@ -273,7 +282,7 @@
                             </button>
                         </template>
                         
-                        {{-- WARNING ALERT MENGGUNAKAN WARNA #D13438 DARI DAILY.BLADE.PHP --}}
+                        
                         <template x-if="activeItem && activeItem.type === 'assignment' && !activeItem.completed">
                             <div class="flex-1 w-full px-4 md:px-8 py-3.5 bg-[#FDE7E9] text-[#D13438] font-bold rounded-2xl border border-[#F4C3C9] flex items-center justify-center gap-2 text-xs md:text-sm shadow-sm">
                                 <i class="ph-warning-circle shrink-0 text-lg"></i> <span class="truncate">Selesaikan tugas untuk lanjut.</span>
@@ -291,7 +300,7 @@
             Alpine.data('learningPlayer', () => ({
                 sidebarOpen: false,
                 isTransitioning: false,
-                syllabus: {!! $syllabusJson ?? '[]' !!}, 
+                syllabus: <?php echo $syllabusJson ?? '[]'; ?>, 
                 activeItem: null,
 
                 get groupedSyllabus() {
@@ -355,15 +364,15 @@
                 },
 
                 markCurrentAsCompleted() {
-                    @if(!isset($isPreview))
+                    <?php if(!isset($isPreview)): ?>
                         if (this.activeItem.type !== 'assignment') {
-                            fetch('{{ route("students.learning.mark-material") }}', {
+                            fetch('<?php echo e(route("students.learning.mark-material")); ?>', {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                                 body: JSON.stringify({ material_id: this.activeItem.db_id })
                             });
                         }
-                    @endif
+                    <?php endif; ?>
 
                     this.syllabus[this.currentIndex].completed = true;
                     if (this.currentIndex + 1 < this.syllabus.length) {
@@ -383,7 +392,7 @@
                             confirmButtonColor: '#0d52a1', // elevate-primary
                             customClass: { popup: 'rounded-[2rem] font-sans' }
                         }).then(() => {
-                            window.location.href = "{{ isset($isPreview) && $isPreview ? route('lms.assignments.index') : route('students.learning.index') }}";
+                            window.location.href = "<?php echo e(isset($isPreview) && $isPreview ? route('lms.assignments.index') : route('students.learning.index')); ?>";
                         });
                     }
                 },
@@ -398,4 +407,13 @@
             }));
         });
     </script>
-</x-student-learning-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $attributes = $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $component = $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/lms/learning-player.blade.php ENDPATH**/ ?>
