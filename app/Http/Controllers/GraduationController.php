@@ -7,6 +7,7 @@ use App\Models\Graduation;
 use App\Models\SchoolClass;
 use App\Models\AlumniProfile; 
 use App\Models\StudentClassHistory;
+use App\Models\AcademicYear; // <-- Wajib ditambahkan agar tidak error "Class not found"
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +19,15 @@ class GraduationController extends Controller
     // --- HALAMAN SISWA (Cek Kelulusan & SKL) ---
     public function index()
     {
+        // Menggunakan helper active() dari model AcademicYear
+        $activeYear = AcademicYear::active(); 
+        $tahunAjaran = $activeYear ? $activeYear->name : date('Y') . '/' . (date('Y') + 1);
+
         $firstGraduation = Graduation::whereNotNull('announcement_date')->orderBy('announcement_date', 'asc')->first();
         $announcementDate = ($firstGraduation && $firstGraduation->announcement_date) ? Carbon::parse($firstGraduation->announcement_date) : Carbon::now()->addYear();
-        return view('graduation.index', compact('announcementDate'));
+        
+        // Jangan lupa compact('tahunAjaran')
+        return view('graduation.index', compact('announcementDate', 'tahunAjaran'));
     }
 
     public function check(Request $request)
@@ -33,8 +40,14 @@ class GraduationController extends Controller
         if (!$student->graduation) return back()->with('error', 'Data kelulusan belum dirilis.');
         if ($student->graduation->announcement_date && now() < $student->graduation->announcement_date) return back()->with('error', 'Pengumuman belum dibuka.');
 
+        // Ambil tahun ajaran untuk ditampilkan di hasil pencarian
+        $activeYear = AcademicYear::active(); 
+        $tahunAjaran = $activeYear ? $activeYear->name : date('Y') . '/' . (date('Y') + 1);
+
         $announcementDate = $student->graduation->announcement_date ? Carbon::parse($student->graduation->announcement_date) : Carbon::now()->addYear();
-        return view('graduation.index', compact('student', 'announcementDate'));
+        
+        // Jangan lupa compact('tahunAjaran')
+        return view('graduation.index', compact('student', 'announcementDate', 'tahunAjaran'));
     }
 
     public function printSkl($id)
