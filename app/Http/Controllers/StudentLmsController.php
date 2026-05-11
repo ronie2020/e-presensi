@@ -92,7 +92,7 @@ class StudentLmsController extends Controller
      * [DIPERBARUI] Upload Tugas (Bisa File atau Link)
      * Menggabungkan logika lama dengan fitur baru submission_type
      */
-    public function submitAssignment(Request $request, $assignmentId)
+     public function submitAssignment(Request $request, $assignmentId)
     {
         $student = Auth::guard('student')->user();
         $assignment = LmsAssignment::findOrFail($assignmentId);
@@ -111,6 +111,20 @@ class StudentLmsController extends Controller
             return back()->with('success', 'Tugas berhasil ditandai selesai!');
         }
 
+         // TAMBAHAN: Jika tipe tugas adalah Video Interaktif (Otomatis selesai tanpa validasi form upload)
+        if ($request->submission_type == 'interactive_video' || $assignment->assignment_type == 'interactive_video') {
+            LmsSubmission::updateOrCreate(
+                ['assignment_id' => $assignmentId, 'student_id' => $student->id],
+                [
+                    'submitted_at' => now(), 
+                    'student_note' => 'Telah menonton dan menjawab kuis Video Interaktif',
+                    'submission_type' => 'interactive_video',
+                    'grade' => 100 // Beri nilai otomatis 100 jika berhasil menjawab semua
+                ]
+            );
+            return back()->with('success', 'Video Interaktif berhasil diselesaikan!');
+        }
+        
         // Cek Deadline
         if (!$assignment->allow_late_submission && now() > $assignment->deadline) {
             return back()->with('error', 'Maaf, batas waktu pengumpulan sudah habis.');

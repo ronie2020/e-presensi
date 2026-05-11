@@ -1,9 +1,19 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
-            {{ __('Buat Tugas Baru') }}
+            <?php echo e(__('Buat Tugas Baru')); ?>
+
         </h2>
-    </x-slot>
+     <?php $__env->endSlot(); ?>
 
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -12,12 +22,12 @@
 
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
-        {{-- Efek Latar Belakang Halus --}}
+        
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER ELEVATE --}}
+            
             <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -27,14 +37,14 @@
                         <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight">Setting Penugasan</h1>
                         <p class="text-elevate-dark/80 text-sm font-semibold">Atur detail tugas, kuis, atau instruksi untuk siswa.</p>
                     </div>
-                    <a href="{{ route('lms.assignments.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
+                    <a href="<?php echo e(route('lms.assignments.index')); ?>" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
                     </a>
                 </div>
             </div>
 
-            {{-- ERROR BLOCK --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div class="animate-enter mb-8 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
                     <div class="w-10 h-10 bg-white text-[#D13438] rounded-xl shrink-0 shadow-sm border border-[#F4C3C9] flex items-center justify-center">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
@@ -42,15 +52,15 @@
                     <div>
                         <h3 class="text-xs font-black text-[#D13438] uppercase tracking-wider mb-1 mt-1">Gagal Menyimpan</h3>
                         <ul class="list-disc list-inside text-sm text-[#D13438] space-y-1 font-bold">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- INFO ALUR BELAJAR --}}
+            
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm">
                 <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
                     <i class="ph-duotone ph-info"></i>
@@ -63,16 +73,16 @@
                 </div>
             </div>
 
-            {{-- FORM CARD --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-                <form action="{{ route('lms.assignments.store') }}" method="POST" id="createAssignmentForm" 
+                <form action="<?php echo e(route('lms.assignments.store')); ?>" method="POST" id="createAssignmentForm" 
                       x-data="{ 
-                          targetType: '{{ old('target_type', 'class') }}', 
-                          assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
+                          targetType: '<?php echo e(old('target_type', 'class')); ?>', 
+                          assignmentType: '<?php echo e(old('assignment_type', 'file_upload')); ?>', 
                           questions: [],
                           interactiveQuestions: [] 
                       }">
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <div class="p-6 md:p-10 space-y-10">
                         
@@ -86,7 +96,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="col-span-2">
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul Tugas <span class="text-[#D13438]">*</span></label>
-                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1">
+                                    <input type="text" name="title" value="<?php echo e(old('title')); ?>" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1">
                                 </div>
 
                                 <div>
@@ -94,9 +104,9 @@
                                     <div class="relative group">
                                         <select name="subject_id" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors cursor-pointer shadow-sm">
                                             <option value="">-- Pilih Mapel --</option>
-                                            @foreach($subjects as $subject)
-                                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $subjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($subject->id); ?>" <?php echo e(old('subject_id') == $subject->id ? 'selected' : ''); ?>><?php echo e($subject->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
                                     </div>
@@ -104,13 +114,13 @@
 
                                 <div>
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Deadline <span class="text-[#D13438]">*</span></label>
-                                    <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors shadow-sm">
+                                    <input type="datetime-local" name="deadline" value="<?php echo e(old('deadline')); ?>" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors shadow-sm">
                                 </div>
 
                                 <div class="col-span-2">
                                     <label class="inline-flex items-center cursor-pointer group">
                                         <div class="relative">
-                                            <input type="checkbox" name="allow_late_submission" class="sr-only peer" {{ old('allow_late_submission') ? 'checked' : '' }}>
+                                            <input type="checkbox" name="allow_late_submission" class="sr-only peer" <?php echo e(old('allow_late_submission') ? 'checked' : ''); ?>>
                                             <div class="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-elevate-primary shadow-inner"></div>
                                         </div>
                                         <span class="ml-3 text-sm font-bold text-slate-500 group-hover:text-elevate-primary transition-colors">Izinkan pengumpulan terlambat</span>
@@ -126,7 +136,7 @@
                             <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-4 ml-1">Jenis Penugasan <span class="text-[#D13438]">*</span></label>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                                {{-- Card 1: Upload File --}}
+                                
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="file_upload" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-elevate-accent/50 hover:bg-elevate-soft/50 transition-all peer-checked:border-elevate-primary peer-checked:bg-elevate-soft/30 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -138,7 +148,7 @@
                                     </div>
                                 </label>
 
-                                {{-- Card 2: Kuis Online --}}
+                                
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="quiz" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-purple-300 hover:bg-purple-50/50 transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50/50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -150,7 +160,7 @@
                                     </div>
                                 </label>
 
-                                {{-- Card 3: Link Eksternal --}}
+                                
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="link" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-[#FFD8A8] hover:bg-[#FFEFD6]/50 transition-all peer-checked:border-[#D83B01] peer-checked:bg-[#FFEFD6]/30 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -162,7 +172,7 @@
                                     </div>
                                 </label>
 
-                                {{-- Card 4: Video Interaktif (BARU) --}}
+                                
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="interactive_video" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-red-300 hover:bg-red-50/50 transition-all peer-checked:border-red-600 peer-checked:bg-red-50/50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -186,7 +196,7 @@
                                           :required="assignmentType === 'file_upload'" 
                                           :disabled="assignmentType !== 'file_upload'"
                                           class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors shadow-sm" 
-                                          placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
+                                          placeholder="Tuliskan soal atau instruksi pengerjaan disini..."><?php echo e(old('description_file')); ?></textarea>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
@@ -195,7 +205,7 @@
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
                                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-link text-lg"></i></div>
-                                        <input type="url" name="link_url" value="{{ old('link_url') }}" 
+                                        <input type="url" name="link_url" value="<?php echo e(old('link_url')); ?>" 
                                                :required="assignmentType === 'link'" 
                                                :disabled="assignmentType !== 'link'"
                                                class="w-full rounded-2xl border-slate-200 bg-white pl-12 font-bold text-elevate-primary focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 transition-colors shadow-sm" 
@@ -207,7 +217,7 @@
                                           :required="assignmentType === 'link'" 
                                           :disabled="assignmentType !== 'link'"
                                           class="w-full rounded-2xl border-slate-200 bg-white focus:ring-[#D83B01]/30 focus:border-[#D83B01] p-5 font-medium transition-colors shadow-sm" 
-                                          placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
+                                          placeholder="Silakan kerjakan link di atas..."><?php echo e(old('description_link')); ?></textarea>
                             </div>
 
                             <!-- C. JIKA KUIS ONLINE -->
@@ -216,11 +226,11 @@
                                 <div class="mb-8 flex flex-col md:flex-row gap-5">
                                     <div class="flex-1">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis <span class="text-[#D13438]">*</span></label>
-                                        <textarea name="description_quiz" rows="2" :required="assignmentType === 'quiz'" :disabled="assignmentType !== 'quiz'" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm">{{ old('description_quiz') }}</textarea>
+                                        <textarea name="description_quiz" rows="2" :required="assignmentType === 'quiz'" :disabled="assignmentType !== 'quiz'" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-purple-500/30 focus:border-purple-500 p-4 transition-colors shadow-sm"><?php echo e(old('description_quiz')); ?></textarea>
                                     </div>
                                     <div class="w-full md:w-1/3">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Durasi (Menit) <span class="text-[#D13438]">*</span></label>
-                                        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" :required="assignmentType === 'quiz'" :disabled="assignmentType !== 'quiz'" class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 transition-colors shadow-sm">
+                                        <input type="number" name="duration_minutes" value="<?php echo e(old('duration_minutes', 60)); ?>" :required="assignmentType === 'quiz'" :disabled="assignmentType !== 'quiz'" class="w-full rounded-2xl border-slate-200 bg-white font-black text-elevate-dark focus:ring-purple-500/30 focus:border-purple-500 h-14 pl-5 transition-colors shadow-sm">
                                     </div>
                                 </div>
 
@@ -276,12 +286,12 @@
                                     <template x-for="(iq, index) in interactiveQuestions" :key="index">
                                         <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 hover:border-red-200 transition-all shadow-sm relative">
                                             
-                                            {{-- Tombol Hapus Soal --}}
+                                            
                                             <button type="button" @click="interactiveQuestions = interactiveQuestions.filter((_, i) => i !== index)" class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 text-slate-500 hover:bg-[#FDE7E9] hover:text-[#D13438] flex items-center justify-center transition-colors shadow-sm">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
 
-                                            {{-- Input Waktu --}}
+                                            
                                             <div class="mb-5 flex flex-wrap items-end gap-3">
                                                 <div class="w-full sm:w-auto">
                                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Muncul di Menit ke</label>
@@ -296,7 +306,7 @@
 
                                             <div class="h-px bg-slate-100 w-full mb-5"></div>
 
-                                            {{-- Input Soal & Jawaban --}}
+                                            
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Pertanyaan</label>
                                             <textarea :name="'interactive_questions['+index+'][text]'" x-model="iq.text" required rows="2" class="w-full rounded-2xl border-slate-200 text-base mb-4 focus:ring-red-500/30 focus:border-red-500 font-medium shadow-sm p-4 bg-slate-50 focus:bg-white transition-colors" placeholder="Tuliskan pertanyaan kuis di sini..."></textarea>
                                             
@@ -351,9 +361,9 @@
                                     <div x-show="targetType === 'class'">
                                         <select name="class_id" :required="targetType === 'class'" :disabled="targetType !== 'class'" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 shadow-sm text-elevate-dark transition-colors">
                                             <option value="">-- Pilih Kelas --</option>
-                                            @foreach($classes as $class)
-                                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($class->id); ?>" <?php echo e(old('class_id') == $class->id ? 'selected' : ''); ?>><?php echo e($class->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                     <div x-show="targetType === 'grade'" style="display: none;">
@@ -370,7 +380,7 @@
 
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-elevate-soft/30 px-6 py-6 md:px-10 md:py-8 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-100">
-                        <a href="{{ route('lms.assignments.index') }}" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm shadow-sm btn-cancel-confirm active:scale-95">Batal</a>
+                        <a href="<?php echo e(route('lms.assignments.index')); ?>" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm shadow-sm btn-cancel-confirm active:scale-95">Batal</a>
                         <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 text-sm border border-transparent active:scale-95">
                             <i class="ph-bold ph-paper-plane-tilt text-lg"></i> <span>Terbitkan Tugas</span>
                         </button>
@@ -380,8 +390,8 @@
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT2 --}}
-    @push('scripts')
+    
+    <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -407,5 +417,14 @@
             }
         });
     </script>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/lms/assignments/create.blade.php ENDPATH**/ ?>

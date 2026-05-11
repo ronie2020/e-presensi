@@ -19,13 +19,14 @@ class StudentLearningController extends Controller
 
         $subject = Subject::findOrFail($subjectId);
 
-        // 1. Ambil Semua Materi & Tugas
+         // 1. Ambil Semua Materi & Tugas
         $materials = LmsMaterial::with('attachments')
             ->where('subject_id', $subjectId)
             ->where('class_id', $classId)
             ->get();
 
-        $assignments = LmsAssignment::where('subject_id', $subjectId)
+        // TAMBAHKAN with('questions') PADA BARIS INI 👇
+        $assignments = LmsAssignment::with('questions')->where('subject_id', $subjectId)
             ->where('class_id', $classId)
             ->get();
             
@@ -125,6 +126,7 @@ class StudentLearningController extends Controller
                     'grade' => $submission->grade ?? null,
                     'completed' => $isCompleted,
                     'locked' => false,
+                    'questions' => $item->questions, // 👈 TAMBAHKAN BARIS INI UNTUK MENGIRIM SOAL KE ALPINE.JS
                 ];
             }
         }

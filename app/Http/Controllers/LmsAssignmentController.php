@@ -75,6 +75,7 @@ class LmsAssignmentController extends Controller
 
     public function store(Request $request)
     {
+        // Tetapkan deskripsi berdasarkan tipe tugas
         $description = null;
         if ($request->assignment_type == 'file_upload') {
             $description = $request->description_file;
@@ -82,21 +83,27 @@ class LmsAssignmentController extends Controller
             $description = $request->description_quiz;
         } elseif ($request->assignment_type == 'link') {
             $description = $request->description_link;
+        } elseif ($request->assignment_type == 'interactive_video') {
+            // Berikan deskripsi default untuk video interaktif jika tidak ada di UI
+            $description = "Tugas Video Interaktif. Silakan tonton video ini dengan saksama dan jawab pertanyaan yang muncul secara otomatis di tengah video.";
         }
 
         $request->merge(['description' => $description]);
 
+        // Validasi diperbarui untuk mendukung 'interactive_video'
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:' . Subject::class . ',id',
             'deadline' => 'required',
             'description' => 'required|string',
-            'assignment_type' => 'required|in:file_upload,quiz,link',
+            'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video',
             'target_type' => 'required|in:grade,class',
             'class_id' => 'required_if:target_type,class|nullable|exists:' . SchoolClass::class . ',id',
             'link_url' => 'nullable|required_if:assignment_type,link|url',
+            'youtube_url' => 'nullable|required_if:assignment_type,interactive_video|url',
             'duration_minutes' => 'nullable|required_if:assignment_type,quiz|integer|min:1',
             'questions' => 'nullable|required_if:assignment_type,quiz|array',
+            'interactive_questions' => 'nullable|required_if:assignment_type,interactive_video|array',
         ]);
 
         $teacherId = Auth::id();
@@ -122,6 +129,15 @@ class LmsAssignmentController extends Controller
                 }
 
                 foreach ($targetClassIds as $classId) {
+                    
+                    // Simpan youtube_url ke dalam kolom link_url
+                    $finalLinkUrl = null;
+                    if ($request->assignment_type == 'link') {
+                        $finalLinkUrl = $request->link_url;
+                    } elseif ($request->assignment_type == 'interactive_video') {
+                        $finalLinkUrl = $request->youtube_url;
+                    }
+
                     $assignment = LmsAssignment::create([
                         'teacher_id' => $teacherId,
                         'subject_id' => $request->subject_id,
@@ -130,13 +146,14 @@ class LmsAssignmentController extends Controller
                         'description' => $description,
                         'deadline' => $deadline,
                         'assignment_type' => $request->assignment_type,
-                        'link_url' => $request->assignment_type == 'link' ? $request->link_url : null,
+                        'link_url' => $finalLinkUrl,
                         'duration_minutes' => $request->assignment_type == 'quiz' ? $request->duration_minutes : null,
                         'allow_late_submission' => $request->has('allow_late_submission'),
                         'created_at' => $now, 
                         'updated_at' => $now,
                     ]);
 
+                    // PROSES PENYIMPANAN SOAL KUIS BIASA
                     if ($request->assignment_type == 'quiz' && $request->has('questions')) {
                         foreach ($request->questions as $q) {
                             LmsQuizQuestion::create([
@@ -146,6 +163,27 @@ class LmsAssignmentController extends Controller
                                 'options' => $q['options'] ?? null, 
                                 'correct_answer' => $q['correct'] ?? null,
                                 'points' => $q['points'] ?? 10,
+                            ]);
+                        }
+                    }
+
+                    // PROSES PENYIMPANAN SOAL VIDEO INTERAKTIF (BARU)
+                    if ($request->assignment_type == 'interactive_video' && $request->has('interactive_questions')) {
+                        foreach ($request->interactive_questions as $iq) {
+                            // Konversi ke total detik (misal: 1 Menit 30 Detik = 90 Detik)
+                            $totalSeconds = ((int)($iq['minute'] ?? 0) * 60) + (int)($iq['second'] ?? 0);
+                            
+                            // Trik: Simpan data waktu di dalam JSON options agar tidak perlu ubah database!
+                            $options = $iq['options'] ?? [];
+                            $options['time_trigger'] = $totalSeconds;
+
+                            LmsQuizQuestion::create([
+                                'assignment_id' => $assignment->id,
+                                'question_text' => $iq['text'] ?? '',
+                                'question_type' => 'multiple_choice', // Selalu pilihan ganda untuk interaktif
+                                'options' => $options, 
+                                'correct_answer' => $iq['correct'] ?? null,
+                                'points' => 10, // Default nilai setiap titik soal
                             ]);
                         }
                     }
@@ -246,7 +284,6 @@ class LmsAssignmentController extends Controller
         return redirect()->route('lms.assignments.index')->with('success', 'Tugas dihapus dari semua kelas.');
     }
 
-    // --- BAGIAN INI DIPERBARUI UNTUK MEMUAT DETAIL JAWABAN (ESSAY) ---
     public function submissions(LmsAssignment $assignment)
     {
         $user = Auth::user();
@@ -306,12 +343,10 @@ class LmsAssignmentController extends Controller
         return back()->with('success', 'Nilai berhasil disimpan.');
     }
 
-    // --- FUNGSI BARU UNTUK MENGHAPUS JAWABAN SISWA ---
     public function destroySubmission($id)
     {
         $submission = LmsSubmission::findOrFail($id);
         
-        // Validasi Hak Akses (Hanya Admin atau Guru yang bersangkutan)
         if (Auth::user()->role !== 'admin' && $submission->assignment->teacher_id !== Auth::id()) {
             abort(403);
         }
