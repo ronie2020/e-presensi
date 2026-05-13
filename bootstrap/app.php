@@ -37,9 +37,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         // 4. MENGATASI ERROR 419 SAAT SCAN QR CODE (CSRF EXCEPTION)
         $middleware->validateCsrfTokens(except: [
-            'scan',
-            'scan/*'
+            'kiosk/process', // <-- Ubah dari 'scan' menjadi ini
         ]);
+
 
     })
     ->withExceptions(function (Exceptions $exceptions) {

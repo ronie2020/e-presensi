@@ -11,6 +11,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendWaScanNotificationJob; 
 
+// --- IMPORT MODEL BARU UNTUK POIN KEDISIPLINAN & EKSKUL ---
+use App\Models\ActivityLog;
+use App\Models\StudentHabit;
+use App\Models\Extracurricular;
+use App\Models\ExtracurricularMember;
+use App\Models\ExtracurricularAttendance;
+
 class KioskController extends Controller
 {
     public function showKiosk()
@@ -21,10 +28,13 @@ class KioskController extends Controller
     public function processKioskScan(Request $request)
     {
         $request->validate([
-            'scan_data' => 'required|string', 
+            'student_id' => 'required|string', // Sudah diperbaiki dari scan_data
+            'type'       => 'nullable|string', 
+            'extra_id'   => 'nullable'
         ]);
 
-        $studentIdFromScan = $request->scan_data;
+        $studentIdFromScan = $request->student_id;
+        $scanType = $request->type ?? 'Harian'; 
         $now = Carbon::now();
         $today = $now->toDateString();
         $timeNow = $now->toTimeString(); 
@@ -44,7 +54,8 @@ class KioskController extends Controller
 
         // 2. Ambil Jadwal
         $schedule = $this->getTodaysSchedule($now);
-        if (!$schedule) {
+        
+        if (!$schedule && $scanType == 'Harian') {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Hari Libur / Tidak Ada Jadwal',
@@ -52,11 +63,93 @@ class KioskController extends Controller
             ], 400); 
         }
 
-        // 3. Cek Status Absensi Siswa Hari Ini di Database
+        // ==========================================
+        // PENANGANAN MODE KHUSUS DENGAN POIN DISIPLIN
+        // ==========================================
+        
+        // --- MODE MAKAN ---
+        if ($scanType === 'Makan') {
+            $exists = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $today)->where('type', 'Meal')->first();
+            if ($exists) return response()->json(['status' => 'error', 'message' => 'Sudah Ambil Makan', 'student_name' => $student->name], 409);
+            
+            // Simpan Kehadiran Makan (Ubah type dari Makan jadi Meal agar sinkron dengan Scanner Guru)
+            $attendanceRecord = AttendanceSiswa::create(['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Meal', 'activity' => 'Makan Siang', 'status' => 'Hadir', 'time_in' => $timeNow, 'notes' => 'Ambil Makan Siang']);
+            
+            // Tambah Poin & Jurnal Kebiasaan
+            $this->logActivity($student, 'Meal', 'Makan Bergizi', "Mengambil jatah makan siang", 2);
+            StudentHabit::updateOrCreate(
+                ['student_id' => $student->id, 'report_date' => $today],
+                ['habit_5' => true, 'habit_5_menu' => 'Menu Sekolah (MBG)']
+            );
+
+            return response()->json(['status' => 'success', 'message' => 'SUKSES! Silahkan Ambil Makan.', 'student_name' => $student->name, 'time' => Carbon::parse($timeNow)->format('H:i'), 'scan' => $attendanceRecord], 200);
+        }
+
+        // --- MODE SHOLAT DHUHA & DHUHUR ---
+        if (in_array($scanType, ['Dhuha', 'Dhuhur'])) {
+            $exists = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $today)->where('type', 'Keagamaan')->where('activity', $scanType)->first();
+            if ($exists) return response()->json(['status' => 'error', 'message' => "Sudah Absen $scanType", 'student_name' => $student->name], 409);
+            
+            $attendanceRecord = AttendanceSiswa::create(['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Keagamaan', 'activity' => $scanType, 'status' => 'Hadir', 'time_in' => $timeNow, 'notes' => "Sholat $scanType (Kiosk)"]);
+            
+            // Tambah Poin, Jurnal Kebiasaan, dan Cek BK
+            $this->logActivity($student, 'Religious', "Sholat $scanType", "Melaksanakan shalat $scanType berjamaah", 5);
+            $colName = ($scanType == 'Dhuha') ? 'prayer_dhuha' : 'prayer_dzuhur';
+            StudentHabit::updateOrCreate(
+                ['student_id' => $student->id, 'report_date' => $today],
+                [$colName => true]
+            );
+            $student->checkBkThresholds();
+
+            return response()->json(['status' => 'success', 'message' => "SUKSES! Absen $scanType Berhasil (+5 Poin).", 'student_name' => $student->name, 'time' => Carbon::parse($timeNow)->format('H:i'), 'scan' => $attendanceRecord], 200);
+        }
+
+        // --- MODE EKSTRAKURIKULER ---
+        if ($scanType === 'Ekstrakurikuler') {
+            $extraId = $request->extra_id;
+            if (!$extraId) return response()->json(['status' => 'error', 'message' => 'Pilih Ekskul Dulu!'], 422);
+            
+            $extra = Extracurricular::find($extraId);
+            if (!$extra) return response()->json(['status' => 'error', 'message' => 'Data Ekskul Tidak Valid'], 422);
+
+            // Simpan Kehadiran (Ubah type jadi Extracurricular agar sinkron)
+            $attendanceRecord = AttendanceSiswa::updateOrCreate(
+                ['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Extracurricular'],
+                ['status' => 'Hadir', 'time_in' => $timeNow, 'notes' => 'Kegiatan Ekstrakurikuler (Kiosk)', 'activity' => $extra->name]
+            );
+
+            // Detail Kehadiran Ekskul spesifik
+            $detailAtt = ExtracurricularAttendance::firstOrCreate(
+                ['extracurricular_id' => $extraId, 'student_id' => $student->id, 'date' => $today],
+                ['status' => 'Hadir', 'time_in' => $timeNow]
+            );
+
+            $msg = "SUKSES! Absen Ekskul Berhasil.";
+            
+            // Logika Poin berdasarkan Status Keanggotaan
+            if ($detailAtt->wasRecentlyCreated) {
+                $isMember = ExtracurricularMember::where('student_id', $student->id)->where('extracurricular_id', $extraId)->exists();
+                if ($isMember) {
+                    $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", 5);
+                    $msg = "{$student->name} Hadir {$extra->name} (+5 Poin)";
+                } else {
+                    $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name} (Tamu)", 0);
+                    $msg = "{$student->name} Hadir {$extra->name} (Tamu)";
+                }
+            } else {
+                $msg = "{$student->name} sudah absen {$extra->name} sebelumnya.";
+            }
+
+            return response()->json(['status' => 'success', 'message' => $msg, 'student_name' => $student->name, 'time' => Carbon::parse($timeNow)->format('H:i'), 'scan' => $attendanceRecord], 200);
+        }
+
+        // ==========================================
+        // LOGIKA UTAMA (HARIAN: MASUK & PULANG)
+        // ==========================================
+        
         $existingAttendance = AttendanceSiswa::where('student_id', $student->id)
             ->where('attendance_date', $today)
-            ->where('type', '!=', 'Keagamaan') 
-            ->where('type', '!=', 'Ekstrakurikuler') 
+            ->whereIn('type', ['Masuk', 'Pulang', 'Harian']) 
             ->first();
 
         $attendanceType = '';
@@ -69,7 +162,7 @@ class KioskController extends Controller
             $isWithinOperationalHours = ($timeNow >= $schedule->start_in && $timeNow <= $schedule->end_out);
 
             if ($isWithinOperationalHours) {
-                $attendanceType = 'Masuk';
+                $attendanceType = 'Harian'; // Ubah 'Masuk' jadi 'Harian' untuk konsistensi DB
                 
                 if ($timeNow > $schedule->end_in) {
                     $endTime = Carbon::parse($schedule->end_in);
@@ -77,10 +170,10 @@ class KioskController extends Controller
                     $minutesLate = $endTime->diffInMinutes($startTime);
                     
                     $finalStatus = 'Terlambat'; 
-                    $finalNotes = "Terlambat {$minutesLate} menit";
+                    $finalNotes = "Terlambat {$minutesLate} menit (Kiosk)";
                 } else {
                     $finalStatus = 'Hadir';
-                    $finalNotes = 'Masuk Tepat Waktu';
+                    $finalNotes = 'Masuk Tepat Waktu (Kiosk)';
                 }
 
             } else {
@@ -104,18 +197,18 @@ class KioskController extends Controller
 
             if ($timeNow >= $schedule->start_out) {
                 $attendanceType = 'Pulang';
-                $finalNotes = $existingAttendance->notes . ' | Pulang Sekolah';
+                $finalNotes = $existingAttendance->notes ? $existingAttendance->notes . ' | Pulang Sekolah (Kiosk)' : 'Pulang Sekolah (Kiosk)';
                 $isUpdate = true;
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Belum Waktunya Pulang (Mulai: ' . $schedule->start_out . ')',
+                    'message' => 'Belum Waktunya Pulang (Mulai: ' . Carbon::parse($schedule->start_out)->format('H:i') . ')',
                     'student_name' => $student->name
                 ], 400);
             }
         }
         
-        // 4. EKSEKUSI SIMPAN DATA
+        // EKSEKUSI SIMPAN DATA HARIAN
         try {
             if ($isUpdate) {
                 $existingAttendance->update([
@@ -132,9 +225,15 @@ class KioskController extends Controller
                     'time_in' => $timeNow,
                     'notes' => $finalNotes,
                 ]);
+
+                // --- TRIGGER PENGURANGAN POIN & BK UNTUK KETERLAMBATAN ---
+                if ($finalStatus == 'Terlambat') {
+                    $this->logActivity($student, 'Violation', 'Terlambat Masuk', $finalNotes, -5);
+                    $student->checkBkThresholds();
+                }
             }
 
-            // Try-Catch untuk Notifikasi WA agar tidak crash 500
+            // Notifikasi WA
             try {
                 SendWaScanNotificationJob::dispatch($attendanceRecord);
             } catch (\Exception $e) {
@@ -142,18 +241,38 @@ class KioskController extends Controller
             }
 
             $messagePrefix = ($finalStatus == 'Terlambat') ? 'TERLAMBAT! ' : 'SUKSES! ';
+            $waktuSapaan = ($attendanceType == 'Pulang') ? 'Absen Pulang Berhasil.' : 'Absen Masuk Berhasil.';
             
             return response()->json([
                 'status' => 'success',
-                'message' => $messagePrefix . "Absen {$attendanceType} Berhasil.",
+                'message' => $messagePrefix . $waktuSapaan,
                 'student_name' => $student->name,
                 'time' => Carbon::parse($timeNow)->format('H:i'),
-                'note' => $finalNotes
+                'note' => $finalNotes,
+                'scan' => $attendanceRecord 
             ], 200);
 
         } catch (\Exception $e) {
             Log::error('Gagal menyimpan absensi Kiosk: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Kesalahan Server'], 500);
+        }
+    }
+
+    /**
+     * Helper Function: Catat Aktivitas Kedisiplinan
+     */
+    private function logActivity($student, $type, $name, $desc, $points) 
+    {
+        ActivityLog::create([
+            'student_id' => $student->id, 
+            'activity_type' => $type, 
+            'activity_name' => $name,
+            'description' => $desc, 
+            'point_earned' => $points
+        ]);
+        
+        if($points != 0) {
+            $student->increment('score', $points);
         }
     }
 
@@ -164,8 +283,11 @@ class KioskController extends Controller
         if ($special) return $special->is_holiday ? null : $special;
 
         $dayOfWeek = $now->dayOfWeek; 
-        if ($dayOfWeek == 5) return ScheduleRegular::where('day_type', 'Jumat')->first();
-        elseif ($dayOfWeek >= 1 && $dayOfWeek <= 4) return ScheduleRegular::where('day_type', 'Biasa')->first();
+        if ($dayOfWeek == 5) {
+            return ScheduleRegular::where('day_name', 'Jumat')->first();
+        } elseif ($dayOfWeek >= 1 && $dayOfWeek <= 4) {
+            return ScheduleRegular::where('day_name', 'Biasa')->first();
+        }
 
         return null;
     }

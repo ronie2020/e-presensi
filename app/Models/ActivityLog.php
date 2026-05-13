@@ -23,7 +23,7 @@ class ActivityLog extends Model
         'description',   
         'notes',
         'scanned_at',    
-        'type',          // Simpan jaga-jaga jika kode lama masih pakai ini
+        //'type',          // Simpan jaga-jaga jika kode lama masih pakai ini
     ];
 
     /**

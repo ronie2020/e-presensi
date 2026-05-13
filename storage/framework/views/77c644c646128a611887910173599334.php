@@ -1,4 +1,13 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <style>
         /* Sembunyikan scrollbar pada menu filter tab */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -18,10 +27,10 @@
         }
     </style>
 
-     {{-- TAMBAHKAN x-data UNTUK ALPINE.JS BULK ACTION MANAGER --}}
+     
      <div x-data="bulkActionManager()" class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen relative">
         
-        {{-- FLOATING BULK ACTION BAR --}}
+        
         <div x-show="selected.length > 0" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform translate-y-10"
@@ -55,21 +64,21 @@
             </button>
         </div>
 
-        {{-- ========================================================= --}}
-        {{-- KOP SURAT (HANYA MUNCUL SAAT DI-PRINT / CETAK PDF)        --}}
-        {{-- ========================================================= --}}
+        
+        
+        
         <div class="hidden print:block w-full border-b-4 border-double border-slate-800 pb-4 mb-8 text-center">
             <h3 class="text-sm font-bold uppercase tracking-widest text-slate-600 mb-1">Pemerintah Provinsi Daerah</h3>
             <h1 class="text-2xl font-black uppercase tracking-wider text-slate-900 mb-1">Nama Sekolah Anda</h1>
             <p class="text-xs font-medium text-slate-700">Jl. Contoh Alamat Sekolah No. 123, Kota/Kabupaten, Kode Pos 12345</p>
             <h2 class="text-lg font-bold uppercase tracking-widest text-slate-800 mt-6 underline decoration-2 underline-offset-4">Rekapitulasi Data Bimbingan Konseling</h2>
-            <p class="text-xs font-bold text-slate-500 mt-2">Dicetak pada: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
+            <p class="text-xs font-bold text-slate-500 mt-2">Dicetak pada: <?php echo e(now()->translatedFormat('d F Y, H:i')); ?> WIB</p>
         </div>
 
-       {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+       
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 print:hidden">
             <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60 group">
-                {{-- Background Decorations --}}
+                
                 <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
                 <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
@@ -87,7 +96,7 @@
                         </p>
                     </div>
 
-                    {{-- Quick Action --}}
+                    
                     <div class="hidden md:block">
                         <div class="bg-white/60 backdrop-blur-md border border-white rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                             <div class="p-3 bg-elevate-accent/20 rounded-xl text-elevate-primary shadow-inner">
@@ -95,7 +104,7 @@
                             </div>
                             <div>
                                 <div class="text-xs text-elevate-primary font-bold uppercase tracking-wider">Hari Ini</div>
-                                <div class="text-lg font-black text-elevate-dark">{{ now()->translatedFormat('l, d F Y') }}</div>
+                                <div class="text-lg font-black text-elevate-dark"><?php echo e(now()->translatedFormat('l, d F Y')); ?></div>
                             </div>
                         </div>
                     </div>
@@ -103,64 +112,64 @@
             </div>
         </div>
 
-        {{-- STATISTIK CARDS --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 print:hidden">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Pending -->
-                <a href="{{ route('admin.bk.index', ['status' => 'pending']) }}" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-amber-100 hover:border-amber-300 hover:shadow-md hover:-translate-y-1 transition-all group">
+                <a href="<?php echo e(route('admin.bk.index', ['status' => 'pending'])); ?>" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-amber-100 hover:border-amber-300 hover:shadow-md hover:-translate-y-1 transition-all group">
                     <div class="flex justify-between items-start mb-2">
                         <div class="p-2 bg-amber-50 rounded-xl text-amber-600 group-hover:bg-amber-100 transition-colors shadow-sm border border-amber-100">
                             <i class="ph-bold ph-hourglass text-xl"></i>
                         </div>
                         <span class="bg-amber-100 text-amber-700 py-1 px-2 rounded-lg text-[10px] font-bold uppercase">Pending</span>
                     </div>
-                    <div class="text-3xl font-black text-elevate-dark">{{ $stats['pending'] }}</div>
+                    <div class="text-3xl font-black text-elevate-dark"><?php echo e($stats['pending']); ?></div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Menunggu Respon</div>
                 </a>
 
                 <!-- Approved (Terjadwal) -->
-                <a href="{{ route('admin.bk.index', ['status' => 'approved']) }}" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-elevate-primary/20 hover:border-elevate-primary/50 hover:shadow-md hover:-translate-y-1 transition-all group">
+                <a href="<?php echo e(route('admin.bk.index', ['status' => 'approved'])); ?>" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-elevate-primary/20 hover:border-elevate-primary/50 hover:shadow-md hover:-translate-y-1 transition-all group">
                     <div class="flex justify-between items-start mb-2">
                         <div class="p-2 bg-elevate-accent/10 rounded-xl text-elevate-primary group-hover:bg-elevate-primary group-hover:text-white transition-colors shadow-sm border border-elevate-accent/20">
                             <i class="ph-bold ph-calendar-check text-xl"></i>
                         </div>
                         <span class="bg-elevate-accent/10 text-elevate-primary border border-elevate-accent/20 py-1 px-2 rounded-lg text-[10px] font-bold uppercase">Terjadwal</span>
                     </div>
-                    <div class="text-3xl font-black text-elevate-dark">{{ $stats['approved'] }}</div>
+                    <div class="text-3xl font-black text-elevate-dark"><?php echo e($stats['approved']); ?></div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Akan Datang</div>
                 </a>
 
                 <!-- Finished -->
-                <a href="{{ route('admin.bk.index', ['status' => 'finished']) }}" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-emerald-100 hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all group">
+                <a href="<?php echo e(route('admin.bk.index', ['status' => 'finished'])); ?>" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-emerald-100 hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all group">
                     <div class="flex justify-between items-start mb-2">
                         <div class="p-2 bg-emerald-50 rounded-xl text-emerald-600 group-hover:bg-emerald-100 transition-colors shadow-sm border border-emerald-100">
                             <i class="ph-bold ph-check-circle text-xl"></i>
                         </div>
                         <span class="bg-emerald-100 text-emerald-700 py-1 px-2 rounded-lg text-[10px] font-bold uppercase">Selesai</span>
                     </div>
-                    <div class="text-3xl font-black text-elevate-dark">{{ $stats['finished'] }}</div>
+                    <div class="text-3xl font-black text-elevate-dark"><?php echo e($stats['finished']); ?></div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
                 </a>
 
                 <!-- Rejected -->
-                <a href="{{ route('admin.bk.index', ['status' => 'rejected']) }}" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-rose-100 hover:border-rose-300 hover:shadow-md hover:-translate-y-1 transition-all group">
+                <a href="<?php echo e(route('admin.bk.index', ['status' => 'rejected'])); ?>" class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-rose-100 hover:border-rose-300 hover:shadow-md hover:-translate-y-1 transition-all group">
                     <div class="flex justify-between items-start mb-2">
                         <div class="p-2 bg-rose-50 rounded-xl text-rose-600 group-hover:bg-rose-100 transition-colors shadow-sm border border-rose-100">
                             <i class="ph-bold ph-x-circle text-xl"></i>
                         </div>
                         <span class="bg-rose-100 text-rose-700 py-1 px-2 rounded-lg text-[10px] font-bold uppercase">Ditolak</span>
                     </div>
-                    <div class="text-3xl font-black text-elevate-dark">{{ $stats['rejected'] }}</div>
+                    <div class="text-3xl font-black text-elevate-dark"><?php echo e($stats['rejected']); ?></div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
                 </a>
             </div>
         </div>
 
-        {{-- FILTER & SEARCH BAR YANG DIPERBARUI --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 print:hidden" x-data="{ showAdvanced: {{ request('class_id') || request('start_date') || request('end_date') ? 'true' : 'false' }} }">
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 print:hidden" x-data="{ showAdvanced: <?php echo e(request('class_id') || request('start_date') || request('end_date') ? 'true' : 'false'); ?> }">
             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-5 transition-all">
                 
-                {{-- BARIS 1: JUDUL & PENCARIAN --}}
+                
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
                     <div class="flex items-center gap-3 text-sm font-black text-elevate-dark uppercase tracking-wider shrink-0">
                         <div class="p-2 bg-elevate-accent/10 text-elevate-primary rounded-xl border border-elevate-accent/20">
@@ -169,16 +178,16 @@
                         Filter & Pencarian
                     </div>
 
-                    {{-- SEARCH BAR DENGAN ADVANCED TOGGLE --}}
-                    <form method="GET" action="{{ route('admin.bk.index') }}" class="w-full flex flex-col gap-4">
-                        @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
-                        @if(request('type')) <input type="hidden" name="type" value="{{ request('type') }}"> @endif
+                    
+                    <form method="GET" action="<?php echo e(route('admin.bk.index')); ?>" class="w-full flex flex-col gap-4">
+                        <?php if(request('status')): ?> <input type="hidden" name="status" value="<?php echo e(request('status')); ?>"> <?php endif; ?>
+                        <?php if(request('type')): ?> <input type="hidden" name="type" value="<?php echo e(request('type')); ?>"> <?php endif; ?>
                         
-                        {{-- Baris Pencarian Dasar --}}
+                        
                         <div class="flex flex-col sm:flex-row justify-end gap-3 w-full">
                             <div class="relative w-full md:max-w-md">
                                 <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa / Topik..." 
+                                <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Cari Siswa / Topik..." 
                                        class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-slate-50 text-sm font-bold text-elevate-dark focus:bg-white focus:ring-elevate-primary focus:border-elevate-primary transition-all shadow-sm">
                             </div>
                             
@@ -189,86 +198,88 @@
                                 <button type="submit" class="bg-elevate-dark hover:bg-elevate-primary text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-elevate-dark/20 transition-all active:scale-95">
                                     Cari
                                 </button>
-                                @if(request()->except('page'))
-                                    <a href="{{ route('admin.bk.index') }}" class="bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 border border-slate-200 hover:border-rose-200 px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-center shadow-sm" title="Reset Filter">
+                                <?php if(request()->except('page')): ?>
+                                    <a href="<?php echo e(route('admin.bk.index')); ?>" class="bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 border border-slate-200 hover:border-rose-200 px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-center shadow-sm" title="Reset Filter">
                                         <i class="ph-bold ph-arrow-counter-clockwise text-lg"></i>
                                     </a>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
 
-                        {{-- Baris Advanced Filter (Kelas & Tanggal) --}}
+                        
                         <div x-show="showAdvanced" style="display: none;" x-transition.opacity class="w-full pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Kelas</label>
                                 <select name="class_id" class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all py-2.5 px-4 cursor-pointer">
                                     <option value="">-- Semua Kelas --</option>
-                                    @if(isset($classes))
-                                        @foreach($classes as $cls)
-                                            <option value="{{ $cls->id }}" {{ request('class_id') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
-                                        @endforeach
-                                    @endif
+                                    <?php if(isset($classes)): ?>
+                                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cls): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($cls->id); ?>" <?php echo e(request('class_id') == $cls->id ? 'selected' : ''); ?>><?php echo e($cls->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php endif; ?>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Dari Tanggal</label>
-                                <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all py-2.5 px-4">
+                                <input type="date" name="start_date" value="<?php echo e(request('start_date')); ?>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all py-2.5 px-4">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Sampai Tanggal</label>
-                                <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all py-2.5 px-4">
+                                <input type="date" name="end_date" value="<?php echo e(request('end_date')); ?>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all py-2.5 px-4">
                             </div>
                         </div>
                     </form>
                 </div>
 
-                {{-- DIVIDER --}}
+                
                 <div class="w-full h-px bg-slate-100 mt-2"></div>
 
-                {{-- BARIS 2: KELOMPOK FILTER TAB --}}
+                
                 <div class="w-full overflow-x-auto hide-scrollbar relative">
-                    {{-- Hint Shadow Kanan untuk Scroll di HP --}}
+                    
                     <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden z-10"></div>
                     
                     <div class="flex items-center gap-4 w-max pb-1 pr-8">
-                        {{-- Filter Status --}}
+                        
                         <div class="flex items-center gap-3">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status:</span>
                             <div class="p-1 bg-slate-50 border border-slate-100 rounded-xl flex gap-1 shadow-inner">
-                                @foreach(['pending' => 'Pending', 'approved' => 'Terjadwal', 'all' => 'Semua'] as $key => $label)
-                                    <a href="{{ request()->fullUrlWithQuery(['status' => $key, 'page' => 1]) }}" 
+                                <?php $__currentLoopData = ['pending' => 'Pending', 'approved' => 'Terjadwal', 'all' => 'Semua']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <a href="<?php echo e(request()->fullUrlWithQuery(['status' => $key, 'page' => 1])); ?>" 
                                        class="px-4 py-2 rounded-lg text-xs font-bold text-center transition-all whitespace-nowrap
-                                       {{ (request('status') == $key || ($key == 'all' && !request('status'))) 
+                                       <?php echo e((request('status') == $key || ($key == 'all' && !request('status'))) 
                                             ? 'bg-white text-elevate-primary shadow-sm border border-slate-200/60' 
-                                            : 'text-slate-500 hover:text-elevate-dark' }}">
-                                       {{ $label }}
+                                            : 'text-slate-500 hover:text-elevate-dark'); ?>">
+                                       <?php echo e($label); ?>
+
                                     </a>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
 
-                        {{-- Divider Vertikal --}}
+                        
                         <div class="w-px h-8 bg-slate-200 mx-2"></div>
 
-                        {{-- Filter Tipe --}}
+                        
                         <div class="flex items-center gap-3">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tipe:</span>
                             <div class="p-1 bg-slate-50 border border-slate-100 rounded-xl flex gap-1 shadow-inner">
-                                @foreach(['all' => 'Semua Tipe', 'bermasalah' => 'Bermasalah', 'berprestasi' => 'Berprestasi', 'mandiri' => 'Pengajuan Siswa'] as $key => $label)
-                                    @php
+                                <?php $__currentLoopData = ['all' => 'Semua Tipe', 'bermasalah' => 'Bermasalah', 'berprestasi' => 'Berprestasi', 'mandiri' => 'Pengajuan Siswa']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $activeClass = 'bg-white text-elevate-dark shadow-sm border border-slate-200/60';
                                         if($key == 'bermasalah') $activeClass = 'bg-rose-50 text-rose-600 shadow-sm border border-rose-200/60';
                                         if($key == 'berprestasi') $activeClass = 'bg-elevate-accent/10 text-elevate-primary shadow-sm border border-elevate-accent/20';
                                         if($key == 'mandiri') $activeClass = 'bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-200/60';
-                                    @endphp
-                                    <a href="{{ request()->fullUrlWithQuery(['type' => $key, 'page' => 1]) }}" 
+                                    ?>
+                                    <a href="<?php echo e(request()->fullUrlWithQuery(['type' => $key, 'page' => 1])); ?>" 
                                        class="px-4 py-2 rounded-lg text-xs font-bold text-center transition-all whitespace-nowrap
-                                       {{ (request('type') == $key || ($key == 'all' && !request('type'))) 
+                                       <?php echo e((request('type') == $key || ($key == 'all' && !request('type'))) 
                                             ? $activeClass 
-                                            : 'text-slate-500 hover:text-elevate-dark' }}">
-                                       {{ $label }}
+                                            : 'text-slate-500 hover:text-elevate-dark'); ?>">
+                                       <?php echo e($label); ?>
+
                                     </a>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
 
@@ -279,39 +290,39 @@
         </div>
 
       
-        {{-- MAIN CONTENT: TABEL DAFTAR --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
                 
-                {{-- Table Header --}}
+                
                 <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2">
                         <i class="ph-fill ph-list-dashes text-elevate-primary text-xl"></i>
                         <span class="text-sm font-black text-elevate-dark">
-                            @if(request('status') || request('type') || request('search'))
+                            <?php if(request('status') || request('type') || request('search')): ?>
                                 Hasil Pencarian Sesi
-                            @else
+                            <?php else: ?>
                                 Daftar Antrian & Riwayat Terbaru
-                            @endif
+                            <?php endif; ?>
                         </span>
                     </div>                    
-                     {{-- TOMBOL EXPORT (EXCEL & PDF) --}}
+                     
                     <div class="flex flex-wrap items-center gap-2 print:hidden w-full sm:w-auto">
-                        <a href="{{ request()->fullUrlWithQuery(['export' => 'excel']) }}" class="flex-1 sm:flex-none text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white px-5 py-2.5 rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['export' => 'excel'])); ?>" class="flex-1 sm:flex-none text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white px-5 py-2.5 rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
                             <i class="ph-bold ph-file-csv text-base"></i> Unduh Excel
                         </a>
-                        <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" target="_blank" class="flex-1 sm:flex-none text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white px-5 py-2.5 rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['export' => 'pdf'])); ?>" target="_blank" class="flex-1 sm:flex-none text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white px-5 py-2.5 rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
                             <i class="ph-bold ph-printer text-base"></i> Cetak Laporan
                         </a>
                     </div>
                 </div>
 
-                {{-- Table Body --}}
+                
                 <div class="overflow-x-auto table-container">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest">
                             <tr>
-                                {{-- HEADER CHECKBOX UNTUK SELECT ALL --}}
+                                
                                 <th class="px-6 py-5 pl-8 w-12 print:hidden">
                                     <input type="checkbox" x-model="selectAll" @change="toggleAll" class="w-4 h-4 rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary transition-colors cursor-pointer shadow-sm">
                                 </th>
@@ -323,93 +334,95 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 text-sm">
-                            @forelse($sessions as $session)
+                            <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             
-                            {{-- LOGIKA SLA / OVERDUE: Tiket lebih dari 2 hari belum direspon --}}
-                            @php
+                            
+                            <?php
                                 $isOverdue = $session->status == 'pending' && $session->created_at->diffInHours(now()) > 48;
-                            @endphp
+                            ?>
 
-                            {{-- INTERAKTIF UX: Seluruh Baris Bisa Diklik Menuju Detail --}}
-                            <tr class="hover:bg-slate-50/80 transition-colors group cursor-pointer" onclick="window.location.href='{{ route('admin.bk.show', $session->id) }}'">
+                            
+                            <tr class="hover:bg-slate-50/80 transition-colors group cursor-pointer" onclick="window.location.href='<?php echo e(route('admin.bk.show', $session->id)); ?>'">
                                 
-                                {{-- CHECKBOX ITEM --}}
+                                
                                 <td class="px-6 py-5 pl-8 w-12 print:hidden align-top" onclick="event.stopPropagation();">
-                                    <input type="checkbox" class="session-checkbox w-4 h-4 rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary transition-colors cursor-pointer shadow-sm" value="{{ $session->id }}" x-model="selected">
+                                    <input type="checkbox" class="session-checkbox w-4 h-4 rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary transition-colors cursor-pointer shadow-sm" value="<?php echo e($session->id); ?>" x-model="selected">
                                 </td>
 
                                 <td class="px-2 py-5 align-top">
                                     <div class="flex items-center gap-3">
                                         <!-- Avatar -->
                                         <div class="w-10 h-10 rounded-[1rem] bg-slate-100 flex items-center justify-center text-elevate-primary font-black text-xs shrink-0 overflow-hidden border border-slate-200 shadow-sm print:hidden group-hover:border-elevate-primary/30 transition-colors">
-                                            @if($session->student && $session->student->photo_path)
-                                                <img src="{{ asset('storage/' . $session->student->photo_path) }}" class="w-full h-full object-cover">
-                                            @else
-                                                {{ substr($session->student->name ?? '?', 0, 1) }}
-                                            @endif
+                                            <?php if($session->student && $session->student->photo_path): ?>
+                                                <img src="<?php echo e(asset('storage/' . $session->student->photo_path)); ?>" class="w-full h-full object-cover">
+                                            <?php else: ?>
+                                                <?php echo e(substr($session->student->name ?? '?', 0, 1)); ?>
+
+                                            <?php endif; ?>
                                         </div>
                                         <div>
-                                            <div class="font-black text-elevate-dark group-hover:text-elevate-primary transition-colors leading-tight line-clamp-1">{{ $session->student->name ?? 'Data Terhapus' }}</div>
-                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $session->student->schoolClass->name ?? '-' }}</div>
+                                            <div class="font-black text-elevate-dark group-hover:text-elevate-primary transition-colors leading-tight line-clamp-1"><?php echo e($session->student->name ?? 'Data Terhapus'); ?></div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5"><?php echo e($session->student->schoolClass->name ?? '-'); ?></div>
                                         </div>
                                     </div>
                                 </td>
                                     <td class="px-6 py-5 align-top">
                                         <div class="flex flex-wrap items-center gap-2 mb-2">
                                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[9px] font-black uppercase tracking-wider print:border-none print:px-0 print:py-0 print:bg-transparent shadow-sm">
-                                                <i class="ph-bold ph-tag print:hidden text-elevate-primary"></i> {{ $session->category->name ?? 'Umum' }}
+                                                <i class="ph-bold ph-tag print:hidden text-elevate-primary"></i> <?php echo e($session->category->name ?? 'Umum'); ?>
+
                                             </span>
                                             
-                                            @if($session->is_system_generated ?? false)
-                                                @if(str_contains($session->initial_message, 'PELANGGARAN'))
+                                            <?php if($session->is_system_generated ?? false): ?>
+                                                <?php if(str_contains($session->initial_message, 'PELANGGARAN')): ?>
                                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 text-rose-700 text-[9px] font-black rounded-lg border border-rose-200 uppercase tracking-widest animate-pulse print:border-none print:px-0 print:py-0 print:bg-transparent print:text-rose-600 shadow-sm">
                                                         <i class="ph-bold ph-warning print:hidden"></i> Panggilan Sistem
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-elevate-accent/10 text-elevate-primary border border-elevate-accent/20 text-[9px] font-black rounded-lg uppercase tracking-widest print:border-none print:px-0 print:py-0 print:bg-transparent shadow-sm">
                                                         <i class="ph-bold ph-medal print:hidden"></i> Apresiasi Sistem
                                                     </span>
-                                                @endif
-                                            @else
+                                                <?php endif; ?>
+                                            <?php else: ?>
                                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-500 text-[9px] font-black rounded-lg border border-slate-200 uppercase tracking-widest print:hidden shadow-sm">
                                                     <i class="ph-bold ph-user text-slate-400"></i> Pengajuan Siswa
                                                 </span>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
-                                        <p class="text-sm text-slate-600 font-medium leading-relaxed truncate w-48 italic print:w-auto print:whitespace-normal" title="{{ $session->initial_message }}">
-                                            "{{ $session->initial_message }}"
+                                        <p class="text-sm text-slate-600 font-medium leading-relaxed truncate w-48 italic print:w-auto print:whitespace-normal" title="<?php echo e($session->initial_message); ?>">
+                                            "<?php echo e($session->initial_message); ?>"
                                         </p>
                                         
                                         <div class="text-[10px] mt-2 flex items-center gap-1.5 font-bold uppercase tracking-widest">
-                                            <span class="text-slate-400 flex items-center gap-1"><i class="ph-bold ph-clock"></i> {{ $session->created_at->diffForHumans() }}</span>
+                                            <span class="text-slate-400 flex items-center gap-1"><i class="ph-bold ph-clock"></i> <?php echo e($session->created_at->diffForHumans()); ?></span>
                                             
-                                            {{-- LENCANA SLA / KETERLAMBATAN --}}
-                                            @if($isOverdue)
+                                            
+                                            <?php if($isOverdue): ?>
                                                 <span class="ml-2 bg-rose-100 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded font-black tracking-wider uppercase animate-pulse print:hidden">
                                                     > 48 Jam
                                                 </span>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 <td class="px-6 py-5 whitespace-nowrap text-sm text-slate-500 print:hidden align-top">
-                                    @if($session->method == 'online')
+                                    <?php if($session->method == 'online'): ?>
                                         <div class="flex items-center gap-2">
                                             <div class="p-1.5 rounded-lg bg-elevate-accent/10 text-elevate-primary border border-elevate-accent/20">
                                                 <i class="ph-bold ph-globe text-base"></i>
                                             </div>
                                             <span class="font-bold text-xs text-elevate-dark uppercase tracking-wider">Online</span>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <div class="flex items-center gap-2">
                                             <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
                                                 <i class="ph-bold ph-users text-base"></i>
                                             </div>
                                             <span class="font-bold text-xs text-elevate-dark uppercase tracking-wider">Tatap Muka</span>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-5 whitespace-nowrap align-top">
-                                    @php
+                                    <?php
                                         $colors = [
                                             'pending' => 'bg-amber-50 text-amber-600 border-amber-200',
                                             'approved' => 'bg-elevate-accent/10 text-elevate-primary border-elevate-accent/20', 
@@ -418,75 +431,78 @@
                                             'rejected' => 'bg-rose-50 text-rose-600 border-rose-200',
                                         ];
                                         $statusClass = $colors[$session->status] ?? 'bg-slate-50 text-slate-500 border-slate-200';
-                                    @endphp
-                                    <span class="px-3 py-1.5 inline-flex text-[9px] font-black uppercase tracking-widest rounded-lg border {{ $statusClass }} print:border-none print:px-0 print:py-0 print:bg-transparent shadow-sm">
-                                        {{ ucfirst($session->status == 'approved' ? 'Terjadwal' : $session->status) }}
+                                    ?>
+                                    <span class="px-3 py-1.5 inline-flex text-[9px] font-black uppercase tracking-widest rounded-lg border <?php echo e($statusClass); ?> print:border-none print:px-0 print:py-0 print:bg-transparent shadow-sm">
+                                        <?php echo e(ucfirst($session->status == 'approved' ? 'Terjadwal' : $session->status)); ?>
+
                                     </span>
                                     
-                                    @if($session->scheduled_at && $session->status == 'approved')
+                                    <?php if($session->scheduled_at && $session->status == 'approved'): ?>
                                         <div class="text-[10px] font-black uppercase tracking-widest text-elevate-primary mt-2 flex items-center gap-1.5 bg-elevate-accent/5 px-2.5 py-1.5 rounded-lg border border-elevate-accent/20 w-fit print:bg-transparent print:p-0">
-                                            <i class="ph-bold ph-calendar-check print:hidden"></i> {{ \Carbon\Carbon::parse($session->scheduled_at)->format('d M Y, H:i') }}
+                                            <i class="ph-bold ph-calendar-check print:hidden"></i> <?php echo e(\Carbon\Carbon::parse($session->scheduled_at)->format('d M Y, H:i')); ?>
+
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-5 text-center print:hidden pr-8 align-top">
                                     <div class="flex items-center justify-end gap-2">
-                                        {{-- TOMBOL SHORTCUT WA (Tanpa masuk halaman detail) --}}
-                                        @if($session->student && $session->student->parent_wa_number)
-                                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $session->student->parent_wa_number) }}" 
+                                        
+                                        <?php if($session->student && $session->student->parent_wa_number): ?>
+                                            <a href="https://wa.me/<?php echo e(preg_replace('/^0/', '62', $session->student->parent_wa_number)); ?>" 
                                                target="_blank" 
                                                onclick="event.stopPropagation();" 
                                                class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-slate-200 text-emerald-500 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all shadow-sm" title="WA Orang Tua">
                                                 <i class="ph-fill ph-whatsapp-logo text-xl"></i>
                                             </a>
-                                        @endif
+                                        <?php endif; ?>
                                         
-                                        {{-- TOMBOL DETAIL --}}
+                                        
                                         <div class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-elevate-dark text-white group-hover:bg-elevate-primary transition-all duration-300 shadow-md shadow-elevate-dark/20" title="Buka Detail">
                                             <i class="ph-bold ph-caret-right text-lg"></i>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="6" class="px-6 py-20 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-3">
                                         <div class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center shadow-inner">
-                                            @if(request('type') == 'berprestasi')
+                                            <?php if(request('type') == 'berprestasi'): ?>
                                                 <i class="ph-duotone ph-medal text-4xl text-slate-300"></i>
-                                            @elseif(request('type') == 'bermasalah')
+                                            <?php elseif(request('type') == 'bermasalah'): ?>
                                                 <i class="ph-duotone ph-warning-octagon text-4xl text-slate-300"></i>
-                                            @else
+                                            <?php else: ?>
                                                 <i class="ph-duotone ph-clipboard-text text-4xl text-slate-300"></i>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                         <span class="font-bold text-slate-500 text-base">
-                                            @if(request('type') == 'berprestasi')
+                                            <?php if(request('type') == 'berprestasi'): ?>
                                                 Belum ada data siswa berprestasi.
-                                            @elseif(request('type') == 'bermasalah')
+                                            <?php elseif(request('type') == 'bermasalah'): ?>
                                                 Belum ada data siswa bermasalah.
-                                            @elseif(request('search'))
+                                            <?php elseif(request('search')): ?>
                                                 Tidak ada data yang cocok dengan pencarian Anda.
-                                            @else
+                                            <?php else: ?>
                                                 Belum ada data pengajuan konseling.
-                                            @endif
+                                            <?php endif; ?>
                                         </span>
                                     </div>
                                 </td>
                             </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
                 
-                {{-- Pagination --}}
+                
                 <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 print:hidden">
-                    {{ $sessions->links() }}
+                    <?php echo e($sessions->links()); ?>
+
                 </div>
             </div>
                         
-              {{-- BAGIAN TANDA TANGAN (HANYA MUNCUL SAAT DI-PRINT REKAP TABEL) --}}
+              
             <div class="hidden print:flex justify-between items-end mt-12 px-8 break-inside-avoid">
                 <div class="text-center">
                     <p class="text-sm font-medium mb-16">Mengetahui,<br>Kepala Sekolah</p>
@@ -494,8 +510,8 @@
                     <p class="text-xs mt-1">NIP. ..............................</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-sm font-medium mb-16">Kota/Kabupaten, {{ now()->translatedFormat('d F Y') }}<br>Guru Bimbingan Konseling</p>
-                    <p class="text-sm font-bold underline decoration-1 underline-offset-2">{{ Auth::user()->name ?? '_________________________' }}</p>
+                    <p class="text-sm font-medium mb-16">Kota/Kabupaten, <?php echo e(now()->translatedFormat('d F Y')); ?><br>Guru Bimbingan Konseling</p>
+                    <p class="text-sm font-bold underline decoration-1 underline-offset-2"><?php echo e(Auth::user()->name ?? '_________________________'); ?></p>
                     <p class="text-xs mt-1">NIP. ..............................</p>
                 </div>
             </div>
@@ -504,7 +520,7 @@
     </div>
 
     
-    {{-- SCRIPT SWEETALERT2 & ALPINE JS --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // --- LOGIKA BULK ACTION (ALPINE.JS) ---
@@ -552,12 +568,12 @@
                             // Membuat Form Submit secara Dinamis
                             let form = document.createElement('form');
                             form.method = 'POST';
-                            form.action = '{{ route("admin.bk.bulk_action") }}';
+                            form.action = '<?php echo e(route("admin.bk.bulk_action")); ?>';
 
                             let csrf = document.createElement('input');
                             csrf.type = 'hidden';
                             csrf.name = '_token';
-                            csrf.value = '{{ csrf_token() }}';
+                            csrf.value = '<?php echo e(csrf_token()); ?>';
                             form.appendChild(csrf);
 
                             let actionInput = document.createElement('input');
@@ -583,21 +599,30 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
-                    icon: 'success', title: 'Berhasil!', text: "{!! session('success') !!}",
+                    icon: 'success', title: 'Berhasil!', text: "<?php echo session('success'); ?>",
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
                     customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                 });
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 Swal.fire({
-                    icon: 'error', title: 'Oops...', text: "{!! session('error') !!}",
+                    icon: 'error', title: 'Oops...', text: "<?php echo session('error'); ?>",
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 4000,
                     customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/admin/bk/index.blade.php ENDPATH**/ ?>

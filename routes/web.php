@@ -716,6 +716,9 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('admin/bk')->name('admin.bk.')->group(function () {  
         Route::get('/', [BkTeacherController::class, 'index'])->name('index');
+
+        // ---> bulk <---
+        Route::post('/bulk-action', [BkTeacherController::class, 'bulkAction'])->name('bulk_action');
         
         // Detail & Approval
         Route::get('/{id}', [BkTeacherController::class, 'show'])->name('show');

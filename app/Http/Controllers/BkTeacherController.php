@@ -15,20 +15,39 @@ class BkTeacherController extends Controller
     /**
      * Menampilkan daftar antrian konseling.
      */
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        // 1. MENGHITUNG STATISTIK UNTUK CARDS (Dipindah dari Blade ke Controller)
+        // 1. MENGHITUNG STATISTIK UNTUK CARDS 
         $stats = [
-            'pending' => BkSession::where('status', 'pending')->count(),
-            'approved' => BkSession::where('status', 'approved')->count(),
-            'finished' => BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count(),
-            'rejected' => BkSession::where('status', 'rejected')->whereMonth('created_at', now()->month)->count(),
+            'pending' => \App\Models\BkSession::where('status', 'pending')->count(),
+            'approved' => \App\Models\BkSession::where('status', 'approved')->count(),
+            'finished' => \App\Models\BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count(),
+            'rejected' => \App\Models\BkSession::where('status', 'rejected')->whereMonth('created_at', now()->month)->count(),
         ];
 
-        // 2. QUERY UTAMA (Tambahkan student.schoolClass agar tidak terjadi N+1 Problem di view)
-        $query = BkSession::with(['student.schoolClass', 'category']);
+        // 2. QUERY UTAMA (Eager Loading)
+        $query = \App\Models\BkSession::with(['student.schoolClass', 'category']);
 
-        // 3. FITUR PENCARIAN (Sebelumnya belum ada logika ini)
+        // =========================================================
+        // FITUR BARU 1: FILTER KELAS (ADVANCED FILTER)
+        // =========================================================
+        if ($request->has('class_id') && $request->class_id != '') {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('class_id', $request->class_id);
+            });
+        }
+
+        // =========================================================
+        // FITUR BARU 2: FILTER TANGGAL PENGAJUAN (ADVANCED FILTER)
+        // =========================================================
+        if ($request->has('start_date') && $request->start_date != '' && $request->has('end_date') && $request->end_date != '') {
+            $query->whereBetween('created_at', [
+                $request->start_date . ' 00:00:00', 
+                $request->end_date . ' 23:59:59'
+            ]);
+        }
+
+        // 3. FITUR PENCARIAN (Logika Asli)
         if ($request->has('search') && $request->search != '') {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -45,7 +64,7 @@ class BkTeacherController extends Controller
             });
         }
 
-        // 4. FILTER STATUS
+        // 4. FILTER STATUS (Logika Asli)
         if ($request->has('status') && $request->status != 'all') {
             $query->where('status', $request->status);
         } else {
@@ -53,7 +72,7 @@ class BkTeacherController extends Controller
             $query->orderByRaw("FIELD(status, 'pending', 'approved', 'ongoing', 'finished', 'rejected')");
         }
 
-        // 5. FILTER TIPE KATEGORI (Memisahkan Bermasalah & Berprestasi)
+        // 5. FILTER TIPE KATEGORI (Logika Asli)
         if ($request->has('type') && $request->type != 'all') {
             if ($request->type == 'bermasalah') {
                 $query->where('is_system_generated', true)
@@ -69,7 +88,7 @@ class BkTeacherController extends Controller
             }
         }
 
-         // === FITUR BARU: EXPORT PDF & EXCEL ===
+        // 6. FITUR EXPORT PDF & EXCEL (Logika Asli)
         if ($request->has('export')) {
             $sessionsExport = $query->latest()->get(); // Ambil semua data sesuai filter (tanpa pagination)
 
@@ -78,7 +97,7 @@ class BkTeacherController extends Controller
                 return view('admin.bk.print', ['sessions' => $sessionsExport]);
             }
 
-            // Export Mode Excel (CSV Format agar tanpa package eksternal)
+            // Export Mode Excel (CSV Format)
             if ($request->export == 'excel') {
                 $fileName = 'Laporan_Konseling_' . date('Y-m-d') . '.csv';
 
@@ -121,9 +140,15 @@ class BkTeacherController extends Controller
             }
         }
 
-        $sessions = $query->latest()->paginate(15)->withQueryString(); // Tambahkan withQueryString agar pagination tidak mereset pencarian
+        $sessions = $query->latest()->paginate(15)->withQueryString(); 
+        
+        // =========================================================
+        // FITUR BARU 3: AMBIL DATA KELAS UNTUK DROPDOWN FILTER
+        // =========================================================
+        $classes = \App\Models\SchoolClass::orderBy('name')->get();
 
-        return view('admin.bk.index', compact('sessions', 'stats'));
+        // Tambahkan $classes ke dalam fungsi compact()
+        return view('admin.bk.index', compact('sessions', 'stats', 'classes'));
     }
 
     /**
@@ -245,5 +270,52 @@ class BkTeacherController extends Controller
         $chat->save();
 
         return response()->json($chat);
+    }
+
+    /**
+     * Memproses Bulk Action (Tandai Selesai / Kirim WA Massal)
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:bk_sessions,id',
+            'action_type' => 'required|in:finish,wa'
+        ]);
+
+        $ids = $request->ids;
+
+        // AKSI 1: TANDAI SELESAI MASSAL
+        if ($request->action_type === 'finish') {
+            \App\Models\BkSession::whereIn('id', $ids)->update([
+                'status' => 'finished',
+                'response_message' => 'Sesi diselesaikan secara massal oleh Guru BK.',
+                'updated_at' => now()
+            ]);
+            
+            return redirect()->back()->with('success', count($ids) . ' Sesi berhasil ditandai selesai.');
+        }
+
+        // AKSI 2: PANGGILAN WA MASSAL
+        if ($request->action_type === 'wa') {
+            // Eager load relasi student untuk mengambil no WA
+            $sessions = \App\Models\BkSession::with('student')->whereIn('id', $ids)->get();
+            $count = 0;
+
+            foreach ($sessions as $session) {
+                if ($session->student && $session->student->parent_wa_number) {
+                    $studentName = $session->student->name;
+                    $msg = "Yth. Bapak/Ibu Orang Tua/Wali dari {$studentName},\n\nKami mengundang kehadiran Bapak/Ibu ke sekolah untuk mendiskusikan perkembangan dan rekap kedisiplinan ananda. Mohon konfirmasi kesediaan waktunya untuk komunikasi lebih lanjut.\n\nSalam hangat dari Bimbingan Konseling Sekolah.";
+                    
+                    // Dispatch Job WA (Gunakan job yang sudah kamu buat sebelumnya)
+                    \App\Jobs\SendGeneralWaJob::dispatch($session->student->parent_wa_number, $msg);
+                    $count++;
+                }
+            }
+
+            return redirect()->back()->with('success', "Permintaan panggilan WA berhasil diproses untuk {$count} orang tua siswa.");
+        }
+
+        return redirect()->back()->with('error', 'Aksi tidak dikenali.');
     }
 }
