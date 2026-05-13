@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKL - {{ $student->name }}</title>
+    <title>SKL - <?php echo e($student->name); ?></title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -18,7 +18,7 @@
         }
     </script>
 
-    {{-- Phosphor Icons --}}
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -106,7 +106,7 @@
             <h2 class="font-black text-elevate-dark font-sans flex items-center gap-2">
                 <i class="ph-bold ph-printer text-elevate-primary text-xl"></i> Pratinjau SKL
             </h2>
-            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: {{ $student->name }} | Kertas: A4</p>
+            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: <?php echo e($student->name); ?> | Kertas: A4</p>
         </div>
 
         <div class="flex flex-wrap gap-3 items-center font-sans">
@@ -126,7 +126,7 @@
         <!-- KOP SURAT (Disesuaikan persis dengan SPPD) -->
         <div class="kop-surat garis-kop pb-2 pt-2 flex justify-between items-center px-1">
             <!-- Logo Kiri -->
-            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[70px] h-auto object-contain" onerror="this.style.display='none'"> 
+            <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" class="w-[70px] h-auto object-contain" onerror="this.style.display='none'"> 
             
             <!-- Teks Tengah -->
             <div class="text-center flex-1 px-4 leading-tight">
@@ -142,13 +142,13 @@
             </div>
 
             <!-- Logo Kanan -->
-            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[70px] h-auto object-contain" onerror="this.style.display='none'">
+            <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" class="w-[70px] h-auto object-contain" onerror="this.style.display='none'">
         </div>
         <div class="garis-kop-bawah"></div>
 
         <div class="judul-surat">
             <h2>SURAT KETERANGAN KELULUSAN</h2>
-            <p>Nomor: {{ $student->graduation->skl_number ?? ($settings['letter_number'] ?? '421.3/     /SMP.03/' . date('Y')) }}</p>
+            <p>Nomor: <?php echo e($student->graduation->skl_number ?? ($settings['letter_number'] ?? '421.3/     /SMP.03/' . date('Y'))); ?></p>
         </div>
 
         <div style="line-height: 1.3;">
@@ -158,22 +158,22 @@
                 <tr>
                     <td>Nama Peserta Didik</td>
                     <td>:</td>
-                    <td style="font-weight: bold; text-transform: uppercase;">{{ $student->name }}</td>
+                    <td style="font-weight: bold; text-transform: uppercase;"><?php echo e($student->name); ?></td>
                 </tr>
                 <tr>
                     <td>Tempat, Tanggal Lahir</td>
                     <td>:</td>
-                    <td>{{ $student->pob }}, {{ \Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y') }}</td>
+                    <td><?php echo e($student->pob); ?>, <?php echo e(\Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y')); ?></td>
                 </tr>
                 <tr>
                     <td>Nomor Induk Siswa</td>
                     <td>:</td>
-                    <td>{{ $student->nis ?? '-' }}</td>
+                    <td><?php echo e($student->nis ?? '-'); ?></td>
                 </tr>
                 <tr>
                     <td>NISN</td>
                     <td>:</td>
-                    <td>{{ $student->student_id }}</td>
+                    <td><?php echo e($student->student_id); ?></td>
                 </tr>
                 <tr>
                     <td>Asal Sekolah</td>
@@ -183,7 +183,7 @@
             </table>
 
             <p style="text-align: justify;">
-                Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran {{ $settings['academic_year'] ?? ($student->graduation->academic_year ?? '') }} yang dilaksanakan pada tanggal {{ \Carbon\Carbon::parse($settings['announcement_date'] ?? ($student->graduation->announcement_date ?? now()))->locale('id')->isoFormat('D MMMM Y') }}, maka peserta didik tersebut dinyatakan:
+                Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran <?php echo e($settings['academic_year'] ?? ($student->graduation->academic_year ?? '')); ?> yang dilaksanakan pada tanggal <?php echo e(\Carbon\Carbon::parse($settings['announcement_date'] ?? ($student->graduation->announcement_date ?? now()))->locale('id')->isoFormat('D MMMM Y')); ?>, maka peserta didik tersebut dinyatakan:
             </p>
 
             <div class="status-box">
@@ -198,13 +198,13 @@
             <div style="margin-top: 30px;">
                 <!-- KIRI: QR Code Verifikasi -->
                 <div style="float: left; width: 48%; text-align: left; padding-left: 20px;">
-                    @php
+                    <?php
                         $portalUrl = route('portal.show', $student->id);
                         // Langsung panggil URL (Browser sangat cerdas meload ini)
                         $qrUrl = "http://api.qrserver.com/v1/create-qr-code/?size=90x90&data=" . urlencode($portalUrl) . "&margin=0";
-                    @endphp
+                    ?>
 
-                    <img src="{{ $qrUrl }}" style="width: 85px; height: 85px;" alt="QR Code Verifikasi">
+                    <img src="<?php echo e($qrUrl); ?>" style="width: 85px; height: 85px;" alt="QR Code Verifikasi">
                     
                     <div style="margin-top: 5px; font-size: 8pt; color: #444; line-height: 1.2;">
                         <i>* Pindai QR Code untuk memverifikasi<br>keaslian dokumen pada SIMADU.</i>
@@ -213,13 +213,13 @@
                 
                 <!-- KANAN: Tanda Tangan Kepala Sekolah -->
                 <div style="float: right; width: 48%; text-align: center;">
-                    <p style="margin: 0;">Lakbok, {{ \Carbon\Carbon::now()->locale('id')->isoFormat('D MMMM Y') }}</p>
+                    <p style="margin: 0;">Lakbok, <?php echo e(\Carbon\Carbon::now()->locale('id')->isoFormat('D MMMM Y')); ?></p>
                     <p style="margin: 0;">Kepala Sekolah,</p>
                     
                     <div style="height: 60px;"></div>
                     
-                    <p style="margin: 0; font-weight: bold; text-decoration: underline; white-space: nowrap;">{{ isset($settings['principal_name']) ? strtoupper($settings['principal_name']) : 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.' }}</p>
-                    <p style="margin: 0;">NIP. {{ $settings['principal_nip'] ?? '197xxxxxx...' }}</p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline; white-space: nowrap;"><?php echo e(isset($settings['principal_name']) ? strtoupper($settings['principal_name']) : 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.'); ?></p>
+                    <p style="margin: 0;">NIP. <?php echo e($settings['principal_nip'] ?? '197xxxxxx...'); ?></p>
                 </div>
                 <div class="clear"></div>
             </div>
@@ -230,4 +230,4 @@
         </div>
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/graduation/pdf_skl.blade.php ENDPATH**/ ?>
