@@ -347,6 +347,7 @@
         function updateTime() {
             const now = new Date();
             clockEl.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+            // Refresh halaman otomatis setiap jam 00:00 untuk mereset session
             if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) window.location.reload();
         }
         setInterval(updateTime, 1000);
@@ -455,6 +456,20 @@
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
                     body: JSON.stringify(body)
                 });
+
+                // --- PERBAIKAN: TANGKAP ERROR 419 (CSRF) & 401 (UNAUTHORIZED) ---
+                if (response.status === 419 || response.status === 401) {
+                    playBeep('error');
+                    stateResult.innerHTML = `
+                        <h2 class="text-2xl font-black text-rose-500 text-center mb-2">SESI BERAKHIR</h2>
+                        <p class="text-sm text-white text-center">Memuat ulang sistem...</p>
+                    `;
+                    // Refresh halaman untuk memperbarui token dan session
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                    return; // Stop eksekusi agar tidak lanjut membaca JSON (yang akan gagal)
+                }
 
                 const result = await response.json();
                 const isLate = String(result.message || '').toUpperCase().includes('TERLAMBAT');
