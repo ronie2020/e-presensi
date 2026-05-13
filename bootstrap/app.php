@@ -35,6 +35,11 @@ return Application::configure(basePath: dirname(__DIR__))
             // Default ke Login Guru
             return route('login');
         });
+        // 4. MENGATASI ERROR 419 SAAT SCAN QR CODE (CSRF EXCEPTION)
+        $middleware->validateCsrfTokens(except: [
+            'scan',
+            'scan/*'
+        ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
