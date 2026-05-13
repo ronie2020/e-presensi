@@ -60,11 +60,14 @@ class GraduationController extends Controller
             : [
                 'letter_number' => '421.3/     /SMP.03/' . date('Y'),
                 'principal_name' => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
-                'principal_nip' => '197xxxxxx...'
+                'principal_nip' => '198028032008011003'
             ];
 
-        // MENGUBAH DARI DOMPDF MENJADI BROWSER PRINT (Sama seperti SPPD)
-        return view('graduation.pdf_skl', compact('student', 'settings'));
+        // mengambil Tahun Ajaran Aktif
+        $activeYear = AcademicYear::active(); 
+        $tahunAjaran = $activeYear ? $activeYear->name : date('Y') . '/' . (date('Y') + 1);
+       
+        return view('graduation.pdf_skl', compact('student', 'settings', 'tahunAjaran'));
     }
 
     // --- HALAMAN ADMIN (Manajemen) ---
@@ -90,7 +93,7 @@ class GraduationController extends Controller
             : [
                 'letter_number' => '421.3/     /SMP.03/' . date('Y'),
                 'principal_name' => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
-                'principal_nip' => '197xxxxxx...'
+                'principal_nip' => '198028032008011003'
             ];
 
         return view('admin.graduation.index', compact('students', 'classes', 'settings'));

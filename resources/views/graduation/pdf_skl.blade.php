@@ -183,7 +183,7 @@
             </table>
 
             <p style="text-align: justify;">
-                Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran {{ $settings['academic_year'] ?? ($student->graduation->academic_year ?? '') }} yang dilaksanakan pada tanggal {{ \Carbon\Carbon::parse($settings['announcement_date'] ?? ($student->graduation->announcement_date ?? now()))->locale('id')->isoFormat('D MMMM Y') }}, maka peserta didik tersebut dinyatakan:
+                Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran {{ $tahunAjaran ?? ($settings['academic_year'] ?? ($student->graduation->academic_year ?? '')) }} yang dilaksanakan pada tanggal {{ \Carbon\Carbon::parse($announcementDate ?? ($settings['announcement_date'] ?? ($student->graduation->announcement_date ?? now())))->locale('id')->isoFormat('D MMMM Y') }}, maka peserta didik tersebut dinyatakan:
             </p>
 
             <div class="status-box">
