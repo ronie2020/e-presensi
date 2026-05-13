@@ -50,7 +50,7 @@ class GraduationController extends Controller
         return view('graduation.index', compact('student', 'announcementDate', 'tahunAjaran'));
     }
 
-    public function printSkl($id)
+      public function printSkl($id)
     {
         $student = Student::with('graduation')->findOrFail($id);
         if ($student->graduation->status !== 'LULUS') return back()->with('error', 'SKL hanya untuk siswa LULUS.');
@@ -63,8 +63,8 @@ class GraduationController extends Controller
                 'principal_nip' => '197xxxxxx...'
             ];
 
-        $pdf = Pdf::loadView('graduation.pdf_skl', compact('student', 'settings'))->setPaper('a4', 'portrait');
-        return $pdf->stream('SKL_' . $student->student_id . '.pdf');
+        // MENGUBAH DARI DOMPDF MENJADI BROWSER PRINT (Sama seperti SPPD)
+        return view('graduation.pdf_skl', compact('student', 'settings'));
     }
 
     // --- HALAMAN ADMIN (Manajemen) ---

@@ -32,4 +32,4 @@
         </div>
     </body>
 </html>
-<?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\vendor\laravel\framework\src\Illuminate\Foundation\Exceptions/views/minimal.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\vendor\laravel\framework\src\Illuminate\Foundation\Exceptions/views/minimal.blade.php ENDPATH**/ ?>
