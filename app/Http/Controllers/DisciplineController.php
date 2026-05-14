@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DisciplineRecord;
 use App\Models\DisciplineType;
 use App\Models\Student;
-use App\Models\BkSession; // Tambahkan ini
+use App\Models\BkSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\DB;
 
 class DisciplineController extends Controller
 {
+    /**
+     * Helper untuk mendapatkan tanggal awal tahun ajaran (1 Juli)
+     */
+    private function getAcademicYearStart()
+    {
+        return Carbon::now('Asia/Jakarta')->month >= 7 
+            ? Carbon::create(Carbon::now('Asia/Jakarta')->year, 7, 1)->toDateString() 
+            : Carbon::create(Carbon::now('Asia/Jakarta')->year - 1, 7, 1)->toDateString();
+    }
+
     /**
      * Menampilkan halaman utama Catatan Disiplin (Dashboard Guru).
      */
@@ -25,17 +35,21 @@ class DisciplineController extends Controller
         $studentTable = app(Student::class)->getTable();
         $recordTable = app(DisciplineRecord::class)->getTable();
         $typeTable = app(DisciplineType::class)->getTable();
+        
+        $academicYearStart = $this->getAcademicYearStart();
 
-        // Subquery untuk menghitung total poin per siswa di level SQL 
+        // Subquery untuk menghitung total poin per siswa di TAHUN AJARAN AKTIF
         $violationSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
-            ->where("{$typeTable}.type", 'Pelanggaran');
+            ->where("{$typeTable}.type", 'Pelanggaran')
+            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
 
         $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
-            ->where("{$typeTable}.type", 'Kebaikan');
+            ->where("{$typeTable}.type", 'Kebaikan')
+            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
 
         // Ambil data siswa dengan relasi kelas     
         $studentsRaw = Student::with('schoolClass')
@@ -115,9 +129,11 @@ class DisciplineController extends Controller
             });
 
         // ==========================================
-        // 5. DATA RIWAYAT
+        // 5. DATA RIWAYAT (TABEL BAWAH)
         // ==========================================
-        $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])->latest(); 
+        $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])
+            ->whereDate('created_at', '>=', $academicYearStart)
+            ->latest(); 
 
         if ($request->has('search') && $request->search != '') {
             $query->whereHas('student', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'));
@@ -137,8 +153,12 @@ class DisciplineController extends Controller
 
  public function analytics()
     {
+        $academicYearStart = $this->getAcademicYearStart();
+        
         // 1. Ambil data dasar
-        $historyRecords = DisciplineRecord::with('disciplineType')->get();
+        $historyRecords = DisciplineRecord::with('disciplineType')
+            ->whereDate('created_at', '>=', $academicYearStart)
+            ->get();
         
         $studentTable = app(Student::class)->getTable();
         $recordTable = app(DisciplineRecord::class)->getTable();
@@ -147,12 +167,14 @@ class DisciplineController extends Controller
         $violationSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
-            ->where("{$typeTable}.type", 'Pelanggaran');
+            ->where("{$typeTable}.type", 'Pelanggaran')
+            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
 
         $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
-            ->where("{$typeTable}.type", 'Kebaikan');
+            ->where("{$typeTable}.type", 'Kebaikan')
+            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
 
         $students = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
@@ -171,14 +193,14 @@ class DisciplineController extends Controller
 
         $topViolators = $students->where('total_violation', '>', 0)->sortByDesc('total_violation')->take(10);
 
-        // 3. LOGIKA TREN BULANAN (REAL DATA)
+        // 3. LOGIKA TREN BULANAN (Hanya untuk Tahun Ajaran Ini)
         $monthlyTrend = DisciplineRecord::select(
                 DB::raw('MONTH(date) as month'),
                 DB::raw("SUM(CASE WHEN {$typeTable}.type = 'Pelanggaran' THEN {$typeTable}.point_value ELSE 0 END) as violations"),
                 DB::raw("SUM(CASE WHEN {$typeTable}.type = 'Kebaikan' THEN {$typeTable}.point_value ELSE 0 END) as merits")
             )
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
-            ->whereYear('date', date('Y'))
+            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart)
             ->groupBy('month')
             ->orderBy('month')
             ->get();
@@ -187,7 +209,6 @@ class DisciplineController extends Controller
         $trendViolations = [];
         $trendMerits = [];
 
-        // Loop 12 bulan agar grafik lengkap dari Jan - Des
         for ($m = 1; $m <= 12; $m++) {
             $monthName = Carbon::create()->month($m)->translatedFormat('M');
             $trendLabels[] = $monthName;
@@ -208,9 +229,11 @@ class DisciplineController extends Controller
      */
     public function spPrint($id)
     {
-        $student = Student::with(['disciplineRecords.disciplineType', 'schoolClass'])->findOrFail($id);
+        $academicYearStart = $this->getAcademicYearStart();
+        $student = Student::with(['disciplineRecords' => function($q) use ($academicYearStart) {
+            $q->whereDate('created_at', '>=', $academicYearStart)->with('disciplineType');
+        }, 'schoolClass'])->findOrFail($id);
         
-        // Hitung total_violation secara dinamis untuk view SP
         $student->total_violation = $student->disciplineRecords
             ->where('disciplineType.type', 'Pelanggaran')
             ->sum('disciplineType.point_value');
@@ -234,7 +257,6 @@ class DisciplineController extends Controller
             $data['date'] = Carbon::today()->toDateString();
         }
 
-        // Simpan Data Disiplin
         DisciplineRecord::create($data);
         
         // =========================================================================
@@ -242,10 +264,8 @@ class DisciplineController extends Controller
         // =========================================================================
         $student = Student::find($request->student_id);
         if ($student) {
-            // Fungsi ini akan menghitung poin dan membuat tiket BK jika mencapai ambang batas
             $student->checkBkThresholds();
         }
-        // =========================================================================
         
         $type = DisciplineType::find($request->discipline_type_id);
         $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat.' : 'Prestasi berhasil ditambahkan!';

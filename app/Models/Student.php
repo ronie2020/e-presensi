@@ -470,4 +470,12 @@ class Student extends Authenticatable
             }
         }
     }
+    /**
+     * Relasi ke riwayat poin tahunan (Arsip Tutup Buku)
+     */
+    public function pointHistories()
+    {
+        return $this->hasMany(StudentPointHistory::class, 'student_id')
+                    ->orderBy('academic_year', 'desc');
+    }
 }

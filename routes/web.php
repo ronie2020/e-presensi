@@ -91,6 +91,7 @@ use App\Http\Controllers\TeacherHabitController;
 use App\Http\Controllers\BkStudentController; 
 use App\Http\Controllers\BkTeacherController; 
 use App\Http\Controllers\RecoveryController;
+use App\Http\Controllers\PointResetController;
 
 // CONTROLLER RAMADAN LOG
 use App\Http\Controllers\RamadanLogController;
@@ -502,6 +503,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [RecoveryController::class, 'index'])->name('index');
         Route::post('/store', [RecoveryController::class, 'store'])->name('store');
         Route::post('/trigger-decay', [RecoveryController::class, 'triggerAutoDecay'])->name('trigger_decay');
+    });
+    
+    // Rute Tutup Buku Poin (Reset Tahunan)
+    Route::prefix('admin/points-reset')->name('admin.points_reset.')->group(function () {
+        Route::get('/', [PointResetController::class, 'index'])->name('index');
+        Route::post('/submit', [PointResetController::class, 'resetYearlyPoints'])->name('submit');
     });
 
     // Catatan Disiplin Utama

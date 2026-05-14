@@ -32,6 +32,7 @@ use App\Models\Schedule;
 use App\Models\CbtExam; 
 use App\Models\CbtStudentExam; 
 use App\Models\AcademicCalendar;
+use App\Models\StudentPointHistory;
 use Illuminate\Support\Facades\Storage;
 
 class StudentPortalController extends Controller
@@ -84,7 +85,8 @@ class StudentPortalController extends Controller
         $student = Student::with([
             'schoolClass.schedules.subject', 
             'schoolClass.schedules.teacher', 
-            'alumniProfile'
+            'alumniProfile',
+            'pointHistories' // riwayat poin siswa untuk ditampilkan di bagian histori poin
         ])->findOrFail($id);
 
          if ($student->status === 'graduated') {
@@ -184,24 +186,30 @@ class StudentPortalController extends Controller
             try { $liaison_messages = LiaisonBook::with('teacher')->where('student_id', $student->id)->latest()->take(10)->get(); } catch (\Exception $e) {}
         }
 
+        // --- DEFINE TAHUN AJARAN AKTIF (1 JULI) ---
+        // Ini adalah kunci agar semua tab otomatis reset (Tutup Buku) ke 0 di awal tahun ajaran.
+        $academicYearStart = Carbon::now('Asia/Jakarta')->month >= 7 
+            ? Carbon::create(Carbon::now('Asia/Jakarta')->year, 7, 1)->toDateString() 
+            : Carbon::create(Carbon::now('Asia/Jakarta')->year - 1, 7, 1)->toDateString();
+
         // --- DATA KEHADIRAN & ABSENSI --- 
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
         
         if (class_exists(AttendanceSiswa::class)) {
-            $currentYearStart = Carbon::now()->startOfYear(); 
+            // Hanya ambil absensi di tahun ajaran ini
             $rawAttendanceRecords = AttendanceSiswa::where('student_id', $id)
-                                    ->whereDate('attendance_date', '>=', $currentYearStart)
+                                    ->whereDate('attendance_date', '>=', $academicYearStart)
                                     ->orderBy('attendance_date', 'desc')->get();
-            $attendance_history = $rawAttendanceRecords->take(10);            
+            $attendance_history = $rawAttendanceRecords->take(10);                
           
-            $allTimeAttendance = AttendanceSiswa::where('student_id', $id)->get(); 
-            $hadir = $allTimeAttendance->whereInStrict('status', ['Hadir', 'Masuk', 'Terlambat', 'hadir', 'masuk', 'terlambat'])->count();
-            $terlambat = $allTimeAttendance->whereInStrict('status', ['Terlambat', 'terlambat'])->count();
-            $sakit = $allTimeAttendance->whereInStrict('status', ['Sakit', 'sakit'])->count();
-            $izin = $allTimeAttendance->whereInStrict('status', ['Izin', 'izin'])->count();
-            $alpa = $allTimeAttendance->whereInStrict('status', ['Alfa', 'Alpa', 'Alpha', 'alfa', 'alpa', 'alpha', 'Tanpa Keterangan'])->count();
+            // Hitung statistik (Tab Kehadiran) HANYA untuk tahun ajaran aktif
+            $hadir = $rawAttendanceRecords->whereInStrict('status', ['Hadir', 'Masuk', 'Terlambat', 'hadir', 'masuk', 'terlambat'])->count();
+            $terlambat = $rawAttendanceRecords->whereInStrict('status', ['Terlambat', 'terlambat'])->count();
+            $sakit = $rawAttendanceRecords->whereInStrict('status', ['Sakit', 'sakit'])->count();
+            $izin = $rawAttendanceRecords->whereInStrict('status', ['Izin', 'izin'])->count();
+            $alpa = $rawAttendanceRecords->whereInStrict('status', ['Alfa', 'Alpa', 'Alpha', 'alfa', 'alpa', 'alpha', 'Tanpa Keterangan'])->count();
         }
         
         $attendanceChart = ['hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa];
@@ -217,6 +225,7 @@ class StudentPortalController extends Controller
             try {
                 $manualViolations = DisciplineRecord::with(['disciplineType', 'recorder']) 
                     ->where('student_id', $id)
+                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
                     ->get() 
                     ->filter(function($record) {
                         $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
@@ -240,6 +249,7 @@ class StudentPortalController extends Controller
             return str_contains($text, 'alfa') || str_contains($text, 'alpa') || str_contains($text, 'bolos') || str_contains($text, 'tidak masuk');
         })->map(function($record) { return Carbon::parse($record->date)->toDateString(); })->toArray();
 
+        // Alpa dan Late sudah otomatis terfilter karena diambil dari $rawAttendanceRecords
         $alpaViolations = $rawAttendanceRecords
             ->filter(function ($att) use ($manualAlpaDates) {
                 $isAlfa = in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
@@ -277,6 +287,7 @@ class StudentPortalController extends Controller
             try {
                 $manualMerits = DisciplineRecord::with(['disciplineType', 'recorder'])
                     ->where('student_id', $id)
+                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
                     ->get()
                     ->filter(function($record) {
                         $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
@@ -321,7 +332,9 @@ class StudentPortalController extends Controller
         $realAchievements = collect([]);
         if (class_exists(Achievement::class)) {
             try {
-                $realAchievements = Achievement::where('student_id', $id)->get()
+                $realAchievements = Achievement::where('student_id', $id)
+                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
+                    ->get()
                     ->map(function($item) {
                         return (object) [
                             'date' => $item->date,
@@ -331,8 +344,8 @@ class StudentPortalController extends Controller
                             'title' => $item->title,
                             'level' => $item->level,
                             'photo' => $item->photo_path,
-                            'certificate_path' => $item->certificate_path, // TAMBAHAN CERTIFICATE
-                            'status' => $item->status, // TAMBAHAN STATUS
+                            'certificate_path' => $item->certificate_path,
+                            'status' => $item->status,
                             'recorder' => (object) ['name' => 'Laporan Prestasi'],
                             'disciplineType' => (object) ['name' => 'Kejuaraan / Prestasi', 'point_value' => 0]
                         ];
@@ -379,8 +392,11 @@ class StudentPortalController extends Controller
         $todayEntry = null; $habits = collect([]); 
         $totalPoints = 0;
         if (class_exists(StudentHabit::class)) {
-            $todayEntry = StudentHabit::where('student_id', $id)->whereDate('report_date', Carbon::today())->first();
-            $habits = StudentHabit::where('student_id', $id)->orderBy('report_date', 'desc')->get();
+            $todayEntry = StudentHabit::where('student_id', $id)->whereDate('report_date', Carbon::today('Asia/Jakarta'))->first();
+            // FILTER 7 KEBIASAAN BERDASARKAN TAHUN AJARAN AKTIF
+            $habits = StudentHabit::where('student_id', $id)
+                        ->whereDate('report_date', '>=', $academicYearStart)
+                        ->orderBy('report_date', 'desc')->get();
             $totalPoints = $habits->count() * 100; 
         }
 
@@ -447,11 +463,9 @@ class StudentPortalController extends Controller
         $bkSessions = collect([]);
         $unreadSystemBk = 0;
         if (class_exists(BkSession::class)) {
-            // Data tiket terbaru langsung terambil dari DB berkat Safety Net di atas
             $bkSessions = BkSession::where('student_id', $student->id)->with(['category', 'teacher'])->latest()->get();
             $unreadSystemBk = $bkSessions->where('is_system_generated', true)->whereIn('status', ['pending', 'ongoing'])->count();
         }
-
 
         // --- TABS CONFIGURATION ---
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
@@ -479,11 +493,15 @@ class StudentPortalController extends Controller
             ]);
         }
 
-        // Statistik Sholat
+        // Statistik Sholat (Difilter juga berdasarkan tahun ajaran)
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
-            $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
-            $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
+            $sholat_dhuha = AttendanceSiswa::where('student_id', $id)
+                            ->where('type', 'Keagamaan')->where('activity', 'Dhuha')
+                            ->whereDate('attendance_date', '>=', $academicYearStart)->count();
+            $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)
+                            ->where('type', 'Keagamaan')->where('activity', 'Dhuhur')
+                            ->whereDate('attendance_date', '>=', $academicYearStart)->count();
         }
 
          // --- DATA LITERASI MANDIRI ---
@@ -491,11 +509,15 @@ class StudentPortalController extends Controller
         $literacy_stats = ['total_books' => 0, 'total_pages' => 0, 'points' => 0, 'level' => 'Warga Biasa', 'progress' => 0, 'next_target' => 100];
 
         if (class_exists(LiteracyJournal::class)) {
-            $literacy_journals = LiteracyJournal::where('student_id', $id)->latest()->take(20)->get();
-            $total_entries = LiteracyJournal::where('student_id', $id)->count();
-            $total_pages = LiteracyJournal::where('student_id', $id)->sum('pages_read');
+            // FILTER JURNAL LITERASI BERDASARKAN TAHUN AJARAN
+            $literacy_journals = LiteracyJournal::where('student_id', $id)
+                                    ->whereDate('created_at', '>=', $academicYearStart)
+                                    ->latest()->take(20)->get();
+            $total_entries = LiteracyJournal::where('student_id', $id)
+                                    ->whereDate('created_at', '>=', $academicYearStart)->count();
+            $total_pages = LiteracyJournal::where('student_id', $id)
+                                    ->whereDate('created_at', '>=', $academicYearStart)->sum('pages_read');
             
-            // Hitung skor tambahan jika ada fitur rating di database, tapi amannya menggunakan entries + pages seperti lama
             $points = ($total_entries * 50) + $total_pages;
             
             $level = 'Pemula'; $next_target = 100;
@@ -516,7 +538,6 @@ class StudentPortalController extends Controller
         $calendarEvents = collect([]);
         $upcomingAgendas = collect([]); 
 
-        // A. Ambil Data Ujian (CBT) sebagai Event
         if (class_exists(\App\Models\CbtExam::class)) {     
             $nowCalendar = Carbon::now('Asia/Jakarta')->subMonths(3);
             
@@ -541,7 +562,6 @@ class StudentPortalController extends Controller
             }
         }
 
-        // B. Ambil Data dari Tabel Kalender Pendidikan
         if (class_exists(\App\Models\AcademicCalendar::class)) {
             $academicEvents = \App\Models\AcademicCalendar::all();
 

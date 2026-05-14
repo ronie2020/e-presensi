@@ -217,6 +217,13 @@ return [
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru']
             ],
             [
+                'name' => 'Tutup Buku Poin',
+                'route' => 'admin.points_reset.index',
+                'active_check' => 'admin.points_reset.*',
+                'icon' => 'ph-archive',
+                'roles' => ['Admin', 'Kepala Sekolah'] 
+            ],
+            [
                 'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
                 'icon' => 'ph-student',               
