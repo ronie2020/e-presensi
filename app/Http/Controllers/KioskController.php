@@ -285,6 +285,7 @@ class KioskController extends Controller
     {
         ActivityLog::create([
             'student_id' => $student->id, 
+            'type' => $type, 
             'activity_type' => $type, 
             'activity_name' => $name,
             'description' => $desc, 
