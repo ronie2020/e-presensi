@@ -237,8 +237,13 @@ class KioskController extends Controller
             try {
                 SendWaScanNotificationJob::dispatch($attendanceRecord);
             } catch (\Exception $e) {
-                Log::warning("Kiosk WA Failed: " . $e->getMessage());
-            }
+            Log::error('Gagal menyimpan absensi Kiosk: ' . $e->getMessage());
+            // UBAH BARIS INI SEMENTARA UNTUK DEBUGGING
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'DB Error: ' . $e->getMessage() 
+            ], 500);
+        }
 
             $messagePrefix = ($finalStatus == 'Terlambat') ? 'TERLAMBAT! ' : 'SUKSES! ';
             $waktuSapaan = ($attendanceType == 'Pulang') ? 'Absen Pulang Berhasil.' : 'Absen Masuk Berhasil.';
