@@ -1,4 +1,19 @@
 <x-app-layout>
+    {{-- Tambahan CSS khusus untuk mencegah input time bawaan browser memakan tempat --}}
+    <style>
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            margin-left: 4px;
+            padding: 0;
+            cursor: pointer;
+        }
+        input[type="time"]::-webkit-datetime-edit {
+            padding: 0;
+        }
+        input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+        }
+    </style>
+
     <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
         
         {{-- Efek Latar Belakang Halus --}}
@@ -45,7 +60,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
-            {{-- Pesan Flash (Style Modern) --}}
+            {{-- Pesan Flash --}}
             @if (session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3 px-2">
@@ -74,300 +89,334 @@
                 </div>
             @endif
 
-            <!-- BAGIAN 1: JADWAL REGULER (Full Width Card) -->
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden mb-10 group hover:shadow-2xl hover:shadow-elevate-accent/10 transition-all duration-300">
-                {{-- Aksen Header --}}
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
+            <!-- LAYOUT UTAMA: KIRI (Reguler) & KANAN (Khusus) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-10">
 
-                <div class="flex items-center gap-4 mb-8">
-                    <div class="w-14 h-14 bg-elevate-soft text-elevate-primary rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-elevate-accent/20 group-hover:scale-110 transition-transform">
-                        <i class="ph-duotone ph-clock"></i>
+                <!-- BAGIAN KIRI: JADWAL REGULER -->
+                <div class="lg:col-span-7 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group hover:shadow-2xl hover:shadow-elevate-accent/10 transition-all duration-300">
+                    {{-- Aksen Header --}}
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
+
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-14 h-14 bg-elevate-soft text-elevate-primary rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-elevate-accent/20 group-hover:scale-110 transition-transform">
+                            <i class="ph-duotone ph-clock"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-black text-elevate-dark">Jadwal Sekolah Reguler</h2>
+                            <p class="text-sm text-elevate-dark/60 font-medium mt-1">Pengaturan jam masuk dan pulang mingguan.</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="text-xl font-black text-elevate-dark">Jadwal Sekolah Reguler</h2>
-                        <p class="text-sm text-elevate-dark/60 font-medium mt-1">Pengaturan jam masuk dan pulang mingguan.</p>
-                    </div>
+
+                    <form action="{{ route('schedules.regular.store') }}" method="POST">
+                        @csrf
+                        <div class="space-y-6">
+                            
+                            <!-- Jadwal Hari Biasa (Senin-Kamis) -->
+                            <div class="bg-slate-50/70 rounded-[2rem] p-5 md:p-6 border border-slate-100 relative hover:bg-slate-50 hover:border-slate-300 transition-all duration-300">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-2 h-8 bg-elevate-primary rounded-full"></div>
+                                    <h4 class="font-black text-elevate-dark text-lg">Senin - Kamis</h4>
+                                </div>
+                                <input type="hidden" name="day_type[]" value="Biasa">
+                                
+                                {{-- Smart Flex Layout (Otomatis baris atau tumpuk) --}}
+                                <div class="flex flex-col xl:flex-row gap-5">
+                                    
+                                    {{-- KELOMPOK MASUK --}}
+                                    <div class="flex-1 bg-white/60 p-3.5 rounded-[1.5rem] border border-slate-200/60 shadow-sm">
+                                        <div class="text-center mb-3">
+                                            <span class="text-[10px] font-bold text-elevate-primary uppercase tracking-wider flex justify-center items-center gap-1">
+                                                <i class="ph-bold ph-sun-horizon"></i> MASUK
+                                            </span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="start_in[]" value="{{ isset($regularSchedules['Biasa']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_in)->format('H:i') : '05:30' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-primary outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Buka Scan</span>
+                                            </div>
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="end_in[]" value="{{ isset($regularSchedules['Biasa']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_in)->format('H:i') : '07:00' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-primary outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Batas Telat</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- PEMBATAS (Tampil di layar besar saja) --}}
+                                    <div class="hidden xl:flex items-center justify-center">
+                                        <div class="w-px h-12 bg-slate-200"></div>
+                                    </div>
+
+                                    {{-- KELOMPOK PULANG --}}
+                                    <div class="flex-1 bg-white/60 p-3.5 rounded-[1.5rem] border border-slate-200/60 shadow-sm">
+                                        <div class="text-center mb-3">
+                                            <span class="text-[10px] font-bold text-elevate-primary uppercase tracking-wider flex justify-center items-center gap-1">
+                                                <i class="ph-bold ph-moon-stars"></i> PULANG
+                                            </span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="start_out[]" value="{{ isset($regularSchedules['Biasa']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_out)->format('H:i') : '14:00' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-primary outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Boleh Plg</span>
+                                            </div>
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="end_out[]" value="{{ isset($regularSchedules['Biasa']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_out)->format('H:i') : '15:00' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-primary outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Tutup Scan</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                            <!-- Jadwal Hari Jum'at -->
+                            <div class="bg-elevate-peach-light/10 rounded-[2rem] p-5 md:p-6 border border-elevate-peach-light/50 relative hover:bg-elevate-peach-light/20 transition-all duration-300">
+                                <div class="flex items-center gap-3 mb-6">
+                                    <div class="w-2 h-8 bg-elevate-peach-dark rounded-full"></div>
+                                    <h4 class="font-black text-elevate-dark text-lg">Hari Jum'at</h4>
+                                </div>
+                                <input type="hidden" name="day_type[]" value="Jumat">
+                                
+                                {{-- Smart Flex Layout (Otomatis baris atau tumpuk) --}}
+                                <div class="flex flex-col xl:flex-row gap-5">
+                                    
+                                    {{-- KELOMPOK MASUK --}}
+                                    <div class="flex-1 bg-white/80 p-3.5 rounded-[1.5rem] border border-elevate-peach/30 shadow-sm">
+                                        <div class="text-center mb-3">
+                                            <span class="text-[10px] font-bold text-elevate-peach-dark uppercase tracking-wider flex justify-center items-center gap-1">
+                                                <i class="ph-bold ph-sun-horizon"></i> MASUK
+                                            </span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="start_in[]" value="{{ isset($regularSchedules['Jumat']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_in)->format('H:i') : '05:30' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-peach/30 focus:border-elevate-peach-dark outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Buka Scan</span>
+                                            </div>
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="end_in[]" value="{{ isset($regularSchedules['Jumat']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_in)->format('H:i') : '07:00' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-peach/30 focus:border-elevate-peach-dark outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Batas Telat</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- PEMBATAS (Tampil di layar besar saja) --}}
+                                    <div class="hidden xl:flex items-center justify-center">
+                                        <div class="w-px h-12 bg-elevate-peach/30"></div>
+                                    </div>
+
+                                    {{-- KELOMPOK PULANG --}}
+                                    <div class="flex-1 bg-white/80 p-3.5 rounded-[1.5rem] border border-elevate-peach/30 shadow-sm">
+                                        <div class="text-center mb-3">
+                                            <span class="text-[10px] font-bold text-elevate-peach-dark uppercase tracking-wider flex justify-center items-center gap-1">
+                                                <i class="ph-bold ph-moon-stars"></i> PULANG
+                                            </span>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="start_out[]" value="{{ isset($regularSchedules['Jumat']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_out)->format('H:i') : '10:45' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-peach/30 focus:border-elevate-peach-dark outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Boleh Plg</span>
+                                            </div>
+                                            <div class="flex-1 flex flex-col items-center">
+                                                <input type="time" name="end_out[]" value="{{ isset($regularSchedules['Jumat']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_out)->format('H:i') : '15:00' }}" 
+                                                    class="w-full min-w-0 text-center font-bold text-sm text-elevate-dark bg-white border border-slate-200 rounded-xl py-2 px-1 focus:ring-2 focus:ring-elevate-peach/30 focus:border-elevate-peach-dark outline-none transition-all cursor-pointer">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase mt-2 tracking-wider text-center">Tutup Scan</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex justify-end pt-2">
+                            <button type="submit" class="w-full sm:w-auto py-3.5 px-8 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
+                                <i class="ph-bold ph-floppy-disk text-xl"></i>
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <form action="{{ route('schedules.regular.store') }}" method="POST">
-                    @csrf
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        
-                        <!-- Jadwal Hari Biasa (Senin-Kamis) -->
-                        <div class="bg-elevate-soft/50 rounded-[2rem] p-6 border border-slate-100 relative group/card hover:bg-elevate-soft hover:border-elevate-accent/30 transition-all duration-300">
-                            <div class="flex items-center justify-between mb-6">
-                                <h4 class="font-black text-elevate-dark flex items-center gap-2 text-lg">
-                                    <span class="w-2 h-8 bg-elevate-primary rounded-full"></span>
-                                    Senin - Kamis
-                                </h4>
-                                <span class="text-[10px] font-black bg-white text-elevate-primary px-3 py-1.5 rounded-xl uppercase tracking-wider border border-slate-200 shadow-sm">Hari Biasa</span>
-                            </div>
-                            <input type="hidden" name="day_type[]" value="Biasa">
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {{-- Jam Masuk --}}
-                                <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm group-hover/card:border-elevate-accent/50 transition-colors">
-                                    <label class="block text-[10px] font-bold text-elevate-primary/70 uppercase mb-3 text-center tracking-wider flex items-center justify-center gap-1">
-                                        <i class="ph-bold ph-sun-horizon text-elevate-primary"></i> Jam Masuk
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="time" name="start_in[]" 
-                                            value="{{ isset($regularSchedules['Biasa']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_in)->format('H:i') : '07:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-accent/20 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                        <span class="text-slate-300 font-bold text-sm">-</span>
-                                        <input type="time" name="end_in[]" 
-                                            value="{{ isset($regularSchedules['Biasa']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_in)->format('H:i') : '07:30' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-accent/20 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                    </div>
-                                </div>
-
-                                {{-- Jam Pulang --}}
-                                <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm group-hover/card:border-elevate-accent/50 transition-colors">
-                                    <label class="block text-[10px] font-bold text-elevate-primary/70 uppercase mb-3 text-center tracking-wider flex items-center justify-center gap-1">
-                                        <i class="ph-bold ph-moon-stars text-elevate-dark"></i> Jam Pulang
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="time" name="start_out[]" 
-                                            value="{{ isset($regularSchedules['Biasa']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_out)->format('H:i') : '14:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-accent/20 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                        <span class="text-slate-300 font-bold text-sm">-</span>
-                                        <input type="time" name="end_out[]" 
-                                            value="{{ isset($regularSchedules['Biasa']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_out)->format('H:i') : '16:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-accent/20 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Jadwal Hari Jum'at -->
-                        <div class="bg-elevate-peach-light/20 rounded-[2rem] p-6 border border-slate-100 relative group/card2 hover:bg-elevate-peach-light/40 hover:border-elevate-peach/50 transition-all duration-300">
-                            <div class="flex items-center justify-between mb-6">
-                                <h4 class="font-black text-elevate-dark flex items-center gap-2 text-lg">
-                                    <span class="w-2 h-8 bg-elevate-peach-dark rounded-full"></span>
-                                    Hari Jum'at
-                                </h4>
-                                <span class="text-[10px] font-black bg-white text-elevate-peach-dark px-3 py-1.5 rounded-xl uppercase tracking-wide border border-slate-200 shadow-sm">Khusus</span>
-                            </div>
-                            <input type="hidden" name="day_type[]" value="Jumat">
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {{-- Jam Masuk --}}
-                                <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm group-hover/card2:border-elevate-peach/50 transition-colors">
-                                    <label class="block text-[10px] font-bold text-elevate-peach-dark/80 uppercase mb-3 text-center tracking-wider flex items-center justify-center gap-1">
-                                        <i class="ph-bold ph-sun-horizon text-elevate-peach-dark"></i> Jam Masuk
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="time" name="start_in[]" 
-                                            value="{{ isset($regularSchedules['Jumat']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_in)->format('H:i') : '07:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-peach/30 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                        <span class="text-slate-300 font-bold text-sm">-</span>
-                                        <input type="time" name="end_in[]" 
-                                            value="{{ isset($regularSchedules['Jumat']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_in)->format('H:i') : '07:30' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-peach/30 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                    </div>
-                                </div>
-
-                                {{-- Jam Pulang --}}
-                                <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200 shadow-sm group-hover/card2:border-elevate-peach/50 transition-colors">
-                                    <label class="block text-[10px] font-bold text-elevate-peach-dark/80 uppercase mb-3 text-center tracking-wider flex items-center justify-center gap-1">
-                                        <i class="ph-bold ph-moon-stars text-elevate-dark"></i> Jam Pulang
-                                    </label>
-                                    <div class="flex items-center gap-2">
-                                        <input type="time" name="start_out[]" 
-                                            value="{{ isset($regularSchedules['Jumat']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_out)->format('H:i') : '11:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-peach/30 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                        <span class="text-slate-300 font-bold text-sm">-</span>
-                                        <input type="time" name="end_out[]" 
-                                            value="{{ isset($regularSchedules['Jumat']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_out)->format('H:i') : '12:00' }}" 
-                                            class="flex-1 min-w-0 text-center font-black text-lg text-elevate-dark bg-slate-50 border-0 rounded-xl focus:ring-4 focus:ring-elevate-peach/30 focus:bg-white px-1 py-3 transition-all cursor-pointer">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 flex justify-end border-t border-slate-100 pt-6">
-                        <button type="submit" class="w-full sm:w-auto py-3.5 px-8 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
-                            <i class="ph-bold ph-floppy-disk text-xl"></i>
-                            Simpan Perubahan
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- BAGIAN 2: JADWAL KHUSUS (GRID 1:3) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                
-                <!-- KOLOM KIRI: FORM INPUT KHUSUS -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group/form hover:shadow-2xl hover:shadow-elevate-accent/10 transition-all duration-300" x-data="{ isHoliday: false }">
+                <!-- BAGIAN KANAN: FORM INPUT KHUSUS -->
+                <div class="lg:col-span-5">
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group/form hover:shadow-2xl hover:shadow-elevate-accent/10 transition-all duration-300" x-data="{ isHoliday: false }">
                         {{-- Aksen Header --}}
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-peach to-elevate-peach-dark"></div>
 
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-12 h-12 bg-elevate-peach-light/40 text-elevate-peach-dark rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-elevate-peach/30 group-hover/form:scale-110 transition-transform">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-14 h-14 bg-elevate-peach-light/40 text-elevate-peach-dark rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-elevate-peach/30 group-hover/form:scale-110 transition-transform">
                                 <i class="ph-duotone ph-calendar-plus"></i>
                             </div>
-                            <h3 class="text-xl font-black text-elevate-dark">Agenda Baru</h3>
+                            <div>
+                                <h3 class="text-xl font-black text-elevate-dark">Agenda Baru</h3>
+                                <p class="text-sm text-elevate-dark/60 font-medium mt-1">Tambahkan hari libur/khusus.</p>
+                            </div>
                         </div>
 
                         <form action="{{ route('schedules.special.store') }}" method="POST">
                             @csrf
-                            
-                            <div class="space-y-5">
+                            <div class="space-y-6">
+                                {{-- Tanggal --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Tanggal <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Tanggal</label>
                                     <div class="relative group">
                                         <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                                         <input type="date" name="date" required 
-                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer outline-none">
+                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer outline-none">
                                     </div>
                                 </div>
 
+                                {{-- Keterangan --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Keterangan <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Keterangan</label>
                                     <div class="relative group">
                                         <i class="ph-bold ph-text-t absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
-                                        <input type="text" name="description" placeholder="Contoh: Ujian Nasional" required
-                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm placeholder:font-medium placeholder:text-slate-400 outline-none">
+                                        <input type="text" name="description" placeholder="Contoh: Rapat Guru" required
+                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm placeholder:font-medium placeholder:text-slate-400 outline-none">
                                     </div>
                                 </div>
                                 
-                                <!-- Toggle Hari Libur Modern -->
-                                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex items-center gap-4 cursor-pointer hover:bg-rose-100 transition-colors select-none shadow-sm" @click="isHoliday = !isHoliday">
-                                    <div class="relative flex items-center">
-                                        <input type="checkbox" name="is_holiday" value="1" class="peer sr-only" x-model="isHoliday">
-                                        <div class="w-10 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <span class="block text-sm font-black text-rose-800">Set Hari Libur</span>
+                                <!-- Toggle Hari Libur -->
+                                <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex items-center justify-between cursor-pointer hover:bg-rose-100 transition-colors select-none shadow-sm" @click="isHoliday = !isHoliday">
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative flex items-center">
+                                            <input type="checkbox" name="is_holiday" value="1" class="peer sr-only" x-model="isHoliday">
+                                            <div class="w-10 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500 shadow-inner"></div>
+                                        </div>
+                                        <span class="block text-sm font-black text-rose-800">Set Sebagai Hari Libur</span>
                                     </div>
                                     <i class="ph-duotone ph-coffee text-rose-500 text-2xl mr-1"></i>
                                 </div>
 
-                                <!-- Input Jam Operasional -->
+                                <!-- Input Jam Operasional Opsional -->
                                 <div x-show="!isHoliday" 
                                      x-transition:enter="transition ease-out duration-300" 
                                      x-transition:enter-start="opacity-0 -translate-y-2" 
                                      x-transition:enter-end="opacity-100 translate-y-0" 
-                                     class="space-y-3 bg-elevate-soft/50 p-5 rounded-2xl border border-elevate-accent/20">
-                                    <p class="text-[10px] font-black text-elevate-primary/70 uppercase text-center mb-2 border-b border-elevate-accent/20 pb-2">Jam Operasional Khusus</p>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="text-[10px] text-elevate-primary font-bold text-center block mb-1">Masuk</label>
-                                            <div class="flex gap-1.5">
-                                                 <input type="time" name="start_in" class="w-full text-xs text-center font-bold rounded-xl border-slate-200 bg-white py-2 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
-                                                 <input type="time" name="end_in" class="w-full text-xs text-center font-bold rounded-xl border-slate-200 bg-white py-2 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
-                                            </div>
+                                     class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                    <p class="text-[10px] font-black text-elevate-primary uppercase text-center mb-4">Jam Operasional (Opsional)</p>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex flex-col items-center">
+                                            <input type="time" name="start_in" class="w-full min-w-0 text-sm text-center font-bold rounded-xl border-slate-200 bg-white py-2.5 px-1 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
+                                            <span class="text-[8px] font-bold text-slate-400 uppercase mt-2">Buka Masuk</span>
                                         </div>
-                                        <div>
-                                            <label class="text-[10px] text-elevate-dark font-bold text-center block mb-1">Pulang</label>
-                                            <div class="flex gap-1.5">
-                                                <input type="time" name="start_out" class="w-full text-xs text-center font-bold rounded-xl border-slate-200 bg-white py-2 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
-                                                <input type="time" name="end_out" class="w-full text-xs text-center font-bold rounded-xl border-slate-200 bg-white py-2 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
-                                            </div>
+                                        <div class="flex flex-col items-center">
+                                            <input type="time" name="end_in" class="w-full min-w-0 text-sm text-center font-bold rounded-xl border-slate-200 bg-white py-2.5 px-1 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
+                                            <span class="text-[8px] font-bold text-slate-400 uppercase mt-2">Batas Telat</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <input type="time" name="start_out" class="w-full min-w-0 text-sm text-center font-bold rounded-xl border-slate-200 bg-white py-2.5 px-1 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
+                                            <span class="text-[8px] font-bold text-slate-400 uppercase mt-2">Boleh Plg</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <input type="time" name="end_out" class="w-full min-w-0 text-sm text-center font-bold rounded-xl border-slate-200 bg-white py-2.5 px-1 focus:ring-2 focus:ring-elevate-accent outline-none cursor-pointer">
+                                            <span class="text-[8px] font-bold text-slate-400 uppercase mt-2">Tutup Scan</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <button type="submit" class="mt-8 w-full py-4 px-6 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
+                            <button type="submit" class="mt-8 w-full py-4 px-6 bg-elevate-primary text-white font-bold rounded-2xl hover:bg-elevate-dark transition-all shadow-lg shadow-elevate-primary/30 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
                                 <i class="ph-bold ph-plus-circle text-lg"></i>
-                                Tambah Jadwal
+                                Simpan Agenda
                             </button>
                         </form>
                     </div>
                 </div>
-                
-                <!-- KOLOM KANAN: DAFTAR JADWAL -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[500px] relative">
-                        {{-- Aksen Header --}}
-                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
-
-                        <div class="p-8 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                            <h3 class="text-lg font-black text-elevate-dark flex items-center gap-2">
-                                <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Riwayat Agenda Khusus
-                            </h3>
-                            <span class="bg-white text-elevate-primary border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl shadow-sm">
-                                {{ $specialSchedules->count() }} Data
-                            </span>
-                        </div>
-                        
-                        <div class="overflow-x-auto flex-1 custom-scrollbar">
-                            <table class="w-full text-left text-sm text-elevate-dark">
-                                <thead class="bg-elevate-soft/50 text-xs font-bold text-elevate-primary uppercase tracking-wider sticky top-0 border-b border-slate-100">
-                                    <tr>
-                                        <th class="px-8 py-5">Tanggal</th>
-                                        <th class="px-6 py-5 w-1/3">Keterangan</th>
-                                        <th class="px-6 py-5 text-center">Status</th>
-                                        <th class="px-8 py-5 text-right">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50">
-                                    @forelse ($specialSchedules as $schedule)
-                                        <tr class="hover:bg-elevate-soft/30 transition-colors group">
-                                            <td class="px-8 py-5 whitespace-nowrap">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 rounded-2xl bg-white text-elevate-primary flex items-center justify-center text-xl shadow-sm border border-slate-200">
-                                                        <i class="ph-duotone ph-calendar-blank"></i>
-                                                    </div>
-                                                    <div>
-                                                        <p class="font-black text-elevate-dark text-base">{{ \Carbon\Carbon::parse($schedule->date)->translatedFormat('d M Y') }}</p>
-                                                        <p class="text-xs text-elevate-dark/50 font-bold uppercase tracking-wide">{{ \Carbon\Carbon::parse($schedule->date)->translatedFormat('l') }}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-5">
-                                                <p class="text-sm font-bold text-elevate-dark leading-snug">{{ $schedule->description }}</p>
-                                                @if(!$schedule->is_holiday)
-                                                    <div class="inline-flex items-center gap-1.5 mt-2 bg-elevate-soft px-2.5 py-1 rounded-lg border border-elevate-accent/20">
-                                                        <i class="ph-bold ph-clock text-elevate-primary text-xs"></i>
-                                                        <span class="text-[10px] font-mono font-bold text-elevate-primary">
-                                                            {{ \Carbon\Carbon::parse($schedule->start_in)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_out)->format('H:i') }}
-                                                        </span>
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-5 text-center">
-                                                @if($schedule->is_holiday)
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-rose-50 text-rose-600 border border-rose-100 shadow-sm">
-                                                        <i class="ph-bold ph-coffee"></i> Libur
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
-                                                        <i class="ph-bold ph-info"></i> Khusus
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-8 py-5 text-right">
-                                                <form action="{{ route('schedules.special.destroy', $schedule->id) }}" method="POST" id="delete-form-{{ $schedule->id }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="button" onclick="confirmDelete('{{ $schedule->id }}')" class="w-9 h-9 ml-auto flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Jadwal">
-                                                        <i class="ph-bold ph-trash text-lg"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="px-8 py-20 text-center">
-                                                <div class="w-16 h-16 bg-elevate-peach-light/50 rounded-full flex items-center justify-center mx-auto mb-4 text-elevate-peach-dark shadow-inner border border-elevate-peach/30">
-                                                    <i class="ph-duotone ph-calendar-slash text-4xl"></i>
-                                                </div>
-                                                <p class="text-sm font-bold text-elevate-dark/60">Tidak ada jadwal khusus.</p>
-                                                <p class="text-xs text-elevate-dark/40 mt-1">Tambahkan hari libur atau kegiatan di formulir kiri.</p>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
             </div>
+
+            <!-- BAGIAN BAWAH: TABEL DAFTAR JADWAL KHUSUS -->
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col relative">
+                {{-- Aksen Header --}}
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
+
+                <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h3 class="text-lg font-black text-elevate-dark flex items-center gap-2">
+                        <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Riwayat Agenda Khusus
+                    </h3>
+                    <span class="bg-white text-elevate-primary border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl shadow-sm self-start sm:self-auto">
+                        {{ $specialSchedules->count() }} Data Tersimpan
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-sm text-elevate-dark">
+                        <thead class="bg-elevate-soft/50 text-xs font-bold text-elevate-primary uppercase tracking-wider border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 md:px-8 py-5">Tanggal</th>
+                                <th class="px-6 py-5 w-1/3">Keterangan</th>
+                                <th class="px-6 py-5 text-center">Status</th>
+                                <th class="px-6 md:px-8 py-5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @forelse ($specialSchedules as $schedule)
+                                <tr class="hover:bg-elevate-soft/30 transition-colors group">
+                                    <td class="px-6 md:px-8 py-5 whitespace-nowrap">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-2xl bg-white text-elevate-primary flex items-center justify-center text-xl shadow-sm border border-slate-200">
+                                                <i class="ph-duotone ph-calendar-blank"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-black text-elevate-dark text-base">{{ \Carbon\Carbon::parse($schedule->date)->translatedFormat('d M Y') }}</p>
+                                                <p class="text-xs text-elevate-dark/50 font-bold uppercase tracking-wide">{{ \Carbon\Carbon::parse($schedule->date)->translatedFormat('l') }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-sm font-bold text-elevate-dark leading-snug">{{ $schedule->description }}</p>
+                                        @if(!$schedule->is_holiday)
+                                            <div class="inline-flex flex-wrap items-center gap-1.5 mt-2 bg-elevate-soft px-2.5 py-1 rounded-lg border border-elevate-accent/20">
+                                                <i class="ph-bold ph-clock text-elevate-primary text-xs"></i>
+                                                <span class="text-[10px] font-mono font-bold text-elevate-primary">
+                                                    {{ \Carbon\Carbon::parse($schedule->start_in)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_out)->format('H:i') }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        @if($schedule->is_holiday)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-rose-50 text-rose-600 border border-rose-100 shadow-sm">
+                                                <i class="ph-bold ph-coffee"></i> Libur
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black uppercase bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm">
+                                                <i class="ph-bold ph-info"></i> Khusus
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 md:px-8 py-5 text-right">
+                                        <form action="{{ route('schedules.special.destroy', $schedule->id) }}" method="POST" id="delete-form-{{ $schedule->id }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" onclick="confirmDelete('{{ $schedule->id }}')" class="w-9 h-9 ml-auto flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Jadwal">
+                                                <i class="ph-bold ph-trash text-lg"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-8 py-20 text-center">
+                                        <div class="w-16 h-16 bg-elevate-peach-light/50 rounded-full flex items-center justify-center mx-auto mb-4 text-elevate-peach-dark shadow-inner border border-elevate-peach/30">
+                                            <i class="ph-duotone ph-calendar-slash text-4xl"></i>
+                                        </div>
+                                        <p class="text-sm font-bold text-elevate-dark/60">Tidak ada jadwal khusus.</p>
+                                        <p class="text-xs text-elevate-dark/40 mt-1">Tambahkan hari libur atau kegiatan khusus pada form di atas.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 

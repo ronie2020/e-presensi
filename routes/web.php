@@ -134,6 +134,7 @@ Route::prefix('ppdb')->name('ppdb.')->group(function () {
 
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
 Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->name('kiosk.process');
+Route::post('/kiosk/sync-batch', [KioskController::class, 'syncBatch'])->name('kiosk.sync-batch');
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');

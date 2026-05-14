@@ -571,6 +571,105 @@
             `;
         }
     });
+
+    <!-- ============================================================== -->
+    <!-- // SCRIPT TAMBAHAN: SISTEM OFFLINE QUEUE (ANTI WIFI MATI)      -->   
+    <!-- ============================================================== -->
+
+    document.addEventListener("DOMContentLoaded", function() {
+    // 1. Inisialisasi Pengecekan Antrean (Interval Sync Setiap 5 Detik)
+    setInterval(attemptSyncOfflineQueue, 5000);
+
+    // 2. Fungsi Modifikasi Pengiriman Data (Bisa Anda sesuaikan dengan fungsi fetch bawaan Anda)
+    // Gunakan fungsi ini untuk menggantikan `fetch('/api/kiosk/scan')` milik Anda yang lama.
+    window.sendScanToServer = async function(qrData, scanType = 'Harian', extraId = null) {
+        
+        // Payload mencatat waktu akurat sekian detik yang lalu (Penting saat offline)
+        const scanPayload = {
+            student_id: qrData,
+            type: scanType,
+            extra_id: extraId,
+            time: new Date().toISOString(), 
+            _token: csrfToken
+        };
+
+        try {
+            // Coba tembak ke server
+            let response = await fetch('/kiosk/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(scanPayload)
+            });
+
+            if (!response.ok) {
+                // Jika error 500 (Server Mati/Putus Database), kita lempar ke error network
+                if(response.status >= 500) throw new Error("Server Error");
+                
+                // Jika error 400 (Ditolak Sistem Kiosk, Misal: Telat/Kepagian), lempar sebagai Validasi
+                let data = await response.json();
+                showErrorUI(data.message); // Panggil fungsi UI Error Anda
+                return;
+            }
+
+            // SUKSES ONLINE
+            let data = await response.json();
+            showSuccessUI(data); // Panggil fungsi UI Sukses Anda
+
+        } catch (error) {
+            // [MODE OFFLINE AKTIF] JARINGAN MATI / SERVER DOWN
+            console.warn("Jaringan Terputus! Beralih ke Mode Offline...");
+            saveToOfflineQueue(scanPayload);
+            
+            // Tetap berikan feedback sukses di layar agar antrean siswa tidak menumpuk
+            showSuccessUI({
+                message: "TERSAVE OFFLINE: Menunggu Sinyal...",
+                student_name: "Antrean " + qrData,
+                note: "Sedang Sinkronisasi...",
+            });
+        }
+    }
+
+    // 3. Simpan ke Local Storage Browser
+    function saveToOfflineQueue(payload) {
+        let queue = JSON.parse(localStorage.getItem('kiosk_offline_queue')) || [];
+        queue.push(payload);
+        localStorage.setItem('kiosk_offline_queue', JSON.stringify(queue));
+    }
+
+    // 4. Background Sync (Menembak Endpoint Batch)
+    async function attemptSyncOfflineQueue() {
+        if (!navigator.onLine) return; // Jika WiFi laptop masih mati, skip.
+
+        let queue = JSON.parse(localStorage.getItem('kiosk_offline_queue')) || [];
+        if (queue.length === 0) return; // Antrean kosong
+
+        try {
+            let response = await fetch('/kiosk/sync-batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ scans: queue })
+            });
+
+            if (response.ok) {
+                console.log(`Berhasil sinkronisasi ${queue.length} antrean offline!`);
+                localStorage.removeItem('kiosk_offline_queue'); // Bersihkan antrean!
+                
+                // Opsional: Bunyikan suara khusus saat sinkronisasi selesai
+                // new Audio('/sounds/sync-success.mp3').play();
+            }
+        } catch (error) {
+            console.log("Menunggu jaringan stabil untuk sinkronisasi antrean...");
+        }
+    }
+});
+
 </script>
 
 <style>
