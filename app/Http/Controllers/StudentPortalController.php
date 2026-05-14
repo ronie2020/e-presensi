@@ -35,6 +35,10 @@ use App\Models\AcademicCalendar;
 use App\Models\StudentPointHistory;
 use Illuminate\Support\Facades\Storage;
 
+// --- IMPORT SERVICES ---
+use App\Services\AttendanceAnalyticService;
+use App\Services\DisciplineService;
+
 class StudentPortalController extends Controller
 {
     public function index()
@@ -61,19 +65,20 @@ class StudentPortalController extends Controller
 
         Auth::guard('student')->login($student);
 
-        // ========================================================
-        // LOGIKA BARU: REDIRECT KE ALUMNI JIKA STATUS GRADUATED
-        // ========================================================
+        // Redirect ke Alumni jika status graduated
         if ($student->status === 'graduated') {
             return redirect()->route('alumni.dashboard')
                              ->with('success', 'Selamat datang di Dashboard Alumni.');
         }
-        // JIKA BUKAN ALUMNI, MASUK KE PORTAL SISWA AKTIF
+        
         return redirect()->route('portal.show', $student->id)
                          ->with('success', 'Berhasil masuk ke Portal Informasi Siswa.');
     }
 
-    public function show($id)
+    // =======================================================================
+    // FUNGSI SHOW YANG SUDAH DIREFACTOR MENGGUNAKAN SERVICE PATTERN
+    // =======================================================================
+    public function show($id, AttendanceAnalyticService $attendanceService, DisciplineService $disciplineService)
     {
         // 1. VALIDASI AKSES
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
@@ -81,21 +86,15 @@ class StudentPortalController extends Controller
         }
 
         Carbon::setLocale('id');
-        
         $student = Student::with([
             'schoolClass.schedules.subject', 
             'schoolClass.schedules.teacher', 
-            'alumniProfile',
-            'pointHistories' // riwayat poin siswa untuk ditampilkan di bagian histori poin
+            'alumniProfile', 
+            'pointHistories'
         ])->findOrFail($id);
 
-         if ($student->status === 'graduated') {
-            return redirect()->route('alumni.dashboard');
-        }
-
-        // ========================================================
-        // 🚀 SAFETY NET: TRIGGER SISTEM E-COUNSELING OTOMATIS        
-        // ========================================================
+        if ($student->status === 'graduated') return redirect()->route('alumni.dashboard');
+        
         if (method_exists($student, 'checkBkThresholds')) {
             $student->checkBkThresholds();
         }
@@ -104,24 +103,33 @@ class StudentPortalController extends Controller
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
         // ==========================================
-        //  1. LOGIKA DASHBOARD OPERASIONAL (PRIORITY)
+        //  EKSEKUSI REFACTOR SERVICES
+        // ==========================================
+        // 1. Eksekusi Service Kehadiran & Keagamaan
+        $academicYearStart = $attendanceService->getAcademicYearStart();
+        $attStats = $attendanceService->getCurrentYearStats($id, $academicYearStart);
+        $attArchive = $attendanceService->getPastYearsArchive($id, $academicYearStart);
+
+        // 2. Eksekusi Service Disiplin & Prestasi
+        $discProfile = $disciplineService->getDisciplineProfile($id, $academicYearStart, $attStats['raw_records']);
+
+
+        // ==========================================
+        //  LOGIKA DASHBOARD OPERASIONAL (PRIORITY)
         // ==========================================
         
-       // A. PRIORITY EXAMS (CBT)
+        // A. PRIORITY EXAMS (CBT)
         $priorityExams = collect([]);
-        
-         if (class_exists(\App\Models\CbtExam::class)) {  
+        if (class_exists(\App\Models\CbtExam::class)) {  
             $studentLevel = $student->schoolClass?->level ?? filter_var($student->schoolClass?->name, FILTER_SANITIZE_NUMBER_INT) ?? null;
-           
             $now = Carbon::now('Asia/Jakarta');            
+            
             $activeExams = \App\Models\CbtExam::where('is_active', true)
                 ->where(function($query) use ($now) {
-                    $query->whereNull('start_time')
-                          ->orWhere('start_time', '<=', $now);
+                    $query->whereNull('start_time')->orWhere('start_time', '<=', $now);
                 })
                 ->where(function($query) use ($now) {
-                    $query->whereNull('end_time')
-                          ->orWhere('end_time', '>=', $now);
+                    $query->whereNull('end_time')->orWhere('end_time', '>=', $now);
                 })
                 ->get();
             
@@ -141,7 +149,7 @@ class StudentPortalController extends Controller
         // B. JADWAL HARI INI
         $todaysSchedule = collect([]);
         if (class_exists(\App\Models\Schedule::class) && $classId) {
-            $dayName = Carbon::now()->isoFormat('dddd');
+            $dayName = Carbon::now('Asia/Jakarta')->isoFormat('dddd');
             $todaysSchedule = \App\Models\Schedule::with(['subject', 'teacher'])
                 ->where('school_class_id', $classId)
                 ->where('day', $dayName)
@@ -155,7 +163,7 @@ class StudentPortalController extends Controller
             $pendingTasks = LmsAssignment::with('subject')
                 ->where('class_id', $classId)
                 ->where(function($q) {
-                    $q->where('deadline', '>=', Carbon::now())
+                    $q->where('deadline', '>=', Carbon::now('Asia/Jakarta'))
                       ->orWhere('allow_late_submission', true);
                 })                
                 ->whereDoesntHave('submissions', function($q) use ($id) {
@@ -167,14 +175,14 @@ class StudentPortalController extends Controller
         }
 
         // ==========================================
-        //  2. DATA PENDUKUNG LAINNYA
+        //  DATA PENDUKUNG LAINNYA
         // ==========================================
 
-         // --- DATA RAMADHAN ---
+        // --- DATA RAMADHAN ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         $ramadanStartStr = \App\Http\Controllers\RamadanLogController::RAMADAN_START_DATE ?? config('school.ramadan_start', '2026-02-19');
         $ramadanDay = Carbon::parse($ramadanStartStr)->diffInDays(Carbon::parse($today)) + 1;
-        $isRamadanEnded = $ramadanDay > 30; // Boolean selesai
+        $isRamadanEnded = $ramadanDay > 30; 
         
         $todayRamadanLog = RamadanLog::where('student_id', $student->id)->whereDate('date', $today)->first();
         $lastVerifiedLog = RamadanLog::where('student_id', $student->id)->whereNotNull('teacher_verified_at')->orderBy('date', 'desc')->first();
@@ -186,217 +194,12 @@ class StudentPortalController extends Controller
             try { $liaison_messages = LiaisonBook::with('teacher')->where('student_id', $student->id)->latest()->take(10)->get(); } catch (\Exception $e) {}
         }
 
-        // --- DEFINE TAHUN AJARAN AKTIF (1 JULI) ---
-        // Ini adalah kunci agar semua tab otomatis reset (Tutup Buku) ke 0 di awal tahun ajaran.
-        $academicYearStart = Carbon::now('Asia/Jakarta')->month >= 7 
-            ? Carbon::create(Carbon::now('Asia/Jakarta')->year, 7, 1)->toDateString() 
-            : Carbon::create(Carbon::now('Asia/Jakarta')->year - 1, 7, 1)->toDateString();
-
-        // --- DATA KEHADIRAN & ABSENSI --- 
-        $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
-        $attendance_history = collect([]);
-        $rawAttendanceRecords = collect([]); 
-        
-        if (class_exists(AttendanceSiswa::class)) {
-            // Hanya ambil absensi di tahun ajaran ini
-            $rawAttendanceRecords = AttendanceSiswa::where('student_id', $id)
-                                    ->whereDate('attendance_date', '>=', $academicYearStart)
-                                    ->orderBy('attendance_date', 'desc')->get();
-            $attendance_history = $rawAttendanceRecords->take(10);                
-          
-            // Hitung statistik (Tab Kehadiran) HANYA untuk tahun ajaran aktif
-            $hadir = $rawAttendanceRecords->whereInStrict('status', ['Hadir', 'Masuk', 'Terlambat', 'hadir', 'masuk', 'terlambat'])->count();
-            $terlambat = $rawAttendanceRecords->whereInStrict('status', ['Terlambat', 'terlambat'])->count();
-            $sakit = $rawAttendanceRecords->whereInStrict('status', ['Sakit', 'sakit'])->count();
-            $izin = $rawAttendanceRecords->whereInStrict('status', ['Izin', 'izin'])->count();
-            $alpa = $rawAttendanceRecords->whereInStrict('status', ['Alfa', 'Alpa', 'Alpha', 'alfa', 'alpa', 'alpha', 'Tanpa Keterangan'])->count();
-        }
-        
-        $attendanceChart = ['hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa];
-        $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
-        $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
-
-        // --- LOGIKA DISIPLIN & PRESTASI ---
-        $violations = collect([]);
-        $achievements = collect([]); 
-        
-        $manualViolations = collect([]);
-        if (class_exists(DisciplineRecord::class)) {
-            try {
-                $manualViolations = DisciplineRecord::with(['disciplineType', 'recorder']) 
-                    ->where('student_id', $id)
-                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
-                    ->get() 
-                    ->filter(function($record) {
-                        $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
-                        return in_array($type, ['violation', 'pelanggaran']);
-                    })
-                    ->map(function($item) {
-                        return (object) [
-                            'date' => $item->date,
-                            'notes' => $item->notes ?? optional($item->disciplineType)->name ?? 'Pelanggaran',
-                            'point' => optional($item->disciplineType)->point_value ?? $item->point ?? 0,
-                            'type' => 'manual',
-                            'recorder' => $item->recorder ?? (object)['name' => 'Admin/Guru'],
-                            'disciplineType' => $item->disciplineType ?? (object)['name' => 'Pelanggaran', 'point_value' => 0]
-                        ];
-                    });
-            } catch (QueryException $e) { }
-        }
-
-        $manualAlpaDates = $manualViolations->filter(function($record) {
-            $text = strtolower(($record->notes ?? '') . ' ' . optional($record->disciplineType)->name);
-            return str_contains($text, 'alfa') || str_contains($text, 'alpa') || str_contains($text, 'bolos') || str_contains($text, 'tidak masuk');
-        })->map(function($record) { return Carbon::parse($record->date)->toDateString(); })->toArray();
-
-        // Alpa dan Late sudah otomatis terfilter karena diambil dari $rawAttendanceRecords
-        $alpaViolations = $rawAttendanceRecords
-            ->filter(function ($att) use ($manualAlpaDates) {
-                $isAlfa = in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
-                $dateString = Carbon::parse($att->attendance_date)->toDateString();
-                return $isAlfa && !in_array($dateString, $manualAlpaDates);
-            })
-            ->map(function ($att) {
-                return (object) [
-                    'date' => $att->attendance_date,
-                    'notes' => 'Ketidakhadiran Tanpa Keterangan (Alpa)',
-                    'point' => 10,
-                    'type' => 'auto',
-                    'recorder' => (object) ['name' => 'Sistem Otomatis'],
-                    'disciplineType' => (object) ['name' => 'Absensi (Alpha)', 'point_value' => 10]
-                ];
-            });
-
-        $lateViolations = $rawAttendanceRecords
-            ->filter(function ($att) { return in_array(strtolower($att->status), ['terlambat']); })
-            ->map(function ($att) {
-                return (object) [
-                    'date' => $att->attendance_date,
-                    'notes' => $att->notes ?? 'Terlambat Datang Sekolah',
-                    'point' => 5,
-                    'type' => 'auto_late',
-                    'recorder' => (object) ['name' => 'Sistem Otomatis'],
-                    'disciplineType' => (object) ['name' => 'Keterlambatan', 'point_value' => 5]
-                ];
-            });
-
-        $violations = $manualViolations->concat($alpaViolations)->concat($lateViolations)->sortByDesc('date');
-
-        $manualMerits = collect([]);
-        if (class_exists(DisciplineRecord::class)) {
-            try {
-                $manualMerits = DisciplineRecord::with(['disciplineType', 'recorder'])
-                    ->where('student_id', $id)
-                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
-                    ->get()
-                    ->filter(function($record) {
-                        $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
-                        return in_array($type, ['merit', 'prestasi', 'kebaikan']);
-                    })
-                    ->map(function($item) {
-                        return (object) [
-                            'date' => $item->date,
-                            'notes' => $item->notes ?? optional($item->disciplineType)->name ?? 'Prestasi',
-                            'point' => optional($item->disciplineType)->point_value ?? $item->point ?? 0,
-                            'type' => 'manual_merit',
-                            'level' => null,
-                            'photo' => null,
-                            'recorder' => $item->recorder ?? (object)['name' => 'Admin/Guru'],
-                            'disciplineType' => $item->disciplineType ?? (object)['name' => 'Prestasi', 'point_value' => 0]
-                        ];
-                    });
-            } catch (QueryException $e) { }
-        }
-
-        $prayerAchievements = $rawAttendanceRecords
-            ->filter(function ($att) {
-                $isReligious = isset($att->type) && strtolower($att->type) === 'keagamaan';
-                $activity = strtolower($att->activity ?? '');
-                $isPrayer = str_contains($activity, 'dhuha') || str_contains($activity, 'dhuhur') || str_contains($activity, 'dzuhur');
-                return $isReligious && $isPrayer;
-            })
-            ->map(function ($att) {
-                $actName = ucfirst($att->activity ?? 'Ibadah');
-                return (object) [
-                    'date' => $att->attendance_date,
-                    'notes' => "Melaksanakan Shalat " . $actName . " Berjamaah",
-                    'point' => 5,
-                    'type' => 'auto_prayer',
-                    'level' => null,
-                    'photo' => null,
-                    'recorder' => (object) ['name' => 'Sistem Otomatis'],
-                    'disciplineType' => (object) ['name' => 'Kegiatan Keagamaan', 'point_value' => 5]
-                ];
-            });
-
-        $realAchievements = collect([]);
-        if (class_exists(Achievement::class)) {
-            try {
-                $realAchievements = Achievement::where('student_id', $id)
-                    ->whereDate('created_at', '>=', $academicYearStart) // FILTER TAHUN AJARAN
-                    ->get()
-                    ->map(function($item) {
-                        return (object) [
-                            'date' => $item->date,
-                            'notes' => $item->description ?? $item->title,
-                            'point' => 0, 
-                            'type' => 'achievement_record',
-                            'title' => $item->title,
-                            'level' => $item->level,
-                            'photo' => $item->photo_path,
-                            'certificate_path' => $item->certificate_path,
-                            'status' => $item->status,
-                            'recorder' => (object) ['name' => 'Laporan Prestasi'],
-                            'disciplineType' => (object) ['name' => 'Kejuaraan / Prestasi', 'point_value' => 0]
-                        ];
-                    });
-            } catch (\Exception $e) {}
-        }
-
-        $achievements = $realAchievements->concat($manualMerits)->concat($prayerAchievements)->sortByDesc('date');
-
-        $total_violation_points = $violations->sum(fn($v) => $v->point ?? $v->disciplineType->point_value ?? 0);
-        $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
-        $finalScore = 100 - $total_violation_points + $total_merit_points;
-
-         // ==========================================
-        //  4. FITUR BARU: ALERT PRIORITAS & AMNESTI
-        // ==========================================
-        $priorityAlerts = collect([]);
-        if (class_exists(BkSession::class)) {
-            $upcomingBk = BkSession::where('student_id', $id)->where('status', 'approved')
-                ->whereBetween('scheduled_at', [Carbon::now(), Carbon::now()->addHours(24)])->first();
-            if ($upcomingBk) {
-                $priorityAlerts->push([
-                    'type' => 'bk_schedule', 'title' => 'Jadwal BK Mendatang', 'color' => 'blue', 'icon' => 'ph-fill ph-clock-countdown',
-                    'message' => 'Kamu memiliki jadwal konseling pada ' . Carbon::parse($upcomingBk->scheduled_at)->translatedFormat('H:i') . ' WIB.'
-                ]);
-            }
-        }
-        if ($finalScore < 60) {
-            $priorityAlerts->push([
-                'type' => 'character_warning', 'title' => 'Skor Perilaku Kritis', 'color' => 'rose', 'icon' => 'ph-fill ph-warning-octagon',
-                'message' => 'Skor karakter kamu berada di zona merah (' . $finalScore . '). Segera lakukan tindakan pemulihan poin.'
-            ]);
-        }
-
-        $amnestyTasks = [
-            ['title' => 'Membantu Inventaris Perpustakaan', 'points' => 10, 'icon' => 'ph-book-open'],
-            ['title' => 'Piket Kebersihan Masjid Sekolah', 'points' => 15, 'icon' => 'ph-mosque'],
-            ['title' => 'Membantu Administrasi Tata Usaha', 'points' => 10, 'icon' => 'ph-files'],
-            ['title' => 'Partisipasi Penanaman Pohon Sekolah', 'points' => 20, 'icon' => 'ph-leaf'],
-        ];
-
-
         // --- JURNAL 7 KEBIASAAN ---
         $todayEntry = null; $habits = collect([]); 
         $totalPoints = 0;
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)->whereDate('report_date', Carbon::today('Asia/Jakarta'))->first();
-            // FILTER 7 KEBIASAAN BERDASARKAN TAHUN AJARAN AKTIF
-            $habits = StudentHabit::where('student_id', $id)
-                        ->whereDate('report_date', '>=', $academicYearStart)
-                        ->orderBy('report_date', 'desc')->get();
+            $habits = StudentHabit::where('student_id', $id)->whereDate('report_date', '>=', $academicYearStart)->orderBy('report_date', 'desc')->get();
             $totalPoints = $habits->count() * 100; 
         }
 
@@ -467,56 +270,14 @@ class StudentPortalController extends Controller
             $unreadSystemBk = $bkSessions->where('is_system_generated', true)->whereIn('status', ['pending', 'ongoing'])->count();
         }
 
-        // --- TABS CONFIGURATION ---
-        $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
-        if ($isAlumni) {
-            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
-            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
-        } else {
-            $tabs = array_merge($tabs, [
-                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan', 'badge' => !$todayEntry ? 1 : 0],
-                'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
-                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
-                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
-                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK', 'badge' => $unreadSystemBk > 0 ? $unreadSystemBk : 0],
-                'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
-                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'], 
-                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
-                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online', 'badge' => $pendingTasks->count()],
-                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
-                'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
-                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
-                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
-                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
-                'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
-                'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
-            ]);
-        }
-
-        // Statistik Sholat (Difilter juga berdasarkan tahun ajaran)
-        $sholat_dhuha = 0; $sholat_dhuhur = 0;
-        if (class_exists(AttendanceSiswa::class)) {
-            $sholat_dhuha = AttendanceSiswa::where('student_id', $id)
-                            ->where('type', 'Keagamaan')->where('activity', 'Dhuha')
-                            ->whereDate('attendance_date', '>=', $academicYearStart)->count();
-            $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)
-                            ->where('type', 'Keagamaan')->where('activity', 'Dhuhur')
-                            ->whereDate('attendance_date', '>=', $academicYearStart)->count();
-        }
-
-         // --- DATA LITERASI MANDIRI ---
+        // --- DATA LITERASI MANDIRI ---
         $literacy_journals = collect([]);
         $literacy_stats = ['total_books' => 0, 'total_pages' => 0, 'points' => 0, 'level' => 'Warga Biasa', 'progress' => 0, 'next_target' => 100];
 
         if (class_exists(LiteracyJournal::class)) {
-            // FILTER JURNAL LITERASI BERDASARKAN TAHUN AJARAN
-            $literacy_journals = LiteracyJournal::where('student_id', $id)
-                                    ->whereDate('created_at', '>=', $academicYearStart)
-                                    ->latest()->take(20)->get();
-            $total_entries = LiteracyJournal::where('student_id', $id)
-                                    ->whereDate('created_at', '>=', $academicYearStart)->count();
-            $total_pages = LiteracyJournal::where('student_id', $id)
-                                    ->whereDate('created_at', '>=', $academicYearStart)->sum('pages_read');
+            $literacy_journals = LiteracyJournal::where('student_id', $id)->whereDate('created_at', '>=', $academicYearStart)->latest()->take(20)->get();
+            $total_entries = LiteracyJournal::where('student_id', $id)->whereDate('created_at', '>=', $academicYearStart)->count();
+            $total_pages = LiteracyJournal::where('student_id', $id)->whereDate('created_at', '>=', $academicYearStart)->sum('pages_read');
             
             $points = ($total_entries * 50) + $total_pages;
             
@@ -533,7 +294,7 @@ class StudentPortalController extends Controller
         }
 
         // ==========================================
-        //  3. LOGIKA KALENDER AKADEMIK (NEW INTEGRATION)
+        //  LOGIKA KALENDER AKADEMIK
         // ==========================================
         $calendarEvents = collect([]);
         $upcomingAgendas = collect([]); 
@@ -570,10 +331,10 @@ class StudentPortalController extends Controller
             }
 
             $upcomingAgendas = \App\Models\AcademicCalendar::where(function($q) {
-                    $q->whereDate('end_date', '>=', Carbon::today())
+                    $q->whereDate('end_date', '>=', Carbon::today('Asia/Jakarta'))
                       ->orWhere(function($q2) {
                           $q2->whereNull('end_date')
-                             ->whereDate('start_date', '>=', Carbon::today());
+                             ->whereDate('start_date', '>=', Carbon::today('Asia/Jakarta'));
                       });
                 })
                 ->orderBy('start_date', 'asc')
@@ -581,38 +342,90 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
+        // --- TABS CONFIGURATION ---
+        $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
+        if ($isAlumni) {
+            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
+            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
+        } else {
+            $tabs = array_merge($tabs, [
+                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan', 'badge' => !$todayEntry ? 1 : 0],
+                'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
+                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
+                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
+                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK', 'badge' => $unreadSystemBk > 0 ? $unreadSystemBk : 0],
+                'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
+                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'], 
+                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
+                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online', 'badge' => $pendingTasks->count()],
+                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+                'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
+                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
+                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
+                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
+                'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
+                'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
+            ]);
+        }
+
         // ==========================================
-        //  14. COMPACT DATA 
+        //  COMPACT DATA 
         // ==========================================
-        $data = compact(
-            'student', 'isAlumni', 'tabs', 'attendancePercentage',
-            'liaison_messages', 'complaints', 
-            'todayEntry', 'habits', 'totalPoints',
-            'hadir', 'terlambat', 'sakit', 'izin', 'alpa', 
-            'attendance_history', 'attendanceChart',
-            'lms_assignments_grouped', 'lms_grades', 
-            'lms_materials_grouped', 
-            'violations', 'total_violation_points', 
-            'achievements', 'total_merit_points',
-            'library_visits', 'library_history', 
-            'ebooks', 'ebookHistory', 
-            'academic_record', 'chartData', 'teaching_journals',
-            'sholat_dhuha', 'sholat_dhuhur',
-            'finalScore',
-            'bkSessions',
-            'today', 
-            'todayRamadanLog', 
-            'lastVerifiedLog',
-            'topRamadanStudents',
-            'isRamadanEnded',
-            'literacy_journals', 
-            'literacy_stats',
-            'priorityExams', 
-            'todaysSchedule',
-            'pendingTasks',
-            'calendarEvents',
-            'upcomingAgendas' 
-        );
+        $data = [
+            'student' => $student, 'isAlumni' => $isAlumni, 'tabs' => $tabs, 'today' => $today,
+            
+            // Variabel Hasil Ekstrak Service Kehadiran
+            'hadir' => $attStats['hadir'], 
+            'terlambat' => $attStats['terlambat'], 
+            'sakit' => $attStats['sakit'], 
+            'izin' => $attStats['izin'], 
+            'alpa' => $attStats['alpa'],
+            'attendance_history' => $attStats['attendance_history'], 
+            'attendanceChart' => $attStats['chart_data'], 
+            'attendancePercentage' => $attStats['percentage'],
+            'sholat_dhuha' => $attStats['sholat_dhuha'], 
+            'sholat_dhuhur' => $attStats['sholat_dhuhur'],
+            'attendanceHistoryYears' => $attArchive['attendance'], 
+            'religionHistoryYears' => $attArchive['religion'],
+
+            // Variabel Hasil Ekstrak Service Disiplin
+            'violations' => $discProfile['violations'], 
+            'achievements' => $discProfile['achievements'],
+            'total_violation_points' => $discProfile['total_violation_points'], 
+            'total_merit_points' => $discProfile['total_merit_points'],
+            'finalScore' => $discProfile['finalScore'], 
+            'priorityAlerts' => $discProfile['alerts'], 
+            'amnestyTasks' => $discProfile['amnestyTasks'],
+
+            // Variabel Original Lainnya yang Belum di Service-kan
+            'liaison_messages' => $liaison_messages, 
+            'complaints' => $complaints, 
+            'todayEntry' => $todayEntry, 
+            'habits' => $habits, 
+            'totalPoints' => $totalPoints,
+            'lms_assignments_grouped' => $lms_assignments_grouped, 
+            'lms_grades' => $lms_grades, 
+            'lms_materials_grouped' => $lms_materials_grouped, 
+            'library_visits' => $library_visits, 
+            'library_history' => $library_history, 
+            'ebooks' => $ebooks, 
+            'ebookHistory' => $ebookHistory, 
+            'academic_record' => $academic_record, 
+            'chartData' => $chartData, 
+            'teaching_journals' => $teaching_journals,
+            'bkSessions' => $bkSessions,
+            'todayRamadanLog' => $todayRamadanLog, 
+            'lastVerifiedLog' => $lastVerifiedLog,
+            'topRamadanStudents' => $topRamadanStudents,
+            'isRamadanEnded' => $isRamadanEnded,
+            'literacy_journals' => $literacy_journals, 
+            'literacy_stats' => $literacy_stats,
+            'priorityExams' => $priorityExams, 
+            'todaysSchedule' => $todaysSchedule,
+            'pendingTasks' => $pendingTasks,
+            'calendarEvents' => $calendarEvents,
+            'upcomingAgendas' => $upcomingAgendas
+        ];
 
         if (view()->exists('students.portal.show')) {
             return view('students.portal.show', $data);
@@ -621,8 +434,8 @@ class StudentPortalController extends Controller
         return view('portal.show', $data);
     }
 
-     /**
-     * FITUR BARU: Menyimpan Rating & Feedback Sesi BK dari Siswa.
+    /**
+     * Menyimpan Rating & Feedback Sesi BK dari Siswa.
      */
     public function storeBkFeedback(Request $request, $id)
     {
@@ -650,7 +463,9 @@ class StudentPortalController extends Controller
         return back()->with('success', 'Terima kasih! Ulasanmu membantu kami meningkatkan kualitas layanan bimbingan sekolah.');
     }
     
-    // METHOD UNTUK MENYIMPAN JURNAL LITERASI YANG SUDAH DIPERBARUI
+    /**
+     * METHOD UNTUK MENYIMPAN JURNAL LITERASI
+     */
     public function storeLiteracy(Request $request)
     {
         $request->validate([
@@ -658,9 +473,9 @@ class StudentPortalController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'nullable|string|max:150',
             'pages' => 'required|numeric|min:1',
-            'rating' => 'required|integer|min:1|max:5', // Tambahan Rating
-            'favorite_character' => 'nullable|string|max:255', // Tambahan Tokoh Favorit
-            'new_vocabulary' => 'nullable|string|max:255', // Tambahan Kosakata
+            'rating' => 'required|integer|min:1|max:5',
+            'favorite_character' => 'nullable|string|max:255',
+            'new_vocabulary' => 'nullable|string|max:255',
             'summary' => 'required|string|min:10',
             'proof' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
@@ -679,7 +494,7 @@ class StudentPortalController extends Controller
                 'favorite_character' => $request->favorite_character,
                 'new_vocabulary' => $request->new_vocabulary,
                 'summary' => $request->summary,
-                'status' => 'pending', // Menambahkan status default
+                'status' => 'pending', 
                 'verified_at' => null 
             ];
 
@@ -696,7 +511,9 @@ class StudentPortalController extends Controller
         }
     }
 
-    // --- TAMBAHAN BARU: FUNGSI LAPOR PRESTASI MANDIRI ---
+    /**
+     * FUNGSI LAPOR PRESTASI MANDIRI
+     */
     public function storeStudentAchievement(Request $request)
     {
         $request->validate([
@@ -706,10 +523,9 @@ class StudentPortalController extends Controller
             'date' => 'required|date',
             'description' => 'nullable|string',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Maks 5MB
-            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120', // Sertifikat PDF/Gambar Maks 5MB
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120', // Maks 5MB
         ]);
 
-        // Pastikan hanya siswa yang login yang bisa melapor atas namanya sendiri
         if (Auth::guard('student')->id() != $request->student_id) {
             return back()->with('error', 'Akses tidak diizinkan.');
         }
@@ -722,7 +538,7 @@ class StudentPortalController extends Controller
                 'level' => $request->level,
                 'date' => $request->date,
                 'description' => $request->description,
-                'status' => 'pending', // TAMBAHAN: Laporan siswa selalu berstatus pending dulu
+                'status' => 'pending',
             ];
 
             // Upload Foto Dokumentasi

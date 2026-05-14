@@ -14,18 +14,20 @@
             </div>
         </div>
         
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-            <div class="overflow-x-auto w-full custom-scrollbar">
-                <table class="w-full text-left border-collapse min-w-[600px]">
-                    <thead class="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-4 md:p-6">
+            <!-- Tambahan max-h dan overflow-auto untuk scroll -->
+            <div class="overflow-auto max-h-[500px] w-full custom-scrollbar rounded-xl border border-slate-100">
+                <table class="w-full text-left border-collapse min-w-[600px] relative">
+                    <!-- Tambahan sticky top-0 agar header tetap terlihat saat scroll -->
+                    <thead class="sticky top-0 z-10 bg-slate-50 text-[10px] font-black text-slate-500 uppercase tracking-widest shadow-sm">
                         <tr>
-                            <th class="px-6 py-5 rounded-tl-[2.5rem]">Mata Pelajaran</th>
-                            <th class="px-6 py-5 text-center">Nilai</th>
-                            <th class="px-6 py-5 text-center">Predikat</th>
-                            <th class="px-6 py-5 hidden md:table-cell rounded-tr-[2.5rem]">Deskripsi Capaian</th>
+                            <th class="px-6 py-5 border-b border-slate-200">Mata Pelajaran</th>
+                            <th class="px-6 py-5 text-center border-b border-slate-200">Nilai</th>
+                            <th class="px-6 py-5 text-center border-b border-slate-200">Predikat</th>
+                            <th class="px-6 py-5 hidden md:table-cell border-b border-slate-200">Deskripsi Capaian</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50 text-sm">
+                    <tbody class="divide-y divide-slate-100 text-sm bg-white">
                         <?php $__currentLoopData = $academic_record->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr class="hover:bg-elevate-soft/30 transition-colors group">
                                 <td class="px-6 py-5 font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">
@@ -76,27 +78,30 @@
         <i class="ph-fill ph-clock-counter-clockwise text-elevate-primary"></i> Riwayat Nilai Raport (Buku Induk)
     </h3>
     
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto w-full custom-scrollbar p-6">
-            <table class="w-full text-center text-xs md:text-sm border-collapse min-w-[800px] border border-slate-200 rounded-xl overflow-hidden">
-                <thead class="bg-slate-50 font-bold text-elevate-dark">
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-4 md:p-6">
+        <!-- Tambahan max-h-[600px] dan overflow-auto -->
+        <div class="overflow-auto max-h-[600px] w-full custom-scrollbar rounded-xl border border-slate-200">
+            <table class="w-full text-center text-xs md:text-sm border-collapse min-w-[800px] relative">
+                <!-- Tambahan sticky top-0 dan z-10 -->
+                <thead class="sticky top-0 z-10 font-bold text-elevate-dark bg-white shadow-sm">
                     <tr>
-                        <th rowspan="2" class="border border-slate-200 p-3 w-12">No</th>
-                        <th rowspan="2" class="border border-slate-200 p-3 text-left">Mata Pelajaran</th>
-                        <th colspan="2" class="border border-slate-200 p-3 bg-blue-50/50">Kelas VII</th>
-                        <th colspan="2" class="border border-slate-200 p-3 bg-emerald-50/50">Kelas VIII</th>
-                        <th colspan="2" class="border border-slate-200 p-3 bg-amber-50/50">Kelas IX</th>
+                        <th rowspan="2" class="border border-slate-200 p-3 w-12 bg-slate-50">No</th>
+                        <th rowspan="2" class="border border-slate-200 p-3 text-left bg-slate-50">Mata Pelajaran</th>
+                        <!-- Menggunakan warna solid agar baris di bawahnya tidak tembus saat scroll -->
+                        <th colspan="2" class="border border-slate-200 p-3 bg-blue-100">Kelas VII</th>
+                        <th colspan="2" class="border border-slate-200 p-3 bg-emerald-100">Kelas VIII</th>
+                        <th colspan="2" class="border border-slate-200 p-3 bg-amber-100">Kelas IX</th>
                     </tr>
-                    <tr class="text-[10px] md:text-xs uppercase tracking-wider text-slate-500">
-                        <th class="border border-slate-200 p-2 bg-blue-50/30">Smt 1</th>
-                        <th class="border border-slate-200 p-2 bg-blue-50/30">Smt 2</th>
-                        <th class="border border-slate-200 p-2 bg-emerald-50/30">Smt 1</th>
-                        <th class="border border-slate-200 p-2 bg-emerald-50/30">Smt 2</th>
-                        <th class="border border-slate-200 p-2 bg-amber-50/30">Smt 1</th>
-                        <th class="border border-slate-200 p-2 bg-amber-50/30">Smt 2</th>
+                    <tr class="text-[10px] md:text-xs uppercase tracking-wider text-slate-600">
+                        <th class="border border-slate-200 p-2 bg-blue-50">Smt 1</th>
+                        <th class="border border-slate-200 p-2 bg-blue-50">Smt 2</th>
+                        <th class="border border-slate-200 p-2 bg-emerald-50">Smt 1</th>
+                        <th class="border border-slate-200 p-2 bg-emerald-50">Smt 2</th>
+                        <th class="border border-slate-200 p-2 bg-amber-50">Smt 1</th>
+                        <th class="border border-slate-200 p-2 bg-amber-50">Smt 2</th>
                     </tr>
                 </thead>
-                <tbody class="text-slate-600">
+                <tbody class="text-slate-600 bg-white">
                     <?php
                         // Memastikan variabel $student ada (di portal biasanya dikirim dengan nama $student atau Auth::user()->student)
                         $targetStudent = isset($student) ? $student : auth()->user()->student;
