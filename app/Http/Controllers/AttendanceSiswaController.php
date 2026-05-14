@@ -332,7 +332,8 @@ class AttendanceSiswaController extends Controller
     private function logActivity($student, $type, $name, $desc, $points) {
         ActivityLog::create([
             'student_id' => $student->id, 
-            'activity_type' => $type, // <--- UBAH DI SINI
+            'type' => $type,             // <--- TAMBAHKAN BARIS INI
+            'activity_type' => $type, 
             'activity_name' => $name,
             'description' => $desc, 
             'point_earned' => $points

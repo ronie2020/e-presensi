@@ -28,9 +28,11 @@ class KioskController extends Controller
     public function processKioskScan(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|string', // Sudah diperbaiki dari scan_data
+            'student_id' => 'required|string', 
             'type'       => 'nullable|string', 
-            'extra_id'   => 'nullable'
+            'extra_id'   => 'nullable',
+            'lat'        => 'nullable', 
+            'long'       => 'nullable'  
         ]);
 
         $studentIdFromScan = $request->student_id;
@@ -42,6 +44,7 @@ class KioskController extends Controller
         // 1. Cari Siswa
         $student = Student::where('student_id', $studentIdFromScan)
                             ->orWhere('rfid_id', $studentIdFromScan)
+                            ->orWhere('nisn', $studentIdFromScan)
                             ->first();
         
         if (!$student) {
@@ -51,6 +54,14 @@ class KioskController extends Controller
                 'student_name' => 'N/A'
             ], 404);
         }
+
+        if ($student->status !== 'active') {
+            return response()->json([
+               'status' => 'error',
+               'message' => 'Status siswa tidak aktif!',
+               'student_name' => $student->name
+           ], 403);
+       }
 
         // 2. Ambil Jadwal
         $schedule = $this->getTodaysSchedule($now);
@@ -72,10 +83,8 @@ class KioskController extends Controller
             $exists = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $today)->where('type', 'Meal')->first();
             if ($exists) return response()->json(['status' => 'error', 'message' => 'Sudah Ambil Makan', 'student_name' => $student->name], 409);
             
-            // Simpan Kehadiran Makan (Ubah type dari Makan jadi Meal agar sinkron dengan Scanner Guru)
-            $attendanceRecord = AttendanceSiswa::create(['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Meal', 'activity' => 'Makan Siang', 'status' => 'Hadir', 'time_in' => $timeNow, 'notes' => 'Ambil Makan Siang']);
+            $attendanceRecord = AttendanceSiswa::create(['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Meal', 'activity' => 'Makan Siang', 'status' => 'Hadir', 'time_in' => $timeNow, 'notes' => 'Ambil Makan Siang (Kiosk)']);
             
-            // Tambah Poin & Jurnal Kebiasaan
             $this->logActivity($student, 'Meal', 'Makan Bergizi', "Mengambil jatah makan siang", 2);
             StudentHabit::updateOrCreate(
                 ['student_id' => $student->id, 'report_date' => $today],
@@ -92,7 +101,6 @@ class KioskController extends Controller
             
             $attendanceRecord = AttendanceSiswa::create(['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Keagamaan', 'activity' => $scanType, 'status' => 'Hadir', 'time_in' => $timeNow, 'notes' => "Sholat $scanType (Kiosk)"]);
             
-            // Tambah Poin, Jurnal Kebiasaan, dan Cek BK
             $this->logActivity($student, 'Religious', "Sholat $scanType", "Melaksanakan shalat $scanType berjamaah", 5);
             $colName = ($scanType == 'Dhuha') ? 'prayer_dhuha' : 'prayer_dzuhur';
             StudentHabit::updateOrCreate(
@@ -112,13 +120,11 @@ class KioskController extends Controller
             $extra = Extracurricular::find($extraId);
             if (!$extra) return response()->json(['status' => 'error', 'message' => 'Data Ekskul Tidak Valid'], 422);
 
-            // Simpan Kehadiran (Ubah type jadi Extracurricular agar sinkron)
             $attendanceRecord = AttendanceSiswa::updateOrCreate(
                 ['student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Extracurricular'],
                 ['status' => 'Hadir', 'time_in' => $timeNow, 'notes' => 'Kegiatan Ekstrakurikuler (Kiosk)', 'activity' => $extra->name]
             );
 
-            // Detail Kehadiran Ekskul spesifik
             $detailAtt = ExtracurricularAttendance::firstOrCreate(
                 ['extracurricular_id' => $extraId, 'student_id' => $student->id, 'date' => $today],
                 ['status' => 'Hadir', 'time_in' => $timeNow]
@@ -126,7 +132,6 @@ class KioskController extends Controller
 
             $msg = "SUKSES! Absen Ekskul Berhasil.";
             
-            // Logika Poin berdasarkan Status Keanggotaan
             if ($detailAtt->wasRecentlyCreated) {
                 $isMember = ExtracurricularMember::where('student_id', $student->id)->where('extracurricular_id', $extraId)->exists();
                 if ($isMember) {
@@ -145,109 +150,115 @@ class KioskController extends Controller
 
         // ==========================================
         // LOGIKA UTAMA (HARIAN: MASUK & PULANG)
+        // DILENGKAPI DENGAN PEMBLOKIR WAKTU STRICT
         // ==========================================
         
+        // Ambil batas waktu dari Database (Fallback jika kosong)
+        $scheduleStartIn  = $schedule->start_in ?? '06:00:00'; 
+        $scheduleLimit    = $schedule->end_in ?? '07:15:00'; 
+        $scheduleStartOut = $schedule->start_out ?? '14:00:00'; 
+        $scheduleEndOut   = $schedule->end_out ?? '17:00:00'; 
+
         $existingAttendance = AttendanceSiswa::where('student_id', $student->id)
             ->where('attendance_date', $today)
             ->whereIn('type', ['Masuk', 'Pulang', 'Harian']) 
             ->first();
 
-        $attendanceType = '';
-        $finalStatus = 'Hadir';
+        $finalStatus = '';
         $finalNotes = '';
-        $isUpdate = false;
 
-        // SKENARIO A: BELUM ABSEN MASUK
-        if (!$existingAttendance) {
-            $isWithinOperationalHours = ($timeNow >= $schedule->start_in && $timeNow <= $schedule->end_out);
-
-            if ($isWithinOperationalHours) {
-                $attendanceType = 'Harian'; // Ubah 'Masuk' jadi 'Harian' untuk konsistensi DB
+        try {
+            // SKENARIO A: BELUM ABSEN MASUK
+            if (!$existingAttendance || !$existingAttendance->time_in || $existingAttendance->time_in == '00:00:00') {
                 
-                if ($timeNow > $schedule->end_in) {
-                    $endTime = Carbon::parse($schedule->end_in);
-                    $startTime = Carbon::parse($timeNow);
-                    $minutesLate = $endTime->diffInMinutes($startTime);
-                    
-                    $finalStatus = 'Terlambat'; 
-                    $finalNotes = "Terlambat {$minutesLate} menit (Kiosk)";
-                } else {
-                    $finalStatus = 'Hadir';
-                    $finalNotes = 'Masuk Tepat Waktu (Kiosk)';
+                // --- 1. BLOKIR JIKA TERLALU PAGI ---
+                if ($timeNow < $scheduleStartIn) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Belum Waktunya Masuk (Mulai: ' . Carbon::parse($scheduleStartIn)->format('H:i') . ')',
+                        'student_name' => $student->name
+                    ], 400);
                 }
 
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Di Luar Jam Operasional Sekolah',
-                    'student_name' => $student->name
-                ], 400);
-            }
-        } 
-        
-        // SKENARIO B: SUDAH ABSEN MASUK -> MAU PULANG
-        else {
-            if ($existingAttendance->time_out) {
-                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Sudah Absen Pulang (' . Carbon::parse($existingAttendance->time_out)->format('H:i') . ')',
-                    'student_name' => $student->name
-                ], 409);
-            }
+                // --- 2. BLOKIR JIKA DI LUAR JAM SEKOLAH (MALAM HARI) ---
+                if ($timeNow > $scheduleEndOut) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Di Luar Jam Operasional Sekolah',
+                        'student_name' => $student->name
+                    ], 400);
+                }
 
-            if ($timeNow >= $schedule->start_out) {
-                $attendanceType = 'Pulang';
-                $finalNotes = $existingAttendance->notes ? $existingAttendance->notes . ' | Pulang Sekolah (Kiosk)' : 'Pulang Sekolah (Kiosk)';
-                $isUpdate = true;
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Belum Waktunya Pulang (Mulai: ' . Carbon::parse($schedule->start_out)->format('H:i') . ')',
-                    'student_name' => $student->name
-                ], 400);
-            }
-        }
-        
-        // EKSEKUSI SIMPAN DATA HARIAN
-        try {
-            if ($isUpdate) {
-                $existingAttendance->update([
-                    'time_out' => $timeNow,
-                    'notes' => $finalNotes
-                ]);
-                $attendanceRecord = $existingAttendance;
-            } else {
+                $limitTime = Carbon::createFromTimeString($scheduleLimit);
+                $isLate = $now->gt($limitTime);
+                $attendanceType = 'Harian'; 
+                
+                $finalStatus = $isLate ? 'Terlambat' : 'Hadir';
+                $finalNotes = $isLate ? "Terlambat (Limit: {$scheduleLimit})" : "Hadir Tepat Waktu (Kiosk)";
+
                 $attendanceRecord = AttendanceSiswa::create([
-                    'student_id' => $student->id,
+                    'student_id'      => $student->id,
                     'attendance_date' => $today,
-                    'type' => $attendanceType, 
-                    'status' => $finalStatus,  
-                    'time_in' => $timeNow,
-                    'notes' => $finalNotes,
+                    'type'            => $attendanceType, 
+                    'status'          => $finalStatus,  
+                    'time_in'         => $timeNow,
+                    'lat_in'          => $request->lat,   
+                    'long_in'         => $request->long,  
+                    'notes'           => $finalNotes,
                 ]);
 
-                // --- TRIGGER PENGURANGAN POIN & BK UNTUK KETERLAMBATAN ---
-                if ($finalStatus == 'Terlambat') {
-                    $this->logActivity($student, 'Violation', 'Terlambat Masuk', $finalNotes, -5);
+                // TRIGGER BK UNTUK KETERLAMBATAN
+                if ($isLate) {
+                    $this->logActivity($student, 'Violation', 'Terlambat Masuk', "Terlambat hadir (Limit: {$scheduleLimit})", -5);
                     $student->checkBkThresholds();
                 }
+
+                $waktuSapaan = 'Absen Masuk Berhasil.';
+                $messagePrefix = $isLate ? 'TERLAMBAT! ' : 'SUKSES! ';
+
+            } 
+            // SKENARIO B: SUDAH ABSEN MASUK -> MAU PULANG
+            else {
+                if ($existingAttendance->time_out) {
+                     return response()->json([
+                        'status' => 'error',
+                        'message' => 'Sudah Absen Pulang (' . Carbon::parse($existingAttendance->time_out)->format('H:i') . ')',
+                        'student_name' => $student->name
+                    ], 409);
+                }
+
+                $startOutTime = Carbon::createFromTimeString($scheduleStartOut);
+                
+                // --- 3. BLOKIR JIKA BELUM WAKTUNYA PULANG (MENCEGAH BOLOS) ---
+                if ($now->lt($startOutTime)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Belum Waktunya Pulang (Mulai: ' . $startOutTime->format('H:i') . ')',
+                        'student_name' => $student->name
+                    ], 400);
+                }
+                
+                $finalNotes = $existingAttendance->notes ? $existingAttendance->notes . " | Pulang (Kiosk)" : "Pulang Sekolah (Kiosk)";
+
+                $existingAttendance->update([
+                    'time_out' => $timeNow,
+                    'lat_out'  => $request->lat,   
+                    'long_out' => $request->long,  
+                    'notes'    => $finalNotes
+                ]);
+                
+                $attendanceRecord = $existingAttendance;
+                $waktuSapaan = 'Absen Pulang Berhasil.';
+                $messagePrefix = 'SUKSES! ';
             }
 
             // Notifikasi WA
             try {
                 SendWaScanNotificationJob::dispatch($attendanceRecord);
             } catch (\Exception $e) {
-            Log::error('Gagal menyimpan absensi Kiosk: ' . $e->getMessage());
-            // UBAH BARIS INI SEMENTARA UNTUK DEBUGGING
-            return response()->json([
-                'status' => 'error', 
-                'message' => 'DB Error: ' . $e->getMessage() 
-            ], 500);
-        }
+                Log::warning("Kiosk WA Failed: " . $e->getMessage());
+            }
 
-            $messagePrefix = ($finalStatus == 'Terlambat') ? 'TERLAMBAT! ' : 'SUKSES! ';
-            $waktuSapaan = ($attendanceType == 'Pulang') ? 'Absen Pulang Berhasil.' : 'Absen Masuk Berhasil.';
-            
             return response()->json([
                 'status' => 'success',
                 'message' => $messagePrefix . $waktuSapaan,
@@ -259,7 +270,11 @@ class KioskController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Gagal menyimpan absensi Kiosk: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Kesalahan Server'], 500);
+            
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'DB ERROR: ' . $e->getMessage()
+            ], 500);
         }
     }
 
