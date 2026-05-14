@@ -20,7 +20,8 @@ use App\Models\LiaisonBook;
 use App\Models\StudentHabit; 
 use App\Models\Borrowing;        
 use App\Models\DisciplineRecord; 
-use App\Models\AcademicRecord;  
+use App\Models\AcademicRecord; 
+use App\Models\GradeRecord;  
 use App\Models\TeachingSession;
 use App\Models\Achievement; 
 use App\Models\BkSession;
@@ -420,8 +421,8 @@ class StudentPortalController extends Controller
 
         // --- DATA AKADEMIK ---
         $academic_record = null; $chartData = ['labels' => [], 'scores' => []];
-        if (class_exists(AcademicRecord::class)) {
-             $academic_record = AcademicRecord::with(['items.subject'])->where('student_id', $id)->latest()->first();
+        if (class_exists(GradeRecord::class)) {
+             $academic_record = GradeRecord::with(['items.subject'])->where('student_id', $id)->latest()->first();
              if ($academic_record) {
                 foreach($academic_record->items as $item) {
                     $chartData['labels'][] = $item->subject->name ?? 'Mapel';
