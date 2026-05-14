@@ -436,7 +436,7 @@ class Student extends Authenticatable
                 ->exists();
 
             if (!$existingViolationTicket) {
-                $kategoriId = BkCategory::where('name', 'like', '%Disiplin%')->first()->id ?? 1;
+                $kategoriId = optional(BkCategory::where('name', 'like', '%Disiplin%')->first())->id ?? 1;
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
@@ -458,7 +458,7 @@ class Student extends Authenticatable
                 ->exists();
 
             if (!$existingMeritTicket) {
-                $kategoriId = BkCategory::where('name', 'like', '%Prestasi%')->first()->id ?? 1;
+                $kategoriId = optional(BkCategory::where('name', 'like', '%Prestasi%')->first())->id ?? 1;
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
