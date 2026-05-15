@@ -363,14 +363,29 @@
                     </tr>
                 </tbody>
             </table>
-
+           
             <!-- I. REKAP ABSENSI REAL-TIME (DARI SCANNER) -->
             @php
-                // Mengambil data absensi langsung di file blade (Mencegah error tanpa perlu edit Controller Admin)
-                if(!isset($attendanceStats)) {
-                    $s_sakit = \App\Models\AttendanceSiswa::where('student_id', $student->id)->where('status', 'Sakit')->whereIn('type', ['Harian', 'Masuk'])->count();
-                    $s_izin  = \App\Models\AttendanceSiswa::where('student_id', $student->id)->where('status', 'Izin')->whereIn('type', ['Harian', 'Masuk'])->count();
-                    $s_alfa  = \App\Models\AttendanceSiswa::where('student_id', $student->id)->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])->whereIn('type', ['Harian', 'Masuk'])->count();
+                // Paksa ambil data terbaru dan perluas filter pencariannya (termasuk Pulang dan Null)
+                if(empty($attendanceStats)) {
+                    $s_sakit = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                                ->where('status', 'Sakit')
+                                ->where(function($q) {
+                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                                })->count();
+                                
+                    $s_izin  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                                ->where('status', 'Izin')
+                                ->where(function($q) {
+                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                                })->count();
+                                
+                    $s_alfa  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])
+                                ->where(function($q) {
+                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                                })->count();
+                                
                     $attendanceStats = ['sakit' => $s_sakit, 'izin' => $s_izin, 'alfa' => $s_alfa];
                 }
             @endphp
