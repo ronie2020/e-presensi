@@ -101,7 +101,10 @@
 
                 <!-- Action Buttons -->
                 <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
-                    <?php if(!$isAlumni): ?>
+                    <?php if(!$isAlumni): ?>                    
+                    <a href="<?php echo e(route('student.habits.dashboard')); ?>" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-3 bg-elevate-peach-dark hover:bg-elevate-peach text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg active:scale-95 group border border-white/20">
+                        <i class="ph-bold ph-star mr-2 group-hover:rotate-180 transition-transform duration-500"></i> Poin Karakter
+                    </a>
                     <a href="<?php echo e(route('portal.card', $student->id)); ?>" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-3 bg-white text-elevate-dark rounded-xl text-xs sm:text-sm font-bold hover:bg-elevate-soft transition-all shadow-lg active:scale-95 group">
                         <i class="ph-bold ph-identification-card mr-2 text-elevate-primary group-hover:animate-bounce"></i> Kartu OSIS
                     </a>

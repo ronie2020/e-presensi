@@ -21,31 +21,43 @@ class StudentHabitController extends Controller
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
-        // 1. Cek Status Hari Ini
-        $todayEntry = StudentHabit::where('student_id', $studentId)
-                        ->whereDate('report_date', $today)
-                        ->first();
+        // --- DATA HABIT ---
+        $todayEntry = StudentHabit::where('student_id', $studentId)->whereDate('report_date', $today)->first();
+        $monthlyCount = StudentHabit::where('student_id', $studentId)->whereMonth('report_date', Carbon::now()->month)->count();
+        $recentActivities = StudentHabit::where('student_id', $studentId)->orderBy('report_date', 'desc')->take(5)->get();
+        
+        // Poin Habit: Misal 1 hari lengkap = 10 Poin, draft = 5 poin (Sesuaikan dengan logika Anda)
+        $totalHabitsPoints = StudentHabit::where('student_id', $studentId)->count() * 10; 
 
-        // 2. Hitung Laporan Bulan Ini
-        $monthlyCount = StudentHabit::where('student_id', $studentId)
-                        ->whereMonth('report_date', Carbon::now('Asia/Jakarta')->month)
-                        ->whereYear('report_date', Carbon::now('Asia/Jakarta')->year)
-                        ->count();
+        // --- DATA LITERASI ---
+        // (Pastikan Anda sudah 'use App\Models\LiteracyJournal;')
+        $literacy_journals = \App\Models\LiteracyJournal::where('student_id', $studentId)->orderBy('created_at', 'desc')->get();
+        
+        $totalPages = $literacy_journals->where('verified_at', '!=', null)->sum('pages_read');
+        $totalBooks = $literacy_journals->count();
+        
+        // Poin Literasi: Misal 1 halaman baca = 2 Poin
+        $literacyPoints = $totalPages * 2;
 
-        // 3. Ambil 5 Riwayat Terakhir
-        $recentActivities = StudentHabit::where('student_id', $studentId)
-                            ->orderBy('report_date', 'desc')
-                            ->take(5)
-                            ->get();
+        $literacy_stats = [
+            'points' => $literacyPoints,
+            'total_books' => $totalBooks,
+            'total_pages' => $totalPages,
+            // Logika target progres literasi bisa ditaruh di sini
+            'progress' => min(($literacyPoints / 1000) * 100, 100), 
+            'next_target' => 1000
+        ];
 
-        // 4. Hitung Poin (Total hari x 100)
-        $totalPoints = StudentHabit::where('student_id', $studentId)->count() * 100;
+        // Total Poin Keseluruhan untuk view
+        $totalPoints = $totalHabitsPoints; 
 
         return view('habits.student_dashboard', compact(
             'todayEntry', 
             'monthlyCount', 
             'recentActivities',
-            'totalPoints'
+            'totalPoints',
+            'literacy_journals',
+            'literacy_stats'
         ));
     }
 

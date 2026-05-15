@@ -112,7 +112,6 @@
             </div>
         @endif
 
-        {{-- FORM INPUT --}}
         <div x-show="showForm" 
              style="display: none;"
              x-transition:enter="transition ease-out duration-300"
@@ -122,7 +121,7 @@
              class="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-elevate-dark/5 border border-elevate-primary/10 ring-4 ring-elevate-soft/50 relative overflow-hidden">
             
              <form action="{{ route('portal.literacy.store') }}" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="student_id" value="{{ $student->id }}">
+                <input type="hidden" name="student_id" value="{{ Auth::guard('student')->id() }}">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="space-y-1">

@@ -195,8 +195,13 @@ class TeacherHabitController extends Controller
             $students = Student::where('class_id', $classId)->orderBy('name', 'asc')->get();
         } else {
             $class = null; // Menandakan mode Cetak Global
-            // Eager load 'schoolClass' agar di tampilan cetak bisa dikelompokkan per kelas
-            $students = Student::with('schoolClass')->orderBy('class_id')->orderBy('name', 'asc')->get();
+            
+            // PERBAIKAN DI SINI: Tambahkan whereHas agar hanya menarik siswa yang punya kelas aktif
+            $students = Student::with('schoolClass')
+                        ->whereHas('schoolClass') 
+                        ->orderBy('class_id')
+                        ->orderBy('name', 'asc')
+                        ->get();
         }
         
         // [OPTIMASI N+1 QUERY UNTUK HALAMAN CETAK]
@@ -210,7 +215,6 @@ class TeacherHabitController extends Controller
         // Gabungkan data
         $students->each(function($student) use ($habits) {
             $student->habit_data = $habits->get($student->id);
-            // Anda juga bisa tambahkan status agar view PDF mudah mengelola warnanya
             $student->habit_status = $student->habit_data ? 'submitted' : 'missing';
         });
 

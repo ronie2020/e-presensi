@@ -478,4 +478,9 @@ class Student extends Authenticatable
         return $this->hasMany(StudentPointHistory::class, 'student_id')
                     ->orderBy('academic_year', 'desc');
     }
+
+    public function literacyJournals()
+    {
+        return $this->hasMany(LiteracyJournal::class); // Sesuaikan dengan nama model literasi 
+    }
 }
