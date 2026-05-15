@@ -19,7 +19,7 @@ class SubjectSeeder extends Seeder
             ['name' => 'Bahasa Inggris', 'group' => 'A', 'order' => 7],
             ['name' => 'PJOK', 'group' => 'A', 'order' => 8],
             ['name' => 'Informatika', 'group' => 'A', 'order' => 9],
-            ['name' => 'Seni dan Prakarya', 'group' => 'A', 'order' => 10],
+            ['name' => 'Seni Budaya dan Prakarya', 'group' => 'A', 'order' => 10],
             ['name' => 'Muatan Lokal (Bahasa Sunda)', 'group' => 'B', 'order' => 11],
             ['name' => 'Projek Penguatan Profil Pelajar Pancasila (P5)', 'group' => 'P5', 'order' => 12],
         ];

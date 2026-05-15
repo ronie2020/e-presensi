@@ -346,7 +346,31 @@
                 </tbody>
             </table>
 
-            <!-- I. REKAP ABSENSI REAL-TIME (DARI SCANNER) -->
+           <!-- I. REKAP ABSENSI REAL-TIME (DARI SCANNER) -->
+            <?php
+                // Paksa ambil data terbaru dan perluas filter pencariannya (termasuk Pulang dan Null)
+                // Memakai logika yang sama dengan show.blade.php agar tidak terjadi perbedaan data
+                $s_sakit = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                            ->where('status', 'Sakit')
+                            ->where(function($q) {
+                                $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                            })->count();
+                            
+                $s_izin  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                            ->where('status', 'Izin')
+                            ->where(function($q) {
+                                $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                            })->count();
+                            
+                $s_alfa  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
+                            ->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])
+                            ->where(function($q) {
+                                $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
+                            })->count();
+                            
+                $attendanceStats = ['sakit' => $s_sakit, 'izin' => $s_izin, 'alfa' => $s_alfa];
+            ?>
+            
             <div class="header-section" style="margin-top: 20px;">I. AKUMULASI KEHADIRAN (SISTEM ABSENSI HARIAN)</div>
             <table class="table-induk" style="width: 50%; border: 1.5px solid #000; margin-bottom: 20px;">
                 <tr>
@@ -362,7 +386,6 @@
                     <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: center;"><?php echo e($attendanceStats['alfa']); ?> Hari</td>
                 </tr>
             </table>
-
             <!-- AREA TANDA TANGAN (MENGGUNAKAN FLEXBOX) -->
             <div class="print-break-avoid" style="margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
                 
