@@ -45,10 +45,9 @@ class LmsGradeController extends Controller
                     $classIds = [$selectedClass->id];
                 }
             } elseif ($levelId) {
-                // FITUR BARU: Deteksi tingkat dari string nama kelas (Tanpa butuh tabel Level)
+                // Deteksi tingkat dari string nama kelas (Tanpa butuh tabel Level)
                 $romawi = [
-                    '7' => 'VII', '8' => 'VIII', '9' => 'IX',
-                    '10' => 'X', '11' => 'XI', '12' => 'XII'
+                    '7' => 'VII', '8' => 'VIII', '9' => 'IX'
                 ][$levelId] ?? $levelId;
 
                 // Cari kelas yang diawali angka (misal '7') atau romawi (misal 'VII')
@@ -86,7 +85,8 @@ class LmsGradeController extends Controller
             $assignments = $queryAssignments->orderBy('created_at')->get();
 
             // 3. Ambil Siswa
-            $students = Student::with('class') 
+            // PERBAIKAN: Menggunakan relasi 'schoolClass' bukan 'class'
+            $students = Student::with('schoolClass') 
                 ->whereIn('class_id', $classIds)
                 ->orderBy('class_id') // Urutkan berdasarkan kelas dulu
                 ->orderBy('name')     // Baru urutkan sesuai abjad nama
@@ -120,16 +120,6 @@ class LmsGradeController extends Controller
      */
     public function index(Request $request)
     {
-        // Buat daftar dropdown tingkat secara manual tanpa perlu akses database
-        $levels = collect([
-            (object)['id' => '7', 'name' => 'Kelas 7 (VII)'],
-            (object)['id' => '8', 'name' => 'Kelas 8 (VIII)'],
-            (object)['id' => '9', 'name' => 'Kelas 9 (IX)'],
-            (object)['id' => '10', 'name' => 'Kelas 10 (X)'],
-            (object)['id' => '11', 'name' => 'Kelas 11 (XI)'],
-            (object)['id' => '12', 'name' => 'Kelas 12 (XII)'],
-        ]);
-
         $classes = SchoolClass::select('id', 'name')->orderBy('name')->get();
         $subjects = Subject::select('id', 'name')->orderBy('name')->get();
 
@@ -138,7 +128,6 @@ class LmsGradeController extends Controller
         $data = $this->getGradeData($request->level_id, $request->class_id, $request->subject_id, $period);
 
         return view('lms.grades.index', array_merge($data, [
-            'levels' => $levels,
             'classes' => $classes,
             'subjects' => $subjects,
             'selectedLevelId' => $request->level_id,
