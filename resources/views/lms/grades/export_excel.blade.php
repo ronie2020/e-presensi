@@ -55,7 +55,9 @@
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $student->name }}</td>
                     <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
-                    <td>{{ $student->class->name ?? '-' }}</td> {{-- DATA KELAS BARU --}}
+                    
+                    {{-- PERBAIKAN: class menjadi schoolClass --}}
+                    <td>{{ $student->schoolClass->name ?? '-' }}</td> 
                     
                     @foreach($assignments as $task)
                         @php $score = $gradeBook[$student->id][$task->id] ?? null; @endphp

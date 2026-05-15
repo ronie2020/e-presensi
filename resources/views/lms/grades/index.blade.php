@@ -206,7 +206,7 @@
                                                     <div class="flex items-center gap-1.5 mt-1">
                                                         <span class="text-[10px] font-bold text-slate-400 font-mono tracking-wider">{{ $student->nisn ?? $student->student_id ?? '-' }}</span>
                                                         <span class="text-slate-300">•</span>
-                                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{{ $student->class->name ?? 'Tanpa Kelas' }}</span>
+                                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{{ $student->schoolClass->name ?? 'Tanpa Kelas' }}</span>
                                                     </div>
                                                 </div>
                                             </td>
