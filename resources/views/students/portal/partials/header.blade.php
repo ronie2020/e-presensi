@@ -103,10 +103,12 @@
                         <i class="ph-bold ph-identification-card mr-2 text-elevate-primary group-hover:animate-bounce"></i> Kartu OSIS
                     </a>
                     @endif
-
-                    <button onclick="window.print()" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
-                        <i class="ph-bold ph-printer mr-2"></i> Biodata
-                    </button>
+                    
+                    <!-- TOMBOL BIODATA (MENGGUNAKAN LINK A HREF) -->
+                    <a href="{{ route('portal.biodata', $student->id) }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
+                        <i class="ph-bold ph-file-text mr-2"></i> Biodata Lengkap
+                    </a>
+                    
                     <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
                         <i class="ph-bold ph-magnifying-glass mr-2"></i> Cari Lain
                     </a>

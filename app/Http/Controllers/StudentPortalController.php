@@ -573,4 +573,13 @@ class StudentPortalController extends Controller
         
         return back()->with('error', 'Template kartu belum tersedia.');
     }
+
+   public function biodata($id)
+    {
+        $student = \App\Models\Student::findOrFail($id);
+        $settings = []; 
+
+        
+        return view('students.portal.biodata', compact('student', 'settings'));
+    }
 }

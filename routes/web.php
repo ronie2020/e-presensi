@@ -140,6 +140,7 @@ Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.i
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
+Route::get('/portal/{id}/biodata', [StudentPortalController::class, 'biodata'])->name('portal.biodata');
 Route::get('/kelulusan', [GraduationController::class, 'index'])->name('graduation.index');
 Route::post('/kelulusan/cek', [GraduationController::class, 'check'])->name('graduation.check');
 Route::get('/kelulusan/cetak/{id}', [GraduationController::class, 'printSkl'])->name('graduation.print');
