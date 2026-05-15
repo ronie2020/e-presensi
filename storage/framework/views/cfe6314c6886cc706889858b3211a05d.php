@@ -272,35 +272,95 @@
                         <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
                     </tr>
                 </thead>
-                <tbody>
+               <tbody>
                     <?php
                         $mapelInduk = \App\Models\Subject::orderBy('order')->get();
                         $no = 1;
+
+                        // Siapkan array untuk menampung total nilai & jumlah mapel per semester
+                        $totals = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
+                        $counts = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
                     ?>
 
                     <?php $__currentLoopData = $mapelInduk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mapel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
+                        // Tarik data nilai aslinya
+                        $v71 = $student->getScore($mapel->name, 7, 1);
+                        $v72 = $student->getScore($mapel->name, 7, 2);
+                        $v81 = $student->getScore($mapel->name, 8, 1);
+                        $v82 = $student->getScore($mapel->name, 8, 2);
+                        $v91 = $student->getScore($mapel->name, 9, 1);
+                        $v92 = $student->getScore($mapel->name, 9, 2);
+
+                        // Cek jika nilainya angka (bukan '-' atau kosong), masukkan ke perhitungan total
+                        if(is_numeric($v71)) { $totals['71'] += (float)$v71; $counts['71']++; }
+                        if(is_numeric($v72)) { $totals['72'] += (float)$v72; $counts['72']++; }
+                        if(is_numeric($v81)) { $totals['81'] += (float)$v81; $counts['81']++; }
+                        if(is_numeric($v82)) { $totals['82'] += (float)$v82; $counts['82']++; }
+                        if(is_numeric($v91)) { $totals['91'] += (float)$v91; $counts['91']++; }
+                        if(is_numeric($v92)) { $totals['92'] += (float)$v92; $counts['92']++; }
+                    ?>
                     <tr>
                         <td style="border: 1px solid #000; padding: 4px;"><?php echo e($no++); ?></td>
                         <td style="border: 1px solid #000; padding: 4px; text-align: left;"><?php echo e($mapel->name); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 7, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 7, 2)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 8, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 8, 2)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 9, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getScore($mapel->name, 9, 2)); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v71); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v72); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v81); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v82); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v91); ?></td>
+                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($v92); ?></td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     
+                    <!-- BARIS RATA-RATA NILAI -->
                     <tr>
-                        <td colspan="2" style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: right;">Ketidakhadiran (S/I/A)</td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(7, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(7, 2)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(8, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(8, 2)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(9, 1)); ?></td>
-                        <td style="border: 1px solid #000; padding: 4px;"><?php echo e($student->getAbsence(9, 2)); ?></td>
+                        <td colspan="2" style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: right; background-color: #f8fafc;">Rata-rata Nilai</td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['71'] > 0 ? round($totals['71'] / $counts['71'], 1) : '-'); ?>
+
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['72'] > 0 ? round($totals['72'] / $counts['72'], 1) : '-'); ?>
+
+                        </td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['81'] > 0 ? round($totals['81'] / $counts['81'], 1) : '-'); ?>
+
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['82'] > 0 ? round($totals['82'] / $counts['82'], 1) : '-'); ?>
+
+                        </td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['91'] > 0 ? round($totals['91'] / $counts['91'], 1) : '-'); ?>
+
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            <?php echo e($counts['92'] > 0 ? round($totals['92'] / $counts['92'], 1) : '-'); ?>
+
+                        </td>
                     </tr>
                 </tbody>
+            </table>
+
+            <!-- I. REKAP ABSENSI REAL-TIME (DARI SCANNER) -->
+            <div class="header-section" style="margin-top: 20px;">I. AKUMULASI KEHADIRAN (SISTEM ABSENSI HARIAN)</div>
+            <table class="table-induk" style="width: 50%; border: 1.5px solid #000; margin-bottom: 20px;">
+                <tr>
+                    <td class="label-col" style="border: 1px solid #000; padding: 4px;">Sakit</td>
+                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: center;"><?php echo e($attendanceStats['sakit']); ?> Hari</td>
+                </tr>
+                <tr>
+                    <td class="label-col" style="border: 1px solid #000; padding: 4px;">Izin</td>
+                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: center;"><?php echo e($attendanceStats['izin']); ?> Hari</td>
+                </tr>
+                <tr>
+                    <td class="label-col" style="border: 1px solid #000; padding: 4px;">Tanpa Keterangan (Alfa)</td>
+                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: center;"><?php echo e($attendanceStats['alfa']); ?> Hari</td>
+                </tr>
             </table>
 
             <!-- AREA TANDA TANGAN (MENGGUNAKAN FLEXBOX) -->

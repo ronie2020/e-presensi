@@ -579,7 +579,30 @@ class StudentPortalController extends Controller
         $student = \App\Models\Student::findOrFail($id);
         $settings = []; 
 
-        
-        return view('students.portal.biodata', compact('student', 'settings'));
+        // 1. AMBIL DATA DARI TABEL ABSENSI HARIAN (AttendanceSiswa)
+        // Kita hitung total status absensi khusus untuk tipe 'Harian' atau 'Masuk'
+        $sakit = \App\Models\AttendanceSiswa::where('student_id', $id)
+                    ->where('status', 'Sakit')
+                    ->whereIn('type', ['Harian', 'Masuk'])
+                    ->count();
+
+        $izin = \App\Models\AttendanceSiswa::where('student_id', $id)
+                    ->where('status', 'Izin')
+                    ->whereIn('type', ['Harian', 'Masuk'])
+                    ->count();
+
+        $alfa = \App\Models\AttendanceSiswa::where('student_id', $id)
+                    ->whereIn('status', ['Alfa', 'Alpa', 'Alpha']) // Antisipasi beda penulisan
+                    ->whereIn('type', ['Harian', 'Masuk'])
+                    ->count();
+
+        $attendanceStats = [
+            'sakit' => $sakit,
+            'izin' => $izin,
+            'alfa' => $alfa
+        ];
+
+        // 2. Kirim data attendanceStats ke view
+        return view('students.portal.biodata', compact('student', 'settings', 'attendanceStats'));
     }
 }
