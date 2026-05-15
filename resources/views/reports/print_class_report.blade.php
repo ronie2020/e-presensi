@@ -6,10 +6,8 @@
     <title>Rekap Absensi Kelas - {{ $selectedClass->name ?? '' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
-        
         body {
-            font-family: 'Noto Sans', sans-serif;
+            font-family: 'Bookman Old Style', Bookman, Georgia, serif;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
@@ -17,6 +15,20 @@
         @page {
             size: A4 landscape;
             margin: 10mm;
+        }
+
+        /* --- KOP SURAT STYLE --- */
+        .kop-surat { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+        .kop-surat td { padding: 0; vertical-align: middle; }
+        .kop-dinas { font-size: 14pt; letter-spacing: 0.025em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-sekolah { font-size: 22pt; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-alamat { font-size: 12pt; font-style: normal; line-height: 1.2; }
+        .kop-kontak { font-size: 11pt; margin-top: 4px; }
+        .garis-kop { border: none; border-top: 4px solid #000; border-bottom: 1.5px solid #000; height: 2px; margin-bottom: 15px; }
+
+        .no-print { display: block; }
+        @media print { 
+            .no-print { display: none !important; } 
         }
 
         .table-compact th, .table-compact td {
@@ -36,26 +48,32 @@
 </head>
 <body class="bg-white text-black p-4">
 
-    {{-- KOP SURAT PROFESIONAL (DENGAN 2 LOGO) --}}
-    <div class="border-b-[3px] border-black pb-2 mb-4 flex items-center justify-between">
-        {{-- Logo 1: Kabupaten Ciamis --}}
-        <div class="w-20">
-            <img src="{{ asset('img/logo_ciamis.png') }}" class="w-16 h-20 object-contain" alt="Logo Ciamis">
-        </div>
+    {{-- KOP SURAT RESMI --}}
+    <table class="kop-surat">
+        <tr>
+            <td width="15%" style="text-align: center;">
+                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+            </td>
+            <td width="70%" style="text-align: center;">
+                <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
+                <div class="kop-sekolah">SMP NEGERI 3 LAKBOK</div>
+                <div class="kop-alamat">Jalan Mekarjaya No.199, Sidaharja</div>
+                <div class="kop-alamat">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                <div class="kop-kontak">
+                    Laman: <a href="http://www.smpn3lakbok.sch.id" style="color: #1d4ed8; text-decoration: underline;">www.smpn3lakbok.sch.id</a> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    E-mail: netila.smp@gmail.com
+                </div>
+            </td>
+            <td width="15%" style="text-align: center;">
+                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+            </td>
+        </tr>
+    </table>
+    <hr class="garis-kop">
 
-        {{-- Teks Tengah --}}
-        <div class="flex-1 text-center px-4">
-            <h2 class="text-sm font-bold uppercase">Pemerintah Kabupaten Ciamis</h2>
-            <h2 class="text-sm font-bold uppercase">Dinas Pendidikan</h2>
-            <h1 class="text-xl font-extrabold uppercase tracking-widest">SMP NEGERI 3 LAKBOK</h1>
-            <p class="text-[10px] italic">Alamat: Jl. Raya Lakbok No. ... Kec. Lakbok, Kab. Ciamis, Jawa Barat</p>
-            <p class="text-xs font-bold mt-1 uppercase border-t border-black pt-1 inline-block">Rekapitulasi Absensi Bulanan Siswa (M/P)</p>
-        </div>
-
-        {{-- Logo 2: Logo Sekolah --}}
-        <div class="w-20 flex justify-end">
-            <img src="{{ asset('img/logo_sekolah.png') }}" class="w-16 h-20 object-contain" alt="Logo Sekolah">
-        </div>
+    <div class="text-center mb-6 mt-2">
+        <h3 class="text-sm font-bold uppercase underline">Rekapitulasi Absensi Bulanan Siswa (M/P)</h3>
     </div>
 
     {{-- INFORMASI KELAS & PERIODE --}}

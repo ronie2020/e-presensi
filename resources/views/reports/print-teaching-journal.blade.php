@@ -59,17 +59,17 @@
             page-break-inside: avoid;
         }
 
-        /* MODIFIKASI GARIS KOP SURAT */
-        .garis-kop {
-            border-bottom: 3px solid black;
-            margin-bottom: 2px;
-        }
-        .garis-kop-bawah {
-            border-bottom: 1px solid black;
-            margin-bottom: 24px;
-        }
+        /* --- KOP SURAT STYLE --- */
+        .kop-surat { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+        .kop-surat td { padding: 0; vertical-align: middle; }
+        .kop-dinas { font-size: 14pt; letter-spacing: 0.025em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-sekolah { font-size: 22pt; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-alamat { font-size: 12pt; font-style: normal; line-height: 1.2; }
+        .kop-kontak { font-size: 11pt; margin-top: 4px; }
+        .garis-kop { border: none; border-top: 4px solid #000; border-bottom: 1.5px solid #000; height: 2px; margin-bottom: 24px; }
         
         /* MODE PRINT */
+        .no-print { display: block; }
         @media print {
             body { background: none; margin: 0; }
             .sheet { 
@@ -142,28 +142,29 @@
          ============================================== -->
     <div class="sheet">
         
-        <!-- KOP SURAT (Sinkron dengan SPPD) -->
-        <div class="kop-surat garis-kop pb-2 pt-2 flex justify-between items-center px-4">
-            <!-- Logo Kiri -->
-            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[95px] h-auto object-contain" onerror="this.style.display='none'"> 
-            
-            <!-- Teks Tengah -->
-            <div class="text-center flex-1 px-4 leading-tight">
-                <div class="text-[14pt] tracking-wide mb-1">PEMERINTAH KABUPATEN CIAMIS</div>
-                <div class="font-bold text-[22pt] tracking-wider mb-1">SMP NEGERI 3 LAKBOK</div>
-                <div class="text-[12pt]">Jalan Mekarjaya No.199, Sidaharja</div>
-                <div class="text-[12pt]">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
-                <div class="text-[11pt] mt-1">
-                    Laman: <a href="http://www.smpn3lakbok.sch.id" class="text-blue-700 underline">www.smpn3lakbok.sch.id</a> 
-                    <span class="mx-3"></span> 
-                    E-mail: netila.smp@gmail.com
-                </div>
-            </div>
-
-            <!-- Logo Kanan -->
-            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[95px] h-auto object-contain" onerror="this.style.display='none'">
-        </div>
-        <div class="garis-kop-bawah"></div>
+        {{-- KOP SURAT RESMI --}}
+        <table class="kop-surat">
+            <tr>
+                <td width="15%" style="text-align: center;">
+                    <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                </td>
+                <td width="70%" style="text-align: center;">
+                    <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
+                    <div class="kop-sekolah">SMP NEGERI 3 LAKBOK</div>
+                    <div class="kop-alamat">Jalan Mekarjaya No.199, Sidaharja</div>
+                    <div class="kop-alamat">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                    <div class="kop-kontak">
+                        Laman: <a href="http://www.smpn3lakbok.sch.id" style="color: #1d4ed8; text-decoration: underline;">www.smpn3lakbok.sch.id</a> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                        E-mail: netila.smp@gmail.com
+                    </div>
+                </td>
+                <td width="15%" style="text-align: center;">
+                    <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                </td>
+            </tr>
+        </table>
+        <hr class="garis-kop">
 
         <!-- JUDUL LAPORAN -->
         <div class="judul-surat">

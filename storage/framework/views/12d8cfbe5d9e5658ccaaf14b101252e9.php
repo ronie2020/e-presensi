@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }}</title>
+    <title><?php echo e($title); ?></title>
     <style>
         @page { size: A4 portrait; margin: 1.5cm; }
         
@@ -62,11 +62,11 @@
         Cetak / Simpan PDF
     </button>
 
-    {{-- KOP SURAT RESMI --}}
+    
     <table class="kop-surat">
         <tr>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
             <td width="70%" style="text-align: center;">
                 <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -80,19 +80,20 @@
                 </div>
             </td>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
     <hr class="garis-kop">
 
-    {{-- JUDUL DOKUMEN --}}
+    
     <div class="report-title">
         <h3>REKAPITULASI MUTABAAH RAMADHAN</h3>
         <p>
-            <strong>Kelas:</strong> {{ $class->name }} &nbsp;|&nbsp;
-            <strong>Periode:</strong> {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} 
-            s/d {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
+            <strong>Kelas:</strong> <?php echo e($class->name); ?> &nbsp;|&nbsp;
+            <strong>Periode:</strong> <?php echo e(\Carbon\Carbon::parse($startDate)->translatedFormat('d F Y')); ?> 
+            s/d <?php echo e(\Carbon\Carbon::parse($endDate)->translatedFormat('d F Y')); ?>
+
         </p>
     </div>
 
@@ -109,21 +110,21 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($reportData as $index => $data)
+            <?php $__empty_1 = true; $__currentLoopData = $reportData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
-                <td class="text-center">{{ $loop->iteration }}</td>
-                <td class="text-center">{{ $data->nis }}</td>
-                <td>{{ $data->name }}</td>
-                <td class="text-center">{{ $data->total_log }} Hari</td>
-                <td class="text-center">{{ $data->total_puasa }} Hari</td>
-                <td class="text-center">{{ $data->total_shalat }} Waktu</td>
-                <td class="text-center font-bold">{{ $data->rata_nilai }}</td>
+                <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                <td class="text-center"><?php echo e($data->nis); ?></td>
+                <td><?php echo e($data->name); ?></td>
+                <td class="text-center"><?php echo e($data->total_log); ?> Hari</td>
+                <td class="text-center"><?php echo e($data->total_puasa); ?> Hari</td>
+                <td class="text-center"><?php echo e($data->total_shalat); ?> Waktu</td>
+                <td class="text-center font-bold"><?php echo e($data->rata_nilai); ?></td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="7" class="text-center" style="padding: 20px;">Data aktivitas Ramadhan tidak ditemukan pada periode ini.</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
@@ -139,10 +140,10 @@
                 </td>
                 <td></td>
                 <td>
-                    Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+                    Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?><br>
                     Guru PAI / Wali Kelas
                     <br><br><br><br><br>
-                    <strong>{{ Auth::user()->name ?? '.........................' }}</strong><br>
+                    <strong><?php echo e(Auth::user()->name ?? '.........................'); ?></strong><br>
                     NIP. .........................
                 </td>
             </tr>
@@ -150,4 +151,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/ramadan/export-pdf.blade.php ENDPATH**/ ?>

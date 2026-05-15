@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Absensi Harian - {{ $range['label'] }}</title>
+    <title>Laporan Absensi Harian - <?php echo e($range['label']); ?></title>
     <style>
         @page { size: A4; margin: 2cm; }
         body { font-family: 'Bookman Old Style', Bookman, Georgia, serif; color: #000; line-height: 1.5; font-size: 11pt; }
@@ -74,11 +74,11 @@
         Cetak Laporan
     </button>
 
-    {{-- KOP SURAT RESMI --}}
+    
     <table class="kop-surat">
         <tr>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
             <td width="70%" style="text-align: center;">
                 <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -92,13 +92,13 @@
                 </div>
             </td>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
     <hr class="garis-kop">
 
-    {{-- JUDUL DOKUMEN --}}
+    
     <div class="doc-title">
         <h3>LAPORAN ABSENSI SISWA</h3>
     </div>
@@ -107,49 +107,49 @@
         <tr>
             <td class="meta-title">Periode</td>
             <td width="10">:</td>
-            <td>{{ $range['label'] }}</td>
+            <td><?php echo e($range['label']); ?></td>
         </tr>
         <tr>
             <td class="meta-title">Dicetak Oleh</td>
             <td>:</td>
-            <td>{{ auth()->user()->name ?? 'Administrator' }}</td>
+            <td><?php echo e(auth()->user()->name ?? 'Administrator'); ?></td>
         </tr>
     </table>
 
     <div class="summary-box">
         <div class="summary-item">
-            <span class="summary-val">{{ $stats['hadir'] + $stats['terlambat'] }}</span>
+            <span class="summary-val"><?php echo e($stats['hadir'] + $stats['terlambat']); ?></span>
             <span class="summary-label">Hadir</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $stats['sakit'] }}</span>
+            <span class="summary-val"><?php echo e($stats['sakit']); ?></span>
             <span class="summary-label">Sakit</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $stats['izin'] }}</span>
+            <span class="summary-val"><?php echo e($stats['izin']); ?></span>
             <span class="summary-label">Izin</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $stats['alfa'] }}</span>
+            <span class="summary-val"><?php echo e($stats['alfa']); ?></span>
             <span class="summary-label">Alfa</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $stats['belum'] }}</span>
+            <span class="summary-val"><?php echo e($stats['belum']); ?></span>
             <span class="summary-label">Belum Absen</span>
         </div>
     </div>
 
-    {{-- Tabel 1: Siswa Hadir & Terlambat --}}
-    @if($attendancesHadir->count() > 0)
+    
+    <?php if($attendancesHadir->count() > 0): ?>
         <div class="section-title">A. Daftar Siswa Hadir</div>
         <table class="data">
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    {{-- LOGIKA BARU: Tampilkan Tanggal hanya jika bukan harian --}}
-                    @if($range['type'] != 'daily') 
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
                         <th width="15%">Tanggal</th> 
-                    @endif
+                    <?php endif; ?>
                     <th width="25%">Nama Siswa</th>
                     <th width="15%">Kelas</th>
                     <th width="15%">Jam Masuk</th>
@@ -158,38 +158,39 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendancesHadir as $index => $att)
+                <?php $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    {{-- LOGIKA BARU: Tampilkan Tanggal --}}
-                    @if($range['type'] != 'daily') 
-                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
-                    @endif
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
-                    <td class="center">{{ $att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-' }}</td>
-                    <td class="center">{{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <td class="center"><?php echo e(\Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y')); ?></td> 
+                    <?php endif; ?>
+                    <td><?php echo e($att->student->name); ?></td>
+                    <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
+                    <td class="center"><?php echo e($att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-'); ?></td>
+                    <td class="center"><?php echo e($att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-'); ?></td>
                     <td>
-                        {{ $att->status }}
-                        @if($att->status == 'Terlambat') <small class="text-danger">(- Poin)</small> @endif
+                        <?php echo e($att->status); ?>
+
+                        <?php if($att->status == 'Terlambat'): ?> <small class="text-danger">(- Poin)</small> <?php endif; ?>
                     </td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- Tabel 2: Siswa Izin/Sakit/Alfa --}}
-    @if($attendancesLain->count() > 0)
+    
+    <?php if($attendancesLain->count() > 0): ?>
         <div class="section-title">B. Daftar Ketidakhadiran (Izin / Sakit / Alfa)</div>
         <table class="data">
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    {{-- LOGIKA BARU: Tampilkan Tanggal --}}
-                    @if($range['type'] != 'daily') 
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
                         <th width="15%">Tanggal</th> 
-                    @endif
+                    <?php endif; ?>
                     <th width="30%">Nama Siswa</th>
                     <th width="15%">Kelas</th>
                     <th width="15%">Status</th>
@@ -197,31 +198,32 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendancesLain as $index => $att)
+                <?php $__currentLoopData = $attendancesLain; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    {{-- LOGIKA BARU: Tampilkan Tanggal --}}
-                    @if($range['type'] != 'daily') 
-                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
-                    @endif
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <td class="center"><?php echo e(\Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y')); ?></td> 
+                    <?php endif; ?>
+                    <td><?php echo e($att->student->name); ?></td>
+                    <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
                     <td class="center" style="font-weight: bold;">
-                        {{ $att->status }}
-                        {{-- TAMBAHAN: Indikator Poin --}}
-                        @if(in_array($att->status, ['Alfa', 'Alpa']))
+                        <?php echo e($att->status); ?>
+
+                        
+                        <?php if(in_array($att->status, ['Alfa', 'Alpa'])): ?>
                             <br><small class="text-danger">(-10 Poin)</small>
-                        @endif
+                        <?php endif; ?>
                     </td>
-                    <td>{{ $att->notes ?? '-' }}</td>
+                    <td><?php echo e($att->notes ?? '-'); ?></td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- Tabel 3: Belum Absen (Tidak perlu tanggal karena belum absen sama sekali di range tsb/hari tsb) --}}
-    @if($belumAbsenList->count() > 0)
+    
+    <?php if($belumAbsenList->count() > 0): ?>
         <div class="section-title text-danger">C. Daftar Siswa Belum Absen</div>
         <table class="data">
             <thead>
@@ -233,22 +235,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($belumAbsenList as $index => $student)
+                <?php $__currentLoopData = $belumAbsenList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    <td>{{ $student->name }}</td>
-                    <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    <td><?php echo e($student->name); ?></td>
+                    <td class="center"><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                     <td class="center text-muted">Belum ada keterangan</td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
     <div class="footer">
         <div class="signature-box">
             <p>
-                Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
+                Lakbok, <?php echo e(\Carbon\Carbon::now()->isoFormat('D MMMM Y')); ?><br>
                 Mengetahui,<br>
                 Kepala Sekolah / Guru Piket
             </p>
@@ -260,4 +262,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/print_daily.blade.php ENDPATH**/ ?>

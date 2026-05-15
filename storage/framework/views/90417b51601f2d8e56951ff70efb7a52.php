@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Daftar Hadir - {{ $exam->title }}</title>
+    <title>Cetak Daftar Hadir - <?php echo e($exam->title); ?></title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    {{-- Phosphor Icons --}}
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -91,11 +91,11 @@
             </div>
             <div>
                 <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Daftar Hadir</h1>
-                <p class="text-xs text-slate-500 font-sans font-bold">{{ $exam->title }}</p>
+                <p class="text-xs text-slate-500 font-sans font-bold"><?php echo e($exam->title); ?></p>
             </div>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('cbt.events.show', $exam->cbt_event_id ?? 0) }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
+            <a href="<?php echo e(route('cbt.events.show', $exam->cbt_event_id ?? 0)); ?>" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
                 <i class="ph-bold ph-arrow-left"></i> Kembali
             </a>
             <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
@@ -106,11 +106,11 @@
     <div class="no-print h-24"></div>
 
     <div class="sheet">
-        {{-- KOP SURAT RESMI STANDAR --}}
+        
         <table class="kop-surat">
             <tr>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
                 <td width="70%" style="text-align: center;">
                     <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -124,7 +124,7 @@
                     </div>
                 </td>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
             </tr>
         </table>
@@ -132,27 +132,27 @@
 
         <div class="judul-surat">
             <h2>DAFTAR HADIR</h2>
-            <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;">{{ strtoupper($exam->title) }}</p>
-            @php
+            <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;"><?php echo e(strtoupper($exam->title)); ?></p>
+            <?php
                 // Mengambil tahun ajaran yang sedang aktif dari database
                 $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
                 $tahunPelajaran = $activeYear ? $activeYear->name : date('Y') . '/' . date('Y', strtotime('+1 year'));
-            @endphp
-            <p>Tahun Pelajaran {{ $tahunPelajaran }}</p>
+            ?>
+            <p>Tahun Pelajaran <?php echo e($tahunPelajaran); ?></p>
         </div>
 
         <!-- Info Ujian -->
         <table class="info-ujian">
             <tr>
-                <td style="width: 15%;">Mata Pelajaran</td><td style="width: 2%;">:</td><td style="width: 43%; font-weight: bold;">{{ $exam->subject_name }}</td>
-                <td style="width: 12%;">Tanggal</td><td style="width: 2%;">:</td><td style="width: 26%;">{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('dddd, D MMMM Y') : '-' }}</td>
+                <td style="width: 15%;">Mata Pelajaran</td><td style="width: 2%;">:</td><td style="width: 43%; font-weight: bold;"><?php echo e($exam->subject_name); ?></td>
+                <td style="width: 12%;">Tanggal</td><td style="width: 2%;">:</td><td style="width: 26%;"><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('dddd, D MMMM Y') : '-'); ?></td>
             </tr>
             <tr>
-                <td>Kelas Target</td><td>:</td><td style="font-weight: bold;">{{ $exam->class_level }}</td>
-                <td>Waktu</td><td>:</td><td>{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('H:i') : '-' }} - {{ $exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->format('H:i') : '-' }} WIB</td>
+                <td>Kelas Target</td><td>:</td><td style="font-weight: bold;"><?php echo e($exam->class_level); ?></td>
+                <td>Waktu</td><td>:</td><td><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('H:i') : '-'); ?> - <?php echo e($exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->format('H:i') : '-'); ?> WIB</td>
             </tr>
             <tr>
-                <td>Sistem Ujian</td><td>:</td><td style="font-weight: bold; text-transform: uppercase;">{{ str_replace('_', ' ', $exam->exam_type) }}</td>
+                <td>Sistem Ujian</td><td>:</td><td style="font-weight: bold; text-transform: uppercase;"><?php echo e(str_replace('_', ' ', $exam->exam_type)); ?></td>
                 <td colspan="3"></td> <!-- Dikosongkan karena info peserta pindah ke bawah -->
             </tr>
         </table>
@@ -170,36 +170,36 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($students as $index => $student)
+                <?php $__empty_1 = true; $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td style="text-align: center;">{{ $index + 1 }}</td>
-                    <td style="text-align: center;">{{ $student->student_id }}</td>
-                    <td style="font-weight: bold;">{{ $student->name }}</td>
-                    <td style="text-align: center;">{{ $student->schoolClass->name ?? '-' }}</td>
+                    <td style="text-align: center;"><?php echo e($index + 1); ?></td>
+                    <td style="text-align: center;"><?php echo e($student->student_id); ?></td>
+                    <td style="font-weight: bold;"><?php echo e($student->name); ?></td>
+                    <td style="text-align: center;"><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                     
                    <!-- Kolom Tanda Tangan Zig-Zag -->
                     <td colspan="2" style="position: relative; height: 35px; width: 160px; padding: 0;">
-                        @if($index % 2 == 0)
+                        <?php if($index % 2 == 0): ?>
                             <!-- Ganjil: Di kiri -->
-                            <span style="position: absolute; top: 4px; left: 8px; font-size: 10px; color: #555;">{{ $index + 1 }}.</span>
-                        @else
+                            <span style="position: absolute; top: 4px; left: 8px; font-size: 10px; color: #555;"><?php echo e($index + 1); ?>.</span>
+                        <?php else: ?>
                             <!-- Genap: Di tengah (50% dari lebar kolom) -->
-                            <span style="position: absolute; top: 4px; left: 50%; font-size: 10px; color: #555;">{{ $index + 1 }}.</span>
-                        @endif
+                            <span style="position: absolute; top: 4px; left: 50%; font-size: 10px; color: #555;"><?php echo e($index + 1); ?>.</span>
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Keterangan Hadir -->
                     <td style="text-align: center; font-size: 14pt; font-weight: bold; color: #16a34a;">
-                        @if(in_array($student->id, $sessions))
+                        <?php if(in_array($student->id, $sessions)): ?>
                             &#10003;
-                        @endif
+                        <?php endif; ?>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="7" style="text-align: center; padding: 20px; color: #6b7280;">Tidak ada data siswa ditemukan untuk kelas ini.</td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
 
@@ -213,17 +213,17 @@
                     <tr>
                         <td style="padding: 3px 0; width: 60%;">Jumlah Peserta Seluruhnya</td>
                         <td style="padding: 3px 5px; width: 5%;">:</td>
-                        <td style="padding: 3px 0; font-weight: bold;">{{ count($students) }} Siswa</td>
+                        <td style="padding: 3px 0; font-weight: bold;"><?php echo e(count($students)); ?> Siswa</td>
                     </tr>
                     <tr>
                         <td style="padding: 3px 0;">Siswa Mengerjakan (Hadir)</td>
                         <td style="padding: 3px 5px;">:</td>
-                        <td style="padding: 3px 0; font-weight: bold;">{{ count($sessions) }} Siswa</td>
+                        <td style="padding: 3px 0; font-weight: bold;"><?php echo e(count($sessions)); ?> Siswa</td>
                     </tr>
                     <tr>
                         <td style="padding: 3px 0;">Belum Mengerjakan (Absen)</td>
                         <td style="padding: 3px 5px;">:</td>
-                        <td style="padding: 3px 0; font-weight: bold;">{{ count($students) - count($sessions) }} Siswa</td>
+                        <td style="padding: 3px 0; font-weight: bold;"><?php echo e(count($students) - count($sessions)); ?> Siswa</td>
                     </tr>
                 </table>
             </div>
@@ -244,4 +244,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/daftar_hadir.blade.php ENDPATH**/ ?>

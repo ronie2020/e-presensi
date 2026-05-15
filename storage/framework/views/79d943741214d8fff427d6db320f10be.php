@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }}</title>
+    <title><?php echo e($title ?? 'Rekapitulasi Absensi Kelas'); ?></title>
     <style>
-        @page { size: A4 portrait; margin: 1.5cm; }
+        @page { size: A4; margin: 1.5cm; }
         
         /* Font disesuaikan menjadi Bookman Old Style */
         body { font-family: 'Bookman Old Style', Bookman, Georgia, serif; color: #000; line-height: 1.4; font-size: 11pt; }
@@ -13,8 +13,7 @@
         .no-print { display: block; margin-bottom: 20px; }
         @media print { 
             .no-print { display: none !important; } 
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            @page { margin: 1.5cm; }
+            body { -webkit-print-color-adjust: exact; }
         }
         
         /* --- KOP SURAT STYLE --- */
@@ -37,7 +36,7 @@
         table.data th { background-color: #e0e0e0; text-align: center; font-weight: bold; vertical-align: middle; }
         table.data td { vertical-align: middle; }
         .text-center { text-align: center; }
-        .text-left { text-align: left; }
+        .text-right { text-align: right; }
         
         /* Footer Tanda Tangan */
         .footer { margin-top: 40px; width: 100%; page-break-inside: avoid; }
@@ -62,11 +61,11 @@
         Cetak / Simpan PDF
     </button>
 
-    {{-- KOP SURAT RESMI --}}
+    
     <table class="kop-surat">
         <tr>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
             <td width="70%" style="text-align: center;">
                 <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -80,53 +79,72 @@
                 </div>
             </td>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
     <hr class="garis-kop">
 
-    {{-- JUDUL DOKUMEN --}}
+    
     <div class="report-title">
-        <h3>REKAPITULASI MUTABAAH RAMADHAN</h3>
+        <h3>REKAPITULASI ABSENSI KELAS</h3>
         <p>
-            <strong>Kelas:</strong> {{ $class->name }} &nbsp;|&nbsp;
-            <strong>Periode:</strong> {{ \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} 
-            s/d {{ \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
+            <strong>Periode:</strong> <?php echo e(isset($startDate) ? \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') : '-'); ?> 
+            s/d <?php echo e(isset($endDate) ? \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') : '-'); ?>
+
         </p>
     </div>
 
+    
     <table class="data">
         <thead>
             <tr>
-                <th width="5%">No</th>
-                <th width="15%">NIS</th>
-                <th class="text-left">Nama Siswa</th>
-                <th width="12%">Total<br>Pengisian</th>
-                <th width="12%">Total<br>Puasa</th>
-                <th width="15%">Total Shalat<br>(Waktu)</th>
-                <th width="12%">Rata-rata<br>Nilai</th>
+                <th rowspan="2" width="5%">No</th>
+                <th rowspan="2">Nama Kelas</th>
+                <th rowspan="2" width="10%">Jml Siswa</th>
+                <th colspan="4">Rincian Kehadiran</th>
+                <th rowspan="2" width="10%">Persentase</th>
+            </tr>
+            <tr>
+                <th width="10%">Hadir</th>
+                <th width="10%">Telat</th>
+                <th width="10%">Izin/Sakit</th>
+                <th width="10%">Alpha</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($reportData as $index => $data)
+            <?php $__empty_1 = true; $__currentLoopData = $reportData ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
+                // Mencegah error "Undefined property" dengan menggunakan data_get
+                // data_get aman karena mengecek property pada object, maupun key pada array.
+                $hadir = data_get($data, 'hadir', 0);
+                $telat = data_get($data, 'telat', 0);
+                $izin_sakit = data_get($data, 'izin_sakit', 0);
+                $alpha = data_get($data, 'alpha', 0);
+                
+                // Kalkulasi manual untuk Rate/Persentase jika propertinya tidak ada
+                $total_logs = $hadir + $telat + $izin_sakit + $alpha;
+                $calculated_rate = $total_logs > 0 ? round(($hadir / $total_logs) * 100, 1) : 0;
+            ?>
             <tr>
-                <td class="text-center">{{ $loop->iteration }}</td>
-                <td class="text-center">{{ $data->nis }}</td>
-                <td>{{ $data->name }}</td>
-                <td class="text-center">{{ $data->total_log }} Hari</td>
-                <td class="text-center">{{ $data->total_puasa }} Hari</td>
-                <td class="text-center">{{ $data->total_shalat }} Waktu</td>
-                <td class="text-center font-bold">{{ $data->rata_nilai }}</td>
+                <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                <td><?php echo e(data_get($data, 'name', 'Kelas Tidak Diketahui')); ?></td>
+                <td class="text-center"><?php echo e(data_get($data, 'total_students', 0)); ?></td>
+                <td class="text-center"><?php echo e($hadir); ?></td>
+                <td class="text-center"><?php echo e($telat); ?></td>
+                <td class="text-center"><?php echo e($izin_sakit); ?></td>
+                <td class="text-center"><?php echo e($alpha); ?></td>
+                <td class="text-center font-bold"><?php echo e(data_get($data, 'rate', $calculated_rate)); ?>%</td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
-                <td colspan="7" class="text-center" style="padding: 20px;">Data aktivitas Ramadhan tidak ditemukan pada periode ini.</td>
+                <td colspan="8" class="text-center" style="padding: 20px;">Data tidak ditemukan pada periode ini.</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
+    
     <div class="footer">
         <table class="signature-table">
             <tr>
@@ -139,10 +157,10 @@
                 </td>
                 <td></td>
                 <td>
-                    Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-                    Guru PAI / Wali Kelas
+                    Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?><br>
+                    Waka Kesiswaan / Petugas
                     <br><br><br><br><br>
-                    <strong>{{ Auth::user()->name ?? '.........................' }}</strong><br>
+                    <strong><?php echo e(Auth::user()->name ?? 'Admin'); ?></strong><br>
                     NIP. .........................
                 </td>
             </tr>
@@ -150,4 +168,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/pdf_class_recap.blade.php ENDPATH**/ ?>

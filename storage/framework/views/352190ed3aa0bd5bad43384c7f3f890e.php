@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title }}</title>
+    <title><?php echo e($title); ?></title>
     <style>
         @page { size: A4; margin: 2cm; }
         
@@ -62,11 +62,11 @@
         Cetak / Simpan PDF
     </button>
 
-    {{-- KOP SURAT RESMI --}}
+    
     <table class="kop-surat">
         <tr>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
             <td width="70%" style="text-align: center;">
                 <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -80,22 +80,23 @@
                 </div>
             </td>
             <td width="15%" style="text-align: center;">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
     <hr class="garis-kop">
 
-    {{-- JUDUL DOKUMEN --}}
+    
     <div class="doc-title">
         <h3>LAPORAN MONITORING IZIN SISWA</h3>
         <p>
-            <strong>Periode:</strong> {{ request('date') ? \Carbon\Carbon::parse(request('date'))->translatedFormat('d F Y') : 'Semua Waktu' }} 
-            | <strong>Status:</strong> {{ request('status') ? ucfirst(request('status')) : 'Semua' }}
+            <strong>Periode:</strong> <?php echo e(request('date') ? \Carbon\Carbon::parse(request('date'))->translatedFormat('d F Y') : 'Semua Waktu'); ?> 
+            | <strong>Status:</strong> <?php echo e(request('status') ? ucfirst(request('status')) : 'Semua'); ?>
+
         </p>
     </div>
 
-    {{-- TABEL DATA --}}
+    
     <table class="data">
         <thead>
             <tr>
@@ -110,63 +111,65 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($permits as $index => $permit)
+            <?php $__empty_1 = true; $__currentLoopData = $permits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $permit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <tr>
-                <td style="text-align: center;">{{ $index + 1 }}</td>
+                <td style="text-align: center;"><?php echo e($index + 1); ?></td>
                 <td>
-                    <strong>{{ $permit->student->name }}</strong><br>
-                    <small>{{ $permit->student->student_id }}</small>
+                    <strong><?php echo e($permit->student->name); ?></strong><br>
+                    <small><?php echo e($permit->student->student_id); ?></small>
                 </td>
-                <td style="text-align: center;">{{ $permit->student->schoolClass->name ?? '-' }}</td>
+                <td style="text-align: center;"><?php echo e($permit->student->schoolClass->name ?? '-'); ?></td>
                 <td>
-                    {{ $permit->reason_category }}
-                    @if($permit->notes) <br><i style="font-size:9pt">"{{ $permit->notes }}"</i> @endif
+                    <?php echo e($permit->reason_category); ?>
+
+                    <?php if($permit->notes): ?> <br><i style="font-size:9pt">"<?php echo e($permit->notes); ?>"</i> <?php endif; ?>
                 </td>
                 <td style="text-align: center;">
-                    {{ $permit->time_out->format('H:i') }}<br>
-                    <small>{{ $permit->time_out->format('d/m/y') }}</small>
+                    <?php echo e($permit->time_out->format('H:i')); ?><br>
+                    <small><?php echo e($permit->time_out->format('d/m/y')); ?></small>
                 </td>
                 <td style="text-align: center;">
-                    @if($permit->time_in)
-                        {{ $permit->time_in->format('H:i') }}
-                    @else
+                    <?php if($permit->time_in): ?>
+                        <?php echo e($permit->time_in->format('H:i')); ?>
+
+                    <?php else: ?>
                         -
-                    @endif
+                    <?php endif; ?>
                 </td>
                 <td style="text-align: center;">
-                    @if($permit->duration_minutes)
-                        {{ $permit->duration_minutes }} m
-                    @else
+                    <?php if($permit->duration_minutes): ?>
+                        <?php echo e($permit->duration_minutes); ?> m
+                    <?php else: ?>
                         -
-                    @endif
+                    <?php endif; ?>
                 </td>
                 <td style="text-align: center;">
-                    @if($permit->status == 'OUT')
+                    <?php if($permit->status == 'OUT'): ?>
                         <span class="badge badge-out">SEDANG KELUAR</span>
-                    @else
+                    <?php else: ?>
                         <span class="badge badge-in">KEMBALI</span>
-                    @endif
+                    <?php endif; ?>
                 </td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="8" style="text-align: center; padding: 20px;">Data tidak ditemukan.</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
-    {{-- FOOTER TANDA TANGAN --}}
+    
     <div class="footer">
         <div class="signature">
             <p>
-                Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+                Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?><br>
                 Petugas Piket,
             </p>
-            <div style="font-weight: bold; text-decoration: underline;">{{ Auth::user()->name ?? '.........................' }}</div>
+            <div style="font-weight: bold; text-decoration: underline;"><?php echo e(Auth::user()->name ?? '.........................'); ?></div>
             <div>NIP. .........................</div>
         </div>
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/permit/print.blade.php ENDPATH**/ ?>

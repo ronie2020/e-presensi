@@ -7,33 +7,28 @@
     <style>
         @page { size: A4; margin: 1.5cm; }
         
-        body { 
-            /* Ubah font utama menjadi Bookman Old Style */
-            font-family: 'Bookman Old Style', Bookman, Georgia, serif; 
-            color: #000; 
-            line-height: 1.3; 
-            font-size: 11pt; 
-        }
+        /* Font disesuaikan menjadi Bookman Old Style */
+        body { font-family: 'Bookman Old Style', Bookman, Georgia, serif; color: #000; line-height: 1.3; font-size: 11pt; }
         
-        .no-print { display: block; margin-bottom: 20px; text-align: right; }
+        .no-print { display: block; margin-bottom: 20px; }
         @media print { 
-            .no-print { display: none; } 
-            body { -webkit-print-color-adjust: exact; }
+            .no-print { display: none !important; } 
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
         
-        /* Kop Surat (Format Tabel untuk Kompatibilitas Ekspor PDF) */
-        .kop-table { width: 100%; border-collapse: collapse; }
-        .kop-table td { vertical-align: middle; }
-        .kop-teks { text-align: center; line-height: 1.1; }
-        
-        /* Garis Ganda Kop Surat */
-        .garis-kop { border-bottom: 3px solid black; margin-top: 8px; margin-bottom: 2px; }
-        .garis-kop-bawah { border-bottom: 1px solid black; margin-bottom: 20px; }
+        /* --- KOP SURAT STYLE --- */
+        .kop-surat { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+        .kop-surat td { padding: 0; vertical-align: middle; }
+        .kop-dinas { font-size: 14pt; letter-spacing: 0.025em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-sekolah { font-size: 22pt; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.1; }
+        .kop-alamat { font-size: 12pt; font-style: normal; line-height: 1.2; }
+        .kop-kontak { font-size: 11pt; margin-top: 4px; }
+        .garis-kop { border: none; border-top: 4px solid #000; border-bottom: 1.5px solid #000; height: 2px; margin-bottom: 15px; }
 
         /* Judul Laporan */
         .report-title { text-align: center; margin-bottom: 20px; }
-        .report-title h3 { margin: 0; text-decoration: underline; text-transform: uppercase; font-size: 12pt; }
-        .report-info { margin-top: 10px; font-size: 10pt; width: 100%; }
+        .report-title h3 { margin: 0; text-decoration: underline; text-transform: uppercase; font-size: 14pt; font-weight: bold; }
+        .report-info { margin-top: 10px; font-size: 11pt; width: 100%; }
         .report-info td { padding: 4px 2px; vertical-align: top; }
 
         /* Tabel Data */
@@ -51,50 +46,47 @@
         .signature-table { width: 100%; }
         .signature-table td { text-align: center; vertical-align: top; width: 35%; }
         
-        /* Tombol Cetak */
+        /* Tombol Cetak (Diseragamkan) */
         .btn-print {
+            position: fixed; top: 20px; right: 20px;
             background: #1e3a8a; color: white; border: none;
-            padding: 10px 20px; border-radius: 6px; cursor: pointer;
-            font-weight: bold; font-family: sans-serif; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            text-decoration: none; display: inline-block;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-family: sans-serif; display: flex; align-items: center; gap: 8px; z-index: 9999;
         }
         .btn-print:hover { background: #1e40af; }
     </style>
 </head>
 <body>
 
-    <div class="no-print">
-        <button onclick="window.print()" class="btn-print">
-            🖨️ Cetak / Simpan PDF
-        </button>
-    </div>
+    <button onclick="window.print()" class="btn-print no-print">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Cetak / Simpan PDF
+    </button>
 
-    {{-- KOP SURAT --}}
-    <table class="kop-table">
+    {{-- KOP SURAT RESMI --}}
+    <table class="kop-surat">
         <tr>
-            <td width="15%" align="left">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto;" onerror="this.style.display='none'">
+            <td width="15%" style="text-align: center;">
+                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
-            <td class="kop-teks">
-                <div style="font-size: 14pt; margin-bottom: 4px;">PEMERINTAH KABUPATEN CIAMIS</div>
-                <div style="font-size: 22pt; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px;">SMP NEGERI 3 LAKBOK</div>
-                <div style="font-size: 12pt;">Jalan Mekarjaya No.199, Sidaharja</div>
-                <div style="font-size: 12pt;">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
-                <div style="font-size: 11pt; margin-top: 4px;">
-                    Laman: <a href="http://www.smpn3lakbok.sch.id" style="color: blue; text-decoration: underline;">www.smpn3lakbok.sch.id</a> 
-                    &nbsp;&nbsp;&nbsp; 
+            <td width="70%" style="text-align: center;">
+                <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
+                <div class="kop-sekolah">SMP NEGERI 3 LAKBOK</div>
+                <div class="kop-alamat">Jalan Mekarjaya No.199, Sidaharja</div>
+                <div class="kop-alamat">Kecamatan Lakbok, Kabupaten Ciamis 46385</div>
+                <div class="kop-kontak">
+                    Laman: <a href="http://www.smpn3lakbok.sch.id" style="color: #1d4ed8; text-decoration: underline;">www.smpn3lakbok.sch.id</a> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
                     E-mail: netila.smp@gmail.com
                 </div>
             </td>
-            <td width="15%" align="right">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" style="width: 85px; height: auto;" onerror="this.style.display='none'">
+            <td width="15%" style="text-align: center;">
+                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
-    <!-- Garis Ganda Kop Surat -->
-    <div class="garis-kop"></div>
-    <div class="garis-kop-bawah"></div>
-
+    <hr class="garis-kop">
 
     <div class="report-title">
         <h3>REKAPITULASI HASIL UJIAN</h3>

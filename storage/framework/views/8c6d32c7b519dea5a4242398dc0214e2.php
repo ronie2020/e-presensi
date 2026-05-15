@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Soal - {{ $title }}</title>
+    <title>Laporan Soal - <?php echo e($title); ?></title>
     
-    {{-- Tailwind CSS & Phosphor Icons --}}
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    {{-- Script MathJax untuk Render Rumus MTK --}}
+    
     <script>
         window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
     </script>
@@ -108,7 +108,7 @@
             </div>
             <div>
                 <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Laporan Butir Soal</h1>
-                <p class="text-xs text-slate-500 font-sans font-bold">{{ $title }}</p>
+                <p class="text-xs text-slate-500 font-sans font-bold"><?php echo e($title); ?></p>
             </div>
         </div>
         <div class="flex gap-3">
@@ -127,11 +127,11 @@
     <!-- HALAMAN KERTAS (KONTEN CETAK) -->
     <div class="sheet">
         
-        {{-- KOP SURAT RESMI STANDAR --}}
+        
         <table class="kop-surat">
             <tr>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
                 <td width="70%" style="text-align: center;">
                     <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -145,7 +145,7 @@
                     </div>
                 </td>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
             </tr>
         </table>
@@ -153,8 +153,8 @@
 
         <!-- JUDUL LAPORAN -->
         <div class="text-center mb-6">
-            <h2 class="m-0 text-[14pt] font-bold uppercase underline">Laporan Butir Soal ({{ $type }})</h2>
-            <p class="text-[12pt] mt-1">{{ $title }}</p>
+            <h2 class="m-0 text-[14pt] font-bold uppercase underline">Laporan Butir Soal (<?php echo e($type); ?>)</h2>
+            <p class="text-[12pt] mt-1"><?php echo e($title); ?></p>
         </div>
 
         <!-- TABEL INFORMASI -->
@@ -162,28 +162,28 @@
             <tr>
                 <td class="w-[18%] py-1 font-bold">Mata Pelajaran</td>
                 <td class="w-[2%] py-1">:</td>
-                <td class="w-[40%] py-1">{{ $subject }}</td>
+                <td class="w-[40%] py-1"><?php echo e($subject); ?></td>
                 
                 <td class="w-[18%] py-1 font-bold">Jumlah Soal</td>
                 <td class="w-[2%] py-1">:</td>
-                <td class="w-[20%] py-1">{{ $questions->count() }} Butir</td>
+                <td class="w-[20%] py-1"><?php echo e($questions->count()); ?> Butir</td>
             </tr>
             <tr>
                 <td class="py-1 font-bold">Keterangan</td>
                 <td class="py-1">:</td>
-                <td class="py-1">{{ $info }}</td>
+                <td class="py-1"><?php echo e($info); ?></td>
                 
                 <td class="py-1 font-bold">Waktu Cetak</td>
                 <td class="py-1">:</td>
-                <td class="py-1">{{ date('d/m/Y H:i') }}</td>
+                <td class="py-1"><?php echo e(date('d/m/Y H:i')); ?></td>
             </tr>
         </table>
 
         <div class="border-b-[3px] border-black mb-8"></div>
 
         <!-- DAFTAR SOAL -->
-        @forelse($questions as $index => $q)
-            @php
+        <?php $__empty_1 = true; $__currentLoopData = $questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
                 $qType = $q->question_type ?? 'choice';
                 $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
                 
@@ -191,77 +191,77 @@
                 if($qType == 'true_false') $typeLabel = 'Benar / Salah';
                 elseif($qType == 'matching') $typeLabel = 'Menjodohkan';
                 elseif($qType == 'essay') $typeLabel = 'Isian / Essai';
-            @endphp
+            ?>
             
             <div class="question-container">
-                {{-- META DATA SOAL (KD, TIPE, BOBOT) --}}
+                
                 <div class="question-meta">
                     <div class="flex gap-2 items-center">
-                        <span class="meta-badge">Tipe: {{ $typeLabel }}</span>
-                        <span class="meta-badge bg-indigo-50 border-indigo-100 text-indigo-700">Materi/KD: {{ !empty($q->tags) ? $q->tags : '-' }}</span>
+                        <span class="meta-badge">Tipe: <?php echo e($typeLabel); ?></span>
+                        <span class="meta-badge bg-indigo-50 border-indigo-100 text-indigo-700">Materi/KD: <?php echo e(!empty($q->tags) ? $q->tags : '-'); ?></span>
                     </div>
                     <div>
-                        <span class="meta-badge bg-amber-50 border-amber-100 text-amber-700">Bobot: {{ $q->score_weight }} Poin</span>
+                        <span class="meta-badge bg-amber-50 border-amber-100 text-amber-700">Bobot: <?php echo e($q->score_weight); ?> Poin</span>
                     </div>
                 </div>
 
                 <div class="question-body">
-                    <div class="question-number">{{ $index + 1 }}.</div>
+                    <div class="question-number"><?php echo e($index + 1); ?>.</div>
                     <div class="question-content">
                         
-                        {{-- Gambar Utama Soal --}}
-                        @if($q->question_image)
-                            <img src="{{ asset('storage/' . $q->question_image) }}" alt="Gambar Soal">
-                        @endif
                         
-                        {{-- Teks Soal --}}
-                        <div class="question-text">{!! $q->question_text !!}</div>
+                        <?php if($q->question_image): ?>
+                            <img src="<?php echo e(asset('storage/' . $q->question_image)); ?>" alt="Gambar Soal">
+                        <?php endif; ?>
                         
-                        {{-- 1. Pilihan Ganda --}}
-                        @if($qType == 'choice')
+                        
+                        <div class="question-text"><?php echo $q->question_text; ?></div>
+                        
+                        
+                        <?php if($qType == 'choice'): ?>
                             <ul class="options">
-                                @foreach(['A','B','C','D','E'] as $opt)
-                                    @if(isset($opts[$opt]) || isset($opts['image_'.$opt]))
-                                        <li class="{{ $q->correct_answer == $opt ? 'correct-answer' : '' }}">
-                                            <div class="opt-label">{{ $opt }}.</div> 
+                                <?php $__currentLoopData = ['A','B','C','D','E']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(isset($opts[$opt]) || isset($opts['image_'.$opt])): ?>
+                                        <li class="<?php echo e($q->correct_answer == $opt ? 'correct-answer' : ''); ?>">
+                                            <div class="opt-label"><?php echo e($opt); ?>.</div> 
                                             <div class="opt-content">
-                                                @if(isset($opts[$opt])) <span>{{ $opts[$opt] }}</span> @endif
+                                                <?php if(isset($opts[$opt])): ?> <span><?php echo e($opts[$opt]); ?></span> <?php endif; ?>
                                                 
-                                                @if(isset($opts['image_'.$opt]))
-                                                    <img src="{{ asset('storage/' . $opts['image_'.$opt]) }}">
-                                                @endif
+                                                <?php if(isset($opts['image_'.$opt])): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $opts['image_'.$opt])); ?>">
+                                                <?php endif; ?>
                                                 
-                                                @if($q->correct_answer == $opt) 
+                                                <?php if($q->correct_answer == $opt): ?> 
                                                     <span class="key-indicator">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg>
                                                         Kunci Jawaban
                                                     </span> 
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </li>
-                                    @endif
-                                @endforeach
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </ul>
                         
-                        {{-- 2. Benar Salah --}}
-                        @elseif($qType == 'true_false')
+                        
+                        <?php elseif($qType == 'true_false'): ?>
                             <ul class="options">
-                                <li class="{{ $q->correct_answer == 'A' ? 'correct-answer' : '' }}">
+                                <li class="<?php echo e($q->correct_answer == 'A' ? 'correct-answer' : ''); ?>">
                                     <div class="opt-label">A.</div>
                                     <div class="opt-content">Benar 
-                                        @if($q->correct_answer == 'A') <span class="key-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg> Kunci</span> @endif
+                                        <?php if($q->correct_answer == 'A'): ?> <span class="key-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg> Kunci</span> <?php endif; ?>
                                     </div>
                                 </li>
-                                <li class="{{ $q->correct_answer == 'B' ? 'correct-answer' : '' }}">
+                                <li class="<?php echo e($q->correct_answer == 'B' ? 'correct-answer' : ''); ?>">
                                     <div class="opt-label">B.</div>
                                     <div class="opt-content">Salah 
-                                        @if($q->correct_answer == 'B') <span class="key-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg> Kunci</span> @endif
+                                        <?php if($q->correct_answer == 'B'): ?> <span class="key-indicator"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path></svg> Kunci</span> <?php endif; ?>
                                     </div>
                                 </li>
                             </ul>
                         
-                        {{-- 3. Menjodohkan --}}
-                        @elseif($qType == 'matching')
+                        
+                        <?php elseif($qType == 'matching'): ?>
                             <table class="matching-table">
                                 <thead>
                                     <tr>
@@ -271,41 +271,43 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if(isset($opts['pairs']))
-                                        @foreach($opts['pairs'] as $idx => $pair)
+                                    <?php if(isset($opts['pairs'])): ?>
+                                        <?php $__currentLoopData = $opts['pairs']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $pair): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr>
-                                                <td align="center">{{ $idx + 1 }}</td>
+                                                <td align="center"><?php echo e($idx + 1); ?></td>
                                                 <td>
-                                                    @if(isset($pair['left_image'])) <img src="{{ asset('storage/' . $pair['left_image']) }}" style="max-width: 150px; max-height: 100px;"> @endif
-                                                    {{ $pair['left'] ?? '' }}
+                                                    <?php if(isset($pair['left_image'])): ?> <img src="<?php echo e(asset('storage/' . $pair['left_image'])); ?>" style="max-width: 150px; max-height: 100px;"> <?php endif; ?>
+                                                    <?php echo e($pair['left'] ?? ''); ?>
+
                                                 </td>
                                                 <td>
-                                                    @if(isset($pair['right_image'])) <img src="{{ asset('storage/' . $pair['right_image']) }}" style="max-width: 150px; max-height: 100px;"> @endif
-                                                    {{ $pair['right'] ?? '' }}
+                                                    <?php if(isset($pair['right_image'])): ?> <img src="<?php echo e(asset('storage/' . $pair['right_image'])); ?>" style="max-width: 150px; max-height: 100px;"> <?php endif; ?>
+                                                    <?php echo e($pair['right'] ?? ''); ?>
+
                                                 </td>
                                             </tr>
-                                        @endforeach
-                                    @endif
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         
-                        {{-- 4. Essai --}}
-                        @elseif($qType == 'essay')
+                        
+                        <?php elseif($qType == 'essay'): ?>
                             <div class="essay-key">
                                 <b class="text-slate-800">Kunci Jawaban / Panduan Koreksi:</b><br>
-                                <span class="text-slate-600">{{ $q->correct_answer ?: '(Koreksi secara manual / kebijaksanaan guru)' }}</span>
+                                <span class="text-slate-600"><?php echo e($q->correct_answer ?: '(Koreksi secara manual / kebijaksanaan guru)'); ?></span>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                     </div>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="text-center p-10 text-slate-500">
                 <h3>Paket Soal Masih Kosong</h3>
             </div>
-        @endforelse
+        <?php endif; ?>
 
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/print_questions.blade.php ENDPATH**/ ?>
