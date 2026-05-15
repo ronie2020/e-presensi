@@ -82,10 +82,36 @@ class LmsGradeController extends Controller
                                  ->whereYear('created_at', Carbon::now()->year);
             }
 
-            $assignments = $queryAssignments->orderBy('created_at')->get();
+            $rawAssignments = $queryAssignments->orderBy('created_at')->get();
+
+            // ====================================================================================
+            // FITUR BARU: Grouping Tugas Berdasarkan Judul (Mencegah Kolom Duplikat di Multi-Kelas)
+            // ====================================================================================
+            $assignments = collect();
+            $groupIdMapping = [];
+            $titleToIds = [];
+
+            foreach ($rawAssignments as $task) {
+                // Buat kunci unik berdasarkan judul (huruf kecil & hapus spasi ekstra) dan tipe tugas
+                $key = strtolower(trim($task->title)) . '_' . $task->assignment_type;
+                
+                if (!isset($titleToIds[$key])) {
+                    $assignments->push($task); // Simpan tugas pertama sebagai "Perwakilan Kolom"
+                    $titleToIds[$key] = [];
+                }
+                $titleToIds[$key][] = $task->id;
+            }
+
+            // Buat mapping agar nilai dari kelas lain masuk ke ID tugas "Perwakilan" yang sama
+            foreach ($titleToIds as $key => $ids) {
+                $representativeId = $ids[0];
+                foreach ($ids as $id) {
+                    $groupIdMapping[$id] = $representativeId;
+                }
+            }
+            // ====================================================================================
 
             // 3. Ambil Siswa
-            // PERBAIKAN: Menggunakan relasi 'schoolClass' bukan 'class'
             $students = Student::with('schoolClass') 
                 ->whereIn('class_id', $classIds)
                 ->orderBy('class_id') // Urutkan berdasarkan kelas dulu
@@ -93,11 +119,13 @@ class LmsGradeController extends Controller
                 ->get();
 
             // 4. Ambil Nilai Siswa
-            $assignmentIds = $assignments->pluck('id');
-            $submissions = LmsSubmission::whereIn('assignment_id', $assignmentIds)->get();
+            $rawAssignmentIds = $rawAssignments->pluck('id');
+            $submissions = LmsSubmission::whereIn('assignment_id', $rawAssignmentIds)->get();
 
             foreach ($submissions as $sub) {
-                $gradeBook[$sub->student_id][$sub->assignment_id] = $sub->grade;
+                // PERBAIKAN: Petakan ID tugas dari nilai siswa ke ID Perwakilan (Kolom yang digabungkan)
+                $repId = $groupIdMapping[$sub->assignment_id] ?? $sub->assignment_id;
+                $gradeBook[$sub->student_id][$repId] = $sub->grade;
             }
 
             // 5. Hitung Kalkulasi Rata-rata
