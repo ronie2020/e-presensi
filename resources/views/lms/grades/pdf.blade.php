@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Rekap Nilai - {{ $selectedClass->name }} - {{ $selectedSubject->name }}</title>
+    <title>Rekap Nilai - {{ $selectedSubject->name ?? 'Mapel' }}</title>
     <style>
         /* Mengatur halaman Landscape agar tabel nilai muat */
         @page { 
@@ -119,12 +119,11 @@
      <!-- INFO KELAS -->
     <table class="info-table">
         <tr>
-            <td class="label">Mata Pelajaran</td><td class="colon">:</td><td width="40%">{{ $selectedSubject->name }}</td>
-            <td class="label">Kelas</td><td class="colon">:</td><td>{{ $selectedClass->name }}</td>
+            <td class="label">Mata Pelajaran</td><td class="colon">:</td><td width="40%">{{ $selectedSubject->name ?? '-' }}</td>
+            <td class="label">Tingkat/Kelas</td><td class="colon">:</td><td>{{ $selectedLevel->name ?? 'Semua' }} / {{ $selectedClass->name ?? 'Semua' }}</td>
         </tr>
         <tr>
-            <td class="label">Guru Pengampu</td><td class="colon">:</td><td>{{ $teacher->name }}</td>
-            {{-- FITUR BARU: Tambahkan info periode ke Kop Surat PDF --}}
+            <td class="label">Guru Pengampu</td><td class="colon">:</td><td>{{ $teacher->name ?? Auth::user()->name ?? '-' }}</td>
             <td class="label">Periode Waktu</td><td class="colon">:</td><td>{{ ucfirst($selectedPeriod ?? 'Semester') }}</td>
         </tr>
         <tr>
@@ -139,7 +138,8 @@
             <tr>
                 <th width="30">No</th>
                 <th>Nama Siswa</th>
-                <th width="80">NISN</th>
+                <th width="70">NISN</th>
+                <th width="60">Kelas</th> {{-- KOLOM KELAS BARU --}}
                 
                 {{-- Loop Header Tugas (Max 10 kolom agar muat di PDF) --}}
                 @foreach($assignments->take(10) as $task)
@@ -150,7 +150,6 @@
                     </th>
                 @endforeach
 
-                {{-- PERBAIKAN: Judul berubah sesuai periode filter --}}
                 <th width="60">{{ ($selectedPeriod ?? 'semester') == 'semester' ? 'Nilai Rapor' : 'Rata2' }}</th>
             </tr>
         </thead>
@@ -159,8 +158,8 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td class="left name-col">{{ $student->name }}</td>
-                    {{-- Sinkronisasi pemanggilan ID siswa --}}
                     <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
+                    <td>{{ $student->class->name ?? '-' }}</td> {{-- DATA KELAS BARU --}}
                     
                     {{-- Loop data kolom (Hanya 10 pertama yang dicetak) --}}
                     @foreach($assignments->take(10) as $task)
@@ -170,7 +169,6 @@
                         <td>{{ $score ?? '-' }}</td>
                     @endforeach
 
-                    {{-- PERBAIKAN: Hapus blok foreach perhitungan yang berat, panggil langsung average_score --}}
                     <td style="font-weight: bold; background-color: #f9f9f9;">
                         {{ $student->average_score ?? 0 }}
                     </td>
@@ -196,7 +194,7 @@
         <div class="sign-box">
             <p>Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>Guru Mata Pelajaran</p>
             <div class="sign-space"></div>
-            <p class="sign-name">{{ $teacher->name }}</p>
+            <p class="sign-name">{{ $teacher->name ?? Auth::user()->name ?? '-' }}</p>
             <p>NIP. {{ $teacher->nip ?? '-' }}</p>
         </div>
     </div>

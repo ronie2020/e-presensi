@@ -49,19 +49,19 @@
                             <i class="ph-fill ph-chart-bar text-elevate-primary drop-shadow-sm"></i> Rekap Nilai
                         </h2>
                         <p class="text-elevate-dark/80 text-sm md:text-base font-semibold max-w-lg leading-relaxed">
-                            Pantau perkembangan nilai tugas, kuis, dan ulangan harian siswa dalam satu tampilan matriks terpadu.
+                            Pantau perkembangan nilai tugas, kuis, dan ulangan harian siswa berdasarkan tingkat atau kelas secara terpadu.
                         </p>
                     </div>
 
                     
-                    <?php if(($selectedClassId ?? false) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty()): ?>
+                    <?php if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty()): ?>
                         <div class="flex flex-col items-center md:items-end gap-2 w-full md:w-auto shrink-0">
                             <div class="flex flex-col sm:flex-row w-full justify-center gap-3">
-                                <a href="<?php echo e(route('lms.grades.export', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId])); ?>" class="btn-export px-6 py-3.5 bg-[#107C10] hover:bg-[#0c5c0c] text-white text-sm font-bold rounded-2xl shadow-lg shadow-[#107C10]/30 transition-all flex items-center justify-center gap-2 group border border-transparent active:scale-95">
+                                <a href="<?php echo e(route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId])); ?>" class="btn-export px-6 py-3.5 bg-[#107C10] hover:bg-[#0c5c0c] text-white text-sm font-bold rounded-2xl shadow-lg shadow-[#107C10]/30 transition-all flex items-center justify-center gap-2 group border border-transparent active:scale-95">
                                     <i class="ph-bold ph-microsoft-excel-logo text-xl"></i>
                                     <span>Export Excel</span>
                                 </a>
-                                <a href="<?php echo e(route('lms.grades.print', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId])); ?>" target="_blank" class="btn-print px-6 py-3.5 bg-white hover:bg-elevate-soft text-elevate-dark text-sm font-bold rounded-2xl shadow-sm border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95">
+                                <a href="<?php echo e(route('lms.grades.print', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId])); ?>" target="_blank" class="btn-print px-6 py-3.5 bg-white hover:bg-elevate-soft text-elevate-dark text-sm font-bold rounded-2xl shadow-sm border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95">
                                     <i class="ph-bold ph-printer text-xl"></i>
                                     <span>Cetak PDF</span>
                                 </a>
@@ -79,27 +79,42 @@
 
             
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 mb-8 relative overflow-hidden" style="animation-delay: 100ms">
-                <form action="<?php echo e(route('lms.grades.index')); ?>" method="GET" class="relative z-10" id="filterForm">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-5 items-end">
+                
+                
+                <form action="<?php echo e(route('lms.grades.index')); ?>" method="GET" class="relative z-10" id="filterForm" x-data="gradeFilter()">
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5 items-end">
+                        
                         
                         <div class="w-full">
-                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pilih Kelas</label>
+                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pilih Tingkat</label>
                             <div class="relative group">
-                                <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer transition-colors shadow-sm" required>
-                                    <option value="">-- Pilih Kelas --</option>
-                                    <?php $__currentLoopData = $classes ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <option value="<?php echo e($c->id); ?>" <?php echo e(($selectedClassId ?? '') == $c->id ? 'selected' : ''); ?>>
-                                            <?php echo e($c->name); ?>
-
-                                        </option>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <select name="level_id" id="level_id" x-model="selectedLevel" @change="handleLevelChange" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer transition-colors shadow-sm">
+                                    <option value="">-- Semua Tingkat --</option>
+                                    <option value="7">Kelas 7 (VII)</option>
+                                    <option value="8">Kelas 8 (VIII)</option>
+                                    <option value="9">Kelas 9 (IX)</option>
                                 </select>
                                 <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
                             </div>
                         </div>
 
+                        
                         <div class="w-full">
-                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pilih Mata Pelajaran</label>
+                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pilih Kelas</label>
+                            <div class="relative group">
+                                <select name="class_id" id="class_id" x-model="selectedClass" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer transition-colors shadow-sm">
+                                    <option value="">-- Semua Kelas --</option>
+                                    <template x-for="c in filteredClasses()" :key="c.id">
+                                        <option :value="c.id" x-text="c.name"></option>
+                                    </template>
+                                </select>
+                                <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="w-full">
+                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pilih Mapel <span class="text-red-500">*</span></label>
                             <div class="relative group">
                                 <select name="subject_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer transition-colors shadow-sm" required>
                                     <option value="">-- Pilih Mapel --</option>
@@ -116,7 +131,7 @@
 
                         
                         <div class="w-full">
-                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Periode Waktu</label>
+                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Periode Waktu <span class="text-red-500">*</span></label>
                             <div class="relative group">
                                 <select name="period" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer transition-colors shadow-sm" required>
                                     <option value="semester" <?php echo e(($selectedPeriod ?? 'semester') == 'semester' ? 'selected' : ''); ?>>Rekap Semester (Rapor)</option>
@@ -139,7 +154,7 @@
             </div>
 
             
-            <?php if(($selectedClassId ?? false) && ($selectedSubjectId ?? false)): ?>
+            <?php if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false)): ?>
                 <div class="animate-enter bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden" style="animation-delay: 200ms">
                     <?php if(($assignments ?? collect())->isEmpty()): ?>
                         
@@ -149,7 +164,7 @@
                             </div>
                             <h3 class="text-2xl font-black text-elevate-dark mb-2">Belum Ada Tugas</h3>
                             <p class="text-slate-500 text-sm max-w-md mx-auto leading-relaxed font-medium">
-                                Belum ada tugas atau kuis yang dibuat untuk kelas dan mata pelajaran ini. Silakan buat tugas terlebih dahulu.
+                                Belum ada tugas atau kuis yang dibuat untuk filter yang Anda pilih.
                             </p>
                             <a href="<?php echo e(route('lms.assignments.create')); ?>" class="mt-8 px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-colors flex items-center gap-2 active:scale-95">
                                 <i class="ph-bold ph-plus text-lg"></i> Buat Tugas Baru
@@ -157,12 +172,12 @@
                         </div>
                     <?php else: ?>
                         
-                        <div class="overflow-x-auto custom-scrollbar pb-2">
+                        <div class="overflow-x-auto custom-scrollbar pb-2 relative z-0">
                             <table class="w-full text-sm text-left border-collapse min-w-[800px]">
                                 <thead class="bg-elevate-soft/50 text-elevate-primary uppercase font-black text-[10px] tracking-wider border-b border-slate-100">
                                     <tr>
                                         <th class="px-5 py-5 sticky left-0 bg-elevate-soft/90 backdrop-blur-sm z-20 min-w-[4rem] max-w-[4rem] text-center border-r border-slate-100">No</th>
-                                        <th class="px-5 py-5 sticky left-[4rem] bg-elevate-soft/90 backdrop-blur-sm z-20 min-w-[220px] border-r border-slate-100 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)]">Nama Siswa</th>
+                                        <th class="px-5 py-5 sticky left-[4rem] bg-elevate-soft/90 backdrop-blur-sm z-20 min-w-[240px] border-r border-slate-100 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)]">Nama Siswa & Kelas</th>
                                         
                                         <!-- Loop Judul Tugas (Kolom) -->
                                         <?php $__currentLoopData = $assignments ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -203,18 +218,25 @@
                                             <td class="px-5 py-4 border-r border-slate-100 sticky left-[4rem] bg-white group-hover:bg-elevate-soft/10 transition-colors z-10 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)]">
                                                 <div class="flex flex-col">
                                                     <span class="font-black text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors"><?php echo e($student->name); ?></span>
-                                                    <span class="text-[10px] font-bold text-slate-400 font-mono tracking-wider mt-0.5"><?php echo e($student->nisn ?? $student->student_id ?? '-'); ?></span>
+                                                    <div class="flex items-center gap-1.5 mt-1">
+                                                        <span class="text-[10px] font-bold text-slate-400 font-mono tracking-wider"><?php echo e($student->nisn ?? $student->student_id ?? '-'); ?></span>
+                                                        <span class="text-slate-300">•</span>
+                                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600"><?php echo e($student->class->name ?? 'Tanpa Kelas'); ?></span>
+                                                    </div>
                                                 </div>
                                             </td>
 
                                             <!-- Loop Nilai per Tugas -->
                                             <?php $__currentLoopData = $assignments ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <?php $score = $gradeBook[$student->id][$task->id] ?? null; ?>
+                                                <?php 
+                                                    $score = $gradeBook[$student->id][$task->id] ?? null; 
+                                                    $batasLulus = $kkm ?? 70;
+                                                ?>
                                                 
                                                 <td class="px-5 py-4 text-center border-r border-slate-50">
                                                     <?php if($score !== null): ?>
                                                         <span class="inline-flex w-12 h-9 items-center justify-center rounded-xl text-sm font-black border shadow-sm
-                                                            <?php echo e($score < 70 ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]'); ?>">
+                                                            <?php echo e($score < $batasLulus ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]'); ?>">
                                                             <?php echo e($score); ?>
 
                                                         </span>
@@ -234,8 +256,8 @@
                                             <?php
                                                 $average = $student->average_score ?? 0;
                                                 $isSemester = ($selectedPeriod ?? 'semester') == 'semester';
-                                                $avgColor = $average > 0 && $average < 70 ? 'text-[#D13438] bg-[#FDE7E9]' : 'text-[#107C10] bg-[#DFF6DD]';
-                                                $semesterColor = $average > 0 && $average < 70 ? 'text-white bg-[#D13438]' : 'text-white bg-elevate-primary';
+                                                $avgColor = $average > 0 && $average < $batasLulus ? 'text-[#D13438] bg-[#FDE7E9]' : 'text-[#107C10] bg-[#DFF6DD]';
+                                                $semesterColor = $average > 0 && $average < $batasLulus ? 'text-white bg-[#D13438]' : 'text-white bg-elevate-primary';
                                             ?>
                                             <td class="px-5 py-4 text-center text-base font-black <?php echo e($isSemester ? $semesterColor : $avgColor); ?>">
                                                 <?php echo e($average); ?>
@@ -260,7 +282,7 @@
                         
                         <h3 class="text-3xl font-black text-elevate-dark mb-4">Mulai Pantau Nilai Siswa</h3>
                         <p class="text-slate-500 max-w-lg mx-auto mb-12 leading-relaxed text-sm font-semibold">
-                            Silakan tentukan <b>Kelas</b> dan <b>Mata Pelajaran</b> pada panel filter di atas untuk melihat matriks rekapitulasi nilai secara lengkap.
+                            Silakan tentukan <b>Tingkat/Kelas</b> dan <b>Mata Pelajaran</b> pada panel filter di atas untuk melihat matriks rekapitulasi nilai secara lengkap.
                         </p>
 
                         <!-- Quick Guide Steps -->
@@ -270,7 +292,7 @@
                                 <div class="absolute -top-4 -right-4 w-20 h-20 bg-elevate-soft rounded-full opacity-80 group-hover:scale-150 transition-transform duration-500 pointer-events-none"></div>
                                 <div class="w-12 h-12 bg-elevate-soft rounded-xl flex items-center justify-center text-elevate-primary font-black mb-5 border border-slate-200 group-hover:bg-elevate-primary group-hover:text-white group-hover:border-elevate-primary transition-colors z-10 relative text-lg shadow-sm">1</div>
                                 <h4 class="font-black text-elevate-dark mb-2 relative z-10 text-lg">Pilih Filter</h4>
-                                <p class="text-xs text-slate-500 font-medium leading-relaxed relative z-10">Pilih kelas dan mata pelajaran yang Anda ampu dari menu dropdown di atas.</p>
+                                <p class="text-xs text-slate-500 font-medium leading-relaxed relative z-10">Pilih tingkat/kelas dan mata pelajaran yang Anda ampu dari menu dropdown di atas.</p>
                             </div>
                             <!-- Step 2 -->
                             <div class="bg-white rounded-[1.5rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-[#B7DFB9] hover:shadow-md transition-all">
@@ -298,24 +320,68 @@
     <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        document.addEventListener('alpine:init', () => {
+            // Komponen Alpine JS untuk mengatur Dropdown Tingkat & Kelas yang bersambung
+            Alpine.data('gradeFilter', () => ({
+                selectedLevel: '<?php echo e($selectedLevelId ?? ''); ?>',
+                selectedClass: '<?php echo e($selectedClassId ?? ''); ?>',
+                allClasses: <?php echo json_encode($classes ?? [], 15, 512) ?>,
+                
+                filteredClasses() {
+                    // Jika tidak ada tingkat yang dipilih, tampilkan semua kelas
+                    if (!this.selectedLevel) return this.allClasses;
+                    
+                    const romawiMap = {
+                        '7': 'VII', '8': 'VIII', '9': 'IX'
+                    };
+                    const romawi = romawiMap[this.selectedLevel] || this.selectedLevel;
+                    
+                    // Filter kelas berdasarkan awal namanya (Misal '7' atau 'VII')
+                    return this.allClasses.filter(c => {
+                        const name = c.name.toString().toUpperCase();
+                        const levelStr = this.selectedLevel.toString().toUpperCase();
+                        const romawiStr = romawi.toString().toUpperCase();
+                        
+                        return name.startsWith(levelStr) || name.startsWith(romawiStr);
+                    });
+                },
+                
+                handleLevelChange() {
+                    // Reset pilihan kelas setiap kali tingkat diubah
+                    this.selectedClass = '';
+                }
+            }));
+        });
+
+        // Script Sweetalert
         document.addEventListener('DOMContentLoaded', function() {
             // 1. Loading saat Filter Form dikirim
             const filterForm = document.getElementById('filterForm');
             if(filterForm) {
                 filterForm.addEventListener('submit', function(e) {
-                    const selects = this.querySelectorAll('select');
-                    let isValid = true;
-                    selects.forEach(s => { if(s.value === '') isValid = false; });
-
-                    if(isValid) {
+                    const subject = document.querySelector('select[name="subject_id"]').value;
+                    const level = document.querySelector('select[name="level_id"]').value;
+                    const cls = document.querySelector('select[name="class_id"]').value;
+                    
+                    // Validasi: Harus pilih Mapel, dan minimal salah satu dari Tingkat atau Kelas
+                    if (subject === '' || (level === '' && cls === '')) {
+                        e.preventDefault();
                         Swal.fire({
-                            title: 'Sedang Memuat Data...',
-                            text: 'Mohon tunggu sebentar.',
-                            allowOutsideClick: false,
-                            didOpen: () => { Swal.showLoading(); },
+                            icon: 'warning',
+                            title: 'Pilih Filter',
+                            text: 'Harap pilih Mata Pelajaran, serta minimal pilih Tingkat atau Kelas.',
                             customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl' }
                         });
+                        return;
                     }
+
+                    Swal.fire({
+                        title: 'Sedang Memuat Data...',
+                        text: 'Mohon tunggu sebentar.',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); },
+                        customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl' }
+                    });
                 });
             }
 

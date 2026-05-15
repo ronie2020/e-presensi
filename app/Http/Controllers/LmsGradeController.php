@@ -9,7 +9,7 @@ use App\Models\Student;
 use App\Models\LmsSubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon; // <== FITUR BARU: Import Carbon untuk filter kalender
+use Carbon\Carbon;
 
 // ===> IMPORT PACKAGES <===
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -21,7 +21,7 @@ class LmsGradeController extends Controller
     /**
      * Helper: Ambil Data Nilai (Agar tidak duplikasi kode)
      */
-    private function getGradeData($classId, $subjectId, $period = 'semester')
+    private function getGradeData($levelId, $classId, $subjectId, $period = 'semester')
     {
         $user = Auth::user();
         
@@ -29,26 +29,51 @@ class LmsGradeController extends Controller
         $assignments = collect();
         $gradeBook = [];
         $selectedClass = null;
+        $selectedLevel = null;
         $selectedSubject = null;
 
-        if ($classId && $subjectId) {
-            $selectedClass = SchoolClass::find($classId);
+        // Validasi: Minimal Level ATAU Class dipilih, DAN Subject dipilih
+        if (($levelId || $classId) && $subjectId) {
             $selectedSubject = Subject::find($subjectId);
 
-            // Jika Kelas/Mapel tidak ditemukan, return data kosong
-            if (!$selectedClass || !$selectedSubject) {
-                return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedSubject');
+            $classIds = [];
+
+            // 1. Tentukan target ID kelas berdasarkan filter
+            if ($classId) {
+                $selectedClass = SchoolClass::find($classId);
+                if ($selectedClass) {
+                    $classIds = [$selectedClass->id];
+                }
+            } elseif ($levelId) {
+                // FITUR BARU: Deteksi tingkat dari string nama kelas (Tanpa butuh tabel Level)
+                $romawi = [
+                    '7' => 'VII', '8' => 'VIII', '9' => 'IX',
+                    '10' => 'X', '11' => 'XI', '12' => 'XII'
+                ][$levelId] ?? $levelId;
+
+                // Cari kelas yang diawali angka (misal '7') atau romawi (misal 'VII')
+                $classIds = SchoolClass::where('name', 'LIKE', $levelId . '%')
+                                    ->orWhere('name', 'LIKE', $romawi . '%')
+                                    ->pluck('id')->toArray();
+
+                // Buat object virtual agar tidak error saat dipanggil namanya di Blade/PDF
+                $selectedLevel = (object)['name' => 'Tingkat ' . $levelId];
             }
 
-            // Ambil Tugas
-            $queryAssignments = LmsAssignment::where('class_id', $classId)
+            // Jika Mapel tidak ditemukan ATAU tidak ada kelas sama sekali, return kosong
+            if (!$selectedSubject || empty($classIds)) {
+                return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedLevel', 'selectedSubject');
+            }
+
+            // 2. Ambil Tugas berdasarkan array classIds
+            $queryAssignments = LmsAssignment::whereIn('class_id', $classIds)
                 ->where('subject_id', $subjectId);
             
             if ($user->role !== 'admin') {
                 $queryAssignments->where('teacher_id', $user->id);
             }
             
-            // FITUR BARU: Filter Berdasarkan Periode
+            // Filter Waktu/Periode
             if ($period === 'daily') {
                 $queryAssignments->whereDate('created_at', Carbon::today());
             } elseif ($period === 'weekly') {
@@ -57,39 +82,37 @@ class LmsGradeController extends Controller
                 $queryAssignments->whereMonth('created_at', Carbon::now()->month)
                                  ->whereYear('created_at', Carbon::now()->year);
             }
-            // Jika period === 'semester', biarkan tampil semua (tanpa filter waktu)
 
             $assignments = $queryAssignments->orderBy('created_at')->get();
 
-            // Ambil Siswa
-            $students = Student::where('class_id', $classId)
-                ->orderBy('name')
+            // 3. Ambil Siswa
+            $students = Student::with('class') 
+                ->whereIn('class_id', $classIds)
+                ->orderBy('class_id') // Urutkan berdasarkan kelas dulu
+                ->orderBy('name')     // Baru urutkan sesuai abjad nama
                 ->get();
 
-            // Ambil Nilai (Menghindari N+1 Query dengan whereIn)
+            // 4. Ambil Nilai Siswa
             $assignmentIds = $assignments->pluck('id');
             $submissions = LmsSubmission::whereIn('assignment_id', $assignmentIds)->get();
 
-            // Mapping Nilai ke Array GradeBook
             foreach ($submissions as $sub) {
                 $gradeBook[$sub->student_id][$sub->assignment_id] = $sub->grade;
             }
 
-            // PERBAIKAN: Hitung Total dan Rata-rata di Controller (Bukan di Blade View)
+            // 5. Hitung Kalkulasi Rata-rata
             foreach ($students as $student) {
                 $studentScores = $gradeBook[$student->id] ?? [];
                 
-                // Hanya hitung jika ada nilai yang masuk
                 $totalScore = array_sum($studentScores);
                 $countScore = count($studentScores);
                 
-                // Sisipkan properti tambahan ke objek student
                 $student->total_score = $totalScore;
                 $student->average_score = $countScore > 0 ? round($totalScore / $countScore, 1) : 0;
             }
         }
 
-        return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedSubject');
+        return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedLevel', 'selectedSubject');
     }
 
     /**
@@ -97,19 +120,31 @@ class LmsGradeController extends Controller
      */
     public function index(Request $request)
     {
-        // PERBAIKAN: Gunakan select() agar query lebih ringan jika hanya butuh nama dan id
+        // Buat daftar dropdown tingkat secara manual tanpa perlu akses database
+        $levels = collect([
+            (object)['id' => '7', 'name' => 'Kelas 7 (VII)'],
+            (object)['id' => '8', 'name' => 'Kelas 8 (VIII)'],
+            (object)['id' => '9', 'name' => 'Kelas 9 (IX)'],
+            (object)['id' => '10', 'name' => 'Kelas 10 (X)'],
+            (object)['id' => '11', 'name' => 'Kelas 11 (XI)'],
+            (object)['id' => '12', 'name' => 'Kelas 12 (XII)'],
+        ]);
+
         $classes = SchoolClass::select('id', 'name')->orderBy('name')->get();
         $subjects = Subject::select('id', 'name')->orderBy('name')->get();
 
         $period = $request->period ?? 'semester';
-        $data = $this->getGradeData($request->class_id, $request->subject_id, $period);
+        
+        $data = $this->getGradeData($request->level_id, $request->class_id, $request->subject_id, $period);
 
         return view('lms.grades.index', array_merge($data, [
+            'levels' => $levels,
             'classes' => $classes,
             'subjects' => $subjects,
+            'selectedLevelId' => $request->level_id,
             'selectedClassId' => $request->class_id,
             'selectedSubjectId' => $request->subject_id,
-            'selectedPeriod' => $period // <== Kirim ke Blade
+            'selectedPeriod' => $period
         ]));
     }
 
@@ -118,21 +153,21 @@ class LmsGradeController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        if (!$request->class_id || !$request->subject_id) {
-            return back()->with('error', 'Pilih Kelas dan Mapel terlebih dahulu.');
+        if ((!$request->level_id && !$request->class_id) || !$request->subject_id) {
+            return back()->with('error', 'Pilih Tingkat/Kelas dan Mapel terlebih dahulu.');
         }
 
         $period = $request->period ?? 'semester';
-        $data = $this->getGradeData($request->class_id, $request->subject_id, $period);
+        $data = $this->getGradeData($request->level_id, $request->class_id, $request->subject_id, $period);
         
-        if (!$data['selectedClass'] || !$data['selectedSubject']) {
-             return back()->with('error', 'Data Kelas atau Mapel tidak valid.');
+        if (!$data['selectedSubject'] || (!$data['selectedClass'] && !$data['selectedLevel'])) {
+             return back()->with('error', 'Data tidak valid atau tidak ditemukan.');
         }
         
-        // PERBAIKAN: Masukkan periode ke data agar bisa dibaca oleh template Excel
         $data['selectedPeriod'] = $period;
 
-        $filename = 'Rekap_Nilai_' . str_replace(' ', '_', $data['selectedClass']->name) . '_' . date('Ymd') . '.xlsx';
+        $targetName = $data['selectedClass'] ? $data['selectedClass']->name : 'Tingkat_' . $data['selectedLevel']->name;
+        $filename = 'Rekap_Nilai_' . str_replace(' ', '_', $targetName) . '_' . date('Ymd') . '.xlsx';
 
         return Excel::download(new GradeRecapExport($data), $filename);
     }
@@ -142,31 +177,29 @@ class LmsGradeController extends Controller
      */
     public function printReport(Request $request)
     {
-        if (!$request->class_id || !$request->subject_id) {
-            return back()->with('error', 'Pilih Kelas dan Mapel terlebih dahulu.');
+        if ((!$request->level_id && !$request->class_id) || !$request->subject_id) {
+            return back()->with('error', 'Pilih Tingkat/Kelas dan Mapel terlebih dahulu.');
         }
 
         $period = $request->period ?? 'semester';
-        $data = $this->getGradeData($request->class_id, $request->subject_id, $period);
+        $data = $this->getGradeData($request->level_id, $request->class_id, $request->subject_id, $period);
         
-        if (!$data['selectedClass']) {
-             return back()->with('error', 'Data tidak valid.');
+        if (!$data['selectedSubject'] || (!$data['selectedClass'] && !$data['selectedLevel'])) {
+             return back()->with('error', 'Data tidak valid atau tidak ditemukan.');
         }
 
-        // PERBAIKAN: Masukkan periode ke data agar bisa dibaca oleh template PDF
         $data['selectedPeriod'] = $period;
-
         $data['teacher'] = Auth::user();
         
-        // PERBAIKAN: Hindari Hardcode nama Kepala Sekolah.
-        // Sebaiknya panggil dari Database pengaturan sekolah, atau setidaknya file .env
-        // Contoh jika menggunakan table settings atau helper function (sementara fallback ke hardcode jika kosong):
         $data['headmaster'] = config('school.headmaster_name', 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.'); 
         $data['headmaster_nip'] = config('school.headmaster_nip', '197xxxxxxxxxxxxx'); 
 
         $pdf = Pdf::loadView('lms.grades.pdf', $data);
         $pdf->setPaper('a4', 'landscape');
 
-        return $pdf->stream('Laporan_Nilai_' . $data['selectedClass']->name . '.pdf');
+        $targetName = $data['selectedClass'] ? $data['selectedClass']->name : 'Tingkat_' . $data['selectedLevel']->name;
+        $filename = 'Laporan_Nilai_' . str_replace(' ', '_', $targetName) . '.pdf';
+
+        return $pdf->stream($filename);
     }
 }

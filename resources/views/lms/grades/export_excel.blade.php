@@ -7,8 +7,9 @@
 <body>
     @php
         // Optimasi: Mendefinisikan variabel colspan agar kode lebih bersih
-        $totalColumns = $assignments->count() + 5;
-        $spasiTengah = $assignments->count() + 1;
+        // Ditambah 1 karena kita menambahkan kolom "Kelas"
+        $totalColumns = $assignments->count() + 6; 
+        $spasiTengah = $assignments->count() + 2;
     @endphp
 
     <table>
@@ -21,7 +22,7 @@
             </tr>
             <tr>
                 <th colspan="{{ $totalColumns }}" style="font-size: 12px; font-weight: bold; text-align: center;">
-                    Kelas: {{ $selectedClass->name ?? '-' }} | Mata Pelajaran: {{ $selectedSubject->name ?? '-' }}
+                    Tingkat: {{ $selectedLevel->name ?? 'Semua' }} | Kelas: {{ $selectedClass->name ?? 'Semua' }} | Mata Pelajaran: {{ $selectedSubject->name ?? '-' }}
                 </th>
             </tr>
             <tr>
@@ -37,6 +38,7 @@
                 <th style="width: 5px;">No</th>
                 <th style="width: 35px;">Nama Siswa</th>
                 <th style="width: 15px;">NISN</th>
+                <th style="width: 15px;">Kelas</th> {{-- KOLOM BARU --}}
                 
                 @foreach($assignments as $task)
                     {{-- Batasi panjang judul tugas biar kolom tidak terlalu lebar --}}
@@ -44,7 +46,6 @@
                 @endforeach
 
                 <th style="width: 10px;">Total</th>
-                {{-- PERBAIKAN: Judul Rata2 otomatis berubah jadi Nilai Rapor jika periode semester --}}
                 <th style="width: 15px;">{{ ($selectedPeriod ?? 'semester') == 'semester' ? 'Nilai Rapor' : 'Rata2' }}</th>
             </tr>
         </thead>
@@ -53,15 +54,14 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $student->name }}</td>
-                    {{-- Sinkronisasi pemanggilan ID siswa --}}
                     <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
+                    <td>{{ $student->class->name ?? '-' }}</td> {{-- DATA KELAS BARU --}}
                     
                     @foreach($assignments as $task)
                         @php $score = $gradeBook[$student->id][$task->id] ?? null; @endphp
                         <td>{{ $score ?? '-' }}</td>
                     @endforeach
 
-                    {{-- PERBAIKAN: Kode jauh lebih bersih, langsung panggil hasil hitungan dari Controller --}}
                     <td style="font-weight: bold;">{{ $student->total_score ?? 0 }}</td>
                     <td style="font-weight: bold;">{{ $student->average_score ?? 0 }}</td>
                 </tr>
@@ -95,7 +95,6 @@
             <tr>
                 <td></td>
                 <td style="text-align: center; font-weight: bold; text-decoration: underline;">
-                    {{-- Tidak lagi hardcode, dilempar dari controller (dengan fallback sementara) --}}
                     {{ $headmaster ?? 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.' }}
                 </td>
                 <td colspan="{{ $spasiTengah }}"></td>
