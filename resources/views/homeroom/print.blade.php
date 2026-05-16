@@ -182,7 +182,7 @@
         </div>
         <div class="signature-box">
             <p>
-                {{ config('school.city', 'Kota/Kabupaten') }}, {{ now()->isoFormat('D MMMM Y') }}<br>
+                {{ config('school.city', 'Ciamis') }}, {{ now()->isoFormat('D MMMM Y') }}<br>
                 Wali Kelas {{ $class->name }}
             </p>
             <div style="font-weight: bold; text-decoration: underline; margin-top: 60px;">

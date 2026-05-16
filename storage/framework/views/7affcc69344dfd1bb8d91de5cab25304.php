@@ -184,7 +184,7 @@
         </div>
         <div class="signature-box">
             <p>
-                <?php echo e(config('school.city', 'Kota/Kabupaten')); ?>, <?php echo e(now()->isoFormat('D MMMM Y')); ?><br>
+                <?php echo e(config('school.city', 'Ciamis')); ?>, <?php echo e(now()->isoFormat('D MMMM Y')); ?><br>
                 Wali Kelas <?php echo e($class->name); ?>
 
             </p>
