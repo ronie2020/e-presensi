@@ -52,40 +52,10 @@ class StudentValidationController extends Controller
             'nik.unique' => 'NIK ini sudah terdaftar pada akun siswa lain.',
         ]);
 
-        // =================================================================
-        // VALIDASI CERDAS NIK (ALGORITMA DUKCAPIL)
-        // Mengecek apakah NIK milik orang lain berdasarkan Tanggal Lahir & Gender
-        // =================================================================
-        if ($student->dob && $student->gender) {
-            $dob = \Carbon\Carbon::parse($student->dob);
-            $day = $dob->format('d');
-            $month = $dob->format('m');
-            $year = $dob->format('y'); // Mengambil 2 digit tahun terakhir
-
-            // Aturan NIK Dukcapil: Jika perempuan, tanggal lahir ditambah 40
-            if (strtoupper($student->gender) === 'P') {
-                $day = (int)$day + 40;
-            }
-
-            // Format NIK yang diharapkan (DDMMYY)
-            $expectedDobInNik = sprintf('%02d%02d%02d', $day, $month, $year);
-            
-            // Ambil digit ke-7 sampai 12 dari inputan NIK siswa
-            $actualDobInNik = substr($request->nik, 6, 6);
-
-            // Jika tidak cocok, berarti dia memasukkan NIK orang lain / asal-asalan
-            if ($expectedDobInNik !== $actualDobInNik) {
-                return redirect()->back()->withErrors([
-                    'nik' => 'NIK Ditolak! NIK tidak cocok dengan Tanggal Lahir ('.$dob->format('d-m-Y').') dan Jenis Kelamin ('.$student->gender.') Anda di sistem. Pastikan Anda memasukkan NIK milik sendiri, bukan milik orang tua.'
-                ])->withInput();
-            }
-        }
-        // =================================================================
-
         // Simpan data dan set flag is_validated menjadi true
         $student->update([
             'nisn' => $request->nisn,
-            'student_id' => $request->nisn, // Di-sync karena dipakai untuk Auth Password
+            'student_id' => $request->nisn, // Di-sync karena dipakai untuk Auth Password (berdasarkan Model Anda)
             'nik' => $request->nik,
             'is_validated' => true
         ]);
