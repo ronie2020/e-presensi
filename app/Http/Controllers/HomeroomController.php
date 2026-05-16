@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\AttendanceSiswa;
+use App\Models\GradeRecord; // <-- Ditambahkan
+use App\Models\GradeItem;   // <-- Ditambahkan
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -138,7 +140,17 @@ class HomeroomController extends Controller
             // ====================================================================
             if ($alfaThisSemester <= 3 && $violationPoints <= 30) {
                 
-                $academicScore = $student->score ?? 0; // Skala 0-100
+                // --- INTEGRASI NILAI AKADEMIK NYATA ---
+                // Cari data raport (GradeRecord) terakhir milik siswa ini
+                $latestGradeRecord = GradeRecord::where('student_id', $student->id)->latest('id')->first();
+                $academicScore = 0;
+                
+                if ($latestGradeRecord) {
+                    // Hitung rata-rata nilai dari seluruh mata pelajaran (GradeItem) di raport tersebut
+                    $averageGrade = GradeItem::where('grade_record_id', $latestGradeRecord->id)->avg('score');
+                    $academicScore = round($averageGrade ?? 0);
+                }
+                // --------------------------------------
 
                 // 1. Skor Kehadiran (Sempurna = 100, tiap 1 Alpa dikurangi 15 poin)
                 $attendanceScore = 100 - ($alfaThisSemester * 15);
@@ -149,7 +161,7 @@ class HomeroomController extends Controller
                 // 3. Skor Keaktifan Tugas (Literasi x 3, Habit x 1)
                 $taskScore = ($literacyCount * 3) + ($habitCount * 1);
 
-                // TOTAL SKOR REKOMENDASI
+                // TOTAL SKOR REKOMENDASI (Proporsi seimbang antara Akademik & Non-Akademik)
                 $recommendationScore = $academicScore + $attendanceScore + $netDisciplineScore + $taskScore;
 
                 if ($recommendationScore > 0) {
