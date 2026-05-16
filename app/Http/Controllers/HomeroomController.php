@@ -40,7 +40,7 @@ class HomeroomController extends Controller
             $allClasses = null; 
         }
 
-        // --- MENGAMBIL DATA SISWA & EAGER LOADING RELASI BARU ---
+        // --- MENGAMBIL DATA SISWA & EAGER LOADING ---
         $students = Student::with(['disciplineRecords.disciplineType', 'attendances', 'habits', 'literacyJournals'])
             ->where('class_id', $class->id)
             ->where('status', 'active')
@@ -53,48 +53,51 @@ class HomeroomController extends Controller
             'total_violations' => 0,
             'total_merits' => 0,
             'alfa_count' => 0,
-            'total_literacy' => 0, // Statistik Literasi
-            'total_habits' => 0,   // Statistik Pembiasaan
+            'total_literacy' => 0, 
+            'total_habits' => 0,   
         ];
 
         $warningStudents = collect();
         $topStudents = collect();
-        $topLiteracy = collect(); // Leaderboard Literasi
-        $topHabits = collect();   // Leaderboard Habit
+        $topLiteracy = collect();
+        $topHabits = collect();
+        
+        // KOLEKSI BARU: NOMINASI PENGHARGAAN AKHIR SEMESTER
+        $awardNominees = collect(); 
 
         $startOfMonth = Carbon::now()->startOfMonth();
+        $startOfSemester = Carbon::now()->subMonths(6); // Asumsi 1 semester terakhir
 
         foreach ($students as $student) {
-            // 1. Poin Kedisiplinan
+            // 1. Poin Kedisiplinan (Akumulasi Semester/Total)
             $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
             $meritPoints = $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
             
             $stats['total_violations'] += $violationPoints;
             $stats['total_merits'] += $meritPoints;
 
-            // 2. Absensi
+            // 2. Absensi (Bulan ini untuk dashboard atas, Semester untuk nominasi)
             $alfaThisMonth = $student->attendances
                 ->where('attendance_date', '>=', $startOfMonth)
+                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
+                ->count();
+                
+            $alfaThisSemester = $student->attendances
+                ->where('attendance_date', '>=', $startOfSemester)
                 ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
                 ->count();
             
             $stats['alfa_count'] += $alfaThisMonth;
 
-            // 3. Literasi (Jumlah buku direview bulan ini)
-            $literacyCount = $student->literacyJournals
-                ->where('created_at', '>=', $startOfMonth)
-                ->count();
-            $stats['total_literacy'] += $literacyCount;
-
-            // 4. Pembiasaan/Habit (Jumlah hari lapor bulan ini)
-            $habitCount = $student->habits
-                ->where('report_date', '>=', $startOfMonth->format('Y-m-d'))
-                ->count();
-            $stats['total_habits'] += $habitCount;
-
-            // --- PENGELOMPOKAN DATA ---
+            // 3. Literasi & Habit
+            $literacyCount = $student->literacyJournals->count();
+            $habitCount = $student->habits->count();
             
-            // Deteksi Dini
+            $stats['total_literacy'] += $student->literacyJournals->where('created_at', '>=', $startOfMonth)->count();
+            $stats['total_habits'] += $student->habits->where('report_date', '>=', $startOfMonth->format('Y-m-d'))->count();
+
+            // --- PENGELOMPOKAN DATA DASHBOARD ---
+            
             if ($violationPoints >= 50 || $alfaThisMonth >= 3) {
                 $warningStudents->push((object)[
                     'id' => $student->id,
@@ -106,7 +109,6 @@ class HomeroomController extends Controller
                 ]);
             }
 
-            // Top Karakter
             if ($meritPoints > 0) {
                 $topStudents->push((object)[
                     'name' => $student->name,
@@ -115,22 +117,51 @@ class HomeroomController extends Controller
                 ]);
             }
 
-            // Top Literasi
-            if ($literacyCount > 0) {
+            $litCountMonth = $student->literacyJournals->where('created_at', '>=', $startOfMonth)->count();
+            if ($litCountMonth > 0) {
                 $topLiteracy->push((object)[
                     'name' => $student->name,
                     'photo' => $student->photo_path,
-                    'count' => $literacyCount,
+                    'count' => $litCountMonth,
                 ]);
             }
 
-            // Top Pembiasaan (Paling Rajin Lapor)
-            if ($habitCount > 0) {
+            $habCountMonth = $student->habits->where('report_date', '>=', $startOfMonth->format('Y-m-d'))->count();
+            if ($habCountMonth > 0) {
                 $topHabits->push((object)[
                     'name' => $student->name,
                     'photo' => $student->photo_path,
-                    'count' => $habitCount,
+                    'count' => $habCountMonth,
                 ]);
+            }
+
+            // ====================================================================
+            // ALGORITMA NOMINASI PENGHARGAAN SISWA TELADAN
+            // Syarat Utama: Alpa = 0 dan Pelanggaran = 0
+            // ====================================================================
+            if ($alfaThisSemester == 0 && $violationPoints == 0) {
+                
+                // Asumsi nilai rata-rata akademik diambil dari kolom 'score' di tabel students (jika ada)
+                // Jika kosong, kita anggap 0. 
+                $academicScore = $student->score ?? 0; 
+
+                // Perhitungan Skor Kelayakan (Recommendation Score)
+                // Bobot: Prestasi (x2), Literasi (x3), Pembiasaan (x1), Akademik (x1)
+                $recommendationScore = ($meritPoints * 2) + ($literacyCount * 3) + ($habitCount * 1) + $academicScore;
+
+                // Hanya masukkan jika ada interaksi/prestasi/tugas yang dikerjakan
+                if ($recommendationScore > 0) {
+                    $awardNominees->push((object)[
+                        'id' => $student->id,
+                        'name' => $student->name,
+                        'photo' => $student->photo_path,
+                        'academic_score' => $academicScore,
+                        'merit_points' => $meritPoints,
+                        'literacy_count' => $literacyCount,
+                        'habit_count' => $habitCount,
+                        'total_score' => $recommendationScore
+                    ]);
+                }
             }
         }
 
@@ -139,7 +170,14 @@ class HomeroomController extends Controller
         $topStudents = $topStudents->sortByDesc('merit_points')->take(5);
         $topLiteracy = $topLiteracy->sortByDesc('count')->take(5);
         $topHabits = $topHabits->sortByDesc('count')->take(5);
+        
+        // Ambil Top 10 Siswa Teladan
+        $awardNominees = $awardNominees->sortByDesc('total_score')->take(10);
 
-        return view('homeroom.dashboard', compact('class', 'stats', 'warningStudents', 'topStudents', 'topLiteracy', 'topHabits', 'isAdminOrKepsek', 'allClasses'));
+        return view('homeroom.dashboard', compact(
+            'class', 'stats', 'warningStudents', 'topStudents', 
+            'topLiteracy', 'topHabits', 'awardNominees', 
+            'isAdminOrKepsek', 'allClasses'
+        ));
     }
 }
