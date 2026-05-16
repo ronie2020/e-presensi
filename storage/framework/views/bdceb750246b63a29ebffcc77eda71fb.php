@@ -25,7 +25,7 @@
         }
     </script>
 
-    {{-- Phosphor Icons --}}
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -155,11 +155,11 @@
          ============================================== -->
     <div class="sheet">
         
-        {{-- KOP SURAT RESMI --}}
+        
         <table class="kop-surat">
             <tr>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" style="width: 85px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
                 <td width="70%" style="text-align: center;">
                     <div class="kop-dinas">PEMERINTAH KABUPATEN CIAMIS</div>
@@ -173,7 +173,7 @@
                     </div>
                 </td>
                 <td width="15%" style="text-align: center;">
-                    <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
+                    <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo SMP" style="width: 90px; height: auto; object-fit: contain;" onerror="this.style.display='none'">
                 </td>
             </tr>
         </table>
@@ -182,7 +182,7 @@
         <!-- JUDUL LAPORAN -->
         <div class="judul-surat">
             <h2>LAPORAN REKAPITULASI JURNAL MENGAJAR</h2>
-            <p>Periode: <strong>{{ \Carbon\Carbon::parse($startDate)->locale('id')->translatedFormat('d F Y') }}</strong> s.d. <strong>{{ \Carbon\Carbon::parse($endDate)->locale('id')->translatedFormat('d F Y') }}</strong></p>
+            <p>Periode: <strong><?php echo e(\Carbon\Carbon::parse($startDate)->locale('id')->translatedFormat('d F Y')); ?></strong> s.d. <strong><?php echo e(\Carbon\Carbon::parse($endDate)->locale('id')->translatedFormat('d F Y')); ?></strong></p>
         </div>
 
         <!-- TABEL DATA -->
@@ -198,47 +198,48 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($sessions as $index => $session)
-                    @php 
+                <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php 
                         $hadir = ($session->hadir_count ?? 0) + ($session->late_count ?? 0); 
                         $sakit = $session->sick_count ?? 0;
                         $izin = $session->permission_count ?? 0;
                         $alpha = $session->alpha_count ?? 0; 
-                    @endphp
+                    ?>
                     <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td class="text-center"><?php echo e($index + 1); ?></td>
                         <td class="text-center">
-                            <span class="text-bold">{{ \Carbon\Carbon::parse($session->date)->format('d/m/Y') }}</span><br>
-                            {{ $session->started_at ? \Carbon\Carbon::parse($session->started_at)->format('H:i') : '-' }} WIB
+                            <span class="text-bold"><?php echo e(\Carbon\Carbon::parse($session->date)->format('d/m/Y')); ?></span><br>
+                            <?php echo e($session->started_at ? \Carbon\Carbon::parse($session->started_at)->format('H:i') : '-'); ?> WIB
                         </td>
                         <td>
-                            <span class="text-bold">{{ $session->teacher->name ?? '-' }}</span><br>
-                            Mapel: {{ $session->schedule->subject->name ?? '-' }}
+                            <span class="text-bold"><?php echo e($session->teacher->name ?? '-'); ?></span><br>
+                            Mapel: <?php echo e($session->schedule->subject->name ?? '-'); ?>
+
                         </td>
-                        <td class="text-center">{{ $session->schedule->schoolClass->name ?? '-' }}</td>
+                        <td class="text-center"><?php echo e($session->schedule->schoolClass->name ?? '-'); ?></td>
                         <td class="col-materi">
-                            <span class="text-bold">{{ $session->topic ?? 'Tanpa Topik' }}</span><br>
-                            <span style="font-size: 9.5pt;">{{ $session->activities ?? '-' }}</span>
+                            <span class="text-bold"><?php echo e($session->topic ?? 'Tanpa Topik'); ?></span><br>
+                            <span style="font-size: 9.5pt;"><?php echo e($session->activities ?? '-'); ?></span>
                         </td>
                         <td style="font-size: 9.5pt; line-height: 1.4;">
-                            Hadir/Telat: <strong>{{ $hadir }}</strong> Siswa<br>
-                            Sakit/Izin: <strong>{{ $sakit + $izin }}</strong> Siswa<br>
-                            Alpha: <strong>{{ $alpha }}</strong> Siswa
+                            Hadir/Telat: <strong><?php echo e($hadir); ?></strong> Siswa<br>
+                            Sakit/Izin: <strong><?php echo e($sakit + $izin); ?></strong> Siswa<br>
+                            Alpha: <strong><?php echo e($alpha); ?></strong> Siswa
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" class="text-center" style="padding: 20px;">
                             <em>Tidak ada data jurnal mengajar pada periode atau filter yang dipilih.</em>
                         </td>
                     </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
 
         <!-- AREA TANDA TANGAN (Otomatis pindah ke halaman baru jika tidak muat) -->
         <div class="ttd-box">
-            <p>Lakbok, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}<br>Kepala Sekolah,</p>
+            <p>Lakbok, <?php echo e(\Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y')); ?><br>Kepala Sekolah,</p>
             <div style="height: 70px;"></div>
             <p class="text-bold" style="text-decoration: underline; margin-bottom: 2px;">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
             <p style="margin-top: 0;">NIP. 19820928 201101 1 002</p>
@@ -248,4 +249,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/print-teaching-journal.blade.php ENDPATH**/ ?>
