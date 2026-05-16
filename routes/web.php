@@ -293,6 +293,7 @@ Route::middleware('auth')->group(function () {
     // ===== ROUTE homeroom <---
     // =========================================================================
     Route::get('/homeroom/dashboard', [\App\Http\Controllers\HomeroomController::class, 'index'])->name('homeroom.dashboard');
+    Route::get('/homeroom/print', [\App\Http\Controllers\HomeroomController::class, 'print'])->name('homeroom.print'); // <--- TAMBAHKAN BARIS INI
     Route::get('/admin/bk/early-warning', [\App\Http\Controllers\BkTeacherController::class, 'earlyWarning'])->name('admin.bk.early_warning');
     // =========================================================================
     

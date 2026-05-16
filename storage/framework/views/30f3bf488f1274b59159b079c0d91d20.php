@@ -45,7 +45,7 @@
                             </form>
                         <?php endif; ?>
 
-                        <a href="<?php echo e(Route::has('reports.classReport') ? route('reports.classReport', ['class_id' => $class->id]) : '#'); ?>" class="w-full sm:w-auto px-5 py-3 bg-white text-elevate-dark font-bold rounded-xl hover:bg-elevate-soft transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-95">
+                        <a href="<?php echo e(route('homeroom.print', ['class_id' => $class->id])); ?>" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-white text-elevate-dark font-bold rounded-xl hover:bg-elevate-soft transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-95">
                             <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> Rekap PDF
                         </a>
                     </div>
