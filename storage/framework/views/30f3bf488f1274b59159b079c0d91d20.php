@@ -25,12 +25,10 @@
                             <i class="ph-fill ph-chalkboard-teacher"></i> Dashboard Wali Kelas
                         </div>
                         <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Kelas <?php echo e($class->name); ?></h1>
-                        <p class="text-elevate-soft font-medium text-sm md:text-base max-w-2xl">Pantau statistik kedisiplinan, kehadiran, dan prestasi anak didik Anda secara real-time.</p>
+                        <p class="text-elevate-soft font-medium text-sm md:text-base max-w-2xl">Pantau statistik kedisiplinan, literasi, pembiasaan, dan kehadiran anak didik Anda.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        
-                        
                         <?php if(isset($isAdminOrKepsek) && $isAdminOrKepsek && isset($allClasses)): ?>
                             <form action="<?php echo e(route('homeroom.dashboard')); ?>" method="GET" class="relative w-full sm:w-auto">
                                 <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer font-bold shadow-sm transition-all">
@@ -55,38 +53,57 @@
             </div>
 
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-blue-200 transition-colors">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-users-three"></i></div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-fill ph-users-three"></i></div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Siswa</p>
-                        <p class="text-2xl font-black text-slate-800"><?php echo e($stats['total_students']); ?></p>
+                        <p class="text-xl font-black text-slate-800"><?php echo e($stats['total_students']); ?></p>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-emerald-200 transition-colors">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-star"></i></div>
+                
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-emerald-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="ph-fill ph-star"></i></div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Poin Karakter</p>
-                        <p class="text-2xl font-black text-emerald-600">+<?php echo e($stats['total_merits']); ?></p>
+                        <p class="text-xl font-black text-emerald-600">+<?php echo e($stats['total_merits']); ?></p>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-rose-200 transition-colors">
-                    <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
+
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-purple-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl"><i class="ph-fill ph-books"></i></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Literasi Bulan Ini</p>
+                        <p class="text-xl font-black text-purple-600"><?php echo e($stats['total_literacy']); ?></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-teal-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl"><i class="ph-fill ph-list-checks"></i></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jurnal Pembiasaan</p>
+                        <p class="text-xl font-black text-teal-600"><?php echo e($stats['total_habits']); ?></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-amber-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl"><i class="ph-fill ph-calendar-x"></i></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Alpa</p>
+                        <p class="text-xl font-black text-amber-600"><?php echo e($stats['alfa_count']); ?></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-rose-200 transition-colors">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl"><i class="ph-fill ph-warning-circle"></i></div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pelanggaran</p>
-                        <p class="text-2xl font-black text-rose-600">-<?php echo e($stats['total_violations']); ?></p>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 hover:border-amber-200 transition-colors">
-                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shrink-0"><i class="ph-fill ph-calendar-x"></i></div>
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Alpa (Bulan Ini)</p>
-                        <p class="text-2xl font-black text-amber-600"><?php echo e($stats['alfa_count']); ?></p>
+                        <p class="text-xl font-black text-rose-600">-<?php echo e($stats['total_violations']); ?></p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 
                 
                 <div class="lg:col-span-2">
@@ -152,7 +169,7 @@
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden h-full">
                         <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
                             <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                                <i class="ph-fill ph-crown text-amber-500"></i> Bintang Kelas
+                                <i class="ph-fill ph-crown text-amber-500"></i> Bintang Karakter
                             </h3>
                         </div>
                         <div class="p-6">
@@ -191,6 +208,84 @@
                 </div>
 
             </div>
+
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-purple-100 overflow-hidden">
+                    <div class="p-6 border-b border-purple-50 bg-purple-50/50 flex justify-between items-center">
+                        <h3 class="font-black text-purple-800 text-lg flex items-center gap-2">
+                            <i class="ph-fill ph-books text-purple-500"></i> Duta Literasi Kelas (Top 5)
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <?php if($topLiteracy->count() > 0): ?>
+                            <div class="space-y-4">
+                                <?php $__currentLoopData = $topLiteracy; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $tl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-purple-200 transition-colors shadow-sm">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-8 font-black text-slate-300 text-center"><?php echo e($index + 1); ?></div>
+                                            <div class="w-10 h-10 rounded-full bg-white border border-slate-200 overflow-hidden shrink-0">
+                                                <?php if($tl->photo): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $tl->photo)); ?>" class="w-full h-full object-cover">
+                                                <?php else: ?>
+                                                    <div class="w-full h-full flex items-center justify-center font-bold text-slate-400"><?php echo e(substr($tl->name, 0, 1)); ?></div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <h4 class="font-bold text-slate-700"><?php echo e($tl->name); ?></h4>
+                                        </div>
+                                        <span class="text-[10px] font-black text-purple-700 bg-purple-100 px-3 py-1.5 rounded-xl border border-purple-200"><?php echo e($tl->count); ?> Buku</span>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-8">
+                                <i class="ph-duotone ph-book-open-text text-4xl text-slate-300 mb-2 block"></i>
+                                <p class="text-sm font-bold text-slate-500">Belum ada siswa yang mengisi Jurnal Literasi bulan ini.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-teal-100 overflow-hidden">
+                    <div class="p-6 border-b border-teal-50 bg-teal-50/50 flex justify-between items-center">
+                        <h3 class="font-black text-teal-800 text-lg flex items-center gap-2">
+                            <i class="ph-fill ph-list-checks text-teal-500"></i> Terajin Lapor Pembiasaan
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <?php if($topHabits->count() > 0): ?>
+                            <div class="space-y-4">
+                                <?php $__currentLoopData = $topHabits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $th): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-teal-200 transition-colors shadow-sm">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-8 font-black text-slate-300 text-center"><?php echo e($index + 1); ?></div>
+                                            <div class="w-10 h-10 rounded-full bg-white border border-slate-200 overflow-hidden shrink-0">
+                                                <?php if($th->photo): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $th->photo)); ?>" class="w-full h-full object-cover">
+                                                <?php else: ?>
+                                                    <div class="w-full h-full flex items-center justify-center font-bold text-slate-400"><?php echo e(substr($th->name, 0, 1)); ?></div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <h4 class="font-bold text-slate-700"><?php echo e($th->name); ?></h4>
+                                        </div>
+                                        <span class="text-[10px] font-black text-teal-700 bg-teal-100 px-3 py-1.5 rounded-xl border border-teal-200"><?php echo e($th->count); ?> Hari</span>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-8">
+                                <i class="ph-duotone ph-mosque text-4xl text-slate-300 mb-2 block"></i>
+                                <p class="text-sm font-bold text-slate-500">Belum ada siswa yang mengisi Jurnal Pembiasaan Keagamaan bulan ini.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </div>
  <?php echo $__env->renderComponent(); ?>
