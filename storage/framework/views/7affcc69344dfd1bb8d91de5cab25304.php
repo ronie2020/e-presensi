@@ -59,7 +59,7 @@
         <tr>
             <!-- Logo Kiri -->
             <td width="15%">
-                <img src="<?php echo e(asset('assets/images/logo_dinas.png')); ?>" alt="Logo" style="width: 80px; height: auto;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo" style="width: 80px; height: auto;" onerror="this.style.display='none'">
             </td>
             <td width="70%">
                 <div class="kop-dinas"><?php echo e(config('school.kop_dinas', 'DINAS PENDIDIKAN')); ?></div>
@@ -69,7 +69,7 @@
             </td>
             <!-- Logo Kanan -->
             <td width="15%">
-                <img src="<?php echo e(asset('assets/images/logo_sekolah.png')); ?>" alt="Logo" style="width: 85px; height: auto;" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo" style="width: 85px; height: auto;" onerror="this.style.display='none'">
             </td>
         </tr>
     </table>
