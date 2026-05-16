@@ -5,37 +5,40 @@
     <div class="py-8 bg-slate-50 min-h-screen font-sans">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Header Panel --}}
-            <div class="relative rounded-[2.5rem] bg-elevate-dark p-8 md:p-10 text-white shadow-xl shadow-elevate-dark/10 overflow-hidden border border-elevate-primary/30 mb-8">
-                <div class="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-elevate-primary blur-[100px] opacity-40 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-elevate-accent blur-[100px] opacity-20 pointer-events-none"></div>
+            {{-- Header Panel (New Fresh Light Theme) --}}
+            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 md:p-10 mb-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/20 overflow-hidden border border-white/60">
+                
+                {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none backdrop-blur-xl"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-elevate-accent border border-white/20 mb-4 shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher"></i> Dashboard Wali Kelas
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[#0d52a1] border border-white/50 mb-4 shadow-sm">
+                            <i class="ph-fill ph-chalkboard-teacher text-lg"></i> Dashboard Wali Kelas
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Kelas {{ $class->name }}</h1>
-                        <p class="text-elevate-soft font-medium text-sm md:text-base max-w-2xl">Pantau statistik kedisiplinan, literasi, pembiasaan, dan kehadiran anak didik Anda.</p>
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2 text-[#0d52a1]">Kelas {{ $class->name }}</h1>
+                        <p class="font-medium text-sm md:text-base max-w-2xl text-[#2c3f61]/80">Pantau statistik kedisiplinan, literasi, pembiasaan, dan kehadiran anak didik Anda secara komprehensif.</p>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                         @if(isset($isAdminOrKepsek) && $isAdminOrKepsek && isset($allClasses))
                             <form action="{{ route('homeroom.dashboard') }}" method="GET" class="relative w-full sm:w-auto">
-                                <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-white/50 cursor-pointer font-bold shadow-sm transition-all">
+                                <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all">
                                     @foreach($allClasses as $c)
                                         <option value="{{ $c->id }}" {{ $class->id == $c->id ? 'selected' : '' }} class="text-slate-800 font-semibold">
                                             Pantau Kelas {{ $c->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#0d52a1]">
                                     <i class="ph-bold ph-caret-down text-lg"></i>
                                 </div>
                             </form>
                         @endif
 
-                        <a href="{{ route('homeroom.print', ['class_id' => $class->id]) }}" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-white text-elevate-dark font-bold rounded-xl hover:bg-elevate-soft transition-all shadow-lg flex items-center justify-center gap-2 group active:scale-95">
+                        <a href="{{ route('homeroom.print', ['class_id' => $class->id]) }}" target="_blank" class="w-full sm:w-auto px-6 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20">
                             <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> Rekap PDF
                         </a>
                     </div>
