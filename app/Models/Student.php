@@ -130,7 +130,8 @@ class Student extends Authenticatable
         'score', 
         'ramadan_points',
         'join_date', 
-        'general_notes'
+        'general_notes',
+        'is_validated' // Kolom baru untuk verifikasi data mandiri
     ];
 
     /**
