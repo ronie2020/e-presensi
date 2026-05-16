@@ -176,9 +176,9 @@
                 Kepala Sekolah
             </p>
             <div style="font-weight: bold; text-decoration: underline; margin-top: 60px;">
-                {{ config('school.headmaster_name', '...........................................') }}
+                {{ config('school.headmaster_name', 'Tantan Sutandi Nugraha, S.Si., M.Pd.') }}
             </div>
-            <div style="margin-top: 5px;">NIP. {{ config('school.headmaster_nip', '.....................................') }}</div>
+            <div style="margin-top: 5px;">NIP. {{ config('school.headmaster_nip', '19820928 201101 1 002') }}</div>
         </div>
         <div class="signature-box">
             <p>
