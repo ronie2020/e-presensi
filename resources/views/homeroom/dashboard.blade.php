@@ -120,7 +120,7 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="w-12 h-12 rounded-full bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                                                     @if($ws->photo)
-                                                        <img src="{{ asset('storage/' . $ws->photo) }}" class="w-full h-full object-cover">
+                                                        <img src="{{ asset('storage/' . $ws->photo) }}" alt="Foto profil {{ $ws->name }}" class="w-full h-full object-cover">
                                                     @else
                                                         <div class="w-full h-full flex items-center justify-center font-bold text-slate-400">{{ substr($ws->name, 0, 1) }}</div>
                                                     @endif

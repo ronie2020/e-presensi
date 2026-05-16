@@ -7,7 +7,7 @@ use App\Models\Student;
 use App\Models\AttendanceSiswa;
 use App\Models\GradeRecord; 
 use App\Models\GradeItem;   
-use App\Models\User; // <-- Ditambahkan untuk mengambil nama wali kelas
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +59,22 @@ class HomeroomController extends Controller
             'total_literacy' => 0, 
             'total_habits' => 0,   
         ];
+
+        // --- OPTIMASI KINERJA (N+1 QUERY FIX) ---
+        // Mengambil semua nilai akademik siswa sekaligus untuk menghindari query di dalam loop
+        $studentIds = $students->pluck('id');
+        $latestGradeRecords = GradeRecord::whereIn('student_id', $studentIds)
+            ->orderBy('id', 'desc')
+            ->get()
+            ->unique('student_id')
+            ->keyBy('student_id');
+
+        $gradeRecordIds = $latestGradeRecords->pluck('id');
+        $averageGrades = GradeItem::whereIn('grade_record_id', $gradeRecordIds)
+            ->selectRaw('grade_record_id, avg(score) as avg_score')
+            ->groupBy('grade_record_id')
+            ->pluck('avg_score', 'grade_record_id');
+        // ----------------------------------------
 
         $warningStudents = collect();
         $topStudents = collect();
@@ -135,16 +151,17 @@ class HomeroomController extends Controller
                 ]);
             }
 
+            // --- NOMINASI (Menggunakan data dari luar loop untuk performa) ---
             if ($alfaThisSemester <= 3 && $violationPoints <= 30) {
-                $latestGradeRecord = GradeRecord::where('student_id', $student->id)->latest('id')->first();
+                
+                $latestGradeRecord = $latestGradeRecords->get($student->id);
                 $academicScore = 0;
                 
                 if ($latestGradeRecord) {
-                    $averageGrade = GradeItem::where('grade_record_id', $latestGradeRecord->id)->avg('score');
-                    $academicScore = round($averageGrade ?? 0);
+                    $academicScore = round($averageGrades->get($latestGradeRecord->id, 0));
                 }
 
-                $attendanceScore = 100 - ($alfaThisSemester * 15);
+                $attendanceScore = max(0, 100 - ($alfaThisSemester * 15));
                 $netDisciplineScore = ($meritPoints - $violationPoints) * 2;
                 $taskScore = ($literacyCount * 3) + ($habitCount * 1);
                 $recommendationScore = $academicScore + $attendanceScore + $netDisciplineScore + $taskScore;
@@ -166,11 +183,12 @@ class HomeroomController extends Controller
             }
         }
 
-        $warningStudents = $warningStudents->sortByDesc('violation_points')->take(10);
-        $topStudents = $topStudents->sortByDesc('merit_points')->take(5);
-        $topLiteracy = $topLiteracy->sortByDesc('count')->take(5);
-        $topHabits = $topHabits->sortByDesc('count')->take(5);
-        $awardNominees = $awardNominees->sortByDesc('total_score')->take(10);
+        // PERBAIKAN BUG RANKING: Tambahkan ->values() untuk me-reset index array menjadi urutan baru
+        $warningStudents = $warningStudents->sortByDesc('violation_points')->take(10)->values();
+        $topStudents = $topStudents->sortByDesc('merit_points')->take(5)->values();
+        $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
+        $topHabits = $topHabits->sortByDesc('count')->take(5)->values();
+        $awardNominees = $awardNominees->sortByDesc('total_score')->take(10)->values();
 
         return view('homeroom.dashboard', compact(
             'class', 'stats', 'warningStudents', 'topStudents', 
@@ -180,7 +198,7 @@ class HomeroomController extends Controller
     }
 
     /**
-     * FUNGSI BARU: Mencetak Laporan Evaluasi Kelas
+     * FUNGSI: Mencetak Laporan Evaluasi Kelas
      */
     public function print(Request $request)
     {
@@ -203,8 +221,7 @@ class HomeroomController extends Controller
             return back()->with('error', 'Data kelas tidak ditemukan.');
         }
 
-        // --- PERBAIKAN: MENGAMBIL NAMA WALI KELAS ---
-        // Jika kelas ini memiliki wali kelas, ambil data User-nya
+        // --- MENGAMBIL NAMA WALI KELAS ---
         $teacherName = '_______________________';
         $teacherNip = '_______________________';
 
@@ -233,6 +250,21 @@ class HomeroomController extends Controller
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfSemester = Carbon::now()->subMonths(6); 
+
+        // --- OPTIMASI KINERJA (N+1 QUERY FIX) ---
+        $studentIds = $students->pluck('id');
+        $latestGradeRecords = GradeRecord::whereIn('student_id', $studentIds)
+            ->orderBy('id', 'desc')
+            ->get()
+            ->unique('student_id')
+            ->keyBy('student_id');
+
+        $gradeRecordIds = $latestGradeRecords->pluck('id');
+        $averageGrades = GradeItem::whereIn('grade_record_id', $gradeRecordIds)
+            ->selectRaw('grade_record_id, avg(score) as avg_score')
+            ->groupBy('grade_record_id')
+            ->pluck('avg_score', 'grade_record_id');
+        // ----------------------------------------
 
         foreach ($students as $student) {
             $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
@@ -264,14 +296,14 @@ class HomeroomController extends Controller
 
             // Nominasi
             if ($alfaThisSemester <= 3 && $violationPoints <= 30) {
-                $latestGradeRecord = GradeRecord::where('student_id', $student->id)->latest('id')->first();
+                
+                $latestGradeRecord = $latestGradeRecords->get($student->id);
                 $academicScore = 0;
                 if ($latestGradeRecord) {
-                    $averageGrade = GradeItem::where('grade_record_id', $latestGradeRecord->id)->avg('score');
-                    $academicScore = round($averageGrade ?? 0);
+                    $academicScore = round($averageGrades->get($latestGradeRecord->id, 0));
                 }
 
-                $attendanceScore = 100 - ($alfaThisSemester * 15);
+                $attendanceScore = max(0, 100 - ($alfaThisSemester * 15));
                 $netDisciplineScore = ($meritPoints - $violationPoints) * 2;
                 $taskScore = ($literacyCount * 3) + ($habitCount * 1);
                 $recommendationScore = $academicScore + $attendanceScore + $netDisciplineScore + $taskScore;
@@ -289,8 +321,9 @@ class HomeroomController extends Controller
             }
         }
 
-        $warningStudents = $warningStudents->sortByDesc('violation_points');
-        $awardNominees = $awardNominees->sortByDesc('total_score')->take(10);
+        // PERBAIKAN BUG RANKING: Tambahkan ->values()
+        $warningStudents = $warningStudents->sortByDesc('violation_points')->values();
+        $awardNominees = $awardNominees->sortByDesc('total_score')->take(10)->values();
 
         return view('homeroom.print', compact(
             'class', 'stats', 'warningStudents', 'awardNominees', 'teacherName', 'teacherNip'
