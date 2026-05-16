@@ -66,7 +66,7 @@
         .kop-sekolah { font-size: 22pt; font-weight: bold; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.1; }
         .kop-alamat { font-size: 12pt; font-style: normal; line-height: 1.2; }
         .kop-kontak { font-size: 11pt; margin-top: 4px; }
-        .garis-kop { border: none; border-top: 4px solid #000; border-bottom: 1.5px solid #000; height: 2px; margin-bottom: 24px; }
+        .garis-kop { border: none; border-top: 4px solid #000; border-bottom: 1.5px solid #000; height: 2px; background-color: transparent; margin-bottom: 24px; }
         
         /* MODE PRINT */
         .no-print { display: block; }
