@@ -22,6 +22,7 @@
     
     <!-- Content Container -->
     <div class="relative z-10 px-6 sm:px-10 pt-14 sm:pt-16 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left gap-4 sm:gap-6">
+        
         <!-- Foto Profil -->
         <div class="relative group shrink-0 mx-auto md:mx-0 -mb-2">
             <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-white p-1.5 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300 ring-4 ring-elevate-accent/20">
@@ -59,32 +60,48 @@
         
         <!-- Detail Siswa -->
         <div class="flex-1 min-w-0 w-full md:pb-3">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div class="flex-1">
-                    <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight mb-2 break-words capitalize">
-                        {{ strtolower($student->name) }}
-                    </h1>
-                    
-                    <div class="flex flex-wrap justify-center md:justify-start gap-2 text-xs sm:text-sm font-medium mb-4">
-                        @if(!$isAlumni)
-                        <span class="flex items-center bg-elevate-primary/50 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-elevate-accent/30">
-                            <i class="ph-fill ph-chalkboard-teacher mr-2 text-base sm:text-lg text-elevate-accent"></i>
-                            <span>Kelas <strong class="font-bold text-white">{{ $student->schoolClass->name ?? 'Unassigned' }}</strong></span>
-                        </span>
-                        @endif
-                        
-                        <span x-data="{ copied: false }" 
-                              @click="navigator.clipboard.writeText('{{ $student->student_id }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                              class="flex items-center bg-white/10 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-white/20 font-mono hover:bg-white/20 cursor-pointer select-none transition-all" 
-                              title="Klik untuk salin">
-                            <i class="ph-fill mr-2 text-base sm:text-lg text-elevate-soft" :class="copied ? 'ph-check text-green-400' : 'ph-identification-card'"></i>
-                            <span x-text="copied ? 'Tersalin!' : '{{ $student->student_id }}'"></span>
-                        </span>
-                    </div>
+            
+            <!-- BARIS 1: Nama (Full Width) -->
+            <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight mb-2 break-words capitalize text-center md:text-left">
+                {{ strtolower($student->name) }}
+            </h1>
+            
+            <!-- BARIS 2: Kumpulan Badge Informasi (Akan selalu sejajar) -->
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 text-xs sm:text-sm font-medium mb-4">
+                @if(!$isAlumni)
+                <span class="inline-flex items-center bg-elevate-primary/50 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-elevate-accent/30 shadow-sm">
+                    <i class="ph-fill ph-chalkboard-teacher mr-2 text-base sm:text-lg text-elevate-accent"></i>
+                    <span>Kelas <strong class="font-bold text-white">{{ $student->schoolClass->name ?? 'Unassigned' }}</strong></span>
+                </span>
+                @endif
+                
+                <span x-data="{ copied: false }" 
+                      @click="navigator.clipboard.writeText('{{ $student->student_id }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                      class="inline-flex items-center bg-white/10 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-white/20 font-mono hover:bg-white/20 cursor-pointer select-none transition-all shadow-sm" 
+                      title="Klik untuk salin">
+                    <i class="ph-fill mr-2 text-base sm:text-lg text-elevate-soft" :class="copied ? 'ph-check text-green-400' : 'ph-identification-card'"></i>
+                    <span x-text="copied ? 'Tersalin!' : '{{ $student->student_id }}'"></span>
+                </span>
 
-                    {{-- GAMIFIED PROGRESS BAR (Elevate Style) --}}
+                {{-- BADGE STATUS VERIFIKASI NIK & NISN --}}
+                @if($student->is_validated)
+                    <span class="inline-flex items-center bg-emerald-500/20 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-emerald-100 border border-emerald-400/30 font-medium shadow-sm" title="Data Telah Tervalidasi">
+                        <i class="ph-fill ph-seal-check mr-1.5 text-base text-emerald-400"></i> Terverifikasi
+                    </span>
+                @else
+                    <a href="{{ route('students.verify') }}" class="inline-flex items-center bg-rose-500/40 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-rose-400/50 font-bold hover:bg-rose-500/60 transition-all shadow-sm animate-pulse cursor-pointer" title="Klik untuk memvalidasi data">
+                        <i class="ph-fill ph-warning-circle mr-1.5 text-base text-rose-300"></i> Belum Validasi
+                    </a>
+                @endif
+            </div>
+
+            <!-- BARIS 3: XP Bar (Kiri) & Tombol Aksi (Kanan) -->
+            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mt-2 border-t border-white/10 pt-4">
+                
+                <!-- BAGIAN KIRI: XP Bar -->
+                <div class="w-full lg:w-5/12 max-w-md mx-auto md:mx-0">
                     @if(!$isAlumni)
-                    <div class="max-w-md mx-auto md:mx-0 bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
+                    <div class="bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
                         <div class="flex items-center justify-between text-[10px] font-bold text-elevate-soft mb-1.5 px-1">
                             <span>{{ $points }} XP</span>
                             <span>{{ $nextLevelPoints }} XP (Next Lvl)</span>
@@ -96,27 +113,28 @@
                     @endif
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+                <!-- BAGIAN KANAN: Action Buttons -->
+                <div class="w-full lg:w-7/12 flex flex-wrap justify-center lg:justify-end gap-2 mt-4 lg:mt-0">
                     @if(!$isAlumni)                    
-                    <a href="{{ route('student.habits.dashboard') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-3 bg-elevate-peach-dark hover:bg-elevate-peach text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg active:scale-95 group border border-white/20">
-                        <i class="ph-bold ph-star mr-2 group-hover:rotate-180 transition-transform duration-500"></i> Poin Karakter
+                    <a href="{{ route('student.habits.dashboard') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-elevate-peach-dark hover:bg-elevate-peach text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg active:scale-95 group border border-white/20">
+                        <i class="ph-bold ph-star mr-1.5 group-hover:rotate-180 transition-transform duration-500"></i> Poin Karakter
                     </a>
-                    <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-3 bg-white text-elevate-dark rounded-xl text-xs sm:text-sm font-bold hover:bg-elevate-soft transition-all shadow-lg active:scale-95 group">
-                        <i class="ph-bold ph-identification-card mr-2 text-elevate-primary group-hover:animate-bounce"></i> Kartu OSIS
+                    <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-white text-elevate-dark rounded-xl text-xs sm:text-sm font-bold hover:bg-elevate-soft transition-all shadow-lg active:scale-95 group">
+                        <i class="ph-bold ph-identification-card mr-1.5 text-elevate-primary group-hover:animate-bounce"></i> Kartu OSIS
                     </a>
                     @endif
                     
-                    <!-- TOMBOL BIODATA (MENGGUNAKAN LINK A HREF) -->
-                    <a href="{{ route('portal.biodata', $student->id) }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
-                        <i class="ph-bold ph-file-text mr-2"></i> Biodata Lengkap
+                    <a href="{{ route('portal.biodata', $student->id) }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
+                        <i class="ph-bold ph-file-text mr-1.5"></i> Biodata
                     </a>
                     
-                    <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
-                        <i class="ph-bold ph-magnifying-glass mr-2"></i> Cari Lain
+                    <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-elevate-primary/30 backdrop-blur-md border border-elevate-accent/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-elevate-primary transition-all shadow-lg">
+                        <i class="ph-bold ph-magnifying-glass mr-1.5"></i> Cari Lain
                     </a>
                 </div>
+                
             </div>
+            
         </div>
     </div>
 </div>

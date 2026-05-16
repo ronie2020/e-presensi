@@ -137,6 +137,7 @@ class Student extends Authenticatable
      * ELOQUENT CASTS (PENTING!)    
      */
     protected $casts = [
+        'is_validated' => 'boolean',    
         'dob' => 'date',
         'birth_date' => 'date',
         'accepted_date' => 'date',

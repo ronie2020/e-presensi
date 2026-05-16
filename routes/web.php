@@ -58,6 +58,7 @@ use App\Http\Controllers\CbtBankController;
 // Portal Siswa
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\StudentAuthController;
+use App\Http\Controllers\StudentValidationController;
 use App\Http\Controllers\StudentExamController;
 use App\Http\Controllers\StudentScheduleController;
 use App\Http\Controllers\StudentHabitController; 
@@ -166,7 +167,11 @@ Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('
 // =========================================================================
 //  AREA SISWA GENERAL (Tanpa SEB Restriction)
 // =========================================================================
-Route::middleware(['auth:student'])->group(function () {    
+Route::middleware(['auth:student'])->group(function () { 
+    
+    // --- 0. ROUTE VERIFIKASI DATA INDUK ---
+    Route::get('/student/verify', [StudentValidationController::class, 'index'])->name('students.verify');
+    Route::post('/student/verify', [StudentValidationController::class, 'process'])->name('students.verify.process');
     
     // --- 1. ROUTE BUKU PENGHUBUNG (SISI SISWA) ---
     Route::get('/student/penghubung', [LiaisonBookController::class, 'indexStudent'])

@@ -31,7 +31,34 @@
 @endphp
 
 <div class="space-y-8 animate-in fade-in duration-500 font-sans">
-
+    
+    {{-- TAMBAHAN ZONE 0.5: ALERT VERIFIKASI DATA MANDIRI --}}
+    @if(!$isAlumni && isset($student) && !$student->is_validated)
+        <div class="flex flex-col sm:flex-row items-center gap-4 p-5 md:p-6 rounded-[2rem] bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 shadow-sm relative overflow-hidden group">
+            <!-- Dekorasi Background -->
+            <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+                <i class="ph-fill ph-identification-card text-8xl text-rose-600"></i>
+            </div>
+            
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center text-3xl shrink-0 shadow-lg shadow-rose-500/30 z-10 animate-pulse">
+                <i class="ph-fill ph-shield-warning"></i>
+            </div>
+            
+            <div class="flex-1 text-center sm:text-left z-10">
+                <h4 class="font-black text-rose-900 dark:text-rose-100 text-base md:text-lg tracking-tight mb-0.5">Tindakan Diperlukan: Validasi Data Induk!</h4>
+                <p class="text-rose-700 dark:text-rose-300 text-xs md:text-sm font-medium leading-snug max-w-2xl">
+                    Sistem mendeteksi NIK dan NISN Anda belum dikonfirmasi. Hal ini wajib dilakukan secepatnya untuk keperluan kelancaran sinkronisasi data dengan server Dapodik Kemdikbud.
+                </p>
+            </div>
+            
+            <div class="shrink-0 w-full sm:w-auto z-10 mt-2 sm:mt-0">
+                <a href="{{ route('students.verify') }}" class="w-full sm:w-auto px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-black rounded-xl transition-all shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 transform active:scale-95">
+                    <i class="ph-bold ph-check-circle text-lg"></i> Validasi Sekarang
+                </a>
+            </div>
+        </div>
+    @endif
+    
     {{-- ZONE 0: CRITICAL PRIORITY ALERTS --}}
     @if(isset($priorityAlerts) && $priorityAlerts->isNotEmpty())
         <div class="space-y-3">
