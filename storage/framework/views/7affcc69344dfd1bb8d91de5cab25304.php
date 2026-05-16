@@ -63,9 +63,9 @@
             </td>
             <td width="70%">
                 <div class="kop-dinas"><?php echo e(config('school.kop_dinas', 'DINAS PENDIDIKAN')); ?></div>
-                <div class="kop-sekolah"><?php echo e(config('school.name', 'NAMA SEKOLAH')); ?></div>
-                <div class="kop-alamat"><?php echo e(config('school.address', 'Alamat Sekolah Lengkap, Kabupaten/Kota, Provinsi')); ?></div>
-                <div class="kop-alamat">Website: <?php echo e(config('school.website', 'www.sekolah.sch.id')); ?> | Email: <?php echo e(config('school.email', 'info@sekolah.sch.id')); ?></div>
+                <div class="kop-sekolah"><?php echo e(config('school.name', 'SMP NEGERI 3 LAKBOK')); ?></div>
+                <div class="kop-alamat"><?php echo e(config('school.address', 'Jalan Mekarjaya No.199, Sidaharja Kecamatan Lakbok, Kabupaten Ciamis 46385')); ?></div>
+                <div class="kop-alamat">Website: <?php echo e(config('school.website', 'www.smpn3lakbok.sch.id')); ?> | Email: <?php echo e(config('school.email', 'netila.smp@gmail.com')); ?></div>
             </td>
             <!-- Logo Kanan -->
             <td width="15%">
