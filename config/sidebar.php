@@ -17,6 +17,14 @@ return [
                 'roles' => ['*']              
             ],  
             [
+                'name' => 'Dashboard Wali Kelas',
+                'route' => 'homeroom.dashboard',
+                'active_check' => 'homeroom.*',
+                'icon' => 'ph-chalkboard-teacher',
+                // Hanya muncul untuk Wali Kelas dan Admin
+                'roles' => ['Wali Kelas', 'Admin', 'Kepala Sekolah'] 
+            ],
+            [
                 'name' => 'Profil Saya',
                 'route' => 'profile.edit',
                 'active_check' => 'profile.*',
@@ -463,6 +471,14 @@ return [
                 'active_check' => 'discipline-types.*',
                 'icon' => 'ph-warning',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
+                'name' => 'Radar Deteksi BK',
+                'route' => 'admin.bk.early_warning',
+                'active_check' => 'admin.bk.early_warning',
+                'icon' => 'ph-siren',
+                // Sesuaikan siapa saja yang berhak melihat peringatan siswa bermasalah
+                'roles' => ['Admin', 'Guru Piket', 'Kepala Sekolah']
             ]
         ]
     ],

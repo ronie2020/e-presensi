@@ -289,6 +289,12 @@ Route::middleware('auth')->group(function () {
      Route::get('/profile', function() {
         return redirect()->route('users.edit', auth()->id());
     })->name('profile.edit');
+
+    // ===== ROUTE homeroom <---
+    // =========================================================================
+    Route::get('/homeroom/dashboard', [\App\Http\Controllers\HomeroomController::class, 'index'])->name('homeroom.dashboard');
+    Route::get('/admin/bk/early-warning', [\App\Http\Controllers\BkTeacherController::class, 'earlyWarning'])->name('admin.bk.early_warning');
+    // =========================================================================
     
     //Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

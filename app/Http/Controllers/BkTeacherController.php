@@ -318,4 +318,27 @@ class BkTeacherController extends Controller
 
         return redirect()->back()->with('error', 'Aksi tidak dikenali.');
     }
+
+      // * Menampilkan daftar kasus kritis yang perlu perhatian segera (Pelanggaran berat, Prestasi luar biasa, dll)
+    public function earlyWarning(Request $request)
+    {
+        // Ambil semua tiket BK yang DIBUAT OTOMATIS OLEH SISTEM (Robot) dan statusnya masih PENDING
+        $warnings = \App\Models\BkSession::with(['student.schoolClass', 'category'])
+            ->where('is_system_generated', true)
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        // Pisahkan antara kasus Pelanggaran dan Apresiasi Prestasi
+        $criticalViolations = $warnings->filter(function($w) {
+            return str_contains(strtolower($w->initial_message), 'pelanggaran');
+        });
+
+        $meritsToAppreciate = $warnings->filter(function($w) {
+            return str_contains(strtolower($w->initial_message), 'prestasi');
+        });
+
+        return view('admin.bk.early_warning', compact('criticalViolations', 'meritsToAppreciate'));
+    }
+
 }
