@@ -69,7 +69,10 @@ class LmsGradeController extends Controller
                 ->where('subject_id', $subjectId);
             
             if ($user->role !== 'admin') {
-                $queryAssignments->where('teacher_id', $user->id);
+                $queryAssignments->where(function($q) use ($user) {
+                    $q->where('teacher_id', $user->id)
+                      ->orWhereNull('teacher_id');
+                });
             }
             
             // Filter Waktu/Periode

@@ -332,7 +332,7 @@ class CbtAnalysisController extends Controller
             foreach ($groupedByClass as $classId => $studentResults) {
                 if (!$classId) continue; 
 
-                $assignment = LmsAssignment::firstOrCreate(
+                $assignment = LmsAssignment::updateOrCreate(
                     [
                         'class_id' => $classId,
                         'subject_id' => $subject->id,
@@ -340,8 +340,8 @@ class CbtAnalysisController extends Controller
                         'assignment_type' => 'quiz', 
                     ],
                     [
-                        'description' => 'Nilai otomatis diposting dari hasil Ujian CBT.',
-                        'teacher_id' => Auth::id(),
+                        'description' => 'Nilai otomatis diposting dari hasil Ujian CBT.',                       
+                        'teacher_id' => null, 
                         'deadline' => $exam->end_time, 
                     ]
                 );
