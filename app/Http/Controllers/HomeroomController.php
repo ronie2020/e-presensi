@@ -43,14 +43,44 @@ class HomeroomController extends Controller
             $allClasses = null; 
         }
 
-        // --- MENGAMBIL DATA SISWA & EAGER LOADING ---
+         // --- MENGAMBIL DATA SISWA & EAGER LOADING ---
         $students = Student::with(['disciplineRecords.disciplineType', 'attendances', 'habits', 'literacyJournals'])
             ->where('class_id', $class->id)
             ->where('status', 'active')
             ->get();
 
         $totalStudents = $students->count();
-        
+
+        // --- FILTER PERIODE WAKTU ---
+        $period = $request->input('period', 'this_month');
+        $currentStart = Carbon::now()->startOfMonth();
+        $currentEnd = Carbon::now()->endOfMonth();
+        $prevStart = Carbon::now()->subMonth()->startOfMonth();
+        $prevEnd = Carbon::now()->subMonth()->endOfMonth();
+
+        if ($period == 'last_month') {
+            $currentStart = Carbon::now()->subMonth()->startOfMonth();
+            $currentEnd = Carbon::now()->subMonth()->endOfMonth();
+            $prevStart = Carbon::now()->subMonths(2)->startOfMonth();
+            $prevEnd = Carbon::now()->subMonths(2)->endOfMonth();
+        } elseif ($period == 'semester_1') {
+            $currentYear = Carbon::now()->year;
+            $currentMonth = Carbon::now()->month;
+            $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
+            $currentStart = Carbon::create($year, 7, 1)->startOfDay();
+            $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
+            $prevStart = Carbon::create($year, 1, 1)->startOfDay();
+            $prevEnd = Carbon::create($year, 6, 30)->endOfDay();
+        } elseif ($period == 'semester_2') {
+            $currentYear = Carbon::now()->year;
+            $currentMonth = Carbon::now()->month;
+            $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
+            $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+            $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
+            $prevStart = Carbon::create($year - 1, 7, 1)->startOfDay();
+            $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
+        }
+
         $stats = [
             'total_students' => $totalStudents,
             'total_violations' => 0,
@@ -69,7 +99,7 @@ class HomeroomController extends Controller
             ->unique('student_id')
             ->keyBy('student_id');
 
-        $gradeRecordIds = $latestGradeRecords->pluck('id');
+         $gradeRecordIds = $latestGradeRecords->pluck('id');
         $averageGrades = GradeItem::whereIn('grade_record_id', $gradeRecordIds)
             ->selectRaw('grade_record_id, avg(score) as avg_score')
             ->groupBy('grade_record_id')
@@ -85,17 +115,30 @@ class HomeroomController extends Controller
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfSemester = Carbon::now()->subMonths(6); 
 
+        // Untuk menghitung Tren
+        $prev_stats = [
+            'total_violations' => 0, 'total_merits' => 0, 'alfa_count' => 0, 'total_literacy' => 0, 'total_habits' => 0
+        ];
+
         foreach ($students as $student) {
-            // 1. Poin Kedisiplinan 
-            $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
-            $meritPoints = $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
+            // 1. Poin Kedisiplinan Berdasarkan Periode
+            $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
+            $meritPoints = $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
             
+            $prev_stats['total_violations'] += $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->whereBetween('created_at', [$prevStart, $prevEnd])->sum('disciplineType.point_value');
+            $prev_stats['total_merits'] += $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->whereBetween('created_at', [$prevStart, $prevEnd])->sum('disciplineType.point_value');
+
             $stats['total_violations'] += $violationPoints;
             $stats['total_merits'] += $meritPoints;
 
-            // 2. Absensi
-            $alfaThisMonth = $student->attendances
-                ->where('attendance_date', '>=', $startOfMonth)
+            // 2. Absensi Berdasarkan Periode
+            $alfaThisPeriod = $student->attendances
+                ->whereBetween('attendance_date', [$currentStart->format('Y-m-d'), $currentEnd->format('Y-m-d')])
+                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
+                ->count();
+            
+            $prev_stats['alfa_count'] += $student->attendances
+                ->whereBetween('attendance_date', [$prevStart->format('Y-m-d'), $prevEnd->format('Y-m-d')])
                 ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
                 ->count();
                 
@@ -104,24 +147,30 @@ class HomeroomController extends Controller
                 ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
                 ->count();
             
-            $stats['alfa_count'] += $alfaThisMonth;
+            $stats['alfa_count'] += $alfaThisPeriod;
 
-            // 3. Literasi & Habit (Tugas)
-            $literacyCount = $student->literacyJournals->count();
-            $habitCount = $student->habits->count();
+            // 3. Literasi & Habit Berdasarkan Periode
+            $literacyCount = $student->literacyJournals->count(); // Untuk nominasi all-time/semester
+            $habitCount = $student->habits->count(); // Untuk nominasi all-time/semester
             
-            $stats['total_literacy'] += $student->literacyJournals->where('created_at', '>=', $startOfMonth)->count();
-            $stats['total_habits'] += $student->habits->where('report_date', '>=', $startOfMonth->format('Y-m-d'))->count();
+            $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
+            $habCountPeriod = $student->habits->whereBetween('report_date', [$currentStart->format('Y-m-d'), $currentEnd->format('Y-m-d')])->count();
+            
+            $stats['total_literacy'] += $litCountPeriod;
+            $stats['total_habits'] += $habCountPeriod;
+
+            $prev_stats['total_literacy'] += $student->literacyJournals->whereBetween('created_at', [$prevStart, $prevEnd])->count();
+            $prev_stats['total_habits'] += $student->habits->whereBetween('report_date', [$prevStart->format('Y-m-d'), $prevEnd->format('Y-m-d')])->count();
 
             // --- PENGELOMPOKAN DATA DASHBOARD ATAS ---
-            if ($violationPoints >= 50 || $alfaThisMonth >= 3) {
+            if ($violationPoints >= 50 || $alfaThisPeriod >= 3) {
                 $warningStudents->push((object)[
                     'id' => $student->id,
                     'name' => $student->name,
                     'photo' => $student->photo_path,
                     'violation_points' => $violationPoints,
-                    'alfa_count' => $alfaThisMonth,
-                    'issue' => $alfaThisMonth >= 3 ? 'Sering Alpa' : 'Pelanggaran Tinggi'
+                    'alfa_count' => $alfaThisPeriod,
+                    'issue' => $alfaThisPeriod >= 3 ? 'Sering Alpa' : 'Pelanggaran Tinggi'
                 ]);
             }
 
@@ -133,21 +182,19 @@ class HomeroomController extends Controller
                 ]);
             }
 
-            $litCountMonth = $student->literacyJournals->where('created_at', '>=', $startOfMonth)->count();
-            if ($litCountMonth > 0) {
+            if ($litCountPeriod > 0) {
                 $topLiteracy->push((object)[
                     'name' => $student->name,
                     'photo' => $student->photo_path,
-                    'count' => $litCountMonth,
+                    'count' => $litCountPeriod,
                 ]);
             }
 
-            $habCountMonth = $student->habits->where('report_date', '>=', $startOfMonth->format('Y-m-d'))->count();
-            if ($habCountMonth > 0) {
+            if ($habCountPeriod > 0) {
                 $topHabits->push((object)[
                     'name' => $student->name,
                     'photo' => $student->photo_path,
-                    'count' => $habCountMonth,
+                    'count' => $habCountPeriod,
                 ]);
             }
 
@@ -186,14 +233,23 @@ class HomeroomController extends Controller
         // PERBAIKAN BUG RANKING: Tambahkan ->values() untuk me-reset index array menjadi urutan baru
         $warningStudents = $warningStudents->sortByDesc('violation_points')->take(10)->values();
         $topStudents = $topStudents->sortByDesc('merit_points')->take(5)->values();
-        $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
+       $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
         $topHabits = $topHabits->sortByDesc('count')->take(5)->values();
         $awardNominees = $awardNominees->sortByDesc('total_score')->take(10)->values();
+
+        // HITUNG TREN (Persentase perubahan dari periode sebelumnya)
+        $trends = [
+            'merits' => $prev_stats['total_merits'] == 0 ? ($stats['total_merits'] > 0 ? 100 : 0) : round((($stats['total_merits'] - $prev_stats['total_merits']) / $prev_stats['total_merits']) * 100),
+            'violations' => $prev_stats['total_violations'] == 0 ? ($stats['total_violations'] > 0 ? 100 : 0) : round((($stats['total_violations'] - $prev_stats['total_violations']) / $prev_stats['total_violations']) * 100),
+            'literacy' => $prev_stats['total_literacy'] == 0 ? ($stats['total_literacy'] > 0 ? 100 : 0) : round((($stats['total_literacy'] - $prev_stats['total_literacy']) / $prev_stats['total_literacy']) * 100),
+            'habits' => $prev_stats['total_habits'] == 0 ? ($stats['total_habits'] > 0 ? 100 : 0) : round((($stats['total_habits'] - $prev_stats['total_habits']) / $prev_stats['total_habits']) * 100),
+            'alfa' => $prev_stats['alfa_count'] == 0 ? ($stats['alfa_count'] > 0 ? 100 : 0) : round((($stats['alfa_count'] - $prev_stats['alfa_count']) / $prev_stats['alfa_count']) * 100),
+        ];
 
         return view('homeroom.dashboard', compact(
             'class', 'stats', 'warningStudents', 'topStudents', 
             'topLiteracy', 'topHabits', 'awardNominees', 
-            'isAdminOrKepsek', 'allClasses'
+            'isAdminOrKepsek', 'allClasses', 'trends'
         ));
     }
 
