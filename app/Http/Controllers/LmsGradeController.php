@@ -70,8 +70,10 @@ class LmsGradeController extends Controller
             
             if ($user->role !== 'admin') {
                 $queryAssignments->where(function($q) use ($user) {
+                    // Guru bisa melihat tugas yang dia buat SENDIRI
                     $q->where('teacher_id', $user->id)
-                      ->orWhereNull('teacher_id');
+                      // ATAU, guru bisa melihat hasil ujian dari CBT (karena CBT bertipe 'quiz')
+                      ->orWhere('assignment_type', 'quiz'); 
                 });
             }
             

@@ -341,7 +341,7 @@ class CbtAnalysisController extends Controller
                     ],
                     [
                         'description' => 'Nilai otomatis diposting dari hasil Ujian CBT.',                       
-                        'teacher_id' => null, 
+                        'teacher_id' => Auth::id(),
                         'deadline' => $exam->end_time, 
                     ]
                 );
