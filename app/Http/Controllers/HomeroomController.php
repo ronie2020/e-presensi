@@ -233,7 +233,7 @@ class HomeroomController extends Controller
         // PERBAIKAN BUG RANKING: Tambahkan ->values() untuk me-reset index array menjadi urutan baru
         $warningStudents = $warningStudents->sortByDesc('violation_points')->take(10)->values();
         $topStudents = $topStudents->sortByDesc('merit_points')->take(5)->values();
-       $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
+        $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
         $topHabits = $topHabits->sortByDesc('count')->take(5)->values();
         $awardNominees = $awardNominees->sortByDesc('total_score')->take(10)->values();
 
