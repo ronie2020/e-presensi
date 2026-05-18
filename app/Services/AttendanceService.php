@@ -253,7 +253,7 @@ class AttendanceService
     {
         ActivityLog::create([
             'student_id' => $student->id, 
-            //'type' => $type,             // Wajib (Bawaan Lama)
+            'type' => $type,             // Wajib (Bawaan Lama)
             'activity_type' => $type,    // Wajib (Baru)
             'activity_name' => $name,
             'description' => $desc, 
