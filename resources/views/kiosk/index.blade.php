@@ -98,7 +98,7 @@
 
             <!-- MODE SELECTOR (Tombol Cepat - F1 s/d F6) -->
              <div class="mt-8 w-full max-w-3xl">
-                <div class="grid grid-cols-6 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                     @foreach([
                         ['label' => 'Masuk (F1)', 'type' => 'Masuk', 'icon' => 'sun-dim', 'color' => 'cyan'],
                         ['label' => 'Pulang (F2)', 'type' => 'Pulang', 'icon' => 'moon-stars', 'color' => 'purple'],
