@@ -8,12 +8,17 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendWaScanNotificationJob; 
 use App\Services\AttendanceService;
+use App\Models\Extracurricular;
 
 class KioskController extends Controller
 {
-    public function showKiosk()
+   public function showKiosk()
     {
-        return view('kiosk.index');
+        // Ganti nama variabelnya menjadi $extracurriculars
+        $extracurriculars = Extracurricular::all(); 
+        
+        // Kirim dengan nama yang sama persis ke view
+        return view('kiosk.index', compact('extracurriculars'));
     }
 
     /**
