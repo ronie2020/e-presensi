@@ -108,9 +108,12 @@ class HomeroomController extends Controller
 
         $warningStudents = collect();
         $topStudents = collect();
-        $topLiteracy = collect();
+         $topLiteracy = collect();
         $topHabits = collect();
         $awardNominees = collect(); 
+
+        // Tambahan untuk menampung data JSON Modal JS di View
+        $mappedStudents = []; 
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfSemester = Carbon::now()->subMonths(6); 
@@ -156,11 +159,26 @@ class HomeroomController extends Controller
             $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
             $habCountPeriod = $student->habits->whereBetween('report_date', [$currentStart->format('Y-m-d'), $currentEnd->format('Y-m-d')])->count();
             
-            $stats['total_literacy'] += $litCountPeriod;
+             $stats['total_literacy'] += $litCountPeriod;
             $stats['total_habits'] += $habCountPeriod;
 
             $prev_stats['total_literacy'] += $student->literacyJournals->whereBetween('created_at', [$prevStart, $prevEnd])->count();
             $prev_stats['total_habits'] += $student->habits->whereBetween('report_date', [$prevStart->format('Y-m-d'), $prevEnd->format('Y-m-d')])->count();
+
+            // --- POPULASI DATA UNTUK MODAL JS (MAPPING) ---
+            // Data ini sudah sinkron dengan filter periode karena menggunakan variabel di atas
+            $mappedStudents[] = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'nisn' => $student->nisn ?? $student->student_id ?? '-',
+                'photo' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
+                'alfa_count' => $alfaThisPeriod,
+                'violation_points' => $violationPoints,
+                'merit_points' => $meritPoints,
+                'literacy_count' => $litCountPeriod,
+                'habits_count' => $habCountPeriod,
+                'parent_phone' => $student->parent_phone ?? $student->phone ?? null,
+            ];
 
             // --- PENGELOMPOKAN DATA DASHBOARD ATAS ---
             if ($violationPoints >= 50 || $alfaThisPeriod >= 3) {
@@ -246,10 +264,11 @@ class HomeroomController extends Controller
             'alfa' => $prev_stats['alfa_count'] == 0 ? ($stats['alfa_count'] > 0 ? 100 : 0) : round((($stats['alfa_count'] - $prev_stats['alfa_count']) / $prev_stats['alfa_count']) * 100),
         ];
 
+        // Jangan lupa tambahkan 'mappedStudents' di dalam compact()
         return view('homeroom.dashboard', compact(
             'class', 'stats', 'warningStudents', 'topStudents', 
             'topLiteracy', 'topHabits', 'awardNominees', 
-            'isAdminOrKepsek', 'allClasses', 'trends'
+            'isAdminOrKepsek', 'allClasses', 'trends', 'mappedStudents'
         ));
     }
 
