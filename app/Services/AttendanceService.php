@@ -51,12 +51,16 @@ class AttendanceService
 
         return DB::transaction(function () use ($student, $todayDate, $timeNow, $now, $lat, $long, $scheduleStartIn, $scheduleLimit, $scheduleStartOut, $scheduleEndOut, $source) {
             
-            // LOCK ROW: Mencegah Race Condition (Double Scan bersamaan)
+            // FIX RACE CONDITION (KUNCI MUTLAK):
+            // Kita lock baris Student! Karena baris Attendance belum ada, kita paksa
+            // request yang datang di milidetik yang sama untuk antre satu per satu di pintu Student.
+            \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
+
+            // Cek apakah data absen sudah ada
             $existingAttendance = AttendanceSiswa::where('student_id', $student->id)
                 ->where('attendance_date', $todayDate)
                 ->whereIn('type', ['Masuk', 'Pulang', 'Harian']) 
-                ->lockForUpdate()
-                ->first();
+                ->first(); // Hapus lockForUpdate di sini karena row ini mungkin belum ada
 
             // SKENARIO A: BELUM ABSEN MASUK
             if (!$existingAttendance || !$existingAttendance->time_in || $existingAttendance->time_in == '00:00:00') {
@@ -127,7 +131,6 @@ class AttendanceService
                 $isEarly = $now->lt($startOutTime);
                 
                 // Blokir kepulangan jika belum waktunya (HANYA KIOSK)
-                // Jika $source === 'guru', maka diizinkan (misal untuk siswa sakit/dispensasi pulang)
                 if ($isEarly && $source === 'kiosk') {
                     return ['success' => false, 'code' => 400, 'message' => 'Belum Waktunya Pulang! Jadwal pulang dimulai pukul: ' . $startOutTime->format('H:i')];
                 }
@@ -164,8 +167,12 @@ class AttendanceService
     {
         return DB::transaction(function () use ($student, $type, $scanTime) {
             $todayDate = $scanTime->toDateString();
+
+            // FIX RACE CONDITION
+            \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
+
             $exists = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $todayDate)
-                ->where('type', 'Keagamaan')->where('activity', $type)->lockForUpdate()->exists();
+                ->where('type', 'Keagamaan')->where('activity', $type)->exists();
 
             if ($exists) return ['success' => false, 'code' => 409, 'message' => "Sudah Absen $type hari ini!"];
 
@@ -191,8 +198,12 @@ class AttendanceService
     {
         return DB::transaction(function () use ($student, $scanTime) {
             $todayDate = $scanTime->toDateString();
+
+            // FIX RACE CONDITION
+            \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
+
             $existing = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $todayDate)
-                ->where('type', 'Meal')->lockForUpdate()->first();
+                ->where('type', 'Meal')->first();
 
             if ($existing) return ['success' => false, 'code' => 409, 'message' => "SUDAH mengambil makan siang!"];
 
@@ -222,14 +233,25 @@ class AttendanceService
         return DB::transaction(function () use ($student, $extra, $extraId, $scanTime) {
             $todayDate = $scanTime->toDateString();
             
+            // FIX RACE CONDITION
+            \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
+
             $mainAtt = AttendanceSiswa::updateOrCreate(
                 ['student_id' => $student->id, 'attendance_date' => $todayDate, 'type' => 'Extracurricular'],
                 ['status' => 'Hadir', 'time_in' => $scanTime->toTimeString(), 'activity' => $extra->name]
             );
 
+            // FIX HY000: Menambahkan kolom 'time_in' tanpa kolom 'status'
+            // firstOrCreate() menggunakan array pertama untuk "mencari", dan array kedua untuk nilai yang akan "di-insert" jika tidak ditemukan.
             $detailAtt = ExtracurricularAttendance::firstOrCreate(
-                ['extracurricular_id' => $extraId, 'student_id' => $student->id, 'date' => $todayDate],
-                ['status' => 'Hadir', 'time_in' => $scanTime->toTimeString()]
+                [
+                    'extracurricular_id' => $extraId, 
+                    'student_id' => $student->id, 
+                    'date' => $todayDate
+                ],
+                [
+                    'time_in' => $scanTime->toTimeString() // <--- Kolom ini wajib ada di database Anda
+                ]
             );
 
             $msg = "Sudah absen {$extra->name} sebelumnya.";
@@ -253,7 +275,6 @@ class AttendanceService
     {
         ActivityLog::create([
             'student_id' => $student->id, 
-            //'type' => $type,             // Wajib (Bawaan Lama)
             'activity_type' => $type,    // Wajib (Baru)
             'activity_name' => $name,
             'description' => $desc, 

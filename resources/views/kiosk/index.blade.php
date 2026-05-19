@@ -417,7 +417,7 @@
             if(e.key === 'Escape') { e.preventDefault(); manualOverride = false; autoSelectMode(); }
         });
 
-       // 1. Tambahkan 2 variabel ini di luar listener (di atasnya)
+        // 1. Tambahkan 2 variabel ini di luar listener (di atasnya)
         let lastScannedBarcode = '';
         let lastScanTimestamp = 0;
 
@@ -426,13 +426,19 @@
             const scanData = e.target.value.trim();
             e.target.value = ''; // Langsung kosongkan input
             
+            // JIKA KIOSK SEDANG MEMPROSES (DIKUNCI), LANGSUNG TOLAK!
             if (!scanData || window.isProcessing) return;
+
+            // FIX TERBAIK (FRONTEND): KUNCI (Lock) SECARA INSTAN! 
+            // Mencegah tembakan paralel sebelum async processScan() berjalan.
+            window.isProcessing = true; 
 
             // FITUR ANTI SPAM SCANNER FISIK (DEBOUNCE)
             const currentTime = Date.now();
             // Jika barcode yang sama discan kurang dari 5 detik lalu, ABREIKAN!
             if (scanData === lastScannedBarcode && (currentTime - lastScanTimestamp) < 5000) {
                 console.log("Spam scan dicegah!");
+                window.isProcessing = false; // Buka kunci lagi karena diabaikan
                 return; 
             }
 
