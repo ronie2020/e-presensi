@@ -81,17 +81,18 @@ class HomeroomController extends Controller
             $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
         }
 
+        // TAMBAHAN: Variabel menampung jumlah keterlambatan
         $stats = [
             'total_students' => $totalStudents,
             'total_violations' => 0,
             'total_merits' => 0,
             'alfa_count' => 0,
+            'late_count' => 0, 
             'total_literacy' => 0, 
             'total_habits' => 0,   
         ];
 
         // --- OPTIMASI KINERJA (N+1 QUERY FIX) ---
-        // Mengambil semua nilai akademik siswa sekaligus untuk menghindari query di dalam loop
         $studentIds = $students->pluck('id');
         $latestGradeRecords = GradeRecord::whereIn('student_id', $studentIds)
             ->orderBy('id', 'desc')
@@ -108,20 +109,25 @@ class HomeroomController extends Controller
 
         $warningStudents = collect();
         $topStudents = collect();
-         $topLiteracy = collect();
+        $topLiteracy = collect();
         $topHabits = collect();
         $awardNominees = collect(); 
 
-        // Tambahan untuk menampung data JSON Modal JS di View
-        $mappedStudents = []; 
+        $mappedStudents = []; // Penampung Data JS Modal
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfSemester = Carbon::now()->subMonths(6); 
 
         // Untuk menghitung Tren
         $prev_stats = [
-            'total_violations' => 0, 'total_merits' => 0, 'alfa_count' => 0, 'total_literacy' => 0, 'total_habits' => 0
+            'total_violations' => 0, 'total_merits' => 0, 'alfa_count' => 0, 'late_count' => 0, 'total_literacy' => 0, 'total_habits' => 0
         ];
+
+        // String Konversi Tanggal untuk Filter yang Akurat
+        $currStartStr = $currentStart->format('Y-m-d');
+        $currEndStr = $currentEnd->format('Y-m-d');
+        $prevStartStr = $prevStart->format('Y-m-d');
+        $prevEndStr = $prevEnd->format('Y-m-d');
 
         foreach ($students as $student) {
             // 1. Poin Kedisiplinan Berdasarkan Periode
@@ -134,45 +140,58 @@ class HomeroomController extends Controller
             $stats['total_violations'] += $violationPoints;
             $stats['total_merits'] += $meritPoints;
 
-            // 2. Absensi Berdasarkan Periode
-            $alfaThisPeriod = $student->attendances
-                ->whereBetween('attendance_date', [$currentStart->format('Y-m-d'), $currentEnd->format('Y-m-d')])
-                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
-                ->count();
+            // 2. Absensi Berdasarkan Periode (DIPERKETAT agar menangkap data Terlambat)
+            $attendancesThisPeriod = $student->attendances->filter(function($att) use ($currStartStr, $currEndStr) {
+                $d = substr($att->attendance_date, 0, 10);
+                return $d >= $currStartStr && $d <= $currEndStr;
+            });
+
+            $attendancesPrevPeriod = $student->attendances->filter(function($att) use ($prevStartStr, $prevEndStr) {
+                $d = substr($att->attendance_date, 0, 10);
+                return $d >= $prevStartStr && $d <= $prevEndStr;
+            });
+
+            $alfaThisPeriod = $attendancesThisPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
             
-            $prev_stats['alfa_count'] += $student->attendances
-                ->whereBetween('attendance_date', [$prevStart->format('Y-m-d'), $prevEnd->format('Y-m-d')])
-                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
-                ->count();
+            // LOGIKA MENANGKAP STATUS TERLAMBAT
+            $lateThisPeriod = $attendancesThisPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
+            
+            $prev_stats['alfa_count'] += $attendancesPrevPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
+            $prev_stats['late_count'] += $attendancesPrevPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
                 
             $alfaThisSemester = $student->attendances
-                ->where('attendance_date', '>=', $startOfSemester)
+                ->filter(function($att) use ($startOfSemester) { return substr($att->attendance_date, 0, 10) >= $startOfSemester->format('Y-m-d'); })
                 ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
                 ->count();
             
             $stats['alfa_count'] += $alfaThisPeriod;
+            $stats['late_count'] += $lateThisPeriod;
 
             // 3. Literasi & Habit Berdasarkan Periode
             $literacyCount = $student->literacyJournals->count(); // Untuk nominasi all-time/semester
             $habitCount = $student->habits->count(); // Untuk nominasi all-time/semester
             
             $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
-            $habCountPeriod = $student->habits->whereBetween('report_date', [$currentStart->format('Y-m-d'), $currentEnd->format('Y-m-d')])->count();
+            $habCountPeriod = $student->habits->filter(function($h) use ($currStartStr, $currEndStr) {
+                return $h->report_date >= $currStartStr && $h->report_date <= $currEndStr;
+            })->count();
             
-             $stats['total_literacy'] += $litCountPeriod;
+            $stats['total_literacy'] += $litCountPeriod;
             $stats['total_habits'] += $habCountPeriod;
 
             $prev_stats['total_literacy'] += $student->literacyJournals->whereBetween('created_at', [$prevStart, $prevEnd])->count();
-            $prev_stats['total_habits'] += $student->habits->whereBetween('report_date', [$prevStart->format('Y-m-d'), $prevEnd->format('Y-m-d')])->count();
+            $prev_stats['total_habits'] += $student->habits->filter(function($h) use ($prevStartStr, $prevEndStr) {
+                return $h->report_date >= $prevStartStr && $h->report_date <= $prevEndStr;
+            })->count();
 
-            // --- POPULASI DATA UNTUK MODAL JS (MAPPING) ---
-            // Data ini sudah sinkron dengan filter periode karena menggunakan variabel di atas
+            // --- INJEKSI KE DATA JS BROWSER UNTUK MODAL ---
             $mappedStudents[] = [
                 'id' => $student->id,
                 'name' => $student->name,
                 'nisn' => $student->nisn ?? $student->student_id ?? '-',
                 'photo' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
                 'alfa_count' => $alfaThisPeriod,
+                'late_count' => $lateThisPeriod, // DISISIPKAN DI SINI
                 'violation_points' => $violationPoints,
                 'merit_points' => $meritPoints,
                 'literacy_count' => $litCountPeriod,
@@ -248,7 +267,6 @@ class HomeroomController extends Controller
             }
         }
 
-        // PERBAIKAN BUG RANKING: Tambahkan ->values() untuk me-reset index array menjadi urutan baru
         $warningStudents = $warningStudents->sortByDesc('violation_points')->take(10)->values();
         $topStudents = $topStudents->sortByDesc('merit_points')->take(5)->values();
         $topLiteracy = $topLiteracy->sortByDesc('count')->take(5)->values();
@@ -262,9 +280,9 @@ class HomeroomController extends Controller
             'literacy' => $prev_stats['total_literacy'] == 0 ? ($stats['total_literacy'] > 0 ? 100 : 0) : round((($stats['total_literacy'] - $prev_stats['total_literacy']) / $prev_stats['total_literacy']) * 100),
             'habits' => $prev_stats['total_habits'] == 0 ? ($stats['total_habits'] > 0 ? 100 : 0) : round((($stats['total_habits'] - $prev_stats['total_habits']) / $prev_stats['total_habits']) * 100),
             'alfa' => $prev_stats['alfa_count'] == 0 ? ($stats['alfa_count'] > 0 ? 100 : 0) : round((($stats['alfa_count'] - $prev_stats['alfa_count']) / $prev_stats['alfa_count']) * 100),
+            'late' => $prev_stats['late_count'] == 0 ? ($stats['late_count'] > 0 ? 100 : 0) : round((($stats['late_count'] - $prev_stats['late_count']) / $prev_stats['late_count']) * 100),
         ];
 
-        // Jangan lupa tambahkan 'mappedStudents' di dalam compact()
         return view('homeroom.dashboard', compact(
             'class', 'stats', 'warningStudents', 'topStudents', 
             'topLiteracy', 'topHabits', 'awardNominees', 
@@ -279,14 +297,10 @@ class HomeroomController extends Controller
     {
         $user = Auth::user();
         
-        // Cek target kelas
         if ($request->has('class_id')) {
-            // Admin mem-bypass dengan parameter URL
             $class = SchoolClass::findOrFail($request->class_id);
         } else {
-            // Cek apakah dia wali kelas
             $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
-            // Jika dia bukan wali kelas (Admin) dan tidak kirim class_id, ambil kelas pertama
             if (!$class && $user->hasRole(['Admin', 'Kepala Sekolah'])) {
                 $class = SchoolClass::first();
             }
@@ -296,7 +310,6 @@ class HomeroomController extends Controller
             return back()->with('error', 'Data kelas tidak ditemukan.');
         }
 
-        // --- MENGAMBIL NAMA WALI KELAS ---
         $teacherName = '_______________________';
         $teacherNip = '_______________________';
 
@@ -318,15 +331,15 @@ class HomeroomController extends Controller
             'total_violations' => 0,
             'total_merits' => 0,
             'alfa_count' => 0,
+            'late_count' => 0, 
         ];
 
         $warningStudents = collect();
         $awardNominees = collect(); 
 
-        $startOfMonth = Carbon::now()->startOfMonth();
         $startOfSemester = Carbon::now()->subMonths(6); 
+        $semesterStr = $startOfSemester->format('Y-m-d');
 
-        // --- OPTIMASI KINERJA (N+1 QUERY FIX) ---
         $studentIds = $students->pluck('id');
         $latestGradeRecords = GradeRecord::whereIn('student_id', $studentIds)
             ->orderBy('id', 'desc')
@@ -339,7 +352,6 @@ class HomeroomController extends Controller
             ->selectRaw('grade_record_id, avg(score) as avg_score')
             ->groupBy('grade_record_id')
             ->pluck('avg_score', 'grade_record_id');
-        // ----------------------------------------
 
         foreach ($students as $student) {
             $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
@@ -349,16 +361,22 @@ class HomeroomController extends Controller
             $stats['total_merits'] += $meritPoints;
 
             $alfaThisSemester = $student->attendances
-                ->where('attendance_date', '>=', $startOfSemester)
+                ->filter(function($att) use ($semesterStr) { return substr($att->attendance_date, 0, 10) >= $semesterStr; })
                 ->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])
+                ->count();
+                
+            $lateThisSemester = $student->attendances
+                ->filter(function($att) use ($semesterStr) { return substr($att->attendance_date, 0, 10) >= $semesterStr; })
+                ->whereIn('type', ['Harian', 'Masuk'])
+                ->where('status', 'Terlambat')
                 ->count();
             
             $stats['alfa_count'] += $alfaThisSemester;
+            $stats['late_count'] += $lateThisSemester;
 
             $literacyCount = $student->literacyJournals->count();
             $habitCount = $student->habits->count();
 
-            // Peringatan Khusus
             if ($violationPoints >= 50 || $alfaThisSemester >= 5) {
                 $warningStudents->push((object)[
                     'name' => $student->name,
@@ -369,9 +387,7 @@ class HomeroomController extends Controller
                 ]);
             }
 
-            // Nominasi
             if ($alfaThisSemester <= 3 && $violationPoints <= 30) {
-                
                 $latestGradeRecord = $latestGradeRecords->get($student->id);
                 $academicScore = 0;
                 if ($latestGradeRecord) {
@@ -396,7 +412,6 @@ class HomeroomController extends Controller
             }
         }
 
-        // PERBAIKAN BUG RANKING: Tambahkan ->values()
         $warningStudents = $warningStudents->sortByDesc('violation_points')->values();
         $awardNominees = $awardNominees->sortByDesc('total_score')->take(10)->values();
 
