@@ -64,8 +64,8 @@
                 </div>
             </div>
 
-            {{-- 6 Statistik Cepat --}}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+            {{-- 7 Statistik Cepat (Grid disesuaikan agar rapi menampung 7 kartu) --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
                 <!-- Kartu Total Siswa -->
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-200 transition-colors">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-fill ph-users-three"></i></div>
@@ -141,6 +141,24 @@
                                 @php $isGood = $trends['alfa'] <= 0; @endphp
                                 <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Meningkatnya Kehadiran)' : 'Meningkat (Banyak Alpa)' }}">
                                     <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['alfa']) }}%
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kartu Terlambat (BARU) -->
+                <div onclick="openDrilldownModal('late')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-cyan-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
+                    <div class="absolute -top-3 right-0 bg-cyan-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl group-hover:bg-cyan-100 transition-colors"><i class="ph-fill ph-clock"></i></div>
+                    <div class="flex flex-col items-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-cyan-600 transition-colors">Terlambat</p>
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-xl font-black text-cyan-600">{{ $stats['late_count'] ?? 0 }}</p>
+                            @if(isset($trends['late']))
+                                @php $isGood = $trends['late'] <= 0; @endphp
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Makin Disiplin)' : 'Meningkat (Banyak Terlambat)' }}">
+                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['late']) }}%
                                 </span>
                             @endif
                         </div>
@@ -430,14 +448,12 @@
     {{-- ========================================================= --}}
     {{-- KOMPONEN MODAL DRILL-DOWN (Dinamis & Terhubung Route)    --}}
     {{-- ========================================================= --}}
-    {{-- FIX: Z-Index dinaikkan drastis agar menang melawan navbar jika masih dalam satu root --}}
     <div id="drilldownModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 hidden opacity-0 transition-opacity duration-300">
         
         <!-- Background Overlay Backdrop -->
         <div onclick="closeDrilldownModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm cursor-pointer"></div>
 
         <!-- Modal Content Box -->
-        {{-- FIX: max-h diubah menjadi 90vh agar modal tidak menyentuh ujung atas bawah monitor secara presisi --}}
         <div class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalBox">
             
             <!-- Header Modal -->
@@ -475,10 +491,10 @@
 
     {{-- Script untuk mengontrol interaktivitas & Data Binding --}}
     <script>
-        // 1. Parsing Seluruh Data Siswa Kelas ke JSON JS dengan Aman (Menggunakan array murni hasil olahan PHP di atas)
-        const studentsData = @json($mappedStudents);
+        // 1. Parsing Seluruh Data Siswa Kelas ke JSON JS dengan Aman
+        const studentsData = @json($mappedStudents ?? []);
 
-        // 2. Base Route dari Laravel untuk Profil Siswa (Aman & Menggunakan Laravel naming route)
+        // 2. Base Route dari Laravel untuk Profil Siswa
         const profileRoutePattern = "{{ route('students.show', ':id') }}";
 
         // Helper untuk memformat dan membersihkan nomor telepon untuk integrasi WhatsApp
@@ -496,11 +512,7 @@
         function openDrilldownModal(type) {
             const modal = document.getElementById('drilldownModal');
             
-            // ====================================================================================
-            // FIX TERBAIK (TELEPORT): Pindahkan elemen modal ke tingkat <body> terluar
-            // Ini akan membebaskan modal dari perangkap Z-Index Navbar atau Sidebar bawaan template.
-            // Modal dipastikan akan menimpa seluruh layar monitor!
-            // ====================================================================================
+            // FIX TERBAIK (TELEPORT)
             if (modal.parentNode !== document.body) {
                 document.body.appendChild(modal);
             }
@@ -508,7 +520,6 @@
             const modalBox = document.getElementById('modalBox');
             const itemsContainer = document.getElementById('modalItemsContainer');
             
-            // Atribut elemen modal yang akan diganti sesuai jenis kartu yang diklik
             const modalTitle = document.getElementById('modalTitle');
             const modalSubtitle = document.getElementById('modalSubtitle');
             const modalHeader = document.getElementById('modalHeader');
@@ -516,7 +527,6 @@
             const modalIcon = document.getElementById('modalIcon');
             const modalFooterHint = document.getElementById('modalFooterHint');
 
-            // Reset list kontainer
             itemsContainer.innerHTML = '';
 
             let filteredStudents = [];
@@ -529,7 +539,6 @@
             let footerHintText = '';
             let valueFormatter = (student) => '';
 
-            // Penentuan skema tema warna modal & filter data berdasarkan stat yang diklik
             switch(type) {
                 case 'alpa':
                     filteredStudents = studentsData.filter(s => s.alfa_count > 0).sort((a,b) => b.alfa_count - a.alfa_count);
@@ -540,6 +549,18 @@
                     subtitleText = `${filteredStudents.length} Siswa membolos / tanpa keterangan`;
                     footerHintText = 'Segera hubungi orang tua apabila siswa alpa lebih dari 2 hari berturut-turut.';
                     valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1"><i class="ph-bold ph-calendar-x"></i> ${s.alfa_count}x Alpa</span>`;
+                    break;
+                
+                // === TAMBAHAN UNTUK DATA SISWA TERLAMBAT ===
+                case 'late':
+                    filteredStudents = studentsData.filter(s => s.late_count > 0).sort((a,b) => b.late_count - a.late_count);
+                    headerBgClass = 'bg-cyan-50/50 border-cyan-100';
+                    iconBgClass = 'bg-cyan-100 text-cyan-600';
+                    iconPhClass = 'ph-clock';
+                    titleText = 'Rincian Siswa Terlambat';
+                    subtitleText = `${filteredStudents.length} Siswa terdeteksi datang terlambat`;
+                    footerHintText = 'Kedisiplinan waktu adalah cerminan karakter. Harap berikan teguran atau peringatan secara simpatik.';
+                    valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-cyan-100 text-cyan-700 border border-cyan-200 flex items-center gap-1"><i class="ph-bold ph-clock"></i> ${s.late_count}x Terlambat</span>`;
                     break;
 
                 case 'violations':
@@ -587,7 +608,6 @@
                     break;
             }
 
-            // Atur Class dan Struktur Visual Header Modal
             modalHeader.className = `flex items-center justify-between p-6 border-b rounded-t-[2rem] ${headerBgClass}`;
             modalIconContainer.className = `w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${iconBgClass}`;
             modalIcon.className = `ph-fill ${iconPhClass}`;
@@ -595,14 +615,13 @@
             modalSubtitle.innerText = subtitleText;
             modalFooterHint.innerText = footerHintText;
 
-            // Render daftar siswa secara dinamis & hubungkan profil riil
             if (filteredStudents.length > 0) {
                 filteredStudents.forEach(student => {
-                    // Membuat URL profile dinamis Laravel
                     const profileUrl = profileRoutePattern.replace(':id', student.id);
                     
-                    // Membuat URL WA dinamis ke nomor orang tua
+                    // TAMBAHAN PESAN WHATSAPP UNTUK KETERLAMBATAN
                     const detailMessageText = type === 'alpa' ? `kehadiran (Alpa sebanyak ${student.alfa_count} hari)` :
+                                              type === 'late' ? `kedisiplinan waktu (Terlambat masuk sekolah sebanyak ${student.late_count} kali)` :
                                               type === 'violations' ? `pelanggaran kedisiplinan sekolah (poin minus: ${student.violation_points})` :
                                               type === 'merits' ? `prestasi karakter positif siswa (+${student.merit_points} poin)` : 'pembiasaan tugas sekolah';
                     
@@ -623,7 +642,6 @@
                         `;
                     }
 
-                    // Kerangka HTML tiap baris siswa
                     const itemHtml = `
                         <div class="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 transition-all bg-white group shadow-sm">
                             <div class="flex items-center gap-4 min-w-0">
@@ -638,7 +656,6 @@
                             <div class="flex items-center gap-3 shrink-0">
                                 ${valueFormatter(student)}
                                 <div class="flex flex-col sm:flex-row gap-1.5">
-                                    <!-- Menghubungkan Profil Siswa Secara Riil -->
                                     <a href="${profileUrl}" class="text-[10px] font-bold text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 px-3 py-1.5 rounded-lg border border-blue-100 transition-all text-center">
                                         Buku Induk
                                     </a>
@@ -661,7 +678,6 @@
                 `;
             }
 
-            // Tampilkan modal container & jalankan animasi transisi
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -673,7 +689,6 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // Fungsi Menutup Modal
         function closeDrilldownModal() {
             const modal = document.getElementById('drilldownModal');
             const modalBox = document.getElementById('modalBox');
@@ -691,19 +706,9 @@
     </script>
     
     <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9; 
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </x-app-layout>
