@@ -446,4 +446,112 @@ class HomeroomController extends Controller
             'class', 'stats', 'warningStudents', 'awardNominees', 'teacherName', 'teacherNip'
         ));
     }
+
+     /**
+     * FUNGSI: Mengekspor Laporan Evaluasi Kelas ke Excel
+     */
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($request->has('class_id')) {
+            $class = SchoolClass::findOrFail($request->class_id);
+        } else {
+            $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
+            if (!$class && $user->hasRole(['Admin', 'Kepala Sekolah'])) {
+                $class = SchoolClass::first();
+            }
+        }
+
+        if (!$class) {
+            return back()->with('error', 'Data kelas tidak ditemukan.');
+        }
+
+        $students = Student::with(['disciplineRecords.disciplineType', 'attendances', 'habits', 'literacyJournals'])
+            ->where('class_id', $class->id)
+            ->where('status', 'active')
+            ->orderBy('name', 'asc') // Urutkan berdasarkan nama (penting untuk absensi)
+            ->get();
+
+        // --- FILTER PERIODE WAKTU (Sama persis dengan logic index) ---
+        $period = $request->input('period', 'this_month');
+        $filterDate = $request->input('filter_date');
+        
+        $currentStart = Carbon::now()->startOfMonth();
+        $currentEnd = Carbon::now()->endOfMonth();
+        $periodName = "Bulan Ini"; // Untuk Judul di Excel
+
+        if (!empty($filterDate)) {
+            $date = Carbon::parse($filterDate);
+            $currentStart = $date->copy()->startOfDay();
+            $currentEnd = $date->copy()->endOfDay();
+            $periodName = "Harian (" . $date->translatedFormat('d F Y') . ")";
+        } else {
+            if ($period == 'today') {
+                $currentStart = Carbon::today()->startOfDay();
+                $currentEnd = Carbon::today()->endOfDay();
+                $periodName = "Hari Ini (" . Carbon::today()->translatedFormat('d F Y') . ")";
+            } elseif ($period == 'last_month') {
+                $currentStart = Carbon::now()->subMonth()->startOfMonth();
+                $currentEnd = Carbon::now()->subMonth()->endOfMonth();
+                $periodName = "Bulan Lalu";
+            } elseif ($period == 'semester_1') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
+                $currentStart = Carbon::create($year, 7, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
+                $periodName = "Semester Ganjil " . $year . "/" . ($year+1);
+            } elseif ($period == 'semester_2') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
+                $periodName = "Semester Genap " . ($year-1) . "/" . $year;
+            }
+        }
+
+        $currStartStr = $currentStart->format('Y-m-d');
+        $currEndStr = $currentEnd->format('Y-m-d');
+
+        $exportData = [];
+        
+        // --- LOOPING DATA UNTUK EXCEL ---
+        foreach ($students as $index => $student) {
+            $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
+            $meritPoints = $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
+            
+            $attendancesThisPeriod = $student->attendances->filter(function($att) use ($currStartStr, $currEndStr) {
+                $d = substr($att->attendance_date, 0, 10);
+                return $d >= $currStartStr && $d <= $currEndStr;
+            });
+
+            $alfaThisPeriod = $attendancesThisPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
+            $lateThisPeriod = $attendancesThisPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
+            
+            $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
+            $habCountPeriod = $student->habits->filter(function($h) use ($currStartStr, $currEndStr) {
+                return $h->report_date >= $currStartStr && $h->report_date <= $currEndStr;
+            })->count();
+
+            // Memasukkan array mentah untuk setiap baris di Excel
+            $exportData[] = [
+                $index + 1,
+                $student->nisn ?? $student->student_id ?? '-',
+                $student->name,
+                $student->gender ?? '-',
+                $alfaThisPeriod,
+                $lateThisPeriod,
+                $violationPoints,
+                $meritPoints,
+                $litCountPeriod,
+                $habCountPeriod,
+            ];
+        }
+
+        $fileName = 'Rekap_Evaluasi_Kelas_' . str_replace(' ', '_', $class->name) . '_' . date('Ymd') . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\HomeroomStatsExport($exportData, $class->name, $periodName), $fileName);
+    }
 }

@@ -294,6 +294,7 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::get('/homeroom/dashboard', [\App\Http\Controllers\HomeroomController::class, 'index'])->name('homeroom.dashboard');
     Route::get('/homeroom/print', [\App\Http\Controllers\HomeroomController::class, 'print'])->name('homeroom.print'); // <--- TAMBAHKAN BARIS INI
+    Route::get('/homeroom/export', [\App\Http\Controllers\HomeroomController::class, 'export'])->name('homeroom.export'); // <--- ROUTE EXCEL BARU
     Route::get('/admin/bk/early-warning', [\App\Http\Controllers\BkTeacherController::class, 'earlyWarning'])->name('admin.bk.early_warning');
     // =========================================================================
     

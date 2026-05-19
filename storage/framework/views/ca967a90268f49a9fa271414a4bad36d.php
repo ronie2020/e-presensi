@@ -104,9 +104,18 @@
                             </form>
                         <?php endif; ?>
 
-                        <a href="<?php echo e(route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')])); ?>" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20 text-sm">
-                            <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> Rekap PDF
-                        </a>
+                        
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <!-- Tombol PDF Lama -->
+                            <a href="<?php echo e(route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')])); ?>" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20 text-sm">
+                                <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> PDF
+                            </a>
+
+                            <!-- Tombol EXCEL Baru -->
+                            <a href="<?php echo e(route('homeroom.export', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')])); ?>" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 group active:scale-95 border border-emerald-600/20 text-sm">
+                                <i class="ph-bold ph-file-xls group-hover:scale-110 transition-transform"></i> Excel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
