@@ -443,13 +443,13 @@
     
     
     
-    <div id="drilldownModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div id="drilldownModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 hidden opacity-0 transition-opacity duration-300">
         
         <!-- Background Overlay Backdrop -->
         <div onclick="closeDrilldownModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm cursor-pointer"></div>
 
         <!-- Modal Content Box -->
-        <div class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[85vh] mx-4 shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalBox">
+        <div class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-full shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalBox">
             
             <!-- Header Modal -->
             <div id="modalHeader" class="flex items-center justify-between p-6 border-b border-slate-100 rounded-t-[2rem]">
