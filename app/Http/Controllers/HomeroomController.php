@@ -51,37 +51,61 @@ class HomeroomController extends Controller
 
         $totalStudents = $students->count();
 
-        // --- FILTER PERIODE WAKTU ---
+        // ==========================================
+        // --- LOGIKA BARU: FILTER TANGGAL HARIAN ---
+        // ==========================================
         $period = $request->input('period', 'this_month');
+        $filterDate = $request->input('filter_date'); // Menangkap input dari datepicker
+
+        // Inisialisasi default
         $currentStart = Carbon::now()->startOfMonth();
         $currentEnd = Carbon::now()->endOfMonth();
         $prevStart = Carbon::now()->subMonth()->startOfMonth();
         $prevEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        if ($period == 'last_month') {
-            $currentStart = Carbon::now()->subMonth()->startOfMonth();
-            $currentEnd = Carbon::now()->subMonth()->endOfMonth();
-            $prevStart = Carbon::now()->subMonths(2)->startOfMonth();
-            $prevEnd = Carbon::now()->subMonths(2)->endOfMonth();
-        } elseif ($period == 'semester_1') {
-            $currentYear = Carbon::now()->year;
-            $currentMonth = Carbon::now()->month;
-            $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
-            $currentStart = Carbon::create($year, 7, 1)->startOfDay();
-            $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
-            $prevStart = Carbon::create($year, 1, 1)->startOfDay();
-            $prevEnd = Carbon::create($year, 6, 30)->endOfDay();
-        } elseif ($period == 'semester_2') {
-            $currentYear = Carbon::now()->year;
-            $currentMonth = Carbon::now()->month;
-            $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
-            $currentStart = Carbon::create($year, 1, 1)->startOfDay();
-            $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
-            $prevStart = Carbon::create($year - 1, 7, 1)->startOfDay();
-            $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
+        if (!empty($filterDate)) {
+            // JIKA USER MEMILIH TANGGAL DI KALENDER
+            $date = Carbon::parse($filterDate);
+            $currentStart = $date->copy()->startOfDay();
+            $currentEnd = $date->copy()->endOfDay();
+            // Pembanding trend adalah 1 hari sebelumnya
+            $prevStart = $date->copy()->subDay()->startOfDay();
+            $prevEnd = $date->copy()->subDay()->endOfDay();
+            
+            $period = 'custom_date'; // Flag agar dropdown otomatis menyesuaikan
+        } else {
+            // JIKA USER MEMILIH DARI DROPDOWN PERIODE
+            if ($period == 'today') {
+                $currentStart = Carbon::today()->startOfDay();
+                $currentEnd = Carbon::today()->endOfDay();
+                $prevStart = Carbon::yesterday()->startOfDay();
+                $prevEnd = Carbon::yesterday()->endOfDay();
+            } elseif ($period == 'last_month') {
+                $currentStart = Carbon::now()->subMonth()->startOfMonth();
+                $currentEnd = Carbon::now()->subMonth()->endOfMonth();
+                $prevStart = Carbon::now()->subMonths(2)->startOfMonth();
+                $prevEnd = Carbon::now()->subMonths(2)->endOfMonth();
+            } elseif ($period == 'semester_1') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
+                $currentStart = Carbon::create($year, 7, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
+                $prevStart = Carbon::create($year, 1, 1)->startOfDay();
+                $prevEnd = Carbon::create($year, 6, 30)->endOfDay();
+            } elseif ($period == 'semester_2') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
+                $prevStart = Carbon::create($year - 1, 7, 1)->startOfDay();
+                $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
+            }
         }
+        // ==========================================
 
-        // TAMBAHAN: Variabel menampung jumlah keterlambatan
+        // Variabel menampung jumlah statistik
         $stats = [
             'total_students' => $totalStudents,
             'total_violations' => 0,
@@ -140,7 +164,7 @@ class HomeroomController extends Controller
             $stats['total_violations'] += $violationPoints;
             $stats['total_merits'] += $meritPoints;
 
-            // 2. Absensi Berdasarkan Periode (DIPERKETAT agar menangkap data Terlambat)
+            // 2. Absensi Berdasarkan Periode
             $attendancesThisPeriod = $student->attendances->filter(function($att) use ($currStartStr, $currEndStr) {
                 $d = substr($att->attendance_date, 0, 10);
                 return $d >= $currStartStr && $d <= $currEndStr;
@@ -191,7 +215,7 @@ class HomeroomController extends Controller
                 'nisn' => $student->nisn ?? $student->student_id ?? '-',
                 'photo' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
                 'alfa_count' => $alfaThisPeriod,
-                'late_count' => $lateThisPeriod, // DISISIPKAN DI SINI
+                'late_count' => $lateThisPeriod,
                 'violation_points' => $violationPoints,
                 'merit_points' => $meritPoints,
                 'literacy_count' => $litCountPeriod,
