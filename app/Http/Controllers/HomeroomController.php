@@ -208,6 +208,9 @@ class HomeroomController extends Controller
                 return $h->report_date >= $prevStartStr && $h->report_date <= $prevEndStr;
             })->count();
 
+            // MENCARI NOMOR KONTAK KHUSUS ORANG TUA SAJA (Mengabaikan nomor siswa/wali)
+            $contactNumber = $student->parent_wa_number ?: ($student->parent_phone ?: null);
+
             // --- INJEKSI KE DATA JS BROWSER UNTUK MODAL ---
             $mappedStudents[] = [
                 'id' => $student->id,
@@ -220,7 +223,7 @@ class HomeroomController extends Controller
                 'merit_points' => $meritPoints,
                 'literacy_count' => $litCountPeriod,
                 'habits_count' => $habCountPeriod,
-                'parent_phone' => $student->parent_phone ?? $student->phone ?? null,
+                'parent_phone' => $contactNumber,
             ];
 
             // --- PENGELOMPOKAN DATA DASHBOARD ATAS ---
