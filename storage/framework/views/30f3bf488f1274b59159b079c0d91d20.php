@@ -443,13 +443,15 @@
     
     
     
-    <div id="drilldownModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 hidden opacity-0 transition-opacity duration-300">
+    
+    <div id="drilldownModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 hidden opacity-0 transition-opacity duration-300">
         
         <!-- Background Overlay Backdrop -->
         <div onclick="closeDrilldownModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm cursor-pointer"></div>
 
         <!-- Modal Content Box -->
-        <div class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-full shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalBox">
+        
+        <div class="relative bg-white rounded-[2rem] w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modalBox">
             
             <!-- Header Modal -->
             <div id="modalHeader" class="flex items-center justify-between p-6 border-b border-slate-100 rounded-t-[2rem]">
@@ -506,6 +508,16 @@
         // Fungsi Membuka Modal Drill-down dengan data dinamis riil
         function openDrilldownModal(type) {
             const modal = document.getElementById('drilldownModal');
+            
+            // ====================================================================================
+            // FIX TERBAIK (TELEPORT): Pindahkan elemen modal ke tingkat <body> terluar
+            // Ini akan membebaskan modal dari perangkap Z-Index Navbar atau Sidebar bawaan template.
+            // Modal dipastikan akan menimpa seluruh layar monitor!
+            // ====================================================================================
+            if (modal.parentNode !== document.body) {
+                document.body.appendChild(modal);
+            }
+
             const modalBox = document.getElementById('modalBox');
             const itemsContainer = document.getElementById('modalItemsContainer');
             
