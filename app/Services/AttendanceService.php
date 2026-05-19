@@ -52,15 +52,13 @@ class AttendanceService
         return DB::transaction(function () use ($student, $todayDate, $timeNow, $now, $lat, $long, $scheduleStartIn, $scheduleLimit, $scheduleStartOut, $scheduleEndOut, $source) {
             
             // FIX RACE CONDITION (KUNCI MUTLAK):
-            // Kita lock baris Student! Karena baris Attendance belum ada, kita paksa
-            // request yang datang di milidetik yang sama untuk antre satu per satu di pintu Student.
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
             // Cek apakah data absen sudah ada
             $existingAttendance = AttendanceSiswa::where('student_id', $student->id)
                 ->where('attendance_date', $todayDate)
                 ->whereIn('type', ['Masuk', 'Pulang', 'Harian']) 
-                ->first(); // Hapus lockForUpdate di sini karena row ini mungkin belum ada
+                ->first(); 
 
             // SKENARIO A: BELUM ABSEN MASUK
             if (!$existingAttendance || !$existingAttendance->time_in || $existingAttendance->time_in == '00:00:00') {
@@ -236,32 +234,36 @@ class AttendanceService
             // FIX RACE CONDITION
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
+            // CEK APAKAH SUDAH PERNAH ABSEN EKSKUL INI HARI INI
+            $alreadyExists = ExtracurricularAttendance::where('extracurricular_id', $extraId)
+                ->where('student_id', $student->id)
+                ->where('date', $todayDate)
+                ->exists();
+
+            if ($alreadyExists) {
+                // KEMBALIKAN ERROR (success: false) AGAR KIOSK MENOLAK (MUNCUL WARNA MERAH)
+                return ['success' => false, 'code' => 409, 'message' => "SUDAH absen {$extra->name} hari ini!"];
+            }
+
+            // JIKA BELUM, SIMPAN DATA BARU
             $mainAtt = AttendanceSiswa::updateOrCreate(
                 ['student_id' => $student->id, 'attendance_date' => $todayDate, 'type' => 'Extracurricular'],
                 ['status' => 'Hadir', 'time_in' => $scanTime->toTimeString(), 'activity' => $extra->name]
             );
 
-            // FIX HY000: Menambahkan kolom 'time_in' tanpa kolom 'status'
-            // firstOrCreate() menggunakan array pertama untuk "mencari", dan array kedua untuk nilai yang akan "di-insert" jika tidak ditemukan.
-            $detailAtt = ExtracurricularAttendance::firstOrCreate(
-                [
-                    'extracurricular_id' => $extraId, 
-                    'student_id' => $student->id, 
-                    'date' => $todayDate
-                ],
-                [
-                    'time_in' => $scanTime->toTimeString() // <--- Kolom ini wajib ada di database Anda
-                ]
-            );
+            ExtracurricularAttendance::create([
+                'extracurricular_id' => $extraId, 
+                'student_id' => $student->id, 
+                'date' => $todayDate,
+                'time_in' => $scanTime->toTimeString()
+            ]);
 
-            $msg = "Sudah absen {$extra->name} sebelumnya.";
-            if ($detailAtt->wasRecentlyCreated) {
-                $isMember = ExtracurricularMember::where('student_id', $student->id)->where('extracurricular_id', $extraId)->exists();
-                $points = $isMember ? 5 : 0;
-                $statusPoin = $isMember ? "(+5 Poin)" : "(Tamu)";
-                $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", $points);
-                $msg = "Hadir {$extra->name} {$statusPoin}";
-            }
+            $isMember = ExtracurricularMember::where('student_id', $student->id)->where('extracurricular_id', $extraId)->exists();
+            $points = $isMember ? 5 : 0;
+            $statusPoin = $isMember ? "(+5 Poin)" : "(Tamu)";
+            
+            $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", $points);
+            $msg = "Hadir {$extra->name} {$statusPoin}";
 
             $mainAtt->setAttribute('extra_name', $extra->name);
             return ['success' => true, 'code' => 200, 'status_text' => 'Hadir Ekskul', 'message' => $msg, 'model' => $mainAtt, 'type' => 'Extracurricular'];
