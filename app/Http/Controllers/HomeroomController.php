@@ -51,37 +51,61 @@ class HomeroomController extends Controller
 
         $totalStudents = $students->count();
 
-        // --- FILTER PERIODE WAKTU ---
+        // ==========================================
+        // --- LOGIKA BARU: FILTER TANGGAL HARIAN ---
+        // ==========================================
         $period = $request->input('period', 'this_month');
+        $filterDate = $request->input('filter_date'); // Menangkap input dari datepicker
+
+        // Inisialisasi default
         $currentStart = Carbon::now()->startOfMonth();
         $currentEnd = Carbon::now()->endOfMonth();
         $prevStart = Carbon::now()->subMonth()->startOfMonth();
         $prevEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        if ($period == 'last_month') {
-            $currentStart = Carbon::now()->subMonth()->startOfMonth();
-            $currentEnd = Carbon::now()->subMonth()->endOfMonth();
-            $prevStart = Carbon::now()->subMonths(2)->startOfMonth();
-            $prevEnd = Carbon::now()->subMonths(2)->endOfMonth();
-        } elseif ($period == 'semester_1') {
-            $currentYear = Carbon::now()->year;
-            $currentMonth = Carbon::now()->month;
-            $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
-            $currentStart = Carbon::create($year, 7, 1)->startOfDay();
-            $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
-            $prevStart = Carbon::create($year, 1, 1)->startOfDay();
-            $prevEnd = Carbon::create($year, 6, 30)->endOfDay();
-        } elseif ($period == 'semester_2') {
-            $currentYear = Carbon::now()->year;
-            $currentMonth = Carbon::now()->month;
-            $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
-            $currentStart = Carbon::create($year, 1, 1)->startOfDay();
-            $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
-            $prevStart = Carbon::create($year - 1, 7, 1)->startOfDay();
-            $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
+        if (!empty($filterDate)) {
+            // JIKA USER MEMILIH TANGGAL DI KALENDER
+            $date = Carbon::parse($filterDate);
+            $currentStart = $date->copy()->startOfDay();
+            $currentEnd = $date->copy()->endOfDay();
+            // Pembanding trend adalah 1 hari sebelumnya
+            $prevStart = $date->copy()->subDay()->startOfDay();
+            $prevEnd = $date->copy()->subDay()->endOfDay();
+            
+            $period = 'custom_date'; // Flag agar dropdown otomatis menyesuaikan
+        } else {
+            // JIKA USER MEMILIH DARI DROPDOWN PERIODE
+            if ($period == 'today') {
+                $currentStart = Carbon::today()->startOfDay();
+                $currentEnd = Carbon::today()->endOfDay();
+                $prevStart = Carbon::yesterday()->startOfDay();
+                $prevEnd = Carbon::yesterday()->endOfDay();
+            } elseif ($period == 'last_month') {
+                $currentStart = Carbon::now()->subMonth()->startOfMonth();
+                $currentEnd = Carbon::now()->subMonth()->endOfMonth();
+                $prevStart = Carbon::now()->subMonths(2)->startOfMonth();
+                $prevEnd = Carbon::now()->subMonths(2)->endOfMonth();
+            } elseif ($period == 'semester_1') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
+                $currentStart = Carbon::create($year, 7, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
+                $prevStart = Carbon::create($year, 1, 1)->startOfDay();
+                $prevEnd = Carbon::create($year, 6, 30)->endOfDay();
+            } elseif ($period == 'semester_2') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
+                $prevStart = Carbon::create($year - 1, 7, 1)->startOfDay();
+                $prevEnd = Carbon::create($year - 1, 12, 31)->endOfDay();
+            }
         }
+        // ==========================================
 
-        // TAMBAHAN: Variabel menampung jumlah keterlambatan
+        // Variabel menampung jumlah statistik
         $stats = [
             'total_students' => $totalStudents,
             'total_violations' => 0,
@@ -140,7 +164,7 @@ class HomeroomController extends Controller
             $stats['total_violations'] += $violationPoints;
             $stats['total_merits'] += $meritPoints;
 
-            // 2. Absensi Berdasarkan Periode (DIPERKETAT agar menangkap data Terlambat)
+            // 2. Absensi Berdasarkan Periode
             $attendancesThisPeriod = $student->attendances->filter(function($att) use ($currStartStr, $currEndStr) {
                 $d = substr($att->attendance_date, 0, 10);
                 return $d >= $currStartStr && $d <= $currEndStr;
@@ -184,6 +208,9 @@ class HomeroomController extends Controller
                 return $h->report_date >= $prevStartStr && $h->report_date <= $prevEndStr;
             })->count();
 
+            // MENCARI NOMOR KONTAK KHUSUS ORANG TUA SAJA (Mengabaikan nomor siswa/wali)
+            $contactNumber = $student->parent_wa_number ?: ($student->parent_phone ?: null);
+
             // --- INJEKSI KE DATA JS BROWSER UNTUK MODAL ---
             $mappedStudents[] = [
                 'id' => $student->id,
@@ -191,12 +218,12 @@ class HomeroomController extends Controller
                 'nisn' => $student->nisn ?? $student->student_id ?? '-',
                 'photo' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
                 'alfa_count' => $alfaThisPeriod,
-                'late_count' => $lateThisPeriod, // DISISIPKAN DI SINI
+                'late_count' => $lateThisPeriod,
                 'violation_points' => $violationPoints,
                 'merit_points' => $meritPoints,
                 'literacy_count' => $litCountPeriod,
                 'habits_count' => $habCountPeriod,
-                'parent_phone' => $student->parent_phone ?? $student->phone ?? null,
+                'parent_phone' => $contactNumber,
             ];
 
             // --- PENGELOMPOKAN DATA DASHBOARD ATAS ---
@@ -418,5 +445,113 @@ class HomeroomController extends Controller
         return view('homeroom.print', compact(
             'class', 'stats', 'warningStudents', 'awardNominees', 'teacherName', 'teacherNip'
         ));
+    }
+
+     /**
+     * FUNGSI: Mengekspor Laporan Evaluasi Kelas ke Excel
+     */
+    public function export(Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($request->has('class_id')) {
+            $class = SchoolClass::findOrFail($request->class_id);
+        } else {
+            $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
+            if (!$class && $user->hasRole(['Admin', 'Kepala Sekolah'])) {
+                $class = SchoolClass::first();
+            }
+        }
+
+        if (!$class) {
+            return back()->with('error', 'Data kelas tidak ditemukan.');
+        }
+
+        $students = Student::with(['disciplineRecords.disciplineType', 'attendances', 'habits', 'literacyJournals'])
+            ->where('class_id', $class->id)
+            ->where('status', 'active')
+            ->orderBy('name', 'asc') // Urutkan berdasarkan nama (penting untuk absensi)
+            ->get();
+
+        // --- FILTER PERIODE WAKTU (Sama persis dengan logic index) ---
+        $period = $request->input('period', 'this_month');
+        $filterDate = $request->input('filter_date');
+        
+        $currentStart = Carbon::now()->startOfMonth();
+        $currentEnd = Carbon::now()->endOfMonth();
+        $periodName = "Bulan Ini"; // Untuk Judul di Excel
+
+        if (!empty($filterDate)) {
+            $date = Carbon::parse($filterDate);
+            $currentStart = $date->copy()->startOfDay();
+            $currentEnd = $date->copy()->endOfDay();
+            $periodName = "Harian (" . $date->translatedFormat('d F Y') . ")";
+        } else {
+            if ($period == 'today') {
+                $currentStart = Carbon::today()->startOfDay();
+                $currentEnd = Carbon::today()->endOfDay();
+                $periodName = "Hari Ini (" . Carbon::today()->translatedFormat('d F Y') . ")";
+            } elseif ($period == 'last_month') {
+                $currentStart = Carbon::now()->subMonth()->startOfMonth();
+                $currentEnd = Carbon::now()->subMonth()->endOfMonth();
+                $periodName = "Bulan Lalu";
+            } elseif ($period == 'semester_1') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear - 1 : $currentYear;
+                $currentStart = Carbon::create($year, 7, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
+                $periodName = "Semester Ganjil " . $year . "/" . ($year+1);
+            } elseif ($period == 'semester_2') {
+                $currentYear = Carbon::now()->year;
+                $currentMonth = Carbon::now()->month;
+                $year = $currentMonth < 7 ? $currentYear : $currentYear + 1;
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 6, 30)->endOfDay();
+                $periodName = "Semester Genap " . ($year-1) . "/" . $year;
+            }
+        }
+
+        $currStartStr = $currentStart->format('Y-m-d');
+        $currEndStr = $currentEnd->format('Y-m-d');
+
+        $exportData = [];
+        
+        // --- LOOPING DATA UNTUK EXCEL ---
+        foreach ($students as $index => $student) {
+            $violationPoints = $student->disciplineRecords->where('disciplineType.type', 'Pelanggaran')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
+            $meritPoints = $student->disciplineRecords->where('disciplineType.type', 'Kebaikan')->whereBetween('created_at', [$currentStart, $currentEnd])->sum('disciplineType.point_value');
+            
+            $attendancesThisPeriod = $student->attendances->filter(function($att) use ($currStartStr, $currEndStr) {
+                $d = substr($att->attendance_date, 0, 10);
+                return $d >= $currStartStr && $d <= $currEndStr;
+            });
+
+            $alfaThisPeriod = $attendancesThisPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
+            $lateThisPeriod = $attendancesThisPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
+            
+            $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
+            $habCountPeriod = $student->habits->filter(function($h) use ($currStartStr, $currEndStr) {
+                return $h->report_date >= $currStartStr && $h->report_date <= $currEndStr;
+            })->count();
+
+            // Memasukkan array mentah untuk setiap baris di Excel
+            $exportData[] = [
+                $index + 1,
+                $student->nisn ?? $student->student_id ?? '-',
+                $student->name,
+                $student->gender ?? '-',
+                $alfaThisPeriod,
+                $lateThisPeriod,
+                $violationPoints,
+                $meritPoints,
+                $litCountPeriod,
+                $habCountPeriod,
+            ];
+        }
+
+        $fileName = 'Rekap_Evaluasi_Kelas_' . str_replace(' ', '_', $class->name) . '_' . date('Ymd') . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\HomeroomStatsExport($exportData, $class->name, $periodName), $fileName);
     }
 }
