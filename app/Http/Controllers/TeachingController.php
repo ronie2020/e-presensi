@@ -279,6 +279,44 @@ class TeachingController extends Controller
         ]);
     }
 
+    // --- TANDAI SISANYA ALPHA (BULK ACTION) ---
+    public function bulkAlpha(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:teaching_sessions,id'
+        ]);
+
+        $session = TeachingSession::with('schedule.schoolClass')->find($request->session_id);
+        if (!$session || $session->status !== 'open') {
+            return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid atau sudah ditutup.']);
+        }
+
+        $classId = $session->schedule->school_class_id;
+        $allStudents = Student::where('class_id', $classId)->pluck('id')->toArray();
+        
+        $presentIds = ClassAttendance::where('teaching_session_id', $session->id)
+                      ->pluck('student_id')->toArray();
+
+        $unmarkedIds = array_diff($allStudents, $presentIds);
+        $updatedIds = [];
+
+        foreach ($unmarkedIds as $studentId) {
+            ClassAttendance::create([
+                'teaching_session_id' => $session->id,
+                'student_id' => $studentId,
+                'status' => 'alpha',
+                'scanned_at' => null
+            ]);
+            $updatedIds[] = $studentId;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => count($updatedIds) . ' siswa berhasil ditandai Alpha.',
+            'updated_ids' => array_values($updatedIds) // Reset index array agar bersih di JS
+        ]);
+    }
+
     // --- TUTUP KELAS & DISIPLIN  ---
     public function close($id)
     {

@@ -4,7 +4,7 @@
         /* FIX KAMERA RESPONSIVE (ANTI GEPENG & ANTI LOMPAT) */
         #reader { 
             width: 100% !important; 
-            height: 300px !important; /* Mengunci tinggi agar tidak mencari fokus/melompat */
+            height: 300px !important; 
             border: none !important; 
             border-radius: 1.5rem !important; 
             overflow: hidden; 
@@ -30,6 +30,10 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        
+        /* Hide scrollbar for filter pills but keep functionality */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     @endpush
 
@@ -38,6 +42,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @endpush
 
+    {{-- TAMBAHAN: state filterTab ditambahkan ke komponen Alpine induk --}}
     <div class="py-6 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20" 
          x-data="teachingSession({ sessionId: {{ $session->id }}, stats: {{ json_encode($stats) }} })">
          
@@ -181,20 +186,23 @@
                         </div>
                         <div class="p-6 sm:p-8">
                             <fieldset {{ !$isOpen ? 'disabled' : '' }}>
-                                <form action="{{ route('teaching.update', $session->id) }}" method="POST" enctype="multipart/form-data">
+                                {{-- TAMBAHAN: Event @submit untuk menghapus localStorage --}}
+                                <form action="{{ route('teaching.update', $session->id) }}" method="POST" enctype="multipart/form-data" @submit="clearJournalDraft()">
                                     @csrf @method('PUT')
                                     <div class="space-y-5">
                                         <div>
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Topik / Materi <span class="text-[#D13438]">*</span></label>
-                                            <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" 
+                                            {{-- TAMBAHAN: Atribut x-model untuk Auto-Save --}}
+                                            <input type="text" name="topic" x-model="journalTopic"
                                                 class="journal-input w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-4 px-5 text-sm bg-elevate-soft transition-all" 
                                                 placeholder="Contoh: Aljabar Linear" required>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Catatan</label>
-                                            <textarea name="activities" rows="3" 
+                                            {{-- TAMBAHAN: Atribut x-model untuk Auto-Save --}}
+                                            <textarea name="activities" rows="3" x-model="journalActivities"
                                                 class="journal-input w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-medium py-4 px-5 bg-elevate-soft transition-all" 
-                                                placeholder="Deskripsi kegiatan...">{{ old('activities', $session->activities) }}</textarea>
+                                                placeholder="Deskripsi kegiatan..."></textarea>
                                         </div>
                                         
                                         <div>
@@ -267,18 +275,43 @@
                                 </div>
                             </div>
 
-                            {{-- Search Bar --}}
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-magnifying-glass text-slate-400 group-focus-within:text-elevate-primary transition-colors text-lg"></i>
+                            <div class="flex flex-col gap-3">
+                                {{-- Search Bar --}}
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                        <i class="ph-bold ph-magnifying-glass text-slate-400 group-focus-within:text-elevate-primary transition-colors text-lg"></i>
+                                    </div>
+                                    <input type="text" x-model="searchQuery" class="journal-input block w-full pl-14 pr-5 py-4 border-slate-200 rounded-2xl bg-white focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 placeholder-slate-400 text-sm font-bold shadow-sm transition-colors text-elevate-dark" placeholder="Cari nama atau NIS siswa...">
                                 </div>
-                                <input type="text" x-model="searchQuery" class="journal-input block w-full pl-14 pr-5 py-4 border-slate-200 rounded-2xl bg-white focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 placeholder-slate-400 text-sm font-bold shadow-sm transition-colors text-elevate-dark" placeholder="Cari nama atau NIS siswa...">
+
+                                {{-- TAMBAHAN: Filter Pills Status & Tombol Bulk Action --}}
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full sm:w-auto">
+                                        <button @click="filterTab = 'all'" :class="filterTab === 'all' ? 'bg-elevate-dark text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border">
+                                            Semua Siswa
+                                        </button>
+                                        <button @click="filterTab = 'unmarked'" :class="filterTab === 'unmarked' ? 'bg-slate-500 text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full" :class="filterTab === 'unmarked' ? 'bg-white' : 'bg-slate-300'"></span> Belum Absen
+                                        </button>
+                                        <button @click="filterTab = 'present'" :class="filterTab === 'present' ? 'bg-[#107C10] text-white border-transparent shadow-md' : 'bg-white text-[#107C10] border-[#B7DFB9] hover:bg-[#DFF6DD]/50'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                            <i class="ph-bold ph-check"></i> Hadir
+                                        </button>
+                                        <button @click="filterTab = 'alpha'" :class="filterTab === 'alpha' ? 'bg-[#D13438] text-white border-transparent shadow-md' : 'bg-white text-[#D13438] border-[#F4C3C9] hover:bg-[#FDE7E9]/50'" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                            <i class="ph-bold ph-x"></i> Alpha
+                                        </button>
+                                    </div>
+                                    
+                                    @if($isOpen)
+                                        <button @click="markRestAsAlpha()" type="button" class="shrink-0 w-full sm:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95">
+                                            <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
                         {{-- 5. LIST SISWA --}}
                         <div class="flex-1 p-5 md:p-8 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
-                            {{-- PERBAIKAN: Mengatur Grid yang lebih responsif dan aman untuk teks --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-3 sm:gap-4">
                                 @foreach($allStudents as $student)
                                     @php
@@ -287,12 +320,18 @@
                                         $initials = Str::upper(Str::substr(trim($student->name), 0, 1));
                                     @endphp
 
-                                    {{-- PERBAIKAN: Padding diperkecil (p-3 sm:p-4) agar area nama lebih luas --}}
                                     <div class="relative border-2 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-all duration-300" 
                                          id="student-row-{{ $student->id }}"
                                          x-data="{ name: '{{ strtolower($student->name) }}', id: '{{ $student->student_id }}', status: '{{ $initialStatus }}' }"
                                          @update-status-{{ $student->id }}.window="status = $event.detail.status"
-                                         x-show="name.includes(searchQuery.toLowerCase()) || id.includes(searchQuery.toLowerCase())"
+                                         {{-- TAMBAHAN: Logika filter dikombinasikan dengan pencarian --}}
+                                         x-show="(name.includes(searchQuery.toLowerCase()) || id.includes(searchQuery.toLowerCase())) &&
+                                                 (filterTab === 'all' ||
+                                                 (filterTab === 'unmarked' && !status) ||
+                                                 (filterTab === 'present' && (status === 'Hadir' || status === 'present')) ||
+                                                 (filterTab === 'sick' && (status === 'Sakit' || status === 'sick')) ||
+                                                 (filterTab === 'permission' && (status === 'Izin' || status === 'permission')) ||
+                                                 (filterTab === 'alpha' && (status === 'Alfa' || status === 'alpha')))"
                                          :class="{
                                             'bg-[#DFF6DD]/20 border-[#B7DFB9]': status === 'Hadir' || status === 'present',
                                             'bg-elevate-soft/40 border-slate-200': status === 'Sakit' || status === 'sick',
@@ -301,7 +340,7 @@
                                             'bg-white border-slate-100 hover:border-slate-300 shadow-sm': !status
                                          }">
                                         
-                                        {{-- Avatar Status (Sedikit diperkecil di layar sempit) --}}
+                                        {{-- Avatar Status --}}
                                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm transition-all border"
                                              :class="{ 
                                                  'bg-[#107C10] text-white border-[#107C10]': status === 'Hadir' || status === 'present',
@@ -318,7 +357,6 @@
                                         </div>
 
                                         <div class="flex-1 min-w-0 pr-1">
-                                            {{-- PERBAIKAN: Menghapus class 'truncate', mengganti dengan 'line-clamp-2' dan 'leading-snug' --}}
                                             <p class="font-black text-elevate-dark text-sm sm:text-base leading-snug line-clamp-2" title="{{ $student->name }}">{{ $student->name }}</p>
                                             <p class="text-[10px] sm:text-xs text-slate-500 font-bold tracking-wide mt-1">{{ $student->student_id }}</p>
                                         </div>
@@ -399,6 +437,79 @@
                 showCamera: false,
                 html5QrcodeScanner: null,
                 isScanMode: true,
+                filterTab: 'all', // TAMBAHAN: Inisialisasi status filter tab
+
+                // TAMBAHAN: Fitur Auto-Save Jurnal
+                journalTopic: localStorage.getItem('journal_' + config.sessionId + '_topic') || {!! json_encode($session->topic ?? '') !!},
+                journalActivities: localStorage.getItem('journal_' + config.sessionId + '_activities') || {!! json_encode($session->activities ?? '') !!},
+
+                init() {
+                    // Watcher untuk menyimpan jurnal ke localStorage setiap kali ada huruf yang diketik
+                    this.$watch('journalTopic', value => localStorage.setItem('journal_' + this.sessionId + '_topic', value));
+                    this.$watch('journalActivities', value => localStorage.setItem('journal_' + this.sessionId + '_activities', value));
+                },
+
+                clearJournalDraft() {
+                    // Hapus draft saat form sukses di-submit
+                    localStorage.removeItem('journal_' + this.sessionId + '_topic');
+                    localStorage.removeItem('journal_' + this.sessionId + '_activities');
+                },
+
+                // TAMBAHAN: Fungsi Bulk Action
+                async markRestAsAlpha() {
+                    const totalStudents = {{ $allStudents->count() }};
+                    const totalMarked = this.stats.present + this.stats.sick + this.stats.permission + this.stats.alpha;
+                    const unmarkedCount = totalStudents - totalMarked;
+
+                    if (unmarkedCount <= 0) {
+                        this.showToast('info', 'Semua siswa sudah diabsen.');
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Tandai ' + unmarkedCount + ' Siswa Alpha?',
+                        text: "Siswa yang belum diabsen akan otomatis diubah statusnya menjadi Alpha.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#D13438',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Tandai Alpha',
+                        cancelButtonText: 'Batal',
+                        customClass: { popup: 'rounded-[2rem] shadow-2xl border-slate-100', confirmButton: 'rounded-xl px-6 py-3 font-bold', cancelButton: 'rounded-xl px-6 py-3 font-bold' }
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                const response = await fetch('/teaching/bulk-alpha', { 
+                                    method: 'POST',
+                                    headers: { 
+                                        'Content-Type': 'application/json', 
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
+                                    },
+                                    body: JSON.stringify({ session_id: this.sessionId })
+                                });
+                                
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    playBeep('error'); // Gunakan nada error/peringatan karena berstatus Alpha
+                                    this.showToast('success', data.message);
+                                    
+                                    // Update UI list siswa secara reaktif (tanpa reload halaman)
+                                    data.updated_ids.forEach(id => {
+                                        window.dispatchEvent(new CustomEvent('update-status-' + id, { detail: { status: 'alpha' } }));
+                                    });
+                                    
+                                    // Update statistik counter Alpha di UI atas
+                                    this.stats.alpha += data.updated_ids.length;
+                                } else {
+                                    throw new Error(data.message || 'Gagal memproses.');
+                                }
+                            } catch (e) {
+                                this.showToast('error', e.message || 'Terjadi kesalahan sistem.');
+                            }
+                        }
+                    });
+                },
 
                 showToast(icon, title) {
                     const Toast = Swal.mixin({
