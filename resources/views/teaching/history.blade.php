@@ -5,11 +5,6 @@
         </h2>
     </x-slot>
 
-    @php
-        // Pastikan format tanggal menggunakan Bahasa Indonesia
-        \Carbon\Carbon::setLocale('id');
-    @endphp
-
     @push('styles')
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -48,16 +43,34 @@
                         </p>
                     </div>
 
-                    {{-- FILTER BULAN --}}
-                    <div class="bg-white/60 backdrop-blur-md p-6 rounded-[1.5rem] border border-white/60 shadow-lg w-full md:w-auto shrink-0 mt-4 md:mt-0">
+                    {{-- FILTER WAKTU (Harian, Mingguan, Bulanan) --}}
+                    <div class="bg-white/60 backdrop-blur-md p-5 rounded-[1.5rem] border border-white/60 shadow-lg w-full lg:w-auto shrink-0 mt-4 md:mt-0" x-data="{ filterType: '{{ $filterType ?? 'monthly' }}' }">
                         <form action="{{ route('teaching.history') }}" method="GET" class="flex flex-col gap-3">
-                            <label for="month" class="text-xs font-black text-elevate-dark uppercase tracking-wider">Filter Bulan</label>
-                            <div class="flex items-center gap-2">
-                                <div class="relative">
-                                    <input type="month" name="month" id="month" value="{{ $month }}" 
-                                        class="bg-white hover:bg-elevate-soft focus:bg-white border border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent/30 text-elevate-dark text-sm font-bold rounded-xl px-5 py-3.5 transition-all shadow-sm w-full sm:w-56 cursor-pointer">
+                            <label class="text-xs font-black text-elevate-dark uppercase tracking-wider">Filter Waktu</label>
+                            <div class="flex flex-col sm:flex-row items-center gap-2">
+                                
+                                {{-- Dropdown Pilih Tipe Waktu --}}
+                                <div class="relative w-full sm:w-auto">
+                                    <select name="filter_type" x-model="filterType" class="bg-white hover:bg-elevate-soft border border-slate-200 text-sm font-bold text-elevate-dark rounded-xl px-4 py-3.5 focus:border-elevate-accent focus:ring-elevate-accent/30 w-full sm:w-[130px] cursor-pointer shadow-sm appearance-none transition-all">
+                                        <option value="daily">Harian</option>
+                                        <option value="weekly">Mingguan</option>
+                                        <option value="monthly">Bulanan</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-elevate-dark">
+                                        <i class="ph-bold ph-caret-down text-xs"></i>
+                                    </div>
                                 </div>
-                                <button type="submit" class="bg-elevate-dark hover:bg-elevate-primary text-white px-5 py-3.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center border border-transparent" title="Terapkan Filter">
+
+                                {{-- Input Nilai Waktu (Berubah Otomatis Sesuai Dropdown) --}}
+                                <div class="relative w-full sm:w-[190px]">
+                                    <input style="display: none;" x-show="filterType === 'daily'" type="date" name="filter_value_daily" value="{{ $filterType == 'daily' ? $filterValue : \Carbon\Carbon::now()->format('Y-m-d') }}" :disabled="filterType !== 'daily'" class="w-full bg-white hover:bg-elevate-soft focus:bg-white border border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent/30 text-elevate-dark text-sm font-bold rounded-xl px-4 py-3.5 transition-all shadow-sm cursor-pointer">
+                                    
+                                    <input style="display: none;" x-show="filterType === 'weekly'" type="week" name="filter_value_weekly" value="{{ $filterType == 'weekly' ? $filterValue : \Carbon\Carbon::now()->format('Y-\WW') }}" :disabled="filterType !== 'weekly'" class="w-full bg-white hover:bg-elevate-soft focus:bg-white border border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent/30 text-elevate-dark text-sm font-bold rounded-xl px-4 py-3.5 transition-all shadow-sm cursor-pointer">
+                                    
+                                    <input style="display: none;" x-show="filterType === 'monthly'" type="month" name="filter_value_monthly" value="{{ $filterType == 'monthly' ? $filterValue : \Carbon\Carbon::now()->format('Y-m') }}" :disabled="filterType !== 'monthly'" class="w-full bg-white hover:bg-elevate-soft focus:bg-white border border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent/30 text-elevate-dark text-sm font-bold rounded-xl px-4 py-3.5 transition-all shadow-sm cursor-pointer">
+                                </div>
+
+                                <button type="submit" class="w-full sm:w-auto bg-elevate-dark hover:bg-elevate-primary text-white px-5 py-3.5 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center border border-transparent" title="Terapkan Filter">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                                 </button>
                             </div>
@@ -70,51 +83,23 @@
             <div class="space-y-6">
 
                 @forelse($histories as $index => $history)
-                    @php
-                        $startDate = \Carbon\Carbon::parse($history->date);
-                        $startTime = \Carbon\Carbon::parse($history->started_at);
-                        $endTime   = \Carbon\Carbon::parse($history->ended_at);
-                        
-                        // 1. Ambil dari perhitungan withCount() di Controller 
-                        // Catatan: Karena di Controller pakai 'attendances as hadir', nama atributnya adalah ->hadir (bukan ->hadir_count)
-                        $jmlHadir = $history->hadir;
-                        $jmlTelat = $history->terlambat;
-                        $jmlAlpha = $history->alpha;
-                        
-                        // 2. FALLBACK: Jika Controller tidak memuat data tersebut (nilainya null), hitung manual dari relasi
-                        if (is_null($jmlHadir)) {
-                            $attendances = $history->attendances ?? collect();
-                            
-                            // Gunakan pengecekan Bahasa Inggris ('present', 'late', 'alpha') karena DB menyimpan nilai tersebut
-                            $jmlHadir = $attendances->whereIn('status', ['present', 'Hadir'])->count();
-                            $jmlTelat = $attendances->whereIn('status', ['late', 'Terlambat'])->count();
-                            $jmlAlpha = $attendances->whereIn('status', ['alpha', 'Alfa', 'Alpha'])->count();
-                        } else {
-                            $jmlHadir = $jmlHadir ?? 0;
-                            $jmlTelat = $jmlTelat ?? 0;
-                            $jmlAlpha = $jmlAlpha ?? 0;
-                        }
-                        
-                        $totalHadir = $jmlHadir + $jmlTelat;
-                    @endphp
-
                     <div class="animate-enter bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col md:flex-row group hover:border-elevate-accent/50 transition-colors" style="animation-delay: {{ ($index + 1) * 100 }}ms">
                         
                         {{-- KIRI: Tanggal & Waktu --}}
                         <div class="bg-elevate-soft/50 border-r border-slate-100 p-6 md:w-56 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 shrink-0 transition-colors group-hover:bg-elevate-peach-light/30">
                             <div class="text-center">
-                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ $startDate->translatedFormat('l') }}</div>
-                                <div class="text-5xl font-black text-elevate-dark leading-none">{{ $startDate->format('d') }}</div>
-                                <div class="text-sm font-bold text-elevate-primary mt-2">{{ $startDate->translatedFormat('M Y') }}</div>
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ $history->date->translatedFormat('l') }}</div>
+                                <div class="text-5xl font-black text-elevate-dark leading-none">{{ $history->date->format('d') }}</div>
+                                <div class="text-sm font-bold text-elevate-primary mt-2">{{ $history->date->translatedFormat('M Y') }}</div>
                             </div>
                             
                             <div class="hidden md:block w-10 h-1 rounded-full bg-slate-200 my-4"></div>
                             
                             <div class="text-center flex flex-col items-center">
                                 <div class="bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm">
-                                    <div class="text-sm font-black text-elevate-dark">{{ $startTime->format('H:i') }}</div>
+                                    <div class="text-sm font-black text-elevate-dark">{{ $history->started_at->format('H:i') }}</div>
                                     <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center mt-0.5">S/D</div>
-                                    <div class="text-sm font-black text-elevate-dark">{{ $history->ended_at ? $endTime->format('H:i') : '...' }}</div>
+                                    <div class="text-sm font-black text-elevate-dark">{{ $history->ended_at ? $history->ended_at->format('H:i') : '...' }}</div>
                                 </div>
                             </div>
                         </div>
@@ -146,18 +131,18 @@
                                 <div class="flex items-center gap-3 flex-wrap">
                                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#DFF6DD] border border-[#B7DFB9] shadow-sm" title="Siswa Hadir">
                                         <i class="ph-fill ph-check-circle text-[#107C10] text-base"></i>
-                                        <span class="text-sm font-black text-[#107C10]">{{ $totalHadir }}</span>
+                                        <span class="text-sm font-black text-[#107C10]">{{ $history->total_hadir }}</span>
                                     </div>
-                                    @if($jmlTelat > 0)
+                                    @if($history->jml_telat > 0)
                                         <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFEFD6] border border-[#FFD8A8] shadow-sm" title="Siswa Terlambat">
                                             <i class="ph-fill ph-clock-warning text-[#D83B01] text-base"></i>
-                                            <span class="text-sm font-black text-[#D83B01]">{{ $jmlTelat }}</span>
+                                            <span class="text-sm font-black text-[#D83B01]">{{ $history->jml_telat }}</span>
                                         </div>
                                     @endif
-                                    @if($jmlAlpha > 0)
+                                    @if($history->jml_alpha > 0)
                                         <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FDE7E9] border border-[#F4C3C9] shadow-sm" title="Siswa Alpha">
                                             <i class="ph-fill ph-x-circle text-[#D13438] text-base"></i>
-                                            <span class="text-sm font-black text-[#D13438]">{{ $jmlAlpha }}</span>
+                                            <span class="text-sm font-black text-[#D13438]">{{ $history->jml_alpha }}</span>
                                         </div>
                                     @endif
                                 </div>
@@ -177,7 +162,7 @@
                         </div>
                         <h3 class="text-elevate-dark font-black text-xl sm:text-2xl">Belum Ada Riwayat</h3>
                         <p class="text-slate-500 text-sm mt-3 max-w-sm mx-auto font-medium leading-relaxed">
-                            Aktivitas mengajar Anda di bulan <span class="font-bold text-slate-700">{{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}</span> belum terekam.
+                            Aktivitas mengajar Anda pada <span class="font-bold text-slate-700">{{ $filterLabel }}</span> belum terekam.
                         </p>
                         <a href="{{ route('teaching.index') }}" class="mt-8 px-8 py-3.5 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2 active:scale-95 border border-transparent text-sm">
                             <i class="ph-bold ph-calendar-check"></i> Cek Jadwal Hari Ini

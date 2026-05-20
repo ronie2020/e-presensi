@@ -65,7 +65,7 @@
                 @endif
             </div>
 
-            {{-- 2. HEADER SESI KELAS ELEVATE --}}
+             {{-- 2. HEADER SESI KELAS ELEVATE --}}
             <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 mb-8 overflow-hidden group border border-white/60">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -74,10 +74,10 @@
                     <div class="space-y-3 w-full">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="bg-elevate-dark shadow-sm text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border border-transparent">
-                                {{ $session->schedule->schoolClass->name }}
+                                {{ $session->schoolClass->name ?? 'Kelas' }}
                             </span>
                             <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->started_at)->format('H:i') }}
+                                <i class="ph-bold ph-clock"></i> {{ $session->started_at->format('H:i') }}
                             </span>
 
                             @if(!$isOpen)
@@ -91,7 +91,7 @@
                             @endif
                         </div>
                         <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-elevate-dark break-words">
-                            {{ $session->schedule->subject->name }}
+                            {{ $session->subject->name ?? 'Mata Pelajaran' }}
                         </h1>
                     </div>
                     

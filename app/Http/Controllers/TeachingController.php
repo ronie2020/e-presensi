@@ -131,12 +131,25 @@ class TeachingController extends Controller
     }
 
     // --- RIWAYAT MENGAJAR ---
-   public function history(Request $request)
+    public function history(Request $request)
     {
         $teacherId = Auth::id();
-        $month = $request->input('month', Carbon::now()->format('Y-m'));
+        Carbon::setLocale('id'); // Pastikan bahasa Indonesia untuk Carbon
+        
+        // 1. Tangkap tipe filter (Harian, Mingguan, Bulanan)
+        $filterType = $request->input('filter_type', 'monthly');
+        
+        // 2. Tangkap nilai filter sesuai tipe yang dipilih (Hanya menangkap input yang aktif)
+        $filterValue = $request->input("filter_value_{$filterType}");
 
-        $histories = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
+        // Jika nilai filter kosong (akses pertama kali), set ke default hari ini/minggu ini/bulan ini
+        if (!$filterValue) {
+            if ($filterType === 'daily') $filterValue = Carbon::now()->format('Y-m-d');
+            elseif ($filterType === 'weekly') $filterValue = Carbon::now()->format('Y-\WW'); // Format: 2026-W21
+            else $filterValue = Carbon::now()->format('Y-m');
+        }
+
+        $query = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
                     ->withCount([
                         'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'Hadir']); },
                         'attendances as terlambat' => function($q){ $q->whereIn('status', ['late', 'Terlambat']); },
@@ -145,14 +158,39 @@ class TeachingController extends Controller
                         'attendances as izin' => function($q){ $q->whereIn('status', ['permission', 'Izin']); },
                     ])
                     ->where('teacher_id', $teacherId)
-                    ->where('status', 'closed')
-                    ->where('date', 'like', "$month%")
-                    ->orderBy('date', 'desc')
-                    ->orderBy('started_at', 'desc')
-                    ->paginate(10)
-                    ->withQueryString();
+                    ->where('status', 'closed');
 
-        return view('teaching.history', compact('histories', 'month'));
+        $filterLabel = ''; // Label dinamis untuk ditampilkan di View ketika data kosong
+
+        // 3. Aplikasikan Query Berdasarkan Tipe Waktu
+        if ($filterType === 'daily') {
+            $query->whereDate('date', $filterValue);
+            $filterLabel = 'tanggal ' . Carbon::parse($filterValue)->translatedFormat('d F Y');
+            
+        } elseif ($filterType === 'weekly') {
+            // Parsing format 2026-W21 dari input type="week"
+            $parts = explode('-W', $filterValue);
+            if (count($parts) == 2) {
+                $startOfWeek = Carbon::now()->setISODate($parts[0], $parts[1])->startOfWeek();
+                $endOfWeek = $startOfWeek->copy()->endOfWeek();
+                
+                $query->whereBetween('date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')]);
+                $filterLabel = 'minggu ' . $startOfWeek->translatedFormat('d M') . ' s/d ' . $endOfWeek->translatedFormat('d M Y');
+            }
+            
+        } else { // monthly
+            $date = Carbon::parse($filterValue . '-01');
+            $query->whereMonth('date', $date->month)
+                  ->whereYear('date', $date->year);
+            $filterLabel = 'bulan ' . $date->translatedFormat('F Y');
+        }
+
+        $histories = $query->orderBy('date', 'desc')
+                           ->orderBy('started_at', 'desc')
+                           ->paginate(10)
+                           ->withQueryString();
+
+        return view('teaching.history', compact('histories', 'filterType', 'filterValue', 'filterLabel'));
     }
 
     // --- SCAN RFID ---
