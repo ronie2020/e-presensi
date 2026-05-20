@@ -284,27 +284,40 @@
                                     <input type="text" x-model="searchQuery" class="journal-input block w-full pl-14 pr-5 py-4 border-slate-200 rounded-2xl bg-white focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 placeholder-slate-400 text-sm font-bold shadow-sm transition-colors text-elevate-dark" placeholder="Cari nama atau NIS siswa...">
                                 </div>
 
-                                {{-- TAMBAHAN: Filter Pills Status & Tombol Bulk Action --}}
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                    {{-- PERBAIKAN: Menambahkan flex-1 min-w-0 agar kontainer scroll aman --}}
-                                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full flex-1 min-w-0">
-                                        {{-- PERBAIKAN: Menambahkan class 'shrink-0' pada semua tombol --}}
-                                        <button @click="filterTab = 'all'" :class="filterTab === 'all' ? 'bg-elevate-dark text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border">
+                               {{-- TAMBAHAN: Filter Pills Status & Tombol Bulk Action --}}
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
+                                    {{-- Container scroll dengan min-w-0 agar tidak merusak layout --}}
+                                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full min-w-0">
+                                        {{-- Menambahkan shrink-0 pada setiap tombol agar tidak "gepeng" saat layar sempit --}}
+                                        <button @click="filterTab = 'all'" 
+                                                :class="filterTab === 'all' ? 'bg-elevate-dark text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" 
+                                                class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border">
                                             Semua Siswa
                                         </button>
-                                        <button @click="filterTab = 'unmarked'" :class="filterTab === 'unmarked' ? 'bg-slate-500 text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                        
+                                        <button @click="filterTab = 'unmarked'" 
+                                                :class="filterTab === 'unmarked' ? 'bg-slate-500 text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" 
+                                                class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
                                             <span class="w-2 h-2 rounded-full" :class="filterTab === 'unmarked' ? 'bg-white' : 'bg-slate-300'"></span> Belum Absen
                                         </button>
-                                        <button @click="filterTab = 'present'" :class="filterTab === 'present' ? 'bg-[#107C10] text-white border-transparent shadow-md' : 'bg-white text-[#107C10] border-[#B7DFB9] hover:bg-[#DFF6DD]/50'" class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                        
+                                        <button @click="filterTab = 'present'" 
+                                                :class="filterTab === 'present' ? 'bg-[#107C10] text-white border-transparent shadow-md' : 'bg-white text-[#107C10] border-[#B7DFB9] hover:bg-[#DFF6DD]/50'" 
+                                                class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
                                             <i class="ph-bold ph-check"></i> Hadir
                                         </button>
-                                        <button @click="filterTab = 'alpha'" :class="filterTab === 'alpha' ? 'bg-[#D13438] text-white border-transparent shadow-md' : 'bg-white text-[#D13438] border-[#F4C3C9] hover:bg-[#FDE7E9]/50'" class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
+                                        
+                                        <button @click="filterTab = 'alpha'" 
+                                                :class="filterTab === 'alpha' ? 'bg-[#D13438] text-white border-transparent shadow-md' : 'bg-white text-[#D13438] border-[#F4C3C9] hover:bg-[#FDE7E9]/50'" 
+                                                class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
                                             <i class="ph-bold ph-x"></i> Alpha
                                         </button>
                                     </div>
                                     
                                     @if($isOpen)
-                                        <button @click="markRestAsAlpha()" type="button" class="shrink-0 w-full sm:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95">
+                                        {{-- Tombol Bulk Alpha diletakkan di luar container scroll agar selalu terlihat/bisa diklik --}}
+                                        <button @click="markRestAsAlpha()" type="button" 
+                                                class="shrink-0 w-full sm:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95 whitespace-nowrap">
                                             <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
                                         </button>
                                     @endif
