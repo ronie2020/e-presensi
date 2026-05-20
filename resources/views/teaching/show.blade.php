@@ -65,7 +65,7 @@
                 @endif
             </div>
 
-             {{-- 2. HEADER SESI KELAS ELEVATE --}}
+            {{-- 2. HEADER SESI KELAS ELEVATE --}}
             <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 mb-8 overflow-hidden group border border-white/60">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -157,7 +157,6 @@
                                 </button>
 
                                 <div x-show="showCamera" x-transition class="mt-4 bg-slate-900 rounded-[1.5rem] overflow-hidden border border-slate-200 relative shadow-inner">
-                                    {{-- PERBAIKAN: Menghapus class h-64 (height) --}}
                                     <div id="reader" class="w-full bg-slate-900"></div>
                                 </div>
 
@@ -248,7 +247,7 @@
                                 <p class="text-sm text-elevate-dark/70 font-semibold">Kelola absensi siswa secara manual atau melalui scan.</p>
                             </div>
                             
-                            {{-- Statistik Ringkas (Real-time via Alpine) --}}
+                            {{-- Statistik Ringkas --}}
                             <div class="grid grid-cols-4 gap-3 md:gap-4">
                                 <div class="px-2 py-4 bg-[#DFF6DD] text-[#107C10] rounded-2xl text-center border border-[#B7DFB9] shadow-sm">
                                     <div class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Hadir</div>
@@ -278,8 +277,9 @@
                         </div>
 
                         {{-- 5. LIST SISWA --}}
-                        <div class="flex-1 p-6 md:p-8 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                        <div class="flex-1 p-5 md:p-8 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
+                            {{-- PERBAIKAN: Mengatur Grid yang lebih responsif dan aman untuk teks --}}
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-3 sm:gap-4">
                                 @foreach($allStudents as $student)
                                     @php
                                         $att = $attendances[$student->id] ?? null;
@@ -287,7 +287,8 @@
                                         $initials = Str::upper(Str::substr(trim($student->name), 0, 1));
                                     @endphp
 
-                                    <div class="relative border-2 rounded-2xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300" 
+                                    {{-- PERBAIKAN: Padding diperkecil (p-3 sm:p-4) agar area nama lebih luas --}}
+                                    <div class="relative border-2 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-all duration-300" 
                                          id="student-row-{{ $student->id }}"
                                          x-data="{ name: '{{ strtolower($student->name) }}', id: '{{ $student->student_id }}', status: '{{ $initialStatus }}' }"
                                          @update-status-{{ $student->id }}.window="status = $event.detail.status"
@@ -300,8 +301,8 @@
                                             'bg-white border-slate-100 hover:border-slate-300 shadow-sm': !status
                                          }">
                                         
-                                        {{-- Avatar Status --}}
-                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm transition-all border"
+                                        {{-- Avatar Status (Sedikit diperkecil di layar sempit) --}}
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm transition-all border"
                                              :class="{ 
                                                  'bg-[#107C10] text-white border-[#107C10]': status === 'Hadir' || status === 'present',
                                                  'bg-elevate-primary text-white border-elevate-primary': status === 'Sakit' || status === 'sick',
@@ -309,33 +310,34 @@
                                                  'bg-[#D13438] text-white border-[#D13438]': status === 'Alfa' || status === 'alpha',
                                                  'bg-slate-100 text-slate-400 border-slate-200': !status 
                                              }">
-                                             <template x-if="status === 'Hadir' || status === 'present'"> <i class="ph-bold ph-check text-xl"></i> </template>
+                                             <template x-if="status === 'Hadir' || status === 'present'"> <i class="ph-bold ph-check text-lg sm:text-xl"></i> </template>
                                              <template x-if="status === 'Sakit' || status === 'sick'"> <span>S</span> </template>
                                              <template x-if="status === 'Izin' || status === 'permission'"> <span>I</span> </template>
                                              <template x-if="status === 'Alfa' || status === 'alpha'"> <span>A</span> </template>
                                              <template x-if="!status"> <span>{{ $initials }}</span> </template>
                                         </div>
 
-                                        <div class="flex-1 min-w-0">
-                                            <p class="font-black text-elevate-dark text-base leading-tight truncate">{{ $student->name }}</p>
-                                            <p class="text-xs text-slate-500 font-bold tracking-wide mt-1">{{ $student->student_id }}</p>
+                                        <div class="flex-1 min-w-0 pr-1">
+                                            {{-- PERBAIKAN: Menghapus class 'truncate', mengganti dengan 'line-clamp-2' dan 'leading-snug' --}}
+                                            <p class="font-black text-elevate-dark text-sm sm:text-base leading-snug line-clamp-2" title="{{ $student->name }}">{{ $student->name }}</p>
+                                            <p class="text-[10px] sm:text-xs text-slate-500 font-bold tracking-wide mt-1">{{ $student->student_id }}</p>
                                         </div>
 
                                         @if($isOpen)
-                                            <div class="flex items-center gap-2 shrink-0">
+                                            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                                 {{-- Tombol Hadir Cepat --}}
                                                 <button @click="setManual({{ $student->id }}, 'present')" 
-                                                        class="w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
+                                                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
                                                         :class="status === 'Hadir' || status === 'present' ? 'bg-[#107C10] text-white' : 'bg-slate-100 text-slate-400 hover:bg-[#DFF6DD] hover:text-[#107C10]'">
-                                                    <i class="ph-bold ph-check text-lg"></i>
+                                                    <i class="ph-bold ph-check text-base sm:text-lg"></i>
                                                 </button>
                                                 
                                                 {{-- Dropdown Pilihan --}}
                                                 <div class="relative" x-data="{ open: false }">
                                                     <button @click="open = !open" @click.outside="open = false"
-                                                            class="w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
+                                                            class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
                                                             :class="['sick', 'permission', 'alpha', 'Sakit', 'Izin', 'Alfa'].includes(status) ? 'bg-elevate-dark text-white' : 'bg-slate-100 text-slate-400 hover:bg-elevate-dark hover:text-white'">
-                                                        <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                                                        <i class="ph-bold ph-dots-three-vertical text-lg sm:text-xl"></i>
                                                     </button>
                                                     
                                                     <div x-show="open" style="display: none;" x-transition class="absolute right-0 mt-2 w-40 bg-white rounded-2xl shadow-xl shadow-elevate-dark/20 border border-slate-100 z-50 p-2 overflow-hidden">
