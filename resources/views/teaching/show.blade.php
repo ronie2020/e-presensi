@@ -284,11 +284,12 @@
                                     <input type="text" x-model="searchQuery" class="journal-input block w-full pl-14 pr-5 py-4 border-slate-200 rounded-2xl bg-white focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 placeholder-slate-400 text-sm font-bold shadow-sm transition-colors text-elevate-dark" placeholder="Cari nama atau NIS siswa...">
                                 </div>
 
-                               {{-- TAMBAHAN: Filter Pills Status & Tombol Bulk Action --}}
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
-                                    {{-- Container scroll dengan min-w-0 agar tidak merusak layout --}}
-                                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 w-full min-w-0">
-                                        {{-- Menambahkan shrink-0 pada setiap tombol agar tidak "gepeng" saat layar sempit --}}
+                                {{-- TAMBAHAN: Filter Pills Status & Tombol Bulk Action --}}
+                                {{-- Perubahan: Gunakan flex-wrap agar tombol otomatis turun ke bawah jika sidebar lebar --}}
+                                <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 w-full">
+                                    
+                                    {{-- Container filter --}}
+                                    <div class="flex flex-wrap items-center gap-2 py-1 w-full">
                                         <button @click="filterTab = 'all'" 
                                                 :class="filterTab === 'all' ? 'bg-elevate-dark text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" 
                                                 class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border">
@@ -315,9 +316,9 @@
                                     </div>
                                     
                                     @if($isOpen)
-                                        {{-- Tombol Bulk Alpha diletakkan di luar container scroll agar selalu terlihat/bisa diklik --}}
+                                        {{-- Tombol Bulk Alpha diletakkan di samping/bawah filter --}}
                                         <button @click="markRestAsAlpha()" type="button" 
-                                                class="shrink-0 w-full sm:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95 whitespace-nowrap">
+                                                class="shrink-0 w-full xl:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95 whitespace-nowrap">
                                             <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
                                         </button>
                                     @endif
