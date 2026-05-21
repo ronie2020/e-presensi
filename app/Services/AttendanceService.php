@@ -277,6 +277,7 @@ class AttendanceService
     {
         ActivityLog::create([
             'student_id' => $student->id, 
+            'type' => 'Pelanggaran',     // <-- TAMBAHKAN BARIS INI AGAR TIDAK ERROR DATABASE LAGI
             'activity_type' => $type,    // Wajib (Baru)
             'activity_name' => $name,
             'description' => $desc, 

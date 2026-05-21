@@ -21,4 +21,4 @@
             <?php echo $__env->yieldContent('content'); ?>
         </div>
     </body>
-</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/kiosk-layout.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/kiosk-layout.blade.php ENDPATH**/ ?>
