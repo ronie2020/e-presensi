@@ -1,4 +1,13 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -20,8 +29,8 @@
     </style>
 
      <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-32" x-data="{ 
-        activeTab: '{{ request('activeTab', 'hadir') }}',
-        reportType: '{{ request('report_type', 'daily') }}',
+        activeTab: '<?php echo e(request('activeTab', 'hadir')); ?>',
+        reportType: '<?php echo e(request('report_type', 'daily')); ?>',
         loading: false, 
         submitFilter() {
             this.loading = true;
@@ -31,7 +40,7 @@
 
      <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
     
-        {{-- LOADING OVERLAY (TELEPORT KE BODY) --}}
+        
           <template x-teleport="body">
             <div x-show="loading" 
                  x-transition:enter="transition ease-out duration-300"
@@ -55,7 +64,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION --}}
+            
              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
                 <div class="animate-enter rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 lg:p-8 text-elevate-dark relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/60 shadow-xl shadow-elevate-accent/20 group">
                     <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -69,7 +78,7 @@
                     <div class="relative z-10 mt-6">
                         <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-white/50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm text-elevate-dark">
                             <i class="ph-bold ph-calendar-blank"></i>
-                            <span>{{ $selectedDate_db->translatedFormat('d F Y') }}</span>
+                            <span><?php echo e($selectedDate_db->translatedFormat('d F Y')); ?></span>
                         </div>
                     </div>
                 </div>
@@ -88,20 +97,20 @@
                             </div>
                         </div>
 
-                       <form action="{{ route('reports.daily') }}" method="GET" class="flex flex-col md:flex-row gap-4 w-full" @submit.prevent="submitFilter">
+                       <form action="<?php echo e(route('reports.daily')); ?>" method="GET" class="flex flex-col md:flex-row gap-4 w-full" @submit.prevent="submitFilter">
                             <input type="hidden" name="report_type" x-model="reportType">
                             <input type="hidden" name="activeTab" x-model="activeTab">
                             <div class="flex-1 w-full">
                                 <div x-show="reportType === 'daily'">
-                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
+                                    <input type="date" name="date" value="<?php echo e(request('date', $selectedDate_db->format('Y-m-d'))); ?>" 
                                            class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-5 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
                                 </div>
                                 <div x-show="reportType === 'weekly'" style="display: none;">
-                                    <input type="week" name="week" value="{{ request('week') }}" 
+                                    <input type="week" name="week" value="<?php echo e(request('week')); ?>" 
                                            class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-5 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
                                 </div>
                                 <div x-show="reportType === 'monthly'" style="display: none;">
-                                    <input type="month" name="month" value="{{ request('month') }}" 
+                                    <input type="month" name="month" value="<?php echo e(request('month')); ?>" 
                                            class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-5 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
                                 </div>
                             </div>
@@ -109,7 +118,7 @@
                                 <button type="submit" class="flex-1 md:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-6 rounded-2xl h-14 font-bold text-sm shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transition-all active:scale-95">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i> <span class="md:hidden">Tampilkan</span>
                                 </button>
-                                <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border-2 border-slate-100 text-elevate-dark hover:bg-elevate-soft px-6 rounded-2xl h-14 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-sm">
+                                <a href="<?php echo e(route('reports.printDaily', request()->all())); ?>" target="_blank" class="flex-1 md:flex-none bg-white border-2 border-slate-100 text-elevate-dark hover:bg-elevate-soft px-6 rounded-2xl h-14 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-sm">
                                     <i class="ph-bold ph-printer text-xl"></i> <span class="md:hidden">Cetak</span>
                                 </a>
                             </div>
@@ -118,64 +127,64 @@
                 </div>
             </div>
 
-             @if (session('success'))
+             <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="animate-enter mb-6 p-5 bg-[#DFF6DD] border border-[#B7DFB9] text-[#107C10] rounded-[1.5rem] font-bold text-sm flex justify-between items-center no-print">
-                    <div class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-xl"></i> <span>{{ session('success') }}</span></div>
+                    <div class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-xl"></i> <span><?php echo e(session('success')); ?></span></div>
                     <button @click="show = false" class="text-[#107C10] hover:opacity-70 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
-            @if (session('error'))
+            <?php endif; ?>
+            <?php if(session('error')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="animate-enter mb-6 p-5 bg-[#FDE7E9] border border-[#F4C3C9] text-[#D13438] rounded-[1.5rem] font-bold text-sm flex justify-between items-center no-print">
-                    <div class="flex items-center gap-3"><i class="ph-fill ph-warning-circle text-xl"></i> <span>{{ session('error') }}</span></div>
+                    <div class="flex items-center gap-3"><i class="ph-fill ph-warning-circle text-xl"></i> <span><?php echo e(session('error')); ?></span></div>
                     <button @click="show = false" class="text-[#D13438] hover:opacity-70 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- KPI CARDS --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 mb-8">
                 <div class="animate-enter bg-white p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex items-center justify-between group hover:-translate-y-1 transition-transform" style="animation-delay: 200ms">
                     <div class="min-w-0">
                          <p class="text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Total Hadir</p>
-                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate">{{ $hadirCount }}</h3>
-                        @if($terlambatCount > 0)
+                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate"><?php echo e($hadirCount); ?></h3>
+                        <?php if($terlambatCount > 0): ?>
                             <div class="mt-3 inline-block px-3 py-1 bg-[#FFEFD6] text-[#D83B01] rounded-lg text-xs font-bold border border-[#FFD8A8]">
-                                {{ $terlambatCount }} Terlambat
+                                <?php echo e($terlambatCount); ?> Terlambat
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     <div class="w-16 h-16 lg:w-20 lg:h-20 bg-[#DFF6DD] text-[#107C10] rounded-[1.5rem] flex items-center justify-center text-3xl lg:text-4xl animate-wiggle shrink-0 shadow-sm"><i class="ph-fill ph-check-circle"></i></div>
                 </div>
                  <div class="animate-enter bg-white p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex items-center justify-between group hover:-translate-y-1 transition-transform" style="animation-delay: 300ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Izin / Sakit / Alfa</p>
-                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate">{{ $sakitCount + $izinCount + $alfaCount }}</h3>
+                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate"><?php echo e($sakitCount + $izinCount + $alfaCount); ?></h3>
                     </div>
                     <div class="w-16 h-16 lg:w-20 lg:h-20 bg-[#FFEFD6] text-[#D83B01] rounded-[1.5rem] flex items-center justify-center text-3xl lg:text-4xl animate-wiggle shrink-0 shadow-sm"><i class="ph-fill ph-warning-circle"></i></div>
                 </div>
                 <div class="animate-enter bg-white p-6 lg:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex items-center justify-between group hover:-translate-y-1 transition-transform" style="animation-delay: 400ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Belum Absen</p>
-                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate">{{ $belumAbsenList->total() }}</h3>
+                        <h3 class="text-4xl lg:text-5xl font-black text-elevate-dark truncate"><?php echo e($belumAbsenList->total()); ?></h3>
                     </div>
                     <div class="w-16 h-16 lg:w-20 lg:h-20 bg-elevate-soft text-elevate-primary rounded-[1.5rem] flex items-center justify-center text-3xl lg:text-4xl animate-wiggle shrink-0 shadow-sm"><i class="ph-fill ph-x-circle"></i></div>
                 </div>
             </div>
 
-             {{-- LIST DATA UTAMA --}}
+             
             <div class="animate-enter bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
                 
-                {{-- Tabs Header --}}
+                
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-elevate-soft/50 p-3 gap-3 sticky top-0 z-20 no-print backdrop-blur-md">
                     <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all">Hadir / Terlambat</button>
                     <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all">
-                        Belum <span class="hidden sm:inline">Absen</span> <span class="ml-2 px-2 py-1 bg-[#FDE7E9] text-[#D13438] rounded-lg text-xs">{{ $belumAbsenList->total() }}</span>
+                        Belum <span class="hidden sm:inline">Absen</span> <span class="ml-2 px-2 py-1 bg-[#FDE7E9] text-[#D13438] rounded-lg text-xs"><?php echo e($belumAbsenList->total()); ?></span>
                     </button>
                     <button @click="activeTab = 'lain'" :class="activeTab === 'lain' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all">Sakit / Izin / Alfa</button>
                     
-                    {{-- TAB REKAP SEMESTER BARU --}}
+                    
                     <button @click="activeTab = 'rekapSemester'" :class="activeTab === 'rekapSemester' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all text-elevate-primary">Rekap Semester</button>
 
-                    {{-- TOMBOL INPUT PER KELAS --}}
+                    
                     <button onclick="openChecklistModal()" class="ml-auto bg-elevate-dark hover:bg-elevate-primary text-white px-6 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-elevate-dark/20 transition-all flex items-center gap-2 active:scale-95 border border-transparent shrink-0">
                         <i class="ph-bold ph-checks text-lg"></i> <span class="hidden sm:inline">Input Per Kelas</span>
                     </button>
@@ -183,150 +192,158 @@
 
                 <div class="w-full bg-white">
                     
-                     {{-- TAB HADIR --}}
+                     
                     <div x-show="activeTab === 'hadir'" class="w-full">
                         <div class="grid grid-cols-1 gap-0">
-                            @forelse ($attendancesHadir as $index => $att)
+                            <?php $__empty_1 = true; $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-5 border-b border-slate-50 hover:bg-elevate-soft/30 transition-colors group flex items-center justify-between">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $att->status == 'Terlambat' ? 'bg-[#D83B01]' : 'bg-[#107C10]' }} hidden group-hover:block rounded-r-md"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 <?php echo e($att->status == 'Terlambat' ? 'bg-[#D83B01]' : 'bg-[#107C10]'); ?> hidden group-hover:block rounded-r-md"></div>
                                     <div class="flex items-center gap-5 overflow-hidden w-full">
-                                        <div class="w-14 h-14 rounded-2xl {{ $att->status == 'Terlambat' ? 'bg-[#FFEFD6] text-[#D83B01]' : 'bg-[#DFF6DD] text-[#107C10]' }} flex items-center justify-center font-black text-sm shrink-0 border border-transparent">
-                                             {{ $attendancesHadir->firstItem() + $index }}
+                                        <div class="w-14 h-14 rounded-2xl <?php echo e($att->status == 'Terlambat' ? 'bg-[#FFEFD6] text-[#D83B01]' : 'bg-[#DFF6DD] text-[#107C10]'); ?> flex items-center justify-center font-black text-sm shrink-0 border border-transparent">
+                                             <?php echo e($attendancesHadir->firstItem() + $index); ?>
+
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="font-black text-lg text-elevate-dark truncate group-hover:text-elevate-primary transition-colors">{{ $att->student->name }}</h4>
+                                            <h4 class="font-black text-lg text-elevate-dark truncate group-hover:text-elevate-primary transition-colors"><?php echo e($att->student->name); ?></h4>
                                             <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs font-bold">
-                                                <span class="text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg">{{ $att->student->schoolClass->name ?? '-' }}</span>
+                                                <span class="text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg"><?php echo e($att->student->schoolClass->name ?? '-'); ?></span>
                                                 <span class="flex items-center gap-1.5 text-slate-600">
-                                                    <i class="ph-bold ph-arrow-right-circle text-[#107C10] text-base"></i> {{ $att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-right-circle text-[#107C10] text-base"></i> <?php echo e($att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-'); ?>
+
                                                 </span>
                                                 <span class="flex items-center gap-1.5 text-slate-600">
-                                                    <i class="ph-bold ph-arrow-left-circle text-elevate-primary text-base"></i> {{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-left-circle text-elevate-primary text-base"></i> <?php echo e($att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-'); ?>
+
                                                 </span>
                                                 
-                                                @if($att->status == 'Terlambat')
+                                                <?php if($att->status == 'Terlambat'): ?>
                                                     <span class="text-[#D83B01] uppercase tracking-wider text-[10px] bg-[#FFEFD6] px-3 py-1 rounded-full border border-[#FFD8A8]">
                                                         Terlambat
                                                     </span>
-                                                    @if($att->notes)
+                                                    <?php if($att->notes): ?>
                                                         <span class="text-[#D13438] text-[10px] bg-[#FDE7E9] px-3 py-1 rounded-full border border-[#F4C3C9] animate-pulse">
-                                                            {{ $att->notes }}
+                                                            <?php echo e($att->notes); ?>
+
                                                         </span>
-                                                    @endif
-                                                @endif
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '{{ $att->time_in }}', '{{ $att->time_out }}')" 
+                                    <button onclick="openEditModal(<?php echo e($att->id); ?>, '<?php echo e(addslashes($att->student->name)); ?>', '<?php echo e($att->status); ?>', `<?php echo e(addslashes($att->notes ?? '')); ?>`, '<?php echo e($att->time_in); ?>', '<?php echo e($att->time_out); ?>')" 
                                         class="p-3 ml-4 text-slate-400 hover:text-white hover:bg-elevate-peach-dark rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-24">
                                     <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-6 text-elevate-primary"><i class="ph-duotone ph-coffee text-5xl"></i></div>
                                     <p class="text-elevate-dark/60 font-semibold text-lg">Belum ada data kehadiran.</p>
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                        @if($attendancesHadir->hasPages())
+                        <?php if($attendancesHadir->hasPages()): ?>
                             <div class="p-6 border-t border-slate-100 bg-white">
-                                {{ $attendancesHadir->links() }}
+                                <?php echo e($attendancesHadir->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- TAB BELUM ABSEN --}}
+                    
                     <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
-                         @if($belumAbsenList->total() > 0)
+                         <?php if($belumAbsenList->total() > 0): ?>
                             <div class="p-6 bg-[#FDE7E9] border-b border-[#F4C3C9] flex flex-col md:flex-row items-center justify-between gap-5 no-print">
                                 <div class="flex items-center gap-4 text-[#D13438]">
                                     <div class="p-3 bg-white rounded-xl shadow-sm shrink-0"><i class="ph-fill ph-warning-octagon text-3xl"></i></div>
                                     <div>
                                         <h4 class="font-black text-lg">Absensi Massal</h4>
-                                        <p class="text-sm font-semibold opacity-90">{{ $belumAbsenList->total() }} siswa akan ditandai Alfa.</p>
+                                        <p class="text-sm font-semibold opacity-90"><?php echo e($belumAbsenList->total()); ?> siswa akan ditandai Alfa.</p>
                                     </div>
                                 </div>
-                                <form id="bulk-alpha-form" action="{{ route('reports.bulkAlpha') }}" method="POST" class="w-full md:w-auto">
-                                    @csrf
-                                    <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                                <form id="bulk-alpha-form" action="<?php echo e(route('reports.bulkAlpha')); ?>" method="POST" class="w-full md:w-auto">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                                     <input type="hidden" name="type" value="Harian">
-                                    <button type="button" onclick="confirmBulkAlpha('{{ $belumAbsenList->total() }}')" 
+                                    <button type="button" onclick="confirmBulkAlpha('<?php echo e($belumAbsenList->total()); ?>')" 
                                         class="w-full bg-[#D13438] hover:bg-[#A4262C] text-white text-sm font-bold px-6 py-3.5 rounded-2xl shadow-lg shadow-[#D13438]/30 transition-all flex items-center justify-center gap-2 active:scale-95 border border-transparent">
                                         <i class="ph-bold ph-check-circle text-lg"></i> Proses Alfa
                                     </button>
                                 </form>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <div class="grid grid-cols-1 gap-0">
-                            @forelse ($belumAbsenList as $student)
+                            <?php $__empty_1 = true; $__currentLoopData = $belumAbsenList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-5 border-b border-slate-50 hover:bg-elevate-soft/30 transition-colors group flex items-center justify-between">
                                     <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#D13438] hidden group-hover:block rounded-r-md"></div>
                                     <div class="flex items-center gap-5 overflow-hidden">
                                         <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center font-black text-lg shrink-0">!</div>
                                         <div class="min-w-0">
-                                            <h4 class="font-black text-lg text-elevate-dark truncate">{{ $student->name }}</h4>
-                                            <p class="text-sm font-bold text-slate-500 mt-0.5">{{ $student->schoolClass->name ?? '-' }}</p>
+                                            <h4 class="font-black text-lg text-elevate-dark truncate"><?php echo e($student->name); ?></h4>
+                                            <p class="text-sm font-bold text-slate-500 mt-0.5"><?php echo e($student->schoolClass->name ?? '-'); ?></p>
                                         </div>
                                     </div>
-                                    <button onclick="openManualModalDaily({{ $student->id }}, '{{ addslashes($student->name) }}')" 
+                                    <button onclick="openManualModalDaily(<?php echo e($student->id); ?>, '<?php echo e(addslashes($student->name)); ?>')" 
                                         class="inline-flex items-center gap-2 bg-white border-2 border-slate-100 text-elevate-dark px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-elevate-soft hover:border-elevate-soft transition-all shadow-sm no-print shrink-0 active:scale-95">
                                         Input <span class="hidden md:inline">Manual</span>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-24 text-[#107C10] font-black text-xl">Semua Aman!</div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                       @if($belumAbsenList->hasPages())
+                       <?php if($belumAbsenList->hasPages()): ?>
                             <div class="p-6 border-t border-slate-100 bg-white">
-                                {{ $belumAbsenList->links() }}
+                                <?php echo e($belumAbsenList->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                 
-                    {{-- TAB LAINNYA (Izin / Sakit / Alfa) --}}
+                    
                     <div x-show="activeTab === 'lain'" style="display: none;" class="w-full">
                          <div class="grid grid-cols-1 gap-0">
-                            @forelse ($attendancesLain as $att)
+                            <?php $__empty_1 = true; $__currentLoopData = $attendancesLain; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-5 border-b border-slate-50 hover:bg-elevate-soft/30 transition-colors group flex items-center justify-between">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $att->status == 'Alfa' ? 'bg-[#D13438]' : ($att->status == 'Izin' ? 'bg-[#D83B01]' : 'bg-elevate-primary') }} hidden group-hover:block rounded-r-md"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1.5 <?php echo e($att->status == 'Alfa' ? 'bg-[#D13438]' : ($att->status == 'Izin' ? 'bg-[#D83B01]' : 'bg-elevate-primary')); ?> hidden group-hover:block rounded-r-md"></div>
                                     <div class="flex items-center gap-5 overflow-hidden">
-                                        <div class="w-14 h-14 rounded-2xl {{ $att->status == 'Alfa' ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : ($att->status == 'Izin' ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-elevate-soft text-elevate-primary border-slate-200') }} border flex items-center justify-center font-black text-lg shrink-0">
-                                             {{ substr($att->status, 0, 1) }}
+                                        <div class="w-14 h-14 rounded-2xl <?php echo e($att->status == 'Alfa' ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : ($att->status == 'Izin' ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-elevate-soft text-elevate-primary border-slate-200')); ?> border flex items-center justify-center font-black text-lg shrink-0">
+                                             <?php echo e(substr($att->status, 0, 1)); ?>
+
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="font-black text-lg text-elevate-dark truncate">{{ $att->student->name }}</h4>
+                                            <h4 class="font-black text-lg text-elevate-dark truncate"><?php echo e($att->student->name); ?></h4>
                                             <div class="flex flex-wrap items-center gap-3 mt-1.5">
-                                                <span class="px-3 py-1 rounded-lg text-xs font-bold {{ $att->status == 'Alfa' ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : ($att->status == 'Izin' ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-elevate-soft text-elevate-primary border-slate-200') }} border uppercase">{{ $att->status }}</span>
-                                                @if($att->notes)
-                                                    <span class="text-sm text-slate-500 font-semibold italic max-w-[150px] md:max-w-none truncate">"{{ $att->notes }}"</span>
-                                                @endif
+                                                <span class="px-3 py-1 rounded-lg text-xs font-bold <?php echo e($att->status == 'Alfa' ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : ($att->status == 'Izin' ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-elevate-soft text-elevate-primary border-slate-200')); ?> border uppercase"><?php echo e($att->status); ?></span>
+                                                <?php if($att->notes): ?>
+                                                    <span class="text-sm text-slate-500 font-semibold italic max-w-[150px] md:max-w-none truncate">"<?php echo e($att->notes); ?>"</span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '', '')" 
+                                    <button onclick="openEditModal(<?php echo e($att->id); ?>, '<?php echo e(addslashes($att->student->name)); ?>', '<?php echo e($att->status); ?>', `<?php echo e(addslashes($att->notes ?? '')); ?>`, '', '')" 
                                         class="p-3 ml-4 text-slate-400 hover:text-white hover:bg-elevate-peach-dark rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-24 text-elevate-dark/60 font-semibold text-lg italic">Tidak ada data lain.</div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                        @if($attendancesLain->hasPages())
+                        <?php if($attendancesLain->hasPages()): ?>
                             <div class="p-6 border-t border-slate-100 bg-white">
-                                {{ $attendancesLain->links() }}
+                                <?php echo e($attendancesLain->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- TAB REKAP SEMESTER BARU --}}
+                    
                     <div x-show="activeTab === 'rekapSemester'" style="display: none;" class="w-full p-6 animate-enter">
                         <div class="mb-5 border-b border-slate-100 pb-5">
                             <h3 class="font-black text-xl text-elevate-dark flex items-center gap-2">
@@ -335,7 +352,8 @@
                             <p class="text-sm font-semibold text-slate-500 mt-1">
                                 Akumulasi (Sakit, Izin, Alfa) per kelas berdasarkan data semester berjalan 
                                 <span class="font-bold text-elevate-dark bg-slate-100 px-2 py-0.5 rounded-md ml-1">
-                                    {{ \Carbon\Carbon::parse($semesterStart)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($semesterEnd)->translatedFormat('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($semesterStart)->translatedFormat('d M Y')); ?> s/d <?php echo e(\Carbon\Carbon::parse($semesterEnd)->translatedFormat('d M Y')); ?>
+
                                 </span>.
                             </p>
                         </div>
@@ -354,32 +372,34 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 text-sm">
-                                        @forelse ($rekapSemester ?? [] as $index => $rekap)
+                                        <?php $__empty_1 = true; $__currentLoopData = $rekapSemester ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rekap): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                             <tr class="hover:bg-slate-50 transition-colors">
-                                                <td class="p-4 text-center font-bold text-slate-400">{{ $index + 1 }}</td>
-                                                <td class="p-4 font-black text-elevate-dark">{{ $rekap->name }}</td>
+                                                <td class="p-4 text-center font-bold text-slate-400"><?php echo e($index + 1); ?></td>
+                                                <td class="p-4 font-black text-elevate-dark"><?php echo e($rekap->name); ?></td>
                                                 
-                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10">{{ $rekap->total_sakit ?: '-' }}</td>
-                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10">{{ $rekap->total_izin ?: '-' }}</td>
-                                                <td class="p-4 text-center font-bold {{ $rekap->total_alfa > 0 ? 'text-[#D13438]' : 'text-slate-600' }} bg-[#FDE7E9]/10">
-                                                    {{ $rekap->total_alfa ?: '-' }}
+                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10"><?php echo e($rekap->total_sakit ?: '-'); ?></td>
+                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10"><?php echo e($rekap->total_izin ?: '-'); ?></td>
+                                                <td class="p-4 text-center font-bold <?php echo e($rekap->total_alfa > 0 ? 'text-[#D13438]' : 'text-slate-600'); ?> bg-[#FDE7E9]/10">
+                                                    <?php echo e($rekap->total_alfa ?: '-'); ?>
+
                                                 </td>
                                                 
                                                 <td class="p-4 text-center font-black text-elevate-dark bg-slate-50">
-                                                    @php $totalTidakHadir = $rekap->total_sakit + $rekap->total_izin + $rekap->total_alfa; @endphp
-                                                    <span class="{{ $totalTidakHadir > 0 ? 'text-elevate-dark' : 'text-slate-300' }}">
-                                                        {{ $totalTidakHadir }}
+                                                    <?php $totalTidakHadir = $rekap->total_sakit + $rekap->total_izin + $rekap->total_alfa; ?>
+                                                    <span class="<?php echo e($totalTidakHadir > 0 ? 'text-elevate-dark' : 'text-slate-300'); ?>">
+                                                        <?php echo e($totalTidakHadir); ?>
+
                                                     </span>
                                                 </td>
                                             </tr>
-                                        @empty
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                             <tr>
                                                 <td colspan="6" class="py-16 text-center">
                                                     <div class="w-16 h-16 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-4 text-elevate-primary"><i class="ph-duotone ph-folder-open text-3xl"></i></div>
                                                     <p class="text-slate-500 font-bold text-base">Belum ada data rekap semester.</p>
                                                 </td>
                                             </tr>
-                                        @endforelse
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -391,7 +411,7 @@
         </div>
     </div>
     
-      {{-- Modal Manual Input --}}
+      
     <template x-teleport="body">
         <div id="manualModalDaily" class="hidden fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
             <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
@@ -399,10 +419,10 @@
                     <h3 class="font-black text-elevate-dark flex items-center gap-3 text-lg"><i class="ph-bold ph-pencil-line text-elevate-peach-dark"></i> Input Manual</h3>
                     <button onclick="closeManualModalDaily()" class="text-slate-400 hover:text-elevate-dark bg-white hover:bg-elevate-soft p-2 rounded-full transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
-                <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 md:p-8 space-y-5">
-                    @csrf
+                <form action="<?php echo e(route('reports.storeManual')); ?>" method="POST" class="p-6 md:p-8 space-y-5">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="attendance_type" value="Harian">
-                    <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                    <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                     <input type="hidden" name="student_id" id="daily-manual-id">
                     
                     <div class="bg-elevate-soft p-4 rounded-2xl border border-slate-100 text-center">
@@ -448,7 +468,7 @@
         </div>
     </template>
 
-    {{-- Modal Edit --}}
+    
     <template x-teleport="body">
         <div id="editAttendanceModal" class="hidden fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
             <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
@@ -457,7 +477,7 @@
                     <button onclick="closeEditModal()" class="text-slate-400 hover:text-elevate-dark bg-white hover:bg-slate-100 p-2 rounded-full transition-colors"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
                 <form id="editForm" method="POST" class="p-6 md:p-8 space-y-5">
-                    @csrf @method('PUT')
+                    <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                     <div class="text-center mb-6">
                         <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-1.5">Mengedit Siswa</p>
                         <p id="modal-student-name" class="text-2xl font-black text-elevate-dark truncate px-2"></p>
@@ -518,7 +538,8 @@
                             <i class="ph-bold ph-list-checks text-elevate-accent"></i> Input Massal Per Kelas
                         </h3>
                         <p class="text-elevate-soft/80 font-medium text-xs mt-1">
-                            Absensi Harian • {{ $selectedDate_db->translatedFormat('d F Y') }}
+                            Absensi Harian • <?php echo e($selectedDate_db->translatedFormat('d F Y')); ?>
+
                         </p>
                     </div>
                     <button onclick="closeChecklistModal()" class="text-white/70 hover:text-white transition bg-white/10 p-2.5 rounded-full hover:bg-white/20">
@@ -532,9 +553,9 @@
                             <label class="text-xs font-bold text-elevate-primary uppercase mb-2 block ml-1">Pilih Kelas</label>
                             <select x-model="selectedClass" @change="fetchStudents()" class="w-full border-slate-200 bg-elevate-soft rounded-2xl font-bold text-elevate-dark h-14 px-5 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors">
                                 <option value="">-- Pilih Kelas --</option>
-                                @foreach($allClasses ?? \App\Models\SchoolClass::orderBy('name')->get() as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $allClasses ?? \App\Models\SchoolClass::orderBy('name')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($c->id); ?>"><?php echo e($c->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="shrink-0 pt-6" x-show="loading">
@@ -542,10 +563,10 @@
                         </div>
                     </div>
 
-                    <form id="checklistForm" action="{{ route('reports.storeClass') }}" method="POST" @submit.prevent="submitChecklist" x-show="students.length > 0" style="display: none;" class="p-6">
-                        @csrf
+                    <form id="checklistForm" action="<?php echo e(route('reports.storeClass')); ?>" method="POST" @submit.prevent="submitChecklist" x-show="students.length > 0" style="display: none;" class="p-6">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="class_id" :value="selectedClass">
-                        <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                        <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                         <input type="hidden" name="type" value="Harian">
                         <button type="submit" x-ref="submitBtn" class="hidden"></button>
 
@@ -694,7 +715,7 @@
             const modal = document.getElementById('editAttendanceModal');
             const form = document.getElementById('editForm');
 
-            form.action = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
+            form.action = '<?php echo e(route('reports.update', ['attendance' => '__ID__'])); ?>'.replace('__ID__', id);
             document.getElementById('modal-student-name').textContent = name;
             
             const statusSelect = document.getElementById('modal-status');
@@ -729,7 +750,7 @@
                     this.students = [];
 
                     try {
-                        const url = `{{ route('reports.getStudentsByClass') }}?class_id=${this.selectedClass}&date={{ $selectedDate_db->format('Y-m-d') }}&type=Harian`;
+                        const url = `<?php echo e(route('reports.getStudentsByClass')); ?>?class_id=${this.selectedClass}&date=<?php echo e($selectedDate_db->format('Y-m-d')); ?>&type=Harian`;
                         const response = await fetch(url);
                         const data = await response.json();
                         this.students = data;
@@ -784,4 +805,13 @@
             document.getElementById('checklistModal').classList.add('hidden');
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/daily.blade.php ENDPATH**/ ?>
