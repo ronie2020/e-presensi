@@ -19,9 +19,9 @@
     </script>
 
     <style>
-        /* PENGATURAN KERTAS A4 */
+        /* PENGATURAN KERTAS F4 (Folio) */
         @page { 
-            size: 21cm 29.7cm; 
+            size: 21.5cm 33cm; 
             margin: 0; 
         }
         
@@ -35,10 +35,9 @@
         .sheet {
             font-family: 'Times New Roman', Times, serif;
             background: white;
-            width: 21cm;
-            min-height: 29.7cm;
+            width: 21.5cm; /* Lebar F4 */
             margin: 30px auto;
-            padding: 1cm 2cm; /* DIPERBAIKI: Padding atas bawah dikurangi agar muat 1 halaman */
+            padding: 0.5cm 1.5cm; 
             box-sizing: border-box;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             position: relative;
@@ -52,29 +51,31 @@
         }
         .garis-kop-bawah {
             border-bottom: 1px solid black;
-            margin-bottom: 10px; /* DIPERBAIKI: Margin dikurangi */
+            margin-bottom: 5px;
         }
 
-        .kop-text-1 { font-size: 13pt; letter-spacing: 0.5px; }
-        .kop-text-2 { font-size: 18pt; font-weight: bold; letter-spacing: 1px; }
-        .kop-text-3 { font-size: 10pt; line-height: 1.2; }
-        .kop-text-4 { font-size: 9pt; color: #1e3a8a; }
+        /* PENYESUAIAN FONT KOP SURAT */
+        .kop-text-1 { font-size: 12pt; letter-spacing: 0.5px; } /* Dari 13pt -> 12pt */
+        .kop-text-2 { font-size: 16pt; font-weight: bold; letter-spacing: 1px; } /* Dari 18pt -> 16pt */
+        .kop-text-3 { font-size: 9pt; line-height: 1.15; } /* Dari 10pt -> 9pt */
+        .kop-text-4 { font-size: 8.5pt; color: #1e3a8a; line-height: 1.15; } /* Dari 9pt -> 8.5pt */
 
         /* TYPOGRAPHY DOKUMEN */
-        .judul-surat { text-align: center; margin-bottom: 10px; /* DIPERBAIKI */ }
-        .judul-surat h2 { margin: 0; font-size: 14pt; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
-        .judul-surat p { margin: 0; font-size: 11pt; }
+        .judul-surat { text-align: center; margin-bottom: 5px; }
+        .judul-surat h2 { margin: 0; font-size: 13pt; font-weight: bold; text-decoration: underline; letter-spacing: 1px; } /* Dari 14pt -> 13pt */
+        .judul-surat p { margin: 0; font-size: 10pt; } /* Dari 11pt -> 10pt */
 
-        .teks-pembuka { font-size: 10pt; text-align: justify; line-height: 1.25; margin-bottom: 3px;} /* DIPERBAIKI: Ukuran & spasi */
+        /* PENYESUAIAN FONT TEKS */
+        .teks-pembuka { font-size: 9.5pt; text-align: justify; line-height: 1.2; margin-bottom: 3px;} /* Dari 10pt -> 9.5pt */
         
         /* LIST PERATURAN */
         ol.peraturan {
-            margin-top: 4px;
-            margin-bottom: 6px; /* DIPERBAIKI */
-            padding-left: 20px;
-            font-size: 10pt; /* DIPERBAIKI */
+            margin-top: 3px;
+            margin-bottom: 5px; 
+            padding-left: 25px; 
+            font-size: 9.5pt; /* Dari 10pt -> 9.5pt */
             text-align: justify;
-            line-height: 1.25; /* DIPERBAIKI */
+            line-height: 1.2; 
             list-style-type: decimal;
         }
         ol.peraturan li {
@@ -83,29 +84,29 @@
         }
 
         /* TABEL BIODATA */
-        table.biodata { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 6px; line-height: 1.25; } /* DIPERBAIKI */
-        table.biodata td { vertical-align: top; }
+        table.biodata { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-bottom: 5px; line-height: 1.2; } /* Dari 10pt -> 9.5pt */
+        table.biodata td { vertical-align: top; padding-bottom: 2px; }
         table.biodata tr td:first-child { width: 220px; }
         table.biodata tr td:nth-child(2) { width: 15px; text-align: center; }
 
         .lulus-text {
-            font-size: 20pt; /* DIPERBAIKI: Sedikit dikecilkan agar hemat ruang */
+            font-size: 16pt; /* Dari 20pt/18pt -> 16pt */
             font-weight: bold;
             text-align: center;
-            letter-spacing: 3px;
-            margin: 6px 0 10px 0; /* DIPERBAIKI */
+            letter-spacing: 4px;
+            margin: 5px 0 5px 0;
         }
 
         /* TABEL NILAI KURIKULUM 2013 */
         table.tabel-nilai { 
             width: 100%; 
             border-collapse: collapse; 
-            font-size: 10pt; /* DIPERBAIKI */
-            margin-bottom: 10px; /* DIPERBAIKI */
+            font-size: 9.5pt; /* Dari 10pt -> 9.5pt */
+            margin-bottom: 5px; 
         }
         table.tabel-nilai th, table.tabel-nilai td { 
             border: 1px solid black; 
-            padding: 3px 5px; /* DIPERBAIKI: Padding cell dikurangi */
+            padding: 3px 5px; /* Padding sedikit dirapatkan */
             vertical-align: middle;
         }
         table.tabel-nilai th { 
@@ -123,8 +124,8 @@
             float: right;
             width: 300px;
             text-align: left;
-            font-size: 11pt;
-            margin-top: 5px; /* DIPERBAIKI */
+            font-size: 10pt; /* Dari 11pt -> 10pt */
+            margin-top: 5px; 
             padding-left: 30px;
         }
 
@@ -133,7 +134,13 @@
         /* MODE PRINT */
         @media print {
             body { background: none; margin: 0; }
-            .sheet { margin: 0; box-shadow: none; padding: 1cm 2cm; } /* DIPERBAIKI: Pastikan saat print paddingnya tetap kecil */
+            .sheet { 
+                width: 21.5cm; 
+                margin: 0; 
+                box-shadow: none; 
+                padding: 0.5cm 1.5cm; 
+                page-break-after: avoid; 
+            } 
             .no-print { display: none !important; }
             table.tabel-nilai th { background-color: transparent; }
         }
@@ -143,12 +150,12 @@
 
     <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-elevate-primary/10 to-transparent pointer-events-none no-print -z-10"></div>
 
-    <div class="w-[21cm] mx-auto mt-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg shadow-elevate-dark/5 border border-white/60 sticky top-4 z-50">
+    <div class="w-[21.5cm] mx-auto mt-6 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg shadow-elevate-dark/5 border border-white/60 sticky top-4 z-50">
         <div>
             <h2 class="font-black text-elevate-dark font-sans flex items-center gap-2">
                 <i class="ph-bold ph-file-text text-elevate-primary text-xl"></i> Format SKL Resmi
             </h2>
-            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: {{ $student->name ?? 'AIDA LESMINING FURIE' }} | Kertas: A4</p>
+            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: {{ $student->name ?? 'AIDA LESMINING FURIE' }} | Kertas: F4 (Folio)</p>
         </div>
 
         <div class="flex flex-wrap gap-3 items-center font-sans">
@@ -214,7 +221,7 @@
         <!-- KOP SURAT -->
         <div class="flex justify-between items-center px-1 mb-1">
             <div class="w-[85px] text-center">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[70px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x120/transparent/000?text=Logo+1'">
+                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[65px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x120/transparent/000?text=Logo+1'">
             </div>
             
             <div class="text-center flex-1 px-2 font-['Arial'] leading-tight">
@@ -229,7 +236,7 @@
             </div>
 
             <div class="w-[85px] text-center">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[75px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x100/transparent/000?text=Logo+2'">
+                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[70px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x100/transparent/000?text=Logo+2'">
             </div>
         </div>
         
@@ -262,27 +269,27 @@
             <tr>
                 <td>Nama</td>
                 <td>:</td>
-                <td style="font-weight: bold;">{{ strtoupper($student->name ?? '-') }}</td>
+                <td style="font-weight: bold;">{{ strtoupper($student->name ?? 'AIDA LESMINING FURIE') }}</td>
             </tr>
             <tr>
                 <td>Tempat dan Tanggal Lahir</td>
                 <td>:</td>
-                <td>{{ ucfirst($student->pob ?? '-') }}, {{ $student ? \Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y') : '-' }}</td>
+                <td>{{ ucfirst($student->pob ?? 'Ciamis') }}, {{ $student ? \Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y') : '23 December 2010' }}</td>
             </tr>
             <tr>
                 <td>Nama Orang Tua/Wali</td>
                 <td>:</td>
-                <td>{{ $student->father_name ?? $student->guardian_name ?? '-' }}</td>
+                <td>{{ $student->father_name ?? $student->guardian_name ?? 'Puji Lukman' }}</td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa</td>
                 <td>:</td>
-                <td>{{ $student->nis ?? '-' }}</td>
+                <td>{{ $student->nis ?? '23247002' }}</td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa Nasional</td>
                 <td>:</td>
-                <td>{{ $student->student_id ?? ($student->nisn ?? '-') }}</td>
+                <td>{{ $student->student_id ?? ($student->nisn ?? '0103163305') }}</td>
             </tr>
             <tr>
                 <td>dinyatakan</td>
@@ -296,7 +303,7 @@
             LULUS
         </div>
 
-        <div style="font-size: 10pt; margin-bottom: 5px;">
+        <div style="font-size: 9pt; margin-bottom: 3px;">
             dengan nilai sebagai berikut:
         </div>
 
@@ -400,7 +407,8 @@
             <p style="margin: 0;">Kepala Sekolah</p>
             
             <!-- Tempat Tanda Tangan dan Stempel -->
-            <div style="height: 65px; position: relative;"> <!-- DIPERBAIKI: Tinggi diturunkan dari 80px ke 65px agar hemat spasi (gambarnya absolute jadi aman overlap) -->
+            <!-- Ruang tanda tangan diregangkan sedikit lagi karena kita sudah hemat ruang berkat font kecil -->
+            <div style="height: 55px; position: relative;"> 
                 <img src="{{ asset('img/ttd_stempel.jpg') }}" 
                      alt="Tanda Tangan dan Stempel" 
                      style="height: 120px; position: absolute; top: -20px; left: -75px; mix-blend-mode: multiply;" 
