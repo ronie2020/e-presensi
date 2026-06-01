@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SKL - {{ $student->name ?? 'AIDA LESMINING FURIE' }}</title>
+    <title>SKL - <?php echo e($student->name ?? 'AIDA LESMINING FURIE'); ?></title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -148,7 +148,7 @@
             <h2 class="font-black text-elevate-dark font-sans flex items-center gap-2">
                 <i class="ph-bold ph-file-text text-elevate-primary text-xl"></i> Format SKL Resmi
             </h2>
-            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: {{ $student->name ?? 'AIDA LESMINING FURIE' }} | Kertas: A4</p>
+            <p class="text-xs text-slate-500 font-bold ml-7 font-sans">Siswa: <?php echo e($student->name ?? 'AIDA LESMINING FURIE'); ?> | Kertas: A4</p>
         </div>
 
         <div class="flex flex-wrap gap-3 items-center font-sans">
@@ -161,7 +161,7 @@
         </div>
     </div>
 
-    @php
+    <?php
         function getSafeScore($student, $subject, $kelas, $semester, $default) {
             if (!$student) return $default;
             try {
@@ -189,14 +189,14 @@
         $n_snd = getSafeScore($student ?? null, 'Sunda', 9, 2, '86,72');
 
         $n_avg = '89,76'; 
-    @endphp
+    ?>
 
     <div class="sheet">
         
         <!-- KOP SURAT -->
         <div class="flex justify-between items-center px-1 mb-1">
             <div class="w-[85px] text-center">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="w-[70px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x120/transparent/000?text=Logo+1'">
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" class="w-[70px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x120/transparent/000?text=Logo+1'">
             </div>
             
             <div class="text-center flex-1 px-2 font-['Arial'] leading-tight">
@@ -211,7 +211,7 @@
             </div>
 
             <div class="w-[85px] text-center">
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="w-[75px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x100/transparent/000?text=Logo+2'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" class="w-[75px] mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/100x100/transparent/000?text=Logo+2'">
             </div>
         </div>
         
@@ -221,7 +221,7 @@
         <!-- JUDUL SURAT -->
         <div class="judul-surat">
             <h2>SURAT KETERANGAN LULUS</h2>
-            <p>Nomor : {{ $student->graduation->skl_number ?? '421.2/...../SMP.03/Disdik/2026' }}</p>
+            <p>Nomor : <?php echo e($student->graduation->skl_number ?? '421.2/...../SMP.03/Disdik/2026'); ?></p>
         </div>
 
         <!-- TEKS PEMBUKA & PERATURAN -->
@@ -244,27 +244,27 @@
             <tr>
                 <td>Nama</td>
                 <td>:</td>
-                <td style="font-weight: bold;">{{ strtoupper($student->name ?? '-') }}</td>
+                <td style="font-weight: bold;"><?php echo e(strtoupper($student->name ?? '-')); ?></td>
             </tr>
             <tr>
                 <td>Tempat dan Tanggal Lahir</td>
                 <td>:</td>
-                <td>{{ ucfirst($student->pob ?? '-') }}, {{ $student ? \Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y') : '-' }}</td>
+                <td><?php echo e(ucfirst($student->pob ?? '-')); ?>, <?php echo e($student ? \Carbon\Carbon::parse($student->dob)->locale('id')->isoFormat('D MMMM Y') : '-'); ?></td>
             </tr>
             <tr>
                 <td>Nama Orang Tua/Wali</td>
                 <td>:</td>
-                <td>{{ $student->father_name ?? $student->guardian_name ?? '-' }}</td>
+                <td><?php echo e($student->father_name ?? $student->guardian_name ?? '-'); ?></td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa</td>
                 <td>:</td>
-                <td>{{ $student->nis ?? '-' }}</td>
+                <td><?php echo e($student->nis ?? '-'); ?></td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa Nasional</td>
                 <td>:</td>
-                <td>{{ $student->student_id ?? ($student->nisn ?? '-') }}</td>
+                <td><?php echo e($student->student_id ?? ($student->nisn ?? '-')); ?></td>
             </tr>
             <tr>
                 <td>dinyatakan</td>
@@ -301,37 +301,37 @@
                 <tr>
                     <td class="no">1.</td>
                     <td>Pendidikan Agama dan Budi Pekerti</td>
-                    <td class="nilai">{{ $n_pai }}</td>
+                    <td class="nilai"><?php echo e($n_pai); ?></td>
                 </tr>
                 <tr>
                     <td class="no">2.</td>
                     <td>Pendidikan Pancasila dan Kewarganegaraan</td>
-                    <td class="nilai">{{ $n_pkn }}</td>
+                    <td class="nilai"><?php echo e($n_pkn); ?></td>
                 </tr>
                 <tr>
                     <td class="no">3.</td>
                     <td>Bahasa Indonesia</td>
-                    <td class="nilai">{{ $n_bin }}</td>
+                    <td class="nilai"><?php echo e($n_bin); ?></td>
                 </tr>
                 <tr>
                     <td class="no">4.</td>
                     <td>Matematika</td>
-                    <td class="nilai">{{ $n_mtk }}</td>
+                    <td class="nilai"><?php echo e($n_mtk); ?></td>
                 </tr>
                 <tr>
                     <td class="no">5.</td>
                     <td>Ilmu Pengetahuan Alam</td>
-                    <td class="nilai">{{ $n_ipa }}</td>
+                    <td class="nilai"><?php echo e($n_ipa); ?></td>
                 </tr>
                 <tr>
                     <td class="no">6.</td>
                     <td>Ilmu Pengetahuan Sosial</td>
-                    <td class="nilai">{{ $n_ips }}</td>
+                    <td class="nilai"><?php echo e($n_ips); ?></td>
                 </tr>
                 <tr>
                     <td class="no">7.</td>
                     <td>Bahasa Inggris</td>
-                    <td class="nilai">{{ $n_ing }}</td>
+                    <td class="nilai"><?php echo e($n_ing); ?></td>
                 </tr>
 
                 <!-- KELOMPOK B -->
@@ -341,17 +341,17 @@
                 <tr>
                     <td class="no">1.</td>
                     <td>Seni Budaya</td>
-                    <td class="nilai">{{ $n_sbd }}</td>
+                    <td class="nilai"><?php echo e($n_sbd); ?></td>
                 </tr>
                 <tr>
                     <td class="no">2.</td>
                     <td>Pendidikan Jasmani, Olahraga dan Kesehatan</td>
-                    <td class="nilai">{{ $n_pjk }}</td>
+                    <td class="nilai"><?php echo e($n_pjk); ?></td>
                 </tr>
                 <tr>
                     <td class="no">3.</td>
                     <td>Prakarya</td>
-                    <td class="nilai">{{ $n_pkr }}</td>
+                    <td class="nilai"><?php echo e($n_pkr); ?></td>
                 </tr>
                 <tr>
                     <td class="no">4.</td>
@@ -361,13 +361,13 @@
                 <tr>
                     <td class="no"></td>
                     <td>Bahasa Sunda</td>
-                    <td class="nilai">{{ $n_snd }}</td>
+                    <td class="nilai"><?php echo e($n_snd); ?></td>
                 </tr>
                 
                 <!-- RATA RATA -->
                 <tr>
                     <td colspan="2" align="center" style="text-align: center; font-weight: bold;"><strong>Rata-rata</strong></td>
-                    <td class="nilai" align="center" style="text-align: center; font-weight: bold;"><strong>{{ $n_avg }}</strong></td>
+                    <td class="nilai" align="center" style="text-align: center; font-weight: bold;"><strong><?php echo e($n_avg); ?></strong></td>
                 </tr>
             </tbody>
         </table>
@@ -383,18 +383,18 @@
             
             <!-- Tempat Tanda Tangan dan Stempel -->
             <div style="height: 65px; position: relative;"> <!-- DIPERBAIKI: Tinggi diturunkan dari 80px ke 65px agar hemat spasi (gambarnya absolute jadi aman overlap) -->
-                <img src="{{ asset('img/ttd_stempel.jpg') }}" 
+                <img src="<?php echo e(asset('img/ttd_stempel.jpg')); ?>" 
                      alt="Tanda Tangan dan Stempel" 
                      style="height: 120px; position: absolute; top: -20px; left: -75px; mix-blend-mode: multiply;" 
                      onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Placeholder_Signature.png'; this.style.filter='hue-rotate(200deg)'; this.style.left='0px';">
             </div>
             
-            <p style="margin: 0; font-weight: bold; text-decoration: underline; white-space: nowrap;">{{ isset($settings['principal_name']) ? $settings['principal_name'] : 'Tantan Sutandi Nugraha, S.Si, M.Pd' }}</p>
-            <p style="margin: 0;">NIP. {{ $settings['principal_nip'] ?? '19820928 201101 1 002' }}</p>
+            <p style="margin: 0; font-weight: bold; text-decoration: underline; white-space: nowrap;"><?php echo e(isset($settings['principal_name']) ? $settings['principal_name'] : 'Tantan Sutandi Nugraha, S.Si, M.Pd'); ?></p>
+            <p style="margin: 0;">NIP. <?php echo e($settings['principal_nip'] ?? '19820928 201101 1 002'); ?></p>
         </div>
 
         <div class="clear"></div>
 
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/graduation/pdf_skl.blade.php ENDPATH**/ ?>

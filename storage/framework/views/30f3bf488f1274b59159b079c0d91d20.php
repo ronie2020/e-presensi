@@ -31,29 +31,66 @@
                         <p class="font-medium text-sm md:text-base max-w-2xl text-[#2c3f61]/80">Pantau statistik kedisiplinan, literasi, pembiasaan, dan kehadiran anak didik Anda secara komprehensif.</p>
                     </div>
                                         
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                         
-                        <form action="<?php echo e(route('homeroom.dashboard')); ?>" method="GET" class="relative w-full sm:w-auto">
+                        
+                        
+                        
+                        <form action="<?php echo e(route('homeroom.dashboard')); ?>" method="GET" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
                             <?php if(request('class_id')): ?>
                                 <input type="hidden" name="class_id" value="<?php echo e(request('class_id')); ?>">
                             <?php endif; ?>
-                            <select name="period" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all">
-                                <option value="this_month" <?php echo e(request('period', 'this_month') == 'this_month' ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Bulan Ini</option>
-                                <option value="last_month" <?php echo e(request('period') == 'last_month' ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Bulan Lalu</option>
-                                <option value="semester_1" <?php echo e(request('period') == 'semester_1' ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Semester Ganjil</option>
-                                <option value="semester_2" <?php echo e(request('period') == 'semester_2' ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Semester Genap</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#0d52a1]">
-                                <i class="ph-bold ph-calendar-blank text-lg"></i>
+                            
+                            
+                            <div class="relative w-full sm:w-auto flex items-center">
+                                <input type="date" 
+                                       name="filter_date" 
+                                       value="<?php echo e(request('filter_date')); ?>" 
+                                       onchange="this.form.submit()" 
+                                       class="w-full sm:w-[150px] px-4 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm"
+                                       title="Pilih Tanggal Spesifik">
+                                
+                                
+                                <?php if(request('filter_date')): ?>
+                                    <a href="<?php echo e(route('homeroom.dashboard', ['class_id' => request('class_id')])); ?>" 
+                                       class="absolute right-12 w-8 h-8 bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-200 flex items-center justify-center transition-colors shadow-sm" 
+                                       title="Hapus Filter Tanggal">
+                                        <i class="ph-bold ph-x"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+
+                            <span class="hidden sm:block text-sm font-bold text-[#2c3f61]/60">atau</span>
+
+                            
+                            <div class="relative w-full sm:w-auto">
+                                <select name="period" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm">
+                                    
+                                    <option value="" class="hidden text-slate-400" <?php echo e(request('filter_date') ? 'selected' : ''); ?> disabled>-- Filter Tanggal Aktif --</option>
+                                    
+                                    <option value="today" <?php echo e(request('period') == 'today' && !request('filter_date') ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Hari Ini</option>
+                                    <option value="this_month" <?php echo e(request('period', 'this_month') == 'this_month' && !request('filter_date') ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Bulan Ini</option>
+                                    <option value="last_month" <?php echo e(request('period') == 'last_month' && !request('filter_date') ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Bulan Lalu</option>
+                                    <option value="semester_1" <?php echo e(request('period') == 'semester_1' && !request('filter_date') ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Semester Ganjil</option>
+                                    <option value="semester_2" <?php echo e(request('period') == 'semester_2' && !request('filter_date') ? 'selected' : ''); ?> class="text-slate-800 font-semibold">Semester Genap</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#0d52a1]">
+                                    <i class="ph-bold ph-calendar-blank text-lg"></i>
+                                </div>
                             </div>
                         </form>
+                        
 
                          <?php if(isset($isAdminOrKepsek) && $isAdminOrKepsek && isset($allClasses)): ?>
                             <form action="<?php echo e(route('homeroom.dashboard')); ?>" method="GET" class="relative w-full sm:w-auto">
                                 <?php if(request('period')): ?>
                                     <input type="hidden" name="period" value="<?php echo e(request('period')); ?>">
                                 <?php endif; ?>
-                                <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all">
+                                <?php if(request('filter_date')): ?>
+                                    <input type="hidden" name="filter_date" value="<?php echo e(request('filter_date')); ?>">
+                                <?php endif; ?>
+
+                                <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm">
                                     <?php $__currentLoopData = $allClasses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <option value="<?php echo e($c->id); ?>" <?php echo e(isset($class) && $class->id == $c->id ? 'selected' : ''); ?> class="text-slate-800 font-semibold">
                                             Pantau Kelas <?php echo e($c->name); ?>
@@ -67,9 +104,18 @@
                             </form>
                         <?php endif; ?>
 
-                        <a href="<?php echo e(route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month')])); ?>" target="_blank" class="w-full sm:w-auto px-6 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20">
-                            <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> Rekap PDF
-                        </a>
+                        
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <!-- Tombol PDF Lama -->
+                            <a href="<?php echo e(route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')])); ?>" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20 text-sm">
+                                <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> PDF
+                            </a>
+
+                            <!-- Tombol EXCEL Baru -->
+                            <a href="<?php echo e(route('homeroom.export', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')])); ?>" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 group active:scale-95 border border-emerald-600/20 text-sm">
+                                <i class="ph-bold ph-file-xls group-hover:scale-110 transition-transform"></i> Excel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -157,7 +203,7 @@
                     </div>
                 </div>
 
-                <!-- Kartu Terlambat (BARU) -->
+                <!-- Kartu Terlambat -->
                 <div onclick="openDrilldownModal('late')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-cyan-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
                     <div class="absolute -top-3 right-0 bg-cyan-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
                     <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl group-hover:bg-cyan-100 transition-colors"><i class="ph-fill ph-clock"></i></div>
@@ -293,7 +339,7 @@
                             <?php else: ?>
                                 <div class="text-center py-10">
                                     <i class="ph-duotone ph-star text-4xl text-slate-300 mb-2 block"></i>
-                                    <p class="text-sm font-bold text-slate-500">Belum ada data prestasi tercatat bulan ini.</p>
+                                    <p class="text-sm font-bold text-slate-500">Belum ada data prestasi tercatat.</p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -335,7 +381,7 @@
                         <?php else: ?>
                             <div class="text-center py-8">
                                 <i class="ph-duotone ph-book-open-text text-4xl text-slate-300 mb-2 block"></i>
-                                <p class="text-sm font-bold text-slate-500">Belum ada siswa yang mengisi Jurnal Literasi bulan ini.</p>
+                                <p class="text-sm font-bold text-slate-500">Belum ada data literasi.</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -371,7 +417,7 @@
                         <?php else: ?>
                             <div class="text-center py-8">
                                 <i class="ph-duotone ph-mosque text-4xl text-slate-300 mb-2 block"></i>
-                                <p class="text-sm font-bold text-slate-500">Belum ada siswa yang mengisi Jurnal Pembiasaan Keagamaan bulan ini.</p>
+                                <p class="text-sm font-bold text-slate-500">Belum ada data jurnal pembiasaan.</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -564,7 +610,6 @@
                     valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1"><i class="ph-bold ph-calendar-x"></i> ${s.alfa_count}x Alpa</span>`;
                     break;
                 
-                // === TAMBAHAN UNTUK DATA SISWA TERLAMBAT ===
                 case 'late':
                     filteredStudents = studentsData.filter(s => s.late_count > 0).sort((a,b) => b.late_count - a.late_count);
                     headerBgClass = 'bg-cyan-50/50 border-cyan-100';
@@ -593,7 +638,7 @@
                     iconBgClass = 'bg-emerald-100 text-emerald-600';
                     iconPhClass = 'ph-star';
                     titleText = 'Rincian Bintang Karakter';
-                    subtitleText = `${filteredStudents.length} Siswa berprestasi bulan ini`;
+                    subtitleText = `${filteredStudents.length} Siswa berprestasi`;
                     footerHintText = 'Berikan apresiasi berkala untuk mempertahankan kedisiplinan positif siswa.';
                     valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1"><i class="ph-bold ph-plus"></i> +${s.merit_points} Pts</span>`;
                     break;
@@ -632,7 +677,6 @@
                 filteredStudents.forEach(student => {
                     const profileUrl = profileRoutePattern.replace(':id', student.id);
                     
-                    // TAMBAHAN PESAN WHATSAPP UNTUK KETERLAMBATAN
                     const detailMessageText = type === 'alpa' ? `kehadiran (Alpa sebanyak ${student.alfa_count} hari)` :
                                               type === 'late' ? `kedisiplinan waktu (Terlambat masuk sekolah sebanyak ${student.late_count} kali)` :
                                               type === 'violations' ? `pelanggaran kedisiplinan sekolah (poin minus: ${student.violation_points})` :
