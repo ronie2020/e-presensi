@@ -162,33 +162,51 @@
     </div>
 
     @php
-        function getSafeScore($student, $subject, $kelas, $semester, $default) {
-            if (!$student) return $default;
+        // Mengambil nilai dalam format angka (float) agar bisa dihitung rata-ratanya
+        function getRawScore($student, $subject, $kelas, $semester, $default) {
+            if (!$student) return (float)$default;
             try {
                 $score = $student->getScore($subject, $kelas, $semester);
                 if (is_numeric($score)) {
-                    return number_format((float)$score, 2, ',', '');
+                    return (float)$score;
                 }
-                return $default;
+                return (float)$default;
             } catch (\Exception $e) {
-                return $default;
+                return (float)$default;
             }
         }
 
-        $n_pai = getSafeScore($student ?? null, 'Agama', 9, 2, '90,96');
-        $n_pkn = getSafeScore($student ?? null, 'Pancasila', 9, 2, '90,72');
-        $n_bin = getSafeScore($student ?? null, 'Indonesia', 9, 2, '88,80');
-        $n_mtk = getSafeScore($student ?? null, 'Matematika', 9, 2, '88,32');
-        $n_ipa = getSafeScore($student ?? null, 'Alam', 9, 2, '89,76');
-        $n_ips = getSafeScore($student ?? null, 'Sosial', 9, 2, '89,60');
-        $n_ing = getSafeScore($student ?? null, 'Inggris', 9, 2, '89,68');
+        // Ambil nilai angka mentah (raw) dari database
+        $r_pai = getRawScore($student ?? null, 'Agama', 9, 2, 90.96);
+        $r_pkn = getRawScore($student ?? null, 'Pancasila', 9, 2, 90.72);
+        $r_bin = getRawScore($student ?? null, 'Indonesia', 9, 2, 88.80);
+        $r_mtk = getRawScore($student ?? null, 'Matematika', 9, 2, 88.32);
+        $r_ipa = getRawScore($student ?? null, 'Alam', 9, 2, 89.76);
+        $r_ips = getRawScore($student ?? null, 'Sosial', 9, 2, 89.60);
+        $r_ing = getRawScore($student ?? null, 'Inggris', 9, 2, 89.68);
+        $r_sbd = getRawScore($student ?? null, 'Seni Budaya', 9, 2, 92.68);
+        $r_pjk = getRawScore($student ?? null, 'Jasmani', 9, 2, 88.28);
+        $r_pkr = getRawScore($student ?? null, 'Prakarya', 9, 2, 91.80);
+        $r_snd = getRawScore($student ?? null, 'Sunda', 9, 2, 86.72);
 
-        $n_sbd = getSafeScore($student ?? null, 'Seni Budaya', 9, 2, '92,68');
-        $n_pjk = getSafeScore($student ?? null, 'Jasmani', 9, 2, '88,28');
-        $n_pkr = getSafeScore($student ?? null, 'Prakarya', 9, 2, '91,80');
-        $n_snd = getSafeScore($student ?? null, 'Sunda', 9, 2, '86,72');
+        // Hitung total dan rata-rata
+        $total_score = $r_pai + $r_pkn + $r_bin + $r_mtk + $r_ipa + $r_ips + $r_ing + $r_sbd + $r_pjk + $r_pkr + $r_snd;
+        $avg_score = $total_score / 11; // 11 adalah jumlah mata pelajaran
 
-        $n_avg = '89,76'; 
+        // Format angka ke format Indonesia (koma) untuk ditampilkan di tabel
+        $n_pai = number_format($r_pai, 2, ',', '');
+        $n_pkn = number_format($r_pkn, 2, ',', '');
+        $n_bin = number_format($r_bin, 2, ',', '');
+        $n_mtk = number_format($r_mtk, 2, ',', '');
+        $n_ipa = number_format($r_ipa, 2, ',', '');
+        $n_ips = number_format($r_ips, 2, ',', '');
+        $n_ing = number_format($r_ing, 2, ',', '');
+        $n_sbd = number_format($r_sbd, 2, ',', '');
+        $n_pjk = number_format($r_pjk, 2, ',', '');
+        $n_pkr = number_format($r_pkr, 2, ',', '');
+        $n_snd = number_format($r_snd, 2, ',', '');
+        
+        $n_avg = number_format($avg_score, 2, ',', '');
     @endphp
 
     <div class="sheet">
