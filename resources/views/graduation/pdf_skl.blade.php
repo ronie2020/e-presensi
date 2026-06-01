@@ -269,7 +269,7 @@
             <tr>
                 <td>Nama</td>
                 <td>:</td>
-                <td style="font-weight: bold;">{{ strtoupper($student->name ?? 'AIDA LESMINING FURIE') }}</td>
+                <td style="font-weight: bold;">{{ strtoupper($student->name ?? '') }}</td>
             </tr>
             <tr>
                 <td>Tempat dan Tanggal Lahir</td>
@@ -279,17 +279,17 @@
             <tr>
                 <td>Nama Orang Tua/Wali</td>
                 <td>:</td>
-                <td>{{ $student->father_name ?? $student->guardian_name ?? 'Puji Lukman' }}</td>
+                <td>{{ $student->father_name ?? $student->guardian_name ?? '' }}</td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa</td>
                 <td>:</td>
-                <td>{{ $student->nis ?? '23247002' }}</td>
+                <td>{{ $student->nis ?? '' }}</td>
             </tr>
             <tr>
                 <td>Nomor Induk Siswa Nasional</td>
                 <td>:</td>
-                <td>{{ $student->student_id ?? ($student->nisn ?? '0103163305') }}</td>
+                <td>{{ $student->student_id ?? ($student->nisn ?? '') }}</td>
             </tr>
             <tr>
                 <td>dinyatakan</td>
