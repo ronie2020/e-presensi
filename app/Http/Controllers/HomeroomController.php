@@ -111,6 +111,8 @@ class HomeroomController extends Controller
             'total_violations' => 0,
             'total_merits' => 0,
             'alfa_count' => 0,
+            'sakit_count' => 0, // NEW
+            'izin_count' => 0,  // NEW
             'late_count' => 0, 
             'total_literacy' => 0, 
             'total_habits' => 0,   
@@ -144,7 +146,7 @@ class HomeroomController extends Controller
 
         // Untuk menghitung Tren
         $prev_stats = [
-            'total_violations' => 0, 'total_merits' => 0, 'alfa_count' => 0, 'late_count' => 0, 'total_literacy' => 0, 'total_habits' => 0
+            'total_violations' => 0, 'total_merits' => 0, 'alfa_count' => 0, 'sakit_count' => 0, 'izin_count' => 0, 'late_count' => 0, 'total_literacy' => 0, 'total_habits' => 0
         ];
 
         // String Konversi Tanggal untuk Filter yang Akurat
@@ -175,12 +177,16 @@ class HomeroomController extends Controller
                 return $d >= $prevStartStr && $d <= $prevEndStr;
             });
 
+            // Rekap Alpa, Sakit, Izin, Terlambat (This Period)
             $alfaThisPeriod = $attendancesThisPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
-            
-            // LOGIKA MENANGKAP STATUS TERLAMBAT
+            $sakitThisPeriod = $attendancesThisPeriod->where('status', 'Sakit')->count();
+            $izinThisPeriod = $attendancesThisPeriod->where('status', 'Izin')->count();
             $lateThisPeriod = $attendancesThisPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
             
+            // Rekap (Prev Period)
             $prev_stats['alfa_count'] += $attendancesPrevPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
+            $prev_stats['sakit_count'] += $attendancesPrevPeriod->where('status', 'Sakit')->count();
+            $prev_stats['izin_count'] += $attendancesPrevPeriod->where('status', 'Izin')->count();
             $prev_stats['late_count'] += $attendancesPrevPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
                 
             $alfaThisSemester = $student->attendances
@@ -189,6 +195,8 @@ class HomeroomController extends Controller
                 ->count();
             
             $stats['alfa_count'] += $alfaThisPeriod;
+            $stats['sakit_count'] += $sakitThisPeriod;
+            $stats['izin_count'] += $izinThisPeriod;
             $stats['late_count'] += $lateThisPeriod;
 
             // 3. Literasi & Habit Berdasarkan Periode
@@ -218,6 +226,8 @@ class HomeroomController extends Controller
                 'nisn' => $student->nisn ?? $student->student_id ?? '-',
                 'photo' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
                 'alfa_count' => $alfaThisPeriod,
+                'sakit_count' => $sakitThisPeriod, // NEW
+                'izin_count' => $izinThisPeriod,   // NEW
                 'late_count' => $lateThisPeriod,
                 'violation_points' => $violationPoints,
                 'merit_points' => $meritPoints,
@@ -307,6 +317,8 @@ class HomeroomController extends Controller
             'literacy' => $prev_stats['total_literacy'] == 0 ? ($stats['total_literacy'] > 0 ? 100 : 0) : round((($stats['total_literacy'] - $prev_stats['total_literacy']) / $prev_stats['total_literacy']) * 100),
             'habits' => $prev_stats['total_habits'] == 0 ? ($stats['total_habits'] > 0 ? 100 : 0) : round((($stats['total_habits'] - $prev_stats['total_habits']) / $prev_stats['total_habits']) * 100),
             'alfa' => $prev_stats['alfa_count'] == 0 ? ($stats['alfa_count'] > 0 ? 100 : 0) : round((($stats['alfa_count'] - $prev_stats['alfa_count']) / $prev_stats['alfa_count']) * 100),
+            'sakit' => $prev_stats['sakit_count'] == 0 ? ($stats['sakit_count'] > 0 ? 100 : 0) : round((($stats['sakit_count'] - $prev_stats['sakit_count']) / $prev_stats['sakit_count']) * 100),
+            'izin' => $prev_stats['izin_count'] == 0 ? ($stats['izin_count'] > 0 ? 100 : 0) : round((($stats['izin_count'] - $prev_stats['izin_count']) / $prev_stats['izin_count']) * 100),
             'late' => $prev_stats['late_count'] == 0 ? ($stats['late_count'] > 0 ? 100 : 0) : round((($stats['late_count'] - $prev_stats['late_count']) / $prev_stats['late_count']) * 100),
         ];
 
@@ -528,6 +540,8 @@ class HomeroomController extends Controller
             });
 
             $alfaThisPeriod = $attendancesThisPeriod->whereIn('status', ['Alfa', 'Alpa', 'Alpha', 'Tanpa Keterangan'])->count();
+            $sakitThisPeriod = $attendancesThisPeriod->where('status', 'Sakit')->count();
+            $izinThisPeriod = $attendancesThisPeriod->where('status', 'Izin')->count();
             $lateThisPeriod = $attendancesThisPeriod->whereIn('type', ['Harian', 'Masuk'])->where('status', 'Terlambat')->count();
             
             $litCountPeriod = $student->literacyJournals->whereBetween('created_at', [$currentStart, $currentEnd])->count();
@@ -541,6 +555,8 @@ class HomeroomController extends Controller
                 $student->nisn ?? $student->student_id ?? '-',
                 $student->name,
                 $student->gender ?? '-',
+                $sakitThisPeriod, // Merekam Sakit
+                $izinThisPeriod,  // Merekam Izin
                 $alfaThisPeriod,
                 $lateThisPeriod,
                 $violationPoints,

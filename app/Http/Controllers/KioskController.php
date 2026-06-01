@@ -14,10 +14,8 @@ class KioskController extends Controller
 {
    public function showKiosk()
     {
-        // Ganti nama variabelnya menjadi $extracurriculars
         $extracurriculars = Extracurricular::all(); 
         
-        // Kirim dengan nama yang sama persis ke view
         return view('kiosk.index', compact('extracurriculars'));
     }
 
@@ -36,20 +34,21 @@ class KioskController extends Controller
         ]);
 
         $scanType = $request->type ?? 'Harian'; 
-        $scanTime = $request->time ? Carbon::parse($request->time) : Carbon::now();
-
-        // 1. Cari Siswa
+        
+        // FIX TIMEZONE: Pastikan waktu dari Kiosk dikonversi ke zona waktu lokal (Asia/Jakarta)
+        $scanTime = $request->time ? Carbon::parse($request->time)->setTimezone(config('app.timezone', 'Asia/Jakarta')) : Carbon::now();
+// 1. Cari Siswa
         $student = Student::where('student_id', $request->student_id)
                             ->orWhere('rfid_id', $request->student_id)
                             ->orWhere('nisn', $request->student_id)
                             ->first();
         
         if (!$student) return response()->json(['status' => 'error', 'message' => 'Siswa Tidak Ditemukan', 'student_name' => 'N/A'], 404);
-        if ($student->status !== 'active') return response()->json(['status' => 'error', 'message' => 'Status siswa tidak aktif!', 'student_name' => $student->name], 403);
+        if ($student->status !== 'active') return response()->json(['status' => 'error', 'message' => 'Status siswa tidak aktif!', 'student_name' => $student->name, 'photo_path' => $student->photo_path ?? null], 403);
 
         // 2. Ambil Jadwal via Service
         $schedule = $attendanceService->getTodaySchedule($scanTime);
-        if (!$schedule && $scanType == 'Harian') return response()->json(['status' => 'error', 'message' => 'Hari Libur / Tidak Ada Jadwal', 'student_name' => $student->name], 400); 
+        if (!$schedule && $scanType == 'Harian') return response()->json(['status' => 'error', 'message' => 'Hari Libur / Tidak Ada Jadwal', 'student_name' => $student->name, 'photo_path' => $student->photo_path ?? null], 400); 
 
         try {
             // 3. Eksekusi Berdasarkan Tipe
@@ -64,9 +63,13 @@ class KioskController extends Controller
                 $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, 'kiosk');
             }
 
-            // 4. Response & Trigger WA
             if (!$res['success']) {
-                return response()->json(['status' => 'error', 'message' => $res['message'], 'student_name' => $student->name], $res['code']);
+                return response()->json([
+                    'status' => 'error', 
+                    'message' => $res['message'], 
+                    'student_name' => $student->name,
+                    'photo_path' => $student->photo_path ?? null
+                ], $res['code']);
             }
 
             // Notifikasi WA di-catch agar tidak merusak response JSON Kiosk
@@ -76,6 +79,7 @@ class KioskController extends Controller
                 'status' => 'success',
                 'message' => $res['message'],
                 'student_name' => $student->name,
+                'photo_path' => $student->photo_path ?? null,
                 'time' => $scanTime->format('H:i'),
                 'note' => $res['note'] ?? '',
                 'scan' => $res['model'] 
@@ -117,11 +121,13 @@ class KioskController extends Controller
 
                 if (!$student) continue;
 
-                $scanTime = Carbon::parse($scan['time']);
+                // FIX TIMEZONE: Konversi ke zona waktu lokal untuk data offline sinkronisasi
+                $scanTime = Carbon::parse($scan['time'])->setTimezone(config('app.timezone', 'Asia/Jakarta'));
                 $schedule = $attendanceService->getTodaySchedule($scanTime);
                 $scanType = $scan['type'] ?? 'Harian';
 
                 // Eksekusi tanpa melempar output agar loop tidak berhenti
+                // Eksekusi tanpa melempar output agar loop tidak berhenti meskipun telat/gagal
                 if ($scanType === 'Makan') {
                     $attendanceService->processMeal($student, $scanTime);
                 } elseif (in_array($scanType, ['Dhuha', 'Dhuhur'])) {

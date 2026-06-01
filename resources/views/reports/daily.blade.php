@@ -171,6 +171,9 @@
                         Belum <span class="hidden sm:inline">Absen</span> <span class="ml-2 px-2 py-1 bg-[#FDE7E9] text-[#D13438] rounded-lg text-xs">{{ $belumAbsenList->total() }}</span>
                     </button>
                     <button @click="activeTab = 'lain'" :class="activeTab === 'lain' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all">Sakit / Izin / Alfa</button>
+                    
+                    {{-- TAB REKAP SEMESTER BARU --}}
+                    <button @click="activeTab = 'rekapSemester'" :class="activeTab === 'rekapSemester' ? 'bg-white text-elevate-dark shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60 hover:text-elevate-dark'" class="flex-1 md:flex-none py-3.5 px-6 rounded-2xl text-sm font-bold whitespace-nowrap transition-all text-elevate-primary">Rekap Semester</button>
 
                     {{-- TOMBOL INPUT PER KELAS --}}
                     <button onclick="openChecklistModal()" class="ml-auto bg-elevate-dark hover:bg-elevate-primary text-white px-6 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-elevate-dark/20 transition-all flex items-center gap-2 active:scale-95 border border-transparent shrink-0">
@@ -286,7 +289,7 @@
                     </div>
 
                 
-                    {{-- TAB LAINNYA --}}
+                    {{-- TAB LAINNYA (Izin / Sakit / Alfa) --}}
                     <div x-show="activeTab === 'lain'" style="display: none;" class="w-full">
                          <div class="grid grid-cols-1 gap-0">
                             @forelse ($attendancesLain as $att)
@@ -322,6 +325,67 @@
                             </div>
                         @endif
                     </div>
+
+                    {{-- TAB REKAP SEMESTER BARU --}}
+                    <div x-show="activeTab === 'rekapSemester'" style="display: none;" class="w-full p-6 animate-enter">
+                        <div class="mb-5 border-b border-slate-100 pb-5">
+                            <h3 class="font-black text-xl text-elevate-dark flex items-center gap-2">
+                                <i class="ph-bold ph-chart-bar text-elevate-primary"></i> Rekapitulasi Ketidakhadiran
+                            </h3>
+                            <p class="text-sm font-semibold text-slate-500 mt-1">
+                                Akumulasi (Sakit, Izin, Alfa) per kelas berdasarkan data semester berjalan 
+                                <span class="font-bold text-elevate-dark bg-slate-100 px-2 py-0.5 rounded-md ml-1">
+                                    {{ \Carbon\Carbon::parse($semesterStart)->translatedFormat('d M Y') }} s/d {{ \Carbon\Carbon::parse($semesterEnd)->translatedFormat('d M Y') }}
+                                </span>.
+                            </p>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden w-full">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse min-w-[600px]">
+                                    <thead class="bg-elevate-soft/80 text-elevate-primary text-xs uppercase font-black border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-4 w-16 text-center">No</th>
+                                            <th class="p-4">Nama Kelas</th>
+                                            <th class="p-4 text-center bg-[#FFEFD6]/30 text-[#D83B01]">Sakit</th>
+                                            <th class="p-4 text-center bg-[#FFEFD6]/30 text-[#D83B01]">Izin</th>
+                                            <th class="p-4 text-center bg-[#FDE7E9]/30 text-[#D13438]">Alfa</th>
+                                            <th class="p-4 text-center bg-slate-100 text-elevate-dark">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 text-sm">
+                                        @forelse ($rekapSemester ?? [] as $index => $rekap)
+                                            <tr class="hover:bg-slate-50 transition-colors">
+                                                <td class="p-4 text-center font-bold text-slate-400">{{ $index + 1 }}</td>
+                                                <td class="p-4 font-black text-elevate-dark">{{ $rekap->name }}</td>
+                                                
+                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10">{{ $rekap->total_sakit ?: '-' }}</td>
+                                                <td class="p-4 text-center font-bold text-slate-600 bg-[#FFEFD6]/10">{{ $rekap->total_izin ?: '-' }}</td>
+                                                <td class="p-4 text-center font-bold {{ $rekap->total_alfa > 0 ? 'text-[#D13438]' : 'text-slate-600' }} bg-[#FDE7E9]/10">
+                                                    {{ $rekap->total_alfa ?: '-' }}
+                                                </td>
+                                                
+                                                <td class="p-4 text-center font-black text-elevate-dark bg-slate-50">
+                                                    @php $totalTidakHadir = $rekap->total_sakit + $rekap->total_izin + $rekap->total_alfa; @endphp
+                                                    <span class="{{ $totalTidakHadir > 0 ? 'text-elevate-dark' : 'text-slate-300' }}">
+                                                        {{ $totalTidakHadir }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="py-16 text-center">
+                                                    <div class="w-16 h-16 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-4 text-elevate-primary"><i class="ph-duotone ph-folder-open text-3xl"></i></div>
+                                                    <p class="text-slate-500 font-bold text-base">Belum ada data rekap semester.</p>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

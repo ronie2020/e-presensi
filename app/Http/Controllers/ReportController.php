@@ -143,6 +143,7 @@ class ReportController extends Controller
             ]);
         }
     }
+
     // =========================================================================
     // 1. REKAP ABSENSI HARIAN 
     // =========================================================================
@@ -152,14 +153,13 @@ class ReportController extends Controller
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
 
-        // BUG FIX: Menggunakan get() bukan paginate(50) karena pagination akan di-handle per Tab.
+        // Data Absensi Harian (List)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->orderBy('attendance_date', 'desc')
             ->get();
-
 
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
@@ -178,7 +178,7 @@ class ReportController extends Controller
         $mappedHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
         $mappedLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
 
-        // Paginasi dengan "Page Name" unik per tab, dan mempertahankan Status Tab saat klik nomor halaman
+        // Paginasi
         $attendancesHadir = $this->paginate($mappedHadir, 20, null, ['pageName' => 'page_hadir'])
             ->appends(array_merge($request->all(), ['activeTab' => 'hadir']));
             
@@ -188,9 +188,44 @@ class ReportController extends Controller
         $belumAbsenList = $this->paginate($belumAbsenListAll, 20, null, ['pageName' => 'page_belum'])
             ->appends(array_merge($request->all(), ['activeTab' => 'belum']));
 
+        // =========================================================
+        // TAMBAHAN: REKAP SEMESTER PER KELAS
+        // =========================================================
+        $now = Carbon::now();
+        // Penentuan Semester Otomatis
+        if ($now->month >= 7) {
+            // Semester Ganjil (Juli - Desember)
+            $semesterStart = $now->copy()->month(7)->startOfMonth()->toDateString();
+            $semesterEnd = $now->copy()->month(12)->endOfMonth()->toDateString();
+        } else {
+            // Semester Genap (Januari - Juni)
+            $semesterStart = $now->copy()->month(1)->startOfMonth()->toDateString();
+            $semesterEnd = $now->copy()->month(6)->endOfMonth()->toDateString();
+        }
+
+        // Ambil data rekap semester per kelas
+        $rekapSemester = SchoolClass::with(['students.attendances' => function($q) use ($semesterStart, $semesterEnd) {
+            $q->whereBetween('attendance_date', [$semesterStart, $semesterEnd])
+              ->whereIn('type', ['Harian', 'Masuk'])
+              ->whereIn('status', ['Sakit', 'Izin', 'Alfa', 'Alpa', 'Alpha']);
+        }])->orderBy('name')->get()->map(function($class) {
+            $sakit = 0; $izin = 0; $alfa = 0;
+            foreach($class->students as $student) {
+                $sakit += $student->attendances->where('status', 'Sakit')->count();
+                $izin += $student->attendances->where('status', 'Izin')->count();
+                $alfa += $student->attendances->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])->count();
+            }
+            $class->total_sakit = $sakit;
+            $class->total_izin = $izin;
+            $class->total_alfa = $alfa;
+            return $class;
+        });
+        // =========================================================
+
         return view('reports.daily', compact(
             'selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList',
-            'hadirCount', 'terlambatCount', 'sakitCount', 'izinCount', 'alfaCount', 'range'
+            'hadirCount', 'terlambatCount', 'sakitCount', 'izinCount', 'alfaCount', 'range',
+            'rekapSemester', 'semesterStart', 'semesterEnd' // Pass variabel rekap
         ));
     }
 

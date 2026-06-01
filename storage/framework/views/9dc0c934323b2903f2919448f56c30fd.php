@@ -1,14 +1,12 @@
-@extends('layouts.kiosk-layout')
-
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
     $scheduleJson = json_encode($safeSchedule);
     
     // Data Ekstrakurikuler untuk Modal/Dropdown
     $extracurriculars = isset($extracurriculars) ? $extracurriculars : [];
     $extraJson = json_encode($extracurriculars);
-@endphp
+?>
 
 <!-- LAYER START KIOSK (Untuk trigger Fullscreen & Audio) -->
 <div id="start-overlay" class="fixed inset-0 z-[100] bg-[#020b18] flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500" onclick="startKiosk()">
@@ -54,7 +52,26 @@
             <!-- Header (Logo & Sekolah) -->
             <div class="flex items-center gap-4 mb-6 relative">
                 <div class="p-2 bg-[#0a1930] rounded-xl border border-cyan-500/40 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
-                    <x-application-logo class="w-12 h-12 text-white fill-current drop-shadow-md" />
+                    <?php if (isset($component)) { $__componentOriginal8892e718f3d0d7a916180885c6f012e7 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8892e718f3d0d7a916180885c6f012e7 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.application-logo','data' => ['class' => 'w-12 h-12 text-white fill-current drop-shadow-md']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('application-logo'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'w-12 h-12 text-white fill-current drop-shadow-md']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $attributes = $__attributesOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $component = $__componentOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__componentOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
                 </div>
                 <div>
                     <h1 class="text-2xl md:text-3xl font-black text-white tracking-widest uppercase drop-shadow-lg">SMP Negeri 3 Lakbok</h1>
@@ -133,17 +150,17 @@
                 <!-- MODE SELECTOR (Tombol Grid di Bawah) -->
                 <div class="mt-6 w-full relative z-20">
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                        @foreach([
+                        <?php $__currentLoopData = [
                             ['label' => 'Masuk (F1)', 'type' => 'Masuk', 'bg' => 'bg-cyan-900/60', 'border' => 'border-cyan-500/50', 'text' => 'text-cyan-300'],
                             ['label' => 'Pulang (F2)', 'type' => 'Pulang', 'bg' => 'bg-purple-900/60', 'border' => 'border-purple-500/50', 'text' => 'text-purple-300'],
                             ['label' => 'Makan (F3)', 'type' => 'Makan', 'bg' => 'bg-orange-900/60', 'border' => 'border-orange-500/50', 'text' => 'text-orange-300'],
                             ['label' => 'Dhuha (F4)', 'type' => 'Dhuha', 'bg' => 'bg-emerald-900/60', 'border' => 'border-emerald-500/50', 'text' => 'text-emerald-300'],
                             ['label' => 'Dhuhur (F5)', 'type' => 'Dhuhur', 'bg' => 'bg-emerald-900/60', 'border' => 'border-emerald-500/50', 'text' => 'text-emerald-300'],
-                        ] as $btn)
-                        <button type="button" onclick="window.setMode('{{ $btn['type'] }}', true)" class="{{ $btn['bg'] }} border {{ $btn['border'] }} hover:bg-opacity-80 py-3 rounded-xl backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-1 group shadow-lg active:scale-95 text-center px-1">
-                            <span class="text-xs lg:text-sm font-bold uppercase tracking-wider {{ $btn['text'] }} drop-shadow-md group-hover:scale-105 transition-transform">{{ $btn['label'] }}</span>
+                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $btn): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <button type="button" onclick="window.setMode('<?php echo e($btn['type']); ?>', true)" class="<?php echo e($btn['bg']); ?> border <?php echo e($btn['border']); ?> hover:bg-opacity-80 py-3 rounded-xl backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-1 group shadow-lg active:scale-95 text-center px-1">
+                            <span class="text-xs lg:text-sm font-bold uppercase tracking-wider <?php echo e($btn['text']); ?> drop-shadow-md group-hover:scale-105 transition-transform"><?php echo e($btn['label']); ?></span>
                         </button>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         
                         <button type="button" @click="openExtraModal" class="bg-pink-900/60 border border-pink-500/50 hover:bg-opacity-80 py-3 rounded-xl backdrop-blur-sm transition-all flex flex-col items-center justify-center gap-1 group shadow-lg active:scale-95 text-center px-1">
                             <span class="text-xs lg:text-sm font-bold uppercase tracking-wider text-pink-300 drop-shadow-md group-hover:scale-105 transition-transform">Ekskul (F6)</span>
@@ -206,16 +223,16 @@
             
             <h3 class="text-2xl font-black text-white mb-6 flex items-center gap-3 uppercase tracking-widest"><i class="ph-fill ph-trophy text-pink-400"></i> Pilih Ekskul</h3>
             <div class="grid grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
-                @forelse($extracurriculars as $ex)
-                    <button type="button" @click="selectExtra('{{ $ex->id }}', '{{ $ex->name }}')" class="p-4 bg-pink-950/30 hover:bg-pink-900/60 border border-pink-900 hover:border-pink-500 rounded-xl text-left transition-all group">
-                        <span class="font-bold text-slate-200 group-hover:text-pink-300 text-base block">{{ $ex->name }}</span>
+                <?php $__empty_1 = true; $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ex): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <button type="button" @click="selectExtra('<?php echo e($ex->id); ?>', '<?php echo e($ex->name); ?>')" class="p-4 bg-pink-950/30 hover:bg-pink-900/60 border border-pink-900 hover:border-pink-500 rounded-xl text-left transition-all group">
+                        <span class="font-bold text-slate-200 group-hover:text-pink-300 text-base block"><?php echo e($ex->name); ?></span>
                     </button>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-2 text-center py-8">
                         <i class="ph-duotone ph-warning-circle text-5xl text-slate-500 mb-3"></i>
                         <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Data Kosong</p>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
             <button type="button" @click="closeModal()" class="mt-6 w-full py-3 bg-slate-800 hover:bg-rose-600 text-white font-bold rounded-xl transition-colors uppercase tracking-widest text-sm shadow-md">Batal / Tutup</button>
         </div>
@@ -244,7 +261,7 @@
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
-        window.location.href = "{{ route('landing') }}"; 
+        window.location.href = "<?php echo e(route('landing')); ?>"; 
     }
 
     function speakSapaan(message) {
@@ -291,7 +308,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const SCHEDULE_DATA = {!! $scheduleJson !!};
+        const SCHEDULE_DATA = <?php echo $scheduleJson; ?>;
         
         let currentScanMode = 'Masuk';
         let manualOverride = false;
@@ -310,8 +327,8 @@
         const emptyLogMsg = document.getElementById('empty-log');
         const ekskulDisplay = document.getElementById('ekskul-name-display');
 
-        const processUrl = '{{ route("kiosk.process") }}';
-        let csrfToken = '{{ csrf_token() }}';
+        const processUrl = '<?php echo e(route("kiosk.process")); ?>';
+        let csrfToken = '<?php echo e(csrf_token()); ?>';
 
         const MODE_CONFIG = {
             'Masuk': { border: 'border-cyan-400', bg: 'bg-cyan-900/90', text: 'text-cyan-200', glow: 'rgba(34,211,238,0.4)', icon: 'ph-sun-dim', label: 'ABSEN MASUK' },
@@ -744,4 +761,5 @@
     [x-cloak] { display: none !important; }
     :fullscreen header, :fullscreen nav { display: none !important; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.kiosk-layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/kiosk/index.blade.php ENDPATH**/ ?>

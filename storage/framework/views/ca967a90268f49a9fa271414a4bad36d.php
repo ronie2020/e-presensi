@@ -121,7 +121,7 @@
             </div>
 
             
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
                 <!-- Kartu Total Siswa -->
                 <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-200 transition-colors">
                     <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-fill ph-users-three"></i></div>
@@ -185,6 +185,60 @@
                     </div>
                 </div>
                 
+                <!-- Kartu Pelanggaran -->
+                <div onclick="openDrilldownModal('violations')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-rose-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
+                    <div class="absolute -top-3 right-0 bg-rose-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl group-hover:bg-rose-100 transition-colors"><i class="ph-fill ph-warning-circle"></i></div>
+                    <div class="flex flex-col items-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Pelanggaran</p>
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-xl font-black text-rose-600">-<?php echo e($stats['total_violations'] ?? 0); ?></p>
+                            <?php if(isset($trends['violations'])): ?>
+                                <?php $isGood = $trends['violations'] <= 0; ?>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border <?php echo e($isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>" title="<?php echo e($isGood ? 'Menurun (Lebih Disiplin)' : 'Meningkat (Banyak Pelanggaran)'); ?>">
+                                    <i class="ph-bold <?php echo e($isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right'); ?> mr-0.5"></i> <?php echo e(abs($trends['violations'])); ?>%
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kartu Sakit -->
+                <div onclick="openDrilldownModal('sakit')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
+                    <div class="absolute -top-3 right-0 bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
+                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl group-hover:bg-blue-100 transition-colors"><i class="ph-fill ph-thermometer"></i></div>
+                    <div class="flex flex-col items-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">Sakit</p>
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-xl font-black text-blue-600"><?php echo e($stats['sakit_count'] ?? 0); ?></p>
+                            <?php if(isset($trends['sakit'])): ?>
+                                <?php $isGood = $trends['sakit'] <= 0; ?>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border <?php echo e($isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>" title="<?php echo e($isGood ? 'Menurun (Makin Sehat)' : 'Meningkat (Banyak Sakit)'); ?>">
+                                    <i class="ph-bold <?php echo e($isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right'); ?> mr-0.5"></i> <?php echo e(abs($trends['sakit'])); ?>%
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kartu Izin -->
+                <div onclick="openDrilldownModal('izin')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
+                    <div class="absolute -top-3 right-0 bg-indigo-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl group-hover:bg-indigo-100 transition-colors"><i class="ph-fill ph-envelope-open"></i></div>
+                    <div class="flex flex-col items-center">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-indigo-600 transition-colors">Izin</p>
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-xl font-black text-indigo-600"><?php echo e($stats['izin_count'] ?? 0); ?></p>
+                            <?php if(isset($trends['izin'])): ?>
+                                <?php $isGood = $trends['izin'] <= 0; ?>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border <?php echo e($isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>" title="<?php echo e($isGood ? 'Menurun' : 'Meningkat'); ?>">
+                                    <i class="ph-bold <?php echo e($isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right'); ?> mr-0.5"></i> <?php echo e(abs($trends['izin'])); ?>%
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Kartu Total Alpa -->
                 <div onclick="openDrilldownModal('alpa')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-amber-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
                     <div class="absolute -top-3 right-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
@@ -221,23 +275,6 @@
                     </div>
                 </div>
 
-                <!-- Kartu Pelanggaran -->
-                <div onclick="openDrilldownModal('violations')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-rose-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-rose-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl group-hover:bg-rose-100 transition-colors"><i class="ph-fill ph-warning-circle"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Pelanggaran</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-rose-600">-<?php echo e($stats['total_violations'] ?? 0); ?></p>
-                            <?php if(isset($trends['violations'])): ?>
-                                <?php $isGood = $trends['violations'] <= 0; ?>
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border <?php echo e($isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>" title="<?php echo e($isGood ? 'Menurun (Lebih Disiplin)' : 'Meningkat (Banyak Pelanggaran)'); ?>">
-                                    <i class="ph-bold <?php echo e($isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right'); ?> mr-0.5"></i> <?php echo e(abs($trends['violations'])); ?>%
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -426,6 +463,72 @@
             </div>
 
             
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden mb-8">
+                <div class="p-6 md:p-8 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="font-black text-slate-800 text-xl flex items-center gap-2">
+                            <i class="ph-fill ph-calendar-check text-blue-500"></i> Rekapitulasi Kehadiran Siswa
+                        </h3>
+                        <p class="text-sm font-medium text-slate-500 mt-1">Data di bawah ini otomatis menyesuaikan dengan <strong>Filter Periode</strong> yang Anda pilih di atas.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar max-h-[500px]">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead class="bg-white text-slate-400 text-xs uppercase font-black sticky top-0 z-10 border-b border-slate-100 shadow-sm">
+                            <tr>
+                                <th class="p-4 pl-6 w-16 text-center bg-white">No</th>
+                                <th class="p-4 bg-white">Nama Siswa</th>
+                                <th class="p-4 text-center bg-white text-blue-600">Sakit</th>
+                                <th class="p-4 text-center bg-white text-indigo-600">Izin</th>
+                                <th class="p-4 text-center bg-white text-rose-600">Alpa</th>
+                                <th class="p-4 text-center bg-white text-cyan-600">Terlambat</th>
+                                <th class="p-4 text-center bg-white">Total Ketidakhadiran</th>
+                                <th class="p-4 pr-6 text-center bg-white">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 text-sm">
+                            <?php $__currentLoopData = $mappedStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $ms): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $totalAbsen = $ms['sakit_count'] + $ms['izin_count'] + $ms['alfa_count'];
+                                ?>
+                                <tr class="hover:bg-slate-50/80 transition-colors group">
+                                    <td class="p-4 pl-6 text-center font-bold text-slate-400"><?php echo e($index + 1); ?></td>
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                                                <?php if($ms['photo']): ?>
+                                                    <img src="<?php echo e($ms['photo']); ?>" class="w-full h-full object-cover">
+                                                <?php else: ?>
+                                                    <div class="w-full h-full flex items-center justify-center font-black text-slate-400 text-xs"><?php echo e(substr($ms['name'], 0, 1)); ?></div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-slate-700 truncate max-w-[200px]"><?php echo e($ms['name']); ?></h4>
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider"><?php echo e($ms['nisn']); ?></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center font-bold <?php echo e($ms['sakit_count'] > 0 ? 'text-blue-600 bg-blue-50/30' : 'text-slate-300'); ?>"><?php echo e($ms['sakit_count'] ?: '-'); ?></td>
+                                    <td class="p-4 text-center font-bold <?php echo e($ms['izin_count'] > 0 ? 'text-indigo-600 bg-indigo-50/30' : 'text-slate-300'); ?>"><?php echo e($ms['izin_count'] ?: '-'); ?></td>
+                                    <td class="p-4 text-center font-bold <?php echo e($ms['alfa_count'] > 0 ? 'text-rose-600 bg-rose-50/30' : 'text-slate-300'); ?>"><?php echo e($ms['alfa_count'] ?: '-'); ?></td>
+                                    <td class="p-4 text-center font-bold <?php echo e($ms['late_count'] > 0 ? 'text-cyan-600 bg-cyan-50/30' : 'text-slate-300'); ?>"><?php echo e($ms['late_count'] ?: '-'); ?></td>
+                                    <td class="p-4 text-center font-black <?php echo e($totalAbsen > 0 ? 'text-slate-700' : 'text-slate-300'); ?>">
+                                        <?php echo e($totalAbsen ?: '-'); ?>
+
+                                    </td>
+                                    <td class="p-4 pr-6 text-center">
+                                        <a href="<?php echo e(route('students.show', $ms['id'])); ?>" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all active:scale-95" title="Lihat Profil & Buku Induk Siswa">
+                                            <i class="ph-bold ph-arrow-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            
             <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-[2.5rem] shadow-lg border border-amber-200 overflow-hidden relative group">
                 <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-700">
                     <i class="ph-fill ph-trophy text-9xl text-amber-500"></i>
@@ -599,6 +702,28 @@
             let valueFormatter = (student) => '';
 
             switch(type) {
+                case 'sakit':
+                    filteredStudents = studentsData.filter(s => s.sakit_count > 0).sort((a,b) => b.sakit_count - a.sakit_count);
+                    headerBgClass = 'bg-blue-50/50 border-blue-100';
+                    iconBgClass = 'bg-blue-100 text-blue-600';
+                    iconPhClass = 'ph-thermometer';
+                    titleText = 'Rincian Siswa Sakit';
+                    subtitleText = `${filteredStudents.length} Siswa terdata sakit`;
+                    footerHintText = 'Pantau kondisi kesehatan siswa, hubungi orang tua jika sakit lebih dari 3 hari.';
+                    valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-1"><i class="ph-bold ph-thermometer"></i> ${s.sakit_count}x Sakit</span>`;
+                    break;
+                    
+                case 'izin':
+                    filteredStudents = studentsData.filter(s => s.izin_count > 0).sort((a,b) => b.izin_count - a.izin_count);
+                    headerBgClass = 'bg-indigo-50/50 border-indigo-100';
+                    iconBgClass = 'bg-indigo-100 text-indigo-600';
+                    iconPhClass = 'ph-envelope-open';
+                    titleText = 'Rincian Siswa Izin';
+                    subtitleText = `${filteredStudents.length} Siswa mengajukan izin`;
+                    footerHintText = 'Pastikan keterangan izin yang diberikan oleh siswa jelas dan valid.';
+                    valueFormatter = (s) => `<span class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200 flex items-center gap-1"><i class="ph-bold ph-envelope-open"></i> ${s.izin_count}x Izin</span>`;
+                    break;
+
                 case 'alpa':
                     filteredStudents = studentsData.filter(s => s.alfa_count > 0).sort((a,b) => b.alfa_count - a.alfa_count);
                     headerBgClass = 'bg-amber-50/50 border-amber-100';
@@ -678,6 +803,8 @@
                     const profileUrl = profileRoutePattern.replace(':id', student.id);
                     
                     const detailMessageText = type === 'alpa' ? `kehadiran (Alpa sebanyak ${student.alfa_count} hari)` :
+                                              type === 'sakit' ? `kehadiran (Sakit sebanyak ${student.sakit_count} hari)` :
+                                              type === 'izin' ? `kehadiran (Izin sebanyak ${student.izin_count} hari)` :
                                               type === 'late' ? `kedisiplinan waktu (Terlambat masuk sekolah sebanyak ${student.late_count} kali)` :
                                               type === 'violations' ? `pelanggaran kedisiplinan sekolah (poin minus: ${student.violation_points})` :
                                               type === 'merits' ? `prestasi karakter positif siswa (+${student.merit_points} poin)` : 'pembiasaan tugas sekolah';
