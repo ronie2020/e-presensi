@@ -2,7 +2,8 @@
 <html lang="id" oncontextmenu="return false" oncopy="return false" oncut="return false" onpaste="return false">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    {{-- PERBAIKAN MOBILE META: Mencegah zoom in otomatis di HP saat klik input/textarea --}}
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Ujian - {{ $exam->title }}</title>
     
@@ -34,11 +35,22 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
-        /* Base Reset */
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; overflow: hidden; }
+        /* Base Reset Anti-Potong: Menjamin tinggi absolut di semua browser HP */
+        body, html { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            overflow: hidden; 
+            overscroll-behavior-y: none; 
+        }
         [x-cloak] { display: none !important; }
         
-        /* Custom Scrollbar - Disesuaikan dengan tema Cyan/Blue */
+        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
@@ -47,8 +59,8 @@
         /* Security */
         @media print { body { display: none; } }
 
-        /* Loader - Menggunakan warna blue-950 */
-        #loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
+        /* Loader */
+        #loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #172554; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -81,6 +93,20 @@
                 array[randId] = tmp;
             }
             return array;
+        }
+
+        // PERBAIKAN: Fetch Timeout untuk mengatasi koneksi gantung
+        async function fetchWithTimeout(resource, options = {}) {
+            const { timeout = 8000 } = options; 
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            
+            const response = await fetch(resource, {
+                ...options,
+                signal: controller.signal  
+            });
+            clearTimeout(id);
+            return response;
         }
 
         window.examData = { 
@@ -138,12 +164,10 @@
 
                         let rawQuestions = JSON.parse(JSON.stringify(window.examData.questions || []));
 
-                        // 1. Acak Urutan Soal (Jika diaktifkan di pengaturan)
                         if (window.examData.randomizeQuestions) {
                             rawQuestions = shuffleArray(rawQuestions, rand);
                         }
 
-                        // 2. Persiapkan Opsi & Acak Pilihan
                         rawQuestions.forEach(q => {
                             if (!q.question_type || q.question_type === 'choice') {
                                 try {
@@ -154,10 +178,8 @@
                                         keys = ['A', 'B', 'C', 'D', 'E'].filter(k => parsedOpts['image_'+k] != null);
                                     }
 
-                                    // Fallback aman jika kosong
                                     if(keys.length === 0) keys = ['A', 'B', 'C', 'D', 'E'];
 
-                                    // Acak posisi opsi (hanya menyusun ulang referensi kunci datanya)
                                     if (window.examData.randomizeOptions && keys.length > 0) {
                                         keys = shuffleArray(keys, rand);
                                     }
@@ -171,13 +193,11 @@
                         this.questions = rawQuestions;
                         this.totalQuestions = this.questions.length;
                         
-                        // Set Timer
                         const now = new Date().getTime();
                         this.endTimeTarget = now + (this.timeLeft * 1000);
                         
                         try { this.loadLocalProgress(); } catch (e) {}
                         
-                        // Jika saat memuat ulang halaman pelanggaran sudah >= batas, usir langsung
                         if (this.violationCount >= this.maxViolations) {
                             this.showSecurityOverlay = true;
                             setTimeout(() => {
@@ -205,7 +225,6 @@
                             }
                         }, 5000);
 
-                        // Render MathJax
                         setTimeout(() => { if(window.renderMath) window.renderMath(); }, 500);
                         this.$watch('currentQuestion', () => {
                             setTimeout(() => { if(window.renderMath) window.renderMath(); }, 100);
@@ -233,7 +252,7 @@
                     this.answeredCount = Object.keys(this.answers).length;
                 },
 
-                // --- LOGIKA JAWABAN (CBT INTERNAL) ---
+                // --- LOGIKA JAWABAN ---
                 selectAnswer(questionId, answer) {
                     this.answers[questionId] = answer;
                     this.unsavedQuestions.add(questionId); 
@@ -263,7 +282,9 @@
                     
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
+                        
+                        // PERBAIKAN: Gunakan fungsi fetchWithTimeout
+                        const response = await fetchWithTimeout("{{ route('student.exam.saveAnswer') }}", {
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
                             body: JSON.stringify({ 
@@ -271,7 +292,8 @@
                                 question_id: questionId, 
                                 answer: answer,                                
                                 question_type: this.questions.find(q => q.id == questionId)?.question_type 
-                            })
+                            }),
+                            timeout: 8000 // 8 detik toleransi
                         });
 
                         if (response.status === 419 || response.status === 401) {
@@ -288,7 +310,10 @@
                             setTimeout(() => this.saveStatus = 'saved', 300);
                         }
                     } catch (error) { 
-                        if(error.message !== 'SESSION_EXPIRED') {
+                        if(error.name === 'AbortError') {
+                            console.warn('Network timeout, saved locally');
+                            this.saveStatus = 'error'; // Aktifkan indikator Offline
+                        } else if(error.message !== 'SESSION_EXPIRED') {
                             console.error('Save failed:', error);
                             this.saveStatus = 'error'; 
                         }
@@ -306,7 +331,7 @@
                         showCancelButton: true,
                         confirmButtonText: '<i class="ph-bold ph-arrow-square-out"></i> Login di Tab Baru',
                         cancelButtonText: 'Tutup Peringatan',
-                        confirmButtonColor: '#172554', /* Warna Blue-950 */
+                        confirmButtonColor: '#172554',
                         allowOutsideClick: false
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -337,7 +362,6 @@
                     }
                 },
 
-                // LOGIKA SINKRONISASI DIPERKUAT (Return Boolean)
                 async syncPendingAnswers() {
                     if (this.unsavedQuestions.size === 0) { 
                         this.saveStatus = 'saved'; 
@@ -369,7 +393,6 @@
                 },
 
                 checkAutoSubmitAfterSync() {
-                    // Jika waktu habis atau pelanggaran max, submit otomatis saat internet kembali jalan
                     if (this.saveStatus !== 'submitting' && this.saveStatus !== 'finished') {
                         if (this.timeLeft <= 0 || this.violationCount >= this.maxViolations) {
                             this.submitExam(true);
@@ -382,7 +405,6 @@
                     else if (Object.keys(this.answers).length > 0) this.saveStatus = 'saved';
                 },
 
-                // --- KEAMANAN & TIMER ---
                  initSecurity() {
                     window.addEventListener('beforeunload', (e) => {
                         if (this.saveStatus !== 'finished') { e.preventDefault(); e.returnValue = ''; }
@@ -416,10 +438,8 @@
                     this.violationCount++; 
                     try { this.saveToLocal(); } catch(e){} 
                     
-                    // Tampilkan Overlay Biru Keamanan
                     this.showSecurityOverlay = true;
 
-                    // Jika Pelanggaran Habis, usir otomatis
                     if(this.violationCount >= this.maxViolations) {
                         setTimeout(() => {
                             if(this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') {
@@ -455,7 +475,6 @@
                 },
 
                 finishExam() {
-                    // LOGIKA 75%
                     const waitThreshold = this.effectiveDuration * 0.25; 
 
                     if (this.timeLeft > waitThreshold) {
@@ -499,11 +518,9 @@
                     }).then((result) => { if (result.isConfirmed) this.submitExam(); });
                 },
 
-                // PENGAMANAN SUBMIT TOTAL (GATEKEEPER)
                 async submitExam(forced = false) {
                     if (this.saveStatus === 'submitting' || this.saveStatus === 'finished') return;
 
-                    // 1. CEK INTERNET DULUAN: Jika offline, Tahan Siswa!
                     if (!this.isOnline && this.examType !== 'google_form') {
                         Swal.fire({
                             icon: 'error',
@@ -512,7 +529,7 @@
                             showConfirmButton: false,
                             allowOutsideClick: false
                         });
-                        return; // Hentikan di sini. Jangan biarkan local storage dihapus!
+                        return; 
                     }
 
                     const prevStatus = this.saveStatus;
@@ -520,13 +537,11 @@
 
                     Swal.fire({ title: 'Menyelesaikan Sesi...', html: 'Sistem sedang memastikan 100% jawaban Anda tersimpan ke server. Mohon tunggu.', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rounded-[2rem]' } });
 
-                    // 2. PAKSA SINKRONISASI JIKA ADA YANG TERTINGGAL
                     if(this.examType !== 'google_form' && this.unsavedQuestions.size > 0) {
                         const syncSuccess = await this.syncPendingAnswers();
                         
-                        // Jika ternyata koneksi buruk dan server gagal membalas saat disinkron:
                         if (!syncSuccess) {
-                            this.saveStatus = prevStatus; // Kembalikan statusnya
+                            this.saveStatus = prevStatus; 
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Gagal Sinkronisasi!',
@@ -534,21 +549,18 @@
                                 confirmButtonText: 'Saya Mengerti',
                                 confirmButtonColor: '#172554'
                             });
-                            return; // Hentikan di sini. Data tidak hilang!
+                            return; 
                         }
                     }
 
-                    // 3. AMAN. DATA 100% SUDAH DI SERVER.
                     this.saveStatus = 'finished';
-                    this.showSecurityOverlay = false; // Boleh hilangkan layar blokir pelanggaran
+                    this.showSecurityOverlay = false; 
                     
                     clearInterval(this.timerInterval);
                     if(this.backgroundSyncInterval) clearInterval(this.backgroundSyncInterval);
 
-                    // BARULAH KITA MENGHAPUS LOKAL STORAGE
                     localStorage.removeItem(`exam_${this.sessionId}`);
 
-                    // 4. SUBMIT FORM KE BACKEND
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
                     form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
@@ -567,7 +579,6 @@
                     form.submit();
                 },
 
-                // --- KAMERA PROCTORING ---
                 async initCamera() {
                     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                         this.handleCameraFailure('Perangkat/Browser Anda tidak mendukung akses kamera.');
@@ -608,7 +619,6 @@
 
                 handleCameraFailure(reason) {
                     this.cameraActive = false;
-                    console.warn("Camera Init Info:", reason);
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -656,7 +666,6 @@
             }
         }
         
-        // Timeout darurat hilangkan loader
         setTimeout(() => {
             const overlay = document.getElementById('loading-overlay');
             if(overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
@@ -664,7 +673,8 @@
     </script>
 </head>
 
-<body class="h-[100dvh] flex flex-col"
+{{-- PERBAIKAN TOTAL LAYOUT: Mencegah tombol bawah terpotong atau navbar hilang di HP Tiongkok --}}
+<body class="bg-slate-50 text-slate-800 antialiased overflow-hidden flex flex-col" style="height: 100vh; height: 100dvh;"
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
     @online.window="isOnline = true; syncPendingAnswers()"
@@ -685,13 +695,12 @@
         <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
     </div>
 
-    {{-- OVERLAY PELANGGARAN (PERBAIKAN FULL DINAMIS) --}}
+    {{-- OVERLAY PELANGGARAN --}}
     <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-blue-950/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
         <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
             <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
             <h2 class="text-xl font-black text-slate-900 mb-2 uppercase">Pelanggaran Terdeteksi</h2>
             
-            {{-- KONDISI 1: JIKA PELANGGARAN MASIH DI BAWAH BATAS --}}
             <template x-if="violationCount < maxViolations">
                 <div>
                     <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-600" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
@@ -699,7 +708,6 @@
                 </div>
             </template>
 
-            {{-- KONDISI 2: JIKA PELANGGARAN SUDAH MENCAPAI BATAS (TIDAK BISA KEMBALI) --}}
             <template x-if="violationCount >= maxViolations">
                 <div>
                     <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda telah melewati batas maksimal pelanggaran.<br><b class="text-rose-600">Sistem menghentikan ujian Anda secara otomatis.</b></p>
@@ -711,12 +719,16 @@
         </div>
     </div>
 
-    {{-- NAVBAR ATAS (TEMA BIRU GELAP / BLUE-950) --}}
-    <nav class="bg-blue-950 text-white h-16 shrink-0 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-blue-900/50 z-50 relative">
+    {{-- NAVBAR ATAS (shrink-0 mencegah terkompres) --}}
+    <nav class="shrink-0 bg-blue-950 text-white h-16 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-blue-900/50 z-50 relative">
         <div class="flex items-center gap-4 min-w-0 flex-1">
             <div class="flex items-center gap-3 shrink-0">
-                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-cyan-400 border border-white/10 shrink-0">
-                    <i class="ph-bold ph-graduation-cap text-xl"></i>
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-cyan-400 border border-white/10 shrink-0 overflow-hidden">
+                    @if(!empty($student->photo_path))
+                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Foto" class="w-full h-full object-cover">
+                    @else
+                        <i class="ph-bold ph-graduation-cap text-xl"></i>
+                    @endif
                 </div>
                 <div class="hidden sm:block">
                     <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px] text-white">{{ $exam->title }}</h1>
@@ -727,8 +739,12 @@
             <div class="hidden md:block w-px h-8 bg-white/10 mx-2"></div>
 
             <div class="hidden md:flex items-center gap-3 min-w-0">
-                 <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold border border-cyan-400/50 shrink-0 shadow-sm">
-                     {{ substr($student->name ?? 'S', 0, 1) }}
+                 <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold border border-cyan-400/50 shrink-0 shadow-sm overflow-hidden">
+                     @if(!empty($student->photo_path))
+                         <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Avatar" class="w-full h-full object-cover">
+                     @else
+                         {{ substr($student->name ?? 'S', 0, 1) }}
+                     @endif
                  </div>
                  <div class="truncate">
                      <p class="font-bold text-sm text-white truncate max-w-[150px]">
@@ -741,7 +757,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-3 md:gap-4">
+        <div class="flex items-center gap-3 md:gap-4 shrink-0">
             {{-- Tombol Ukuran Font --}}
             <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg mr-2">
                 <span class="text-[10px] text-cyan-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
@@ -765,20 +781,20 @@
             </div>
             
             {{-- Tombol Hamburger Map Soal --}}
-            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition">
+            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition active:scale-95">
                 <i class="ph-bold" :class="showMobileMap ? 'ph-x' : 'ph-squares-four'"></i>
             </button>
         </div>
     </nav>
 
-    {{-- PROGRESS BAR HORIZONTAL (TEMA CYAN CERAH) --}}
-    <div x-show="examType !== 'google_form'" class="h-1.5 w-full bg-blue-900 shrink-0 relative z-40 overflow-hidden">
+    {{-- PROGRESS BAR HORIZONTAL --}}
+    <div x-show="examType !== 'google_form'" class="shrink-0 h-1.5 w-full bg-blue-900 relative z-40 overflow-hidden">
         <div class="h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
-    <div class="flex-1 flex overflow-hidden relative min-h-0">
+    {{-- KONTEN UTAMA (flex-1 min-h-0 adalah KUNCI agar tinggi tidak melebar) --}}
+    <div class="flex-1 min-h-0 relative flex w-full">
         
-        {{-- KONDISI 1: GOOGLE FORM --}}
         @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
             <main class="flex-1 flex flex-col h-full bg-slate-100 relative z-0">
                 <div class="bg-cyan-50/80 backdrop-blur-sm border-b border-cyan-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
@@ -792,7 +808,7 @@
                     <iframe src="{{ $exam->google_form_url }}" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
                 </div>
                 
-                <div class="p-4 bg-white border-t border-slate-200 flex justify-between items-center relative z-10 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+                <div class="shrink-0 p-4 bg-white border-t border-slate-200 flex justify-between items-center relative z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-[calc(1rem+env(safe-area-inset-bottom))]">
                     <div class="hidden sm:block">
                         <p class="text-xs font-bold text-slate-500">Ujian Berbasis Google Form</p>
                     </div>
@@ -806,202 +822,192 @@
             </main>
         @else
 
-        {{-- KONDISI 2: CBT INTERNAL (Engine Asli) --}}
-        <main class="flex-1 flex flex-col bg-slate-50 relative z-0 min-h-0">
-            <div class="w-full max-w-4xl mx-auto p-0 sm:p-4 md:p-6 lg:p-8 flex-1 flex flex-col min-h-0">
-                <div class="bg-white sm:rounded-[2rem] shadow-sm border-0 sm:border border-slate-200 flex-1 flex flex-col overflow-hidden relative min-h-0">
+        <main class="flex-1 flex flex-col w-full max-w-4xl mx-auto p-0 sm:p-4 md:p-6 lg:p-8 h-full relative z-10 min-h-0">
+            <div class="bg-white sm:rounded-[2rem] shadow-sm border-0 sm:border border-slate-200 flex-1 flex flex-col w-full h-full overflow-hidden relative min-h-0">
+                
+                {{-- Judul Bar Soal (shrink-0) --}}
+                <div class="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
                     
-                    {{-- Header Soal --}}
-                    <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-                        <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
+                    <div class="flex items-center gap-4">
+                        <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-cyan-600 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> <span class="hidden sm:inline">Menyimpan</span></span>
+                        <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check text-base"></i> <span class="hidden sm:inline">Tersimpan</span></span>
+                        <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle text-base"></i> <span class="hidden sm:inline">Error / Offline</span></span>
                         
-                        {{-- Status Indikator --}}
-                        <div class="flex items-center gap-4">
-                            <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-cyan-600 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan</span>
-                            <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check"></i> Tersimpan</span>
-                            <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Error / Offline</span>
-                            
-                            {{-- Checkbox Ragu-Ragu --}}
-                            <label class="flex items-center gap-2 cursor-pointer select-none group">
-                                <div class="relative">
-                                    <input type="checkbox" class="peer sr-only" x-model="markedQuestions[questions[currentQuestion]?.id]" @change="saveToLocal()">
-                                    <div class="w-5 h-5 rounded border-2 border-slate-300 peer-checked:bg-amber-400 peer-checked:border-amber-400 transition-colors"></div>
-                                    <i class="ph-bold ph-check text-white text-xs absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100"></i>
-                                </div>
-                                <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-amber-500 transition">Ragu</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    {{-- Isi Soal --}}
-                    <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto custom-scroll relative">
-                        <template x-if="questions.length > 0 && questions[currentQuestion]">
-                            <div>
-                                {{-- Gambar Soal --}}
-                                <template x-if="questions[currentQuestion].question_image">
-                                    <div class="mb-6 relative group w-fit">
-                                        <img :src="'/storage/' + questions[currentQuestion].question_image" 
-                                             onerror="this.style.display='none'" 
-                                             @click="zoomedImage = '/storage/' + questions[currentQuestion].question_image"
-                                             class="max-h-[300px] w-auto rounded-2xl border border-slate-200 shadow-sm cursor-zoom-in transition group-hover:brightness-90">
-                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                                            <span class="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><i class="ph-bold ph-magnifying-glass-plus"></i></span>
-                                        </div>
-                                    </div>
-                                </template>
-                                
-                                {{-- Teks Soal --}}
-                                <div class="prose prose-slate max-w-none mb-8 select-none trix-content">
-                                    <div class="font-medium text-slate-800 leading-relaxed transition-all duration-300" 
-                                         :class="{'text-base': fontSize === 1, 'text-xl': fontSize === 2, 'text-2xl': fontSize === 3}"
-                                         x-html="questions[currentQuestion].question_text"></div>
-                                </div>
-
-                                {{-- === AREA JAWABAN (DENGAN LOGIKA ACAK OPSI) === --}}
-                                
-                                {{-- TIPE 1: PILIHAN GANDA --}}
-                                <template x-if="!questions[currentQuestion].question_type || questions[currentQuestion].question_type === 'choice'">
-                                    <div class="space-y-3">
-                                        <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
-                                            
-                                            <label class="relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group active:scale-[0.99]" 
-                                                   :class="answers[questions[currentQuestion].id] === optionKey ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30'">
-                                                
-                                                <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
-                                                       @change="selectAnswer(questions[currentQuestion].id, optionKey)" 
-                                                       x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
-                                                
-                                                <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
-                                                     :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-cyan-400 group-hover:text-cyan-600'">
-                                                    
-                                                    {{-- SOLUSI: Secara visual huruf akan selalu berurutan A, B, C, D, E berdasarkan index posisinya --}}
-                                                    <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
-                                                          x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
-                                                    
-                                                    <i class="ph-bold ph-spinner animate-spin text-lg" 
-                                                       x-show="savingQuestionId === questions[currentQuestion].id && answers[questions[currentQuestion].id] === optionKey" style="display: none;"></i>
-                                                </div>
-                                                
-                                                <div class="flex-1 select-none" x-data="{ 
-                                                    get parsedOptions() { 
-                                                        try { return typeof questions[currentQuestion].options === 'string' ? JSON.parse(questions[currentQuestion].options) : (questions[currentQuestion].options || {}); } 
-                                                        catch(e) { return {}; } 
-                                                    } 
-                                                }">
-                                                    <span class="font-medium transition-colors block" 
-                                                          :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-cyan-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
-                                                        
-                                                        {{-- Teks Jawaban asli yang sudah teracak --}}
-                                                        <span x-text="parsedOptions[optionKey]"></span>
-                                                    </span>
-                                                    
-                                                    <template x-if="parsedOptions['image_' + optionKey]">
-                                                        <img :src="'/storage/' + parsedOptions['image_' + optionKey]" class="mt-3 max-h-32 rounded-xl border border-slate-200 shadow-sm object-contain">
-                                                    </template>
-                                                </div>
-                                            </label>
-                                        </template>
-                                    </div>
-                                </template>
-
-                                {{-- TIPE 2: BENAR / SALAH --}}
-                                <template x-if="questions[currentQuestion].question_type === 'true_false'">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99]" 
-                                               :class="answers[questions[currentQuestion].id] === 'A' ? 'border-emerald-500 bg-emerald-50 shadow-lg' : 'border-slate-100 bg-white hover:border-emerald-200'">
-                                            <input type="radio" :name="'q_' + questions[currentQuestion].id" value="A" 
-                                                    @change="selectAnswer(questions[currentQuestion].id, 'A')" 
-                                                    x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
-                                            <i class="ph-fill ph-check-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-500' : 'text-slate-300'"></i>
-                                            <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-700' : 'text-slate-500'">BENAR</span>
-                                        </label>
-                                        
-                                        <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99]" 
-                                               :class="answers[questions[currentQuestion].id] === 'B' ? 'border-rose-500 bg-rose-50 shadow-lg' : 'border-slate-100 bg-white hover:border-rose-200'">
-                                            <input type="radio" :name="'q_' + questions[currentQuestion].id" value="B" 
-                                                    @change="selectAnswer(questions[currentQuestion].id, 'B')" 
-                                                    x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
-                                            <i class="ph-fill ph-x-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-500' : 'text-slate-300'"></i>
-                                            <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-700' : 'text-slate-500'">SALAH</span>
-                                        </label>
-                                    </div>
-                                </template>
-
-                                {{-- TIPE 3: ESSAY --}}
-                                <template x-if="questions[currentQuestion].question_type === 'essay'">
-                                    <div class="relative">
-                                        <textarea x-model="answers[questions[currentQuestion].id]" 
-                                            @input.debounce.1000ms="selectAnswer(questions[currentQuestion].id, $event.target.value)" 
-                                            class="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all font-medium text-slate-700 leading-relaxed text-lg" 
-                                            placeholder="Ketik jawaban Anda di sini..."></textarea>
-                                        
-                                        <div class="absolute top-4 right-4 text-cyan-600" x-show="savingQuestionId === questions[currentQuestion].id">
-                                            <i class="ph-bold ph-spinner animate-spin text-xl"></i>
-                                        </div>
-
-                                        <div class="flex items-center gap-2 mt-3 text-slate-400">
-                                            <i class="ph-fill ph-info text-cyan-500"></i>
-                                            <p class="text-xs font-bold">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                {{-- TIPE 4: MENJODOHKAN --}}
-                                <template x-if="questions[currentQuestion].question_type === 'matching'">
-                                    <div class="space-y-4">
-                                        <p class="text-sm text-slate-500 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
-                                        <template x-for="(pair, idx) in questions[currentQuestion].options.pairs" :key="idx">
-                                            <div class="flex flex-col sm:flex-row items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                                                <div class="flex-1 font-medium text-slate-800 bg-white p-3 rounded-lg border border-slate-100 shadow-sm w-full text-center sm:text-left" x-text="pair.left"></div>
-                                                <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-cyan-400 text-xl font-bold"></i>
-                                                <div class="flex-1 w-full relative">
-                                                    <select class="w-full rounded-xl border-slate-300 text-sm font-bold text-slate-700 focus:ring-cyan-500 py-3 px-4 shadow-sm"
-                                                            @change="updateMatching(questions[currentQuestion].id, pair.left, $event.target.value)">
-                                                        <option value="" selected disabled>-- Pilih Pasangan --</option>
-                                                        <template x-for="pOption in questions[currentQuestion].options.pairs" :key="pOption.right">
-                                                            <option :value="pOption.right" x-text="pOption.right" 
-                                                                    :selected="answers[questions[currentQuestion].id] && answers[questions[currentQuestion].id][pair.left] === pOption.right">
-                                                            </option>
-                                                        </template>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-
+                        <label class="flex items-center gap-2 cursor-pointer select-none group">
+                            <div class="relative shrink-0">
+                                <input type="checkbox" class="peer sr-only" x-model="markedQuestions[questions[currentQuestion]?.id]" @change="saveToLocal()">
+                                <div class="w-5 h-5 rounded border-2 border-slate-300 peer-checked:bg-amber-400 peer-checked:border-amber-400 transition-colors"></div>
+                                <i class="ph-bold ph-check text-white text-xs absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100"></i>
                             </div>
-                        </template>
+                            <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-amber-500 transition">Ragu</span>
+                        </label>
                     </div>
+                </div>
 
-                    {{-- Tombol Navigasi Bawah --}}
-                    <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10 shrink-0">
-                        <button @click="prevQuestion" :disabled="currentQuestion === 0" 
-                                class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900">
-                            <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
-                        </button>
-                        
-                        <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" 
-                                class="px-6 py-3 rounded-xl font-bold bg-cyan-600 text-white hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 flex items-center gap-2 transition-all active:scale-95">
-                            <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
-                        </button>
-                        
-                        <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" 
-                                class="px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95"
-                                :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-blue-950/30'">
-                            <span>Kumpulkan</span> 
-                            <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-check-circle'"></i>
-                        </button>
-                    </div>
+                {{-- Area Teks Soal & Jawaban (Scrollable) --}}
+                <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto overscroll-contain custom-scroll relative">
+                    <template x-if="questions.length > 0 && questions[currentQuestion]">
+                        <div>
+                            {{-- Gambar Soal --}}
+                            <template x-if="questions[currentQuestion].question_image">
+                                <div class="mb-6 relative group w-fit">
+                                    <img :src="'/storage/' + questions[currentQuestion].question_image" 
+                                         onerror="this.style.display='none'" 
+                                         @click="zoomedImage = '/storage/' + questions[currentQuestion].question_image"
+                                         class="max-h-[300px] w-auto rounded-2xl border border-slate-200 shadow-sm cursor-zoom-in transition group-hover:brightness-90">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                        <span class="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><i class="ph-bold ph-magnifying-glass-plus"></i></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            {{-- Teks Soal --}}
+                            <div class="prose prose-slate max-w-none mb-8 select-text trix-content">
+                                <div class="font-medium text-slate-800 leading-relaxed transition-all duration-300" 
+                                     :class="{'text-base': fontSize === 1, 'text-xl': fontSize === 2, 'text-2xl': fontSize === 3}"
+                                     x-html="questions[currentQuestion].question_text"></div>
+                            </div>
+
+                            {{-- TIPE 1: PILIHAN GANDA --}}
+                            <template x-if="!questions[currentQuestion].question_type || questions[currentQuestion].question_type === 'choice'">
+                                <div class="space-y-3">
+                                    <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
+                                        
+                                        <label class="relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group active:scale-[0.99] touch-manipulation" 
+                                               :class="answers[questions[currentQuestion].id] === optionKey ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30'">
+                                            
+                                            <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
+                                                   @change="selectAnswer(questions[currentQuestion].id, optionKey)" 
+                                                   x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
+                                            
+                                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
+                                                 :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-cyan-400 group-hover:text-cyan-600'">
+                                                
+                                                <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
+                                                      x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
+                                                
+                                                <i class="ph-bold ph-spinner animate-spin text-lg" 
+                                                   x-show="savingQuestionId === questions[currentQuestion].id && answers[questions[currentQuestion].id] === optionKey" style="display: none;"></i>
+                                            </div>
+                                            
+                                            <div class="flex-1 select-text" x-data="{ 
+                                                get parsedOptions() { 
+                                                    try { return typeof questions[currentQuestion].options === 'string' ? JSON.parse(questions[currentQuestion].options) : (questions[currentQuestion].options || {}); } 
+                                                    catch(e) { return {}; } 
+                                                } 
+                                            }">
+                                                <span class="font-medium transition-colors block" 
+                                                      :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-cyan-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
+                                                    <span x-text="parsedOptions[optionKey]"></span>
+                                                </span>
+                                                
+                                                <template x-if="parsedOptions['image_' + optionKey]">
+                                                    <img :src="'/storage/' + parsedOptions['image_' + optionKey]" class="mt-3 max-h-32 rounded-xl border border-slate-200 shadow-sm object-contain">
+                                                </template>
+                                            </div>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
+                            {{-- TIPE 2: BENAR / SALAH --}}
+                            <template x-if="questions[currentQuestion].question_type === 'true_false'">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
+                                           :class="answers[questions[currentQuestion].id] === 'A' ? 'border-emerald-500 bg-emerald-50 shadow-lg' : 'border-slate-100 bg-white hover:border-emerald-200'">
+                                        <input type="radio" :name="'q_' + questions[currentQuestion].id" value="A" 
+                                                @change="selectAnswer(questions[currentQuestion].id, 'A')" 
+                                                x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
+                                        <i class="ph-fill ph-check-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-500' : 'text-slate-300'"></i>
+                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-700' : 'text-slate-500'">BENAR</span>
+                                    </label>
+                                    
+                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
+                                           :class="answers[questions[currentQuestion].id] === 'B' ? 'border-rose-500 bg-rose-50 shadow-lg' : 'border-slate-100 bg-white hover:border-rose-200'">
+                                        <input type="radio" :name="'q_' + questions[currentQuestion].id" value="B" 
+                                                @change="selectAnswer(questions[currentQuestion].id, 'B')" 
+                                                x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
+                                        <i class="ph-fill ph-x-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-500' : 'text-slate-300'"></i>
+                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-700' : 'text-slate-500'">SALAH</span>
+                                    </label>
+                                </div>
+                            </template>
+
+                            {{-- TIPE 3: ESSAY --}}
+                            <template x-if="questions[currentQuestion].question_type === 'essay'">
+                                <div class="relative">
+                                    <textarea x-model="answers[questions[currentQuestion].id]" 
+                                        @input.debounce.1000ms="selectAnswer(questions[currentQuestion].id, $event.target.value)" 
+                                        class="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all font-medium text-slate-700 leading-relaxed text-lg" 
+                                        placeholder="Ketik jawaban Anda di sini..."></textarea>
+                                    
+                                    <div class="absolute top-4 right-4 text-cyan-600" x-show="savingQuestionId === questions[currentQuestion].id">
+                                        <i class="ph-bold ph-spinner animate-spin text-xl"></i>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 mt-3 text-slate-400">
+                                        <i class="ph-fill ph-info text-cyan-500"></i>
+                                        <p class="text-xs font-bold">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
+                                    </div>
+                                </div>
+                            </template>
+
+                            {{-- TIPE 4: MENJODOHKAN --}}
+                            <template x-if="questions[currentQuestion].question_type === 'matching'">
+                                <div class="space-y-4">
+                                    <p class="text-sm text-slate-500 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
+                                    <template x-for="(pair, idx) in questions[currentQuestion].options.pairs" :key="idx">
+                                        <div class="flex flex-col sm:flex-row items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                            <div class="flex-1 font-medium text-slate-800 bg-white p-3 rounded-lg border border-slate-100 shadow-sm w-full text-center sm:text-left" x-text="pair.left"></div>
+                                            <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-cyan-400 text-xl font-bold"></i>
+                                            <div class="flex-1 w-full relative">
+                                                <select class="w-full rounded-xl border-slate-300 text-sm font-bold text-slate-700 focus:ring-cyan-500 py-3 px-4 shadow-sm touch-manipulation"
+                                                        @change="updateMatching(questions[currentQuestion].id, pair.left, $event.target.value)">
+                                                    <option value="" selected disabled>-- Pilih Pasangan --</option>
+                                                    <template x-for="pOption in questions[currentQuestion].options.pairs" :key="pOption.right">
+                                                        <option :value="pOption.right" x-text="pOption.right" 
+                                                                :selected="answers[questions[currentQuestion].id] && answers[questions[currentQuestion].id][pair.left] === pOption.right">
+                                                        </option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </div>
+                    </template>
+                </div>
+
+                {{-- Tombol Bawah (shrink-0 mengamankan tombol agar tidak tertelan konten atasnya) --}}
+                <div class="shrink-0 p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.05)]">
+                    <button @click="prevQuestion" :disabled="currentQuestion === 0" 
+                            class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900 touch-manipulation">
+                        <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
+                    </button>
+                    
+                    <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" 
+                            class="px-6 py-3 rounded-xl font-bold bg-cyan-600 text-white hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 flex items-center gap-2 transition-all active:scale-95 touch-manipulation">
+                        <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                    
+                    <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" 
+                            class="px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95 touch-manipulation"
+                            :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-blue-950/30'">
+                        <span>Kumpulkan</span> 
+                        <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-check-circle'"></i>
+                    </button>
                 </div>
             </div>
         </main>
 
         {{-- SIDEBAR NAVIGASI SOAL --}}
-        <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col" 
+        <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col h-full" 
                :class="showMobileMap ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
             
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div class="shrink-0 p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                     <i class="ph-fill ph-squares-four text-cyan-500"></i> Navigasi Soal
                 </h3>
@@ -1010,10 +1016,14 @@
                 </button>
             </div>
 
-            <div class="p-4 bg-blue-950/5 border-b border-blue-900/10 flex justify-between items-center">
+            <div class="shrink-0 p-4 bg-blue-950/5 border-b border-blue-900/10 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-cyan-100 font-bold shadow-md border border-blue-800">
-                        {{ substr($student->name ?? 'S', 0, 1) }}
+                    <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-cyan-100 font-bold shadow-md border border-blue-800 overflow-hidden">
+                        @if(!empty($student->photo_path))
+                            <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Avatar" class="w-full h-full object-cover">
+                        @else
+                            {{ substr($student->name ?? 'S', 0, 1) }}
+                        @endif
                     </div>
                     <div class="min-w-0">
                         <p class="text-sm font-bold text-slate-800 truncate">{{ $student->name ?? 'Peserta' }}</p>
@@ -1022,13 +1032,13 @@
                 </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto custom-scroll p-6">
+            <div class="flex-1 overflow-y-auto custom-scroll p-6 overscroll-contain">
                 <div class="grid grid-cols-5 gap-3">
                     <template x-for="(q, index) in questions" :key="index">
                         <button @click="jumpTo(index)" 
-                                class="aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all shadow-sm border-2 relative" 
+                                class="aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all shadow-sm border-2 relative touch-manipulation" 
                                 :class="{ 
-                                    'border-blue-950 bg-white ring-2 ring-blue-950 ring-offset-2 z-10': currentQuestion === index, 
+                                    'border-blue-950 bg-white ring-2 ring-blue-950 ring-offset-2 z-10 scale-110': currentQuestion === index, 
                                     'bg-cyan-500 text-white border-cyan-500': (answers[q.id] && Object.keys(answers[q.id] || {}).length > 0) && !markedQuestions[q.id] && currentQuestion !== index, 
                                     'bg-amber-400 text-white border-amber-400': markedQuestions[q.id], 
                                     'bg-white text-slate-600 border-slate-200 hover:border-cyan-300': (!answers[q.id] || Object.keys(answers[q.id] || {}).length === 0) && !markedQuestions[q.id] && currentQuestion !== index 
@@ -1040,7 +1050,7 @@
                 </div>
             </div>
             
-            <div class="p-6 border-t border-slate-100 bg-slate-50">
+            <div class="shrink-0 p-6 border-t border-slate-100 bg-slate-50 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
                 <div class="grid grid-cols-2 gap-4 mb-4 text-[10px] uppercase font-bold text-slate-500">
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Dijawab</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-white border-2 border-slate-300"></span> Kosong</div>
@@ -1049,7 +1059,7 @@
                 </div>
                 
                 <button @click="finishExam()" 
-                        class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                        class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 touch-manipulation"
                         :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:shadow-xl hover:bg-blue-900'">
                     <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-paper-plane-right'"></i> 
                     <span x-text="timeLeft > (effectiveDuration * 0.25) ? 'Terkunci (Waktu Minimal)' : 'Kumpulkan Jawaban'"></span>
@@ -1057,7 +1067,7 @@
             </div>
         </aside>
         
-        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-blue-950/50 z-30 lg:hidden"></div>
+        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-blue-950/50 z-30 lg:hidden backdrop-blur-sm"></div>
         
         @endif
     </div>

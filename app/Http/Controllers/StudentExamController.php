@@ -12,6 +12,7 @@ use App\Models\CbtStudentExam;
 use App\Models\CbtStudentAnswer;
 use App\Models\CbtQuestion;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log; // PERBAIKAN: Tambahkan Log untuk merekam error
 
 class StudentExamController extends Controller
 {
@@ -41,29 +42,27 @@ class StudentExamController extends Controller
             return $this->checkClassMatch($className, $exam->class_level);
         });
 
-        $now = Carbon::now(); // Ambil waktu sekarang
+        // PERBAIKAN TIMEZONE: Pastikan menggunakan timezone aplikasi
+        $now = Carbon::now(config('app.timezone')); 
 
         foreach($exams as $exam) {
             $session = CbtStudentExam::where('student_id', $this->getStudentId())
                 ->where('cbt_exam_id', $exam->id)
                 ->first();
             
-            // LOGIKA WAKTU DITAMBAHKAN DI SINI
-            $startTime = Carbon::parse($exam->start_time);
-            $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
+            // PERBAIKAN TIMEZONE
+            $startTime = Carbon::parse($exam->start_time)->timezone(config('app.timezone'));
+            $endTime = $exam->end_time ? Carbon::parse($exam->end_time)->timezone(config('app.timezone')) : null;
 
             if ($session) {
                 $exam->student_status = $session->status;
             } else {
-                // Jika waktu sekarang masih kurang dari waktu mulai
                 if ($now->lessThan($startTime)) {
                     $exam->student_status = 'upcoming';
                 } 
-                // Jika waktu sekarang sudah melewati waktu selesai (opsional, jika ada end_time)
                 elseif ($endTime && $now->greaterThan($endTime)) {
-                    $exam->student_status = 'finished'; // Atau bisa buat status baru 'expired'
+                    $exam->student_status = 'finished'; 
                 } 
-                // Jika sudah masuk rentang waktu ujian
                 else {
                     $exam->student_status = 'open';
                 }
@@ -86,10 +85,10 @@ class StudentExamController extends Controller
             return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
         }
 
-        // PENGECEKAN WAKTU
-        $now = Carbon::now();
-        $startTime = Carbon::parse($exam->start_time);
-        $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
+        // PERBAIKAN TIMEZONE
+        $now = Carbon::now(config('app.timezone'));
+        $startTime = Carbon::parse($exam->start_time)->timezone(config('app.timezone'));
+        $endTime = $exam->end_time ? Carbon::parse($exam->end_time)->timezone(config('app.timezone')) : null;
 
         if ($now->lessThan($startTime)) {
             return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian belum dimulai.');
@@ -123,9 +122,9 @@ class StudentExamController extends Controller
             return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Anda tidak diizinkan memulai ujian ini.');
         }
 
-        // PENGECEKAN WAKTU (Double Security)
-        $now = Carbon::now();
-        if ($now->lessThan(Carbon::parse($exam->start_time))) {
+        // PERBAIKAN TIMEZONE
+        $now = Carbon::now(config('app.timezone'));
+        if ($now->lessThan(Carbon::parse($exam->start_time)->timezone(config('app.timezone')))) {
             return redirect()->route('student.exam.index')->with('error', 'Ujian belum dimulai. Silakan tunggu jadwalnya.');
         }
 
@@ -166,12 +165,16 @@ class StudentExamController extends Controller
             return redirect()->route('student.exam.index');
         }
 
-        // PERBAIKAN LOGIKA HITUNG WAKTU (Cegah Bug End Time Null)
-        $startTime = Carbon::parse($session->created_at);
-        $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
+        // PERBAIKAN LOGIKA HITUNG WAKTU (Timezone & Cegah Bug End Time Null)
+        $now = Carbon::now(config('app.timezone'));
+        $startTime = Carbon::parse($session->created_at)->timezone(config('app.timezone'));
+        
+        // Fallback aman jika admin lupa isi durasi atau isinya 0
+        $duration = $exam->duration_minutes > 0 ? $exam->duration_minutes : 120;
+        $endTimeByDuration = $startTime->copy()->addMinutes($duration);
         
         if (!empty($exam->end_time)) {
-            $endTimeBySchedule = Carbon::parse($exam->end_time);
+            $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'));
             // Ambil waktu mana yang lebih dulu habis (Durasi vs Jadwal)
             $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
         } else {
@@ -179,7 +182,7 @@ class StudentExamController extends Controller
             $finalEndTime = $endTimeByDuration;
         }
         
-        $timeLeft = Carbon::now()->diffInSeconds($finalEndTime, false);
+        $timeLeft = $now->diffInSeconds($finalEndTime, false);
         
         // DURASI EFEKTIF: Waktu asli (dalam detik) yang siswa dapatkan (Penting untuk perhitungan 75%)
         $effectiveDuration = $startTime->diffInSeconds($finalEndTime);
@@ -188,11 +191,18 @@ class StudentExamController extends Controller
             return $this->finishProcess($session, $exam);
         }
 
-        // Ambil soal dan acak        
-        $questions = CbtQuestion::where('cbt_exam_id', $exam_id)
+        // Ambil soal dan acak
+        // PENTING: Jangan select 'correct_answer' ke view untuk menghindari siswa curang (Inspect Element)
+        $query = CbtQuestion::where('cbt_exam_id', $exam_id)
             ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
-            ->inRandomOrder($session->id) 
-            ->get();
+            ->inRandomOrder($session->id);
+
+        // Jika guru menyetel limit soal (misal 40), potong soalnya!
+        if (isset($exam->question_limit) && $exam->question_limit > 0) {
+            $query->take($exam->question_limit);
+        }
+
+        $questions = $query->get();
 
         $savedAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)
             ->pluck('answer', 'cbt_question_id');
@@ -215,19 +225,6 @@ class StudentExamController extends Controller
         });       
 
         $sessionId = $session->id;
-
-        // Query dasar mengambil soal
-        $query = CbtQuestion::where('cbt_exam_id', $exam_id)
-            ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
-            ->inRandomOrder($session->id);
-
-        // LOGIKA ANDA: Jika guru menyetel limit (misal 40), maka potong soalnya!
-        if (isset($exam->question_limit) && $exam->question_limit > 0) {
-            $query->take($exam->question_limit);
-        }
-
-        // Eksekusi query
-        $questions = $query->get();
         
         if (view()->exists('cbt.student.exam_runner')) {
              return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
@@ -244,28 +241,35 @@ class StudentExamController extends Controller
             'answer' => 'nullable' 
         ]);
 
-        $session = CbtStudentExam::where('id', $request->session_id)
-            ->where('student_id', $this->getStudentId())
-            ->first();
+        // PERBAIKAN: Gunakan Try-Catch agar tidak memutus respon jika DB Timeout/Lock
+        try {
+            $session = CbtStudentExam::where('id', $request->session_id)
+                ->where('student_id', $this->getStudentId())
+                ->first();
 
-        if (!$session || $session->status == 'finished') {
-            return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid'], 403);
+            if (!$session || $session->status == 'finished') {
+                return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid'], 403);
+            }
+            
+            $answerToSave = is_array($request->answer) ? json_encode($request->answer) : $request->answer;
+          
+            CbtStudentAnswer::updateOrInsert(
+                [
+                    'cbt_student_exam_id' => $session->id,
+                    'cbt_question_id' => $request->question_id
+                ],
+                [
+                    'answer' => $answerToSave,                
+                    'updated_at' => now()
+                ]
+            );
+
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            Log::error('CBT Save Answer Error: ' . $e->getMessage()); 
+            // Mengembalikan error 500 akan memicu mekanisme Abort/Offline otomatis di Javascript exam_runner
+            return response()->json(['status' => 'error', 'message' => 'Database timeout / error'], 500);
         }
-        
-        $answerToSave = is_array($request->answer) ? json_encode($request->answer) : $request->answer;
-      
-        CbtStudentAnswer::updateOrInsert(
-            [
-                'cbt_student_exam_id' => $session->id,
-                'cbt_question_id' => $request->question_id
-            ],
-            [
-                'answer' => $answerToSave,                
-                'updated_at' => now()
-            ]
-        );
-
-        return response()->json(['status' => 'success']);
     }
 
     public function finish(Request $request, $exam_id)
@@ -280,13 +284,16 @@ class StudentExamController extends Controller
             
             // --- LOGIKA 75% WAKTU DINAMIS (Bypass jika forced/pelanggaran) ---
             if (!$request->has('forced')) {
-                $startTime = Carbon::parse($session->created_at);
-                $now = Carbon::now();
+                // PERBAIKAN TIMEZONE
+                $now = Carbon::now(config('app.timezone'));
+                $startTime = Carbon::parse($session->created_at)->timezone(config('app.timezone'));
                 
                 // Kalkulasi ulang batas waktu sesungguhnya
-                $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
+                $duration = $exam->duration_minutes > 0 ? $exam->duration_minutes : 120;
+                $endTimeByDuration = $startTime->copy()->addMinutes($duration);
+                
                 if (!empty($exam->end_time)) {
-                    $endTimeBySchedule = Carbon::parse($exam->end_time);
+                    $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'));
                     $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
                 } else {
                     $finalEndTime = $endTimeByDuration;
@@ -299,7 +306,8 @@ class StudentExamController extends Controller
                 // Syarat: Siswa WAJIB mengerjakan 75% dari waktu yang TERSEDIA BAGI MEREKA
                 $minimumMinutesRequired = $effectiveDurationMinutes * 0.75;
 
-                if ($minutesElapsed < $minimumMinutesRequired) {
+                // Mencegah error jika minutes_required 0 (ujian tanpa durasi)
+                if ($minimumMinutesRequired > 0 && $minutesElapsed < $minimumMinutesRequired) {
                     return redirect()->route('student.exam.run', $exam_id)
                         ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu pengerjaan (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
                 }
@@ -354,7 +362,7 @@ class StudentExamController extends Controller
         if (!$session) return redirect()->route('student.exam.index');
 
         $studentAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)->get();
-        // Mengambil data soal lengkap termasuk question_type
+        // Mengambil data soal lengkap termasuk question_type & kunci
         $questions = CbtQuestion::where('cbt_exam_id', $session->cbt_exam_id)->get()->keyBy('id');
 
         $totalScore = 0;
