@@ -1004,10 +1004,10 @@
         </main>
 
         {{-- SIDEBAR NAVIGASI SOAL --}}
-        <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col h-full" 
+        <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col max-h-[100dvh]" 
                :class="showMobileMap ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
             
-            <div class="shrink-0 p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <div class="shrink-0 p-4 lg:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                     <i class="ph-fill ph-squares-four text-cyan-500"></i> Navigasi Soal
                 </h3>
@@ -1032,7 +1032,7 @@
                 </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto custom-scroll p-6 overscroll-contain">
+            <div class="flex-1 min-h-0 overflow-y-auto custom-scroll p-4 lg:p-6 overscroll-contain">
                 <div class="grid grid-cols-5 gap-3">
                     <template x-for="(q, index) in questions" :key="index">
                         <button @click="jumpTo(index)" 
@@ -1050,7 +1050,7 @@
                 </div>
             </div>
             
-            <div class="shrink-0 p-6 border-t border-slate-100 bg-slate-50 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+            <div class="shrink-0 p-4 lg:p-6 border-t border-slate-100 bg-slate-50 pb-[calc(1rem+env(safe-area-inset-bottom))]">
                 <div class="grid grid-cols-2 gap-4 mb-4 text-[10px] uppercase font-bold text-slate-500">
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Dijawab</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-white border-2 border-slate-300"></span> Kosong</div>
