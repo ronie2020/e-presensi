@@ -214,8 +214,12 @@ class PpdbController extends Controller
         ]);
 
         try {
-            Excel::import(new PpdbRegistrantImport, $request->file('file_excel'));
-            return redirect()->back()->with('success', 'Data siswa berhasil diimpor! Silakan cek status pendaftaran menggunakan NISN.');
+            $import = new PpdbRegistrantImport();
+            Excel::import($import, $request->file('file_excel'));
+            
+            return redirect()->route('ppdb.collective.success')
+                             ->with('success', 'Data siswa berhasil diimpor!')
+                             ->with('imported_data', $import->importedData);
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
              $failures = $e->failures();
              $errorMsg = "Gagal Import: <br>";
@@ -226,6 +230,19 @@ class PpdbController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
+    }
+
+      /**
+     * Halaman Sukses Import Kolektif (Rekap Data)
+     */
+    public function collectiveSuccess()
+    {
+        // Cegah akses langsung jika tidak ada data dari session
+        if (!session('imported_data')) {
+            return redirect()->route('ppdb.collective')->with('error', 'Tidak ada data import terbaru untuk ditampilkan.');
+        }
+
+        return view('ppdb.collective-success');
     }
     
     /**

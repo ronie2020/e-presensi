@@ -178,8 +178,15 @@
                     </a>
                 </div>
                 
+                
                 {{-- Search & Bulk Actions --}}
                 <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
+                    
+                    {{-- [TAMBAHAN] Tombol Cetak Seluruh/Filter Data Siswa --}}
+                    <a href="{{ route('admin.ppdb.print.recap', request()->query()) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark rounded-xl font-bold text-xs hover:bg-slate-50 hover:border-elevate-accent/30 hover:text-elevate-primary transition flex items-center justify-center gap-2 shadow-sm">
+                        <i class="ph-bold ph-printer text-base"></i> Cetak Data
+                    </a>
+
                     <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-elevate-dark text-white rounded-xl font-bold text-xs hover:bg-elevate-primary transition flex items-center justify-center gap-2 shadow-sm">
                         <i class="ph-bold ph-user-plus"></i> Promote Terpilih
                     </button>

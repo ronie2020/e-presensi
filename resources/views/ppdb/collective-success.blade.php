@@ -38,10 +38,14 @@
         table { border-collapse: collapse !important; width: 100% !important; }
         th, td { border: 1px solid #000 !important; padding: 8px !important; color: #000 !important; font-size: 10pt !important; }
         th { background-color: #f3f4f6 !important; font-weight: bold !important; -webkit-print-color-adjust: exact; }
+
+        /* [PERBAIKAN] Mencegah tabel terpotong saat print & Area Tanda Tangan */
+        .overflow-x-auto { overflow: visible !important; }
+        .print-footer { display: block !important; margin-top: 40px; float: right; width: 300px; text-align: left; font-size: 11pt; color: #000; }
     }
     
     /* Disembunyikan di layar, hanya muncul saat print */
-    .print-header { display: none; }
+    .print-header, .print-footer { display: none; }
 </style>
 
 <div class="min-h-screen w-full flex flex-col items-center py-10 relative overflow-hidden bg-elevate-surface font-sans">
@@ -80,7 +84,7 @@
                     <div>
                         <h2 class="text-2xl font-black text-emerald-800 tracking-tight">Import Berhasil!</h2>
                         <p class="text-sm text-emerald-600 font-medium mt-1">
-                            Sebanyak <strong>{{ count(session('imported_data')) }}</strong> data siswa telah berhasil dimasukkan ke sistem.
+                            Sebanyak <strong>{{ session('imported_data') ? count(session('imported_data')) : 0 }}</strong> data siswa telah berhasil dimasukkan ke sistem.
                         </p>
                     </div>
                 </div>
@@ -110,22 +114,34 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach(session('imported_data') as $index => $data)
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="py-3 px-5 text-sm text-slate-500 font-bold text-center">{{ $index + 1 }}</td>
-                                <td class="py-3 px-5">
-                                    <span class="inline-flex py-1 px-2.5 rounded-md bg-elevate-soft text-elevate-primary font-mono font-bold text-sm border border-elevate-accent/20">
-                                        {{ $data['registration_number'] }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-5 text-sm font-bold text-elevate-dark">{{ $data['full_name'] }}</td>
-                                <td class="py-3 px-5 text-sm font-mono text-slate-600">{{ $data['nisn'] }}</td>
-                                <td class="py-3 px-5 text-sm text-slate-500">{{ $data['school_origin'] }}</td>
-                            </tr>
-                            @endforeach
+                            @if(session('imported_data'))
+                                @foreach(session('imported_data') as $index => $data)
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="py-3 px-5 text-sm text-slate-500 font-bold text-center">{{ $index + 1 }}</td>
+                                    <td class="py-3 px-5">
+                                        <span class="inline-flex py-1 px-2.5 rounded-md bg-elevate-soft text-elevate-primary font-mono font-bold text-sm border border-elevate-accent/20">
+                                            {{ $data['registration_number'] }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-5 text-sm font-bold text-elevate-dark">{{ $data['full_name'] }}</td>
+                                    <td class="py-3 px-5 text-sm font-mono text-slate-600">{{ $data['nisn'] }}</td>
+                                    <td class="py-3 px-5 text-sm text-slate-500">{{ $data['school_origin'] }}</td>
+                                </tr>
+                                @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>
+
+                {{-- [PERBAIKAN] TANDA TANGAN KHUSUS CETAK --}}
+                <div class="print-footer">
+                    <p>Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
+                    <p>Kepala Sekolah,</p>
+                    <br><br><br><br>
+                    <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
+                    <p>NIP. 198209282011011002</p>
+                </div>
+                <div style="clear: both;" class="hidden print:block"></div>
 
                 <div class="mt-8 pt-6 border-t border-slate-100 flex justify-center no-print">
                     <a href="{{ route('ppdb.collective') }}" class="px-6 py-3 text-sm font-bold text-slate-500 hover:text-elevate-dark border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-2">

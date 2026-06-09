@@ -130,6 +130,7 @@ Route::prefix('ppdb')->name('ppdb.')->group(function () {
 
     // Fitur Pendaftaran Kolektif (Guru SD)
     Route::get('/kolektif', [PpdbController::class, 'collective'])->name('collective');
+    Route::get('/kolektif/success', [PpdbController::class, 'collectiveSuccess'])->name('collective.success');
     Route::post('/import', [PpdbController::class, 'importExcel'])->name('import');
     Route::get('/template', [PpdbController::class, 'downloadTemplate'])->name('download_template');
 });

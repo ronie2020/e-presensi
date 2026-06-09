@@ -14,6 +14,9 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
     private $currentSequence = 0;
     private $year;
 
+    // Tambahan: Variabel publik untuk menampung data siswa yang baru masuk
+    public $importedData = []; 
+
     /**
      * Pindahkan query database ke Constructor agar hanya dieksekusi SEKALI.
      * Ini mencegah masalah nomor pendaftaran ganda saat import massal.
@@ -40,6 +43,14 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
         // 1. Generate No Reg Otomatis (Increment di memory, lebih cepat & aman)
         $this->currentSequence++;
         $regNumber = 'REG-' . $this->year . '-' . str_pad($this->currentSequence, 4, '0', STR_PAD_LEFT);
+
+        // Tambahan: Simpan data penting ke array untuk dilempar ke Controller & View
+        $this->importedData[] = [
+            'registration_number' => $regNumber,
+            'full_name'          => $row['nama_lengkap'],
+            'nisn'               => $row['nisn'],
+            'school_origin'      => $row['asal_sekolah']
+        ];
 
         // 2. Format Tanggal Lahir (Excel serial date -> Y-m-d)
         $birthDate = null;
