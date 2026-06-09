@@ -111,9 +111,25 @@
                             </div>
                         @endif
 
+                        {{-- [PERBAIKAN] Mengganti {!! !!} menjadi {{ }} untuk keamanan --}}
                         @if(session('error'))
                             <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold flex items-center gap-3">
-                                <i class="ph-fill ph-warning-circle text-xl shrink-0"></i> {!! session('error') !!}
+                                <i class="ph-fill ph-warning-circle text-xl shrink-0"></i> {{ session('error') }}
+                            </div>
+                        @endif
+
+                        {{-- [TAMBAHAN] Menampilkan error validasi dari file Excel --}}
+                        @if($errors->any())
+                            <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-medium flex flex-col gap-2">
+                                <div class="flex items-center gap-3 font-bold">
+                                    <i class="ph-fill ph-warning-circle text-xl shrink-0"></i> 
+                                    <span>Terdapat kesalahan pada data Excel Anda:</span>
+                                </div>
+                                <ul class="list-disc list-inside ml-8 mt-1">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
                             </div>
                         @endif
 

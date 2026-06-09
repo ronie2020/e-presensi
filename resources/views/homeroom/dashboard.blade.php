@@ -311,7 +311,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <a href="{{ route('students.show', $ws->id) }}" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all shrink-0" title="Buku Induk & Detail">
+                                            <a href="{{ route('admin.bk.index',) }}" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all shrink-0" title="Buku Induk & Detail">
                                                 <i class="ph-bold ph-arrow-right"></i>
                                             </a>
                                         </div>
@@ -505,7 +505,7 @@
                                         {{ $totalAbsen ?: '-' }}
                                     </td>
                                     <td class="p-4 pr-6 text-center">
-                                        <a href="{{ route('students.show', $ms['id']) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all active:scale-95" title="Lihat Profil & Buku Induk Siswa">
+                                        <a href="{{ route('admin.bk.index', $ms['id']) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all active:scale-95" title="Lihat Profil & Buku Induk Siswa">
                                             <i class="ph-bold ph-arrow-right"></i>
                                         </a>
                                     </td>
@@ -643,7 +643,7 @@
         const studentsData = @json($mappedStudents ?? []);
 
         // 2. Base Route dari Laravel untuk Profil Siswa
-        const profileRoutePattern = "{{ route('students.show', ':id') }}";
+        const profileRoutePattern = "{{ route('admin.bk.index', ':id') }}";
 
         // Helper untuk memformat dan membersihkan nomor telepon untuk integrasi WhatsApp
         function getWhatsAppUrl(phone, name, detailMessage) {

@@ -11,26 +11,35 @@ use Illuminate\Support\Facades\Log;
 
 class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
 {
+    private $currentSequence = 0;
+    private $year;
+
+    /**
+     * Pindahkan query database ke Constructor agar hanya dieksekusi SEKALI.
+     * Ini mencegah masalah nomor pendaftaran ganda saat import massal.
+     */
+    public function __construct()
+    {
+        $this->year = date('Y');
+        
+        // Ambil data terakhir di tahun ini
+        $latest = PpdbRegistrant::where('academic_year', $this->year)
+                    ->orderBy('id', 'desc')
+                    ->first();
+        
+        if ($latest) {
+            $this->currentSequence = intval(substr($latest->registration_number, -4));
+        }
+    }
+
     /**
     * Mapping data dari Excel ke Database
     */
     public function model(array $row)
     {
-        // 1. Generate No Reg Otomatis per Baris
-        $year = date('Y');
-        // Menggunakan lockForUpdate untuk mencegah nomor ganda saat import banyak
-        $latest = PpdbRegistrant::where('academic_year', $year)->lockForUpdate()->latest()->first();
-        
-        $sequence = 1;
-        if ($latest) {
-            // Ambil 4 digit terakhir REG-YYYY-XXXX
-            // Pastikan format di database konsisten REG-YYYY-XXXX (13 karakter)
-            // Jika format berbeda, sesuaikan substr
-            $lastNumber = intval(substr($latest->registration_number, -4));
-            $sequence = $lastNumber + 1;
-        }
-        
-        $regNumber = 'REG-' . $year . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
+        // 1. Generate No Reg Otomatis (Increment di memory, lebih cepat & aman)
+        $this->currentSequence++;
+        $regNumber = 'REG-' . $this->year . '-' . str_pad($this->currentSequence, 4, '0', STR_PAD_LEFT);
 
         // 2. Format Tanggal Lahir (Excel serial date -> Y-m-d)
         $birthDate = null;
@@ -50,7 +59,7 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
         // 3. Return Model Baru
         return new PpdbRegistrant([
             'registration_number' => $regNumber,
-            'academic_year'      => $year,
+            'academic_year'      => $this->year,
             'status'             => 'pending', 
             'track'              => 'kolektif',
 
@@ -63,7 +72,7 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
             'birth_date'         => $birthDate,
             'address'            => $row['alamat'],
             
-            // [BARU] Input Nilai Rapor
+            // Input Nilai Rapor
             'average_grade'      => $row['rata_rata_nilai'] ?? 0, 
             
             'father_name'        => $row['nama_ayah'],
@@ -79,9 +88,14 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nisn' => 'required|unique:ppdb_registrants,nisn',
-            'nama_lengkap' => 'required',
+            'nama_lengkap' => 'required|string|max:255',
             'jk' => 'required|in:L,P,l,p',
-            'rata_rata_nilai' => 'nullable|numeric', // Validasi angka
+            'rata_rata_nilai' => 'nullable|numeric', 
+            'nama_ayah' => 'required|string|max:255',
+            'nama_ibu' => 'required|string|max:255',
+            
+            // [PERBAIKAN] Tambahkan required agar dicegat sebelum masuk DB
+            'no_hp_ortu' => 'required', 
         ];
     }
     
@@ -92,6 +106,20 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
             'nama_lengkap' => 'Nama Lengkap',
             'jk' => 'Jenis Kelamin',
             'rata_rata_nilai' => 'Nilai Rata-rata',
+            'nama_ayah' => 'Nama Ayah',
+            'nama_ibu' => 'Nama Ibu',
+            'no_hp_ortu' => 'Nomor HP Orang Tua',
+        ];
+    }
+
+    /**
+     * Kustomisasi pesan error agar lebih ramah dibaca pengguna
+     */
+    public function customValidationMessages()
+    {
+        return [
+            'no_hp_ortu.required' => 'Nomor HP Orang Tua pada baris data Excel tidak boleh kosong.',
+            'nisn.unique' => 'NISN :input sudah terdaftar di sistem.',
         ];
     }
 }
