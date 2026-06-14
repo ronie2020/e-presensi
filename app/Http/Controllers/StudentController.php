@@ -31,7 +31,7 @@ class StudentController extends Controller
         // -------------------------
 
         $query = Student::with('schoolClass')
-            ->join('classes', 'students.class_id', '=', 'classes.id')
+            ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
             ->select('students.*');
 
         // Filter Wali Kelas

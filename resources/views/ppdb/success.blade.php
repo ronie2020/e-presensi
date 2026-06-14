@@ -80,7 +80,7 @@
                     <div>
                         <h2 class="text-2xl font-black text-emerald-800 tracking-tight">Import Berhasil!</h2>
                         <p class="text-sm text-emerald-600 font-medium mt-1">
-                            Sebanyak <strong>{{ count(session('imported_data')) }}</strong> data siswa telah berhasil dimasukkan ke sistem.
+                            Sebanyak <strong>{{ count(session('imported_data', [])) }}</strong> data siswa telah berhasil dimasukkan ke sistem.
                         </p>
                     </div>
                 </div>
@@ -100,7 +100,7 @@
                 {{-- TABEL DATA --}}
                 <div class="overflow-x-auto rounded-2xl border border-slate-200 print-area">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b border-slate-200">
+                       <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th class="py-4 px-5 text-xs font-black text-slate-500 uppercase tracking-wider w-16 text-center">No</th>
                                 <th class="py-4 px-5 text-xs font-black text-slate-500 uppercase tracking-wider">No. Registrasi</th>
@@ -110,7 +110,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @foreach(session('imported_data') as $index => $data)
+                            @forelse(session('imported_data', []) as $index => $data)
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="py-3 px-5 text-sm text-slate-500 font-bold text-center">{{ $index + 1 }}</td>
                                 <td class="py-3 px-5">
@@ -122,7 +122,13 @@
                                 <td class="py-3 px-5 text-sm font-mono text-slate-600">{{ $data['nisn'] }}</td>
                                 <td class="py-3 px-5 text-sm text-slate-500">{{ $data['school_origin'] }}</td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="5" class="py-8 px-5 text-center text-sm font-bold text-slate-400">
+                                    Sesi telah berakhir atau tidak ada data yang di-import.
+                                </td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

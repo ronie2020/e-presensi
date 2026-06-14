@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        {{-- 2. NAVIGATION TABS (INTEGRASI PORTAL) --}}
+        {{-- 2. NAVIGATION TABS --}}
         <div class="max-w-6xl mx-auto px-4 sm:px-6 -mt-12 relative z-20 mb-6">
             <div class="bg-white/90 backdrop-blur-xl p-1.5 rounded-2xl shadow-lg border border-slate-200/60 overflow-x-auto custom-scrollbar flex justify-center">
                 <div class="flex items-center gap-1 w-max">
@@ -82,7 +82,7 @@
         {{-- 3. CONTENT AREAS --}}
         <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
             
-            {{-- === TAB 1: RINGKASAN (TRACER & PROFIL) === --}}
+            {{-- === TAB 1: RINGKASAN === --}}
             <div x-show="activeTab === 'ringkasan'" x-transition.duration.300ms>
                 
                 {{-- ALERT STATUS TRACER --}}
@@ -129,7 +129,6 @@
                         @if($profile)
                             <div class="flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50 p-6 rounded-3xl border border-slate-100">
                                 <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-sm bg-white text-slate-700">
-                                    {{-- Ikon Dinamis --}}
                                     @if(in_array($profile->activity_status, ['SMA', 'SMK', 'MA']))
                                         <i class="ph-duotone ph-student text-blue-500"></i>
                                     @elseif($profile->activity_status == 'Pesantren')
@@ -203,7 +202,7 @@
                 </div>
             </div>
 
-            {{-- === TAB 2: PRESTASI (DARI PORTAL) === --}}
+            {{-- === TAB 2: PRESTASI === --}}
             <div x-show="activeTab === 'prestasi'" x-cloak x-transition.duration.300ms>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {{-- Summary Card --}}
@@ -212,12 +211,12 @@
                             <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-4">
                                 <i class="ph-duotone ph-trophy"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-slate-800 mb-1">Total Poin Kebaikan</h3>
+                            <h3 class="text-lg font-bold text-slate-800 mb-1">Daftar Prestasi</h3>
                             <p class="text-sm text-slate-500 mb-6">Akumulasi prestasi selama bersekolah.</p>
                             
                             <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-center text-white shadow-lg shadow-emerald-500/30">
-                                <p class="text-4xl font-black mb-1">+{{ $total_merit_points ?? 0 }}</p>
-                                <p class="text-xs font-medium opacity-80 uppercase tracking-widest">POIN TERKUMPUL</p>
+                                <p class="text-4xl font-black mb-1">{{ isset($achievements) ? count($achievements) : 0 }}</p>
+                                <p class="text-xs font-medium opacity-80 uppercase tracking-widest">PENGHARGAAN</p>
                             </div>
                         </div>
                     </div>
@@ -242,12 +241,13 @@
                                         </div>
                                         <div class="flex-grow">
                                             <div class="flex justify-between items-start mb-1">
-                                                <h4 class="font-bold text-slate-800 text-lg">{{ $record->disciplineType->name ?? 'Prestasi' }}</h4>
+                                                {{-- PERBAIKAN: Memanggil kolom bawaan title dan level --}}
+                                                <h4 class="font-bold text-slate-800 text-lg">{{ $record->title ?? 'Prestasi' }}</h4>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">
-                                                    +{{ $record->disciplineType->point_value ?? 0 }}
+                                                    {{ $record->level ?? '-' }}
                                                 </span>
                                             </div>
-                                            <p class="text-sm text-slate-500">{{ $record->notes ?? 'Tanpa keterangan' }}</p>
+                                            <p class="text-sm text-slate-500">{{ $record->description ?? 'Tanpa keterangan' }}</p>
                                         </div>
                                     </div>
                                     @endforeach
@@ -263,7 +263,7 @@
                 </div>
             </div>
 
-            {{-- === TAB 3: PERPUSTAKAAN (DARI PORTAL) === --}}
+            {{-- === TAB 3: PERPUSTAKAAN === --}}
             <div x-show="activeTab === 'perpustakaan'" x-cloak x-transition.duration.300ms>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {{-- Summary --}}

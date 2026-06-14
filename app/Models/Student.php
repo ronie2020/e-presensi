@@ -157,7 +157,7 @@ class Student extends Authenticatable
      */
     public function getAuthPassword()
     {
-        return $this->student_id; 
+        return $this->password; 
     }
 
     /**
@@ -166,6 +166,9 @@ class Student extends Authenticatable
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+         $a = $record->absent_a ?: '-';
+
+        return "{$s} / {$i} / {$a}";    
     }
 
     /**
@@ -356,10 +359,14 @@ class Student extends Authenticatable
      */
      public static function generateNextNis()
     {
-        $yearShort = date('y');
-        $lastStudent = self::where('nis', 'like', $yearShort . '%')->orderBy('nis', 'desc')->first();
+        $currentYearShort = date('y'); // Contoh: 26
+        $nextYearShort = sprintf('%02d', $currentYearShort + 1); // Contoh: 27
+        $prefixNis = $currentYearShort . $nextYearShort . '7'; // Hasil: 26277
+
+        $lastStudent = self::where('nis', 'like', $prefixNis . '%')->orderBy('nis', 'desc')->first();
         $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
-        return ['prefix' => $yearShort, 'sequence' => $sequence];
+        
+        return ['prefix' => $prefixNis, 'sequence' => $sequence];
     }
 
     public function getCleanViolationPoints()

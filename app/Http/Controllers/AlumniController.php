@@ -28,27 +28,16 @@ class AlumniController extends Controller
         // Cek apakah class Achievement ada di App\Models
         if (class_exists(\App\Models\Achievement::class)) {
             $achievements = \App\Models\Achievement::where('student_id', $student->id)
-                                ->with('disciplineType') 
                                 ->latest('date')
                                 ->get();
                                 
-            $total_merit_points = $achievements->sum(function($item) {
-                return $item->disciplineType->point_value ?? 0;
-            });
+            // Poin di-set 0 karena data tidak lagi mengambil dari tabel disiplin
+            $total_merit_points = 0; 
         }
 
         // 3. Data Perpustakaan (Opsional, set kosong dulu agar aman)
         $library_history = [];
         $library_visits = 0;
-
-        //  Model LibraryLoan, jika ada:
-        /*
-        if (class_exists(\App\Models\LibraryLoan::class)) {
-             $library_history = \App\Models\LibraryLoan::where('student_id', $student->id)
-                                    ->latest('borrow_date')
-                                    ->get();
-        }
-        */
 
         return view('alumni.dashboard', compact(
             'student', 

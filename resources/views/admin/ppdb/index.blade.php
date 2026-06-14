@@ -187,9 +187,20 @@
                         <i class="ph-bold ph-printer text-base"></i> Cetak Data
                     </a>
 
-                    <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-elevate-dark text-white rounded-xl font-bold text-xs hover:bg-elevate-primary transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="ph-bold ph-user-plus"></i> Promote Terpilih
-                    </button>
+                    {{-- PERBAIKAN: Tombol Promote HANYA MUNCUL JIKA filter status = accepted --}}
+                    @if(request('status') == 'accepted')
+                        <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm border border-emerald-700">
+                            <i class="ph-bold ph-user-plus text-base"></i> Promote Terpilih
+                        </button>
+                        
+                        {{-- TAMBAHAN: Tombol Bagi Kelas & Generate NIS Otomatis --}}
+                        <form action="{{ route('admin.ppdb.auto_distribute') }}" method="POST" id="autoDistributeForm" class="m-0 p-0">
+                            @csrf
+                            <button type="button" onclick="confirmAutoDistribute()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-sm border border-indigo-700 w-full md:w-auto">
+                                <i class="ph-bold ph-magic-wand text-base"></i> Bagi Kelas Otomatis
+                            </button>
+                        </form>
+                    @endif
 
                     <form method="GET" class="relative group w-full md:w-64">
                         <input type="hidden" name="status" value="{{ request('status') }}">
@@ -204,44 +215,67 @@
             <div class="overflow-x-auto flex-1">
                 <form action="{{ route('admin.ppdb.bulk_promote') }}" method="POST" id="bulkForm">
                     @csrf
-                    <table class="w-full text-sm text-left text-elevate-dark">
+                    <table class="w-full text-sm text-left text-elevate-dark whitespace-nowrap md:whitespace-normal">
                         <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-100">
                             <tr>
                                 <th class="px-5 py-4 w-10 text-center">
-                                    <input type="checkbox" id="checkAll" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-4 h-4 cursor-pointer bg-white">
+                                    {{-- PERBAIKAN: Check All hanya aktif jika di tab Diterima --}}
+                                    @if(request('status') == 'accepted')
+                                        <input type="checkbox" id="checkAll" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 w-4 h-4 cursor-pointer bg-white">
+                                    @else
+                                        <i class="ph-bold ph-minus text-slate-300"></i>
+                                    @endif
                                 </th>
                                 <th class="px-5 py-4">Data Siswa</th>
-                                <th class="px-5 py-4 text-center">Jalur & Nilai</th>
+                                {{-- PERBAIKAN: Disembunyikan di HP agar tabel tidak terlalu lebar --}}
+                                <th class="px-5 py-4 text-center hidden sm:table-cell">Jalur & Nilai</th>
                                 <th class="px-5 py-4 text-center">Status</th>
                                 <th class="px-5 py-4 text-right">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse($registrants as $item)
-                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                            
+                            {{-- LOGIKA PENGECEKAN KE TABEL STUDENTS (Apakah sudah digenerate?) --}}
+                            @php
+                                $studentData = \App\Models\Student::with('schoolClass')->where('nisn', $item->nisn)->first();
+                                $isPromoted = $studentData ? true : false;
+                            @endphp
+
+                            <tr class="hover:bg-slate-50/50 transition-colors group {{ $isPromoted ? 'bg-indigo-50/10' : '' }}">
                                 <td class="px-5 py-4 text-center">
-                                    @if($item->status == 'accepted')
-                                        <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-4 h-4 cursor-pointer">
+                                    @if($item->status == 'accepted' && !$isPromoted)
+                                        <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-slate-300 text-emerald-600 focus:ring-emerald-600 w-4 h-4 cursor-pointer">
+                                    @elseif($isPromoted)
+                                        <i class="ph-fill ph-check-circle text-indigo-500 text-xl" title="Sudah Dipetakan"></i>
                                     @else
-                                        <i class="ph-bold ph-minus text-slate-300"></i>
+                                        <i class="ph-bold ph-minus text-slate-200"></i>
                                     @endif
                                 </td>
                                 
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-black text-sm group-hover:scale-110 group-hover:border-elevate-primary group-hover:text-elevate-primary transition-all shadow-sm">
+                                        <div class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-black text-sm group-hover:scale-110 group-hover:border-elevate-primary group-hover:text-elevate-primary transition-all shadow-sm">
                                             {{ substr($item->full_name, 0, 1) }}
                                         </div>
                                         <div>
                                             <div class="font-bold text-elevate-dark mb-0.5 group-hover:text-elevate-primary transition-colors">{{ $item->full_name }}</div>
-                                            <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
+                                            <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1.5 mb-1">
                                                 <i class="ph-bold ph-identification-card"></i> {{ $item->registration_number }}
                                             </div>
+                                            
+                                            {{-- BADGE INFO NIS & KELAS MUNCUL JIKA SUDAH TERPETAKAN --}}
+                                            @if($isPromoted)
+                                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 mt-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-sm">
+                                                    <i class="ph-fill ph-student"></i> NIS: {{ $studentData->nis }} | Kelas: {{ $studentData->schoolClass ? $studentData->schoolClass->name : 'Belum Ada' }}
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="px-5 py-4 text-center">
+                                {{-- PERBAIKAN: Disembunyikan di HP --}}
+                                <td class="px-5 py-4 text-center hidden sm:table-cell">
                                     <div class="flex flex-col items-center gap-1.5">
                                         <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border 
                                             {{ $item->track == 'prestasi' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-elevate-soft text-elevate-primary border-elevate-accent/30' }}">
@@ -252,23 +286,25 @@
                                 </td>
 
                                 <td class="px-5 py-4 text-center">
-                                    @if($item->status == 'pending')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
-                                        </span>
-                                    @elseif($item->status == 'accepted')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                                            <i class="ph-fill ph-check-circle"></i> Diterima
-                                        </span>
-                                    @elseif($item->status == 'verified')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-elevate-soft text-elevate-primary border border-elevate-accent/30">
-                                            <i class="ph-fill ph-shield-check"></i> Terverifikasi
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                                            <i class="ph-fill ph-x-circle"></i> Ditolak
-                                        </span>
-                                    @endif
+                                    <div class="flex flex-col items-center gap-1.5">
+                                        @if($item->status == 'pending')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                                            </span>
+                                        @elseif($item->status == 'accepted')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                                <i class="ph-fill ph-check-circle"></i> Diterima
+                                            </span>
+                                        @elseif($item->status == 'verified')
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-elevate-soft text-elevate-primary border border-elevate-accent/30">
+                                                <i class="ph-fill ph-shield-check"></i> Terverifikasi
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                                                <i class="ph-fill ph-x-circle"></i> Ditolak
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td class="px-5 py-4 text-right">
@@ -285,11 +321,12 @@
                             @empty
                             <tr>
                                 <td colspan="5" class="py-16 text-center">
-                                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
+                                    {{-- PERBAIKAN: Empty state diperjelas --}}
+                                    <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-200 text-slate-400 shadow-sm">
                                         <i class="ph-duotone ph-folder-notch-open text-3xl"></i>
                                     </div>
-                                    <p class="text-sm font-bold text-elevate-dark">Belum ada data pendaftar</p>
-                                    <p class="text-xs text-slate-400 mt-1">Silakan sesuaikan filter pencarian.</p>
+                                    <p class="text-sm font-bold text-elevate-dark">Belum ada data pendaftar ditemukan.</p>
+                                    <p class="text-xs text-slate-400 mt-1">Cobalah mengubah filter status atau kata kunci pencarian Anda.</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -338,6 +375,15 @@
             @if(session('error'))
                 Swal.fire({ icon: 'error', title: 'Error', text: '{{ session('error') }}', customClass: { popup: 'rounded-[2rem]'} });
             @endif
+            @if(session('warning'))
+                Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Perhatian!', 
+                    text: '{!! session('warning') !!}', 
+                    confirmButtonColor: '#f59e0b',
+                    customClass: { popup: 'rounded-[2rem]', confirmButton: 'px-6 py-2 rounded-xl font-bold' } 
+                });
+            @endif
 
             const checkAll = document.getElementById('checkAll');
             const checkItems = document.querySelectorAll('.check-item');
@@ -351,16 +397,16 @@
         function submitBulk() {
             const selected = document.querySelectorAll('.check-item:checked').length;
             if(selected === 0) {
-                Swal.fire({ icon: 'warning', title: 'Pilih Data', text: 'Centang minimal satu siswa.', customClass: { popup: 'rounded-[2rem]' }, confirmButtonColor: '#2c3f61' });
+                Swal.fire({ icon: 'warning', title: 'Pilih Data', text: 'Centang minimal satu siswa yang belum dipetakan.', customClass: { popup: 'rounded-[2rem]' }, confirmButtonColor: '#2c3f61' });
                 return;
             }
             Swal.fire({
-                title: 'Promote Siswa?',
-                text: `Pindahkan ${selected} siswa ke Data Induk Siswa Aktif?`,
+                title: 'Promote Massal?',
+                text: `Pindahkan ${selected} siswa yang terpilih ke Data Induk Siswa Aktif?`,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Ya, Proses',
-                confirmButtonColor: '#0d52a1', // Elevate Primary
+                confirmButtonText: 'Ya, Pindahkan',
+                confirmButtonColor: '#059669', // Emerald 600
                 cancelButtonColor: '#64748b',
                 customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
             }).then((res) => {
@@ -379,6 +425,25 @@
                 customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
             }).then((res) => {
                 if(res.isConfirmed) document.getElementById('delete-form-'+id).submit();
+            });
+        }
+
+        // TAMBAHAN: Fungsi Konfirmasi Bagi Kelas Otomatis
+        function confirmAutoDistribute() {
+            Swal.fire({
+                title: 'Eksekusi Pembagian Kelas?',
+                text: "Sistem akan mengurutkan abjad seluruh siswa DITERIMA yang BELUM dipetakan, membuatkan NIS, membagi ke kelas 7A-7F secara merata, lalu memindahkannya ke Data Induk.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5', // Indigo 600
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Proses Sekarang!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('autoDistributeForm').submit();
+                }
             });
         }
     </script>

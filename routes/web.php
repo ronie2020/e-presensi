@@ -687,18 +687,23 @@ Route::middleware('auth')->group(function () {
    // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
-        Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
-        Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
-        Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
-        Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
-        Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');
-        Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
         Route::get('/reports', [AdminPpdbController::class, 'reports'])->name('reports');
         Route::get('/reports/export-excel', [AdminPpdbController::class, 'exportExcel'])->name('export.excel');
         Route::get('/reports/print-recap', [AdminPpdbController::class, 'printRecap'])->name('print.recap');
         Route::get('/reports/print-mass-letters', [AdminPpdbController::class, 'printMassLetters'])->name('print.mass_letters');
+        
+        // Aksi Massal & Pengaturan
+        Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
+        Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
+        Route::post('/auto-distribute', [AdminPpdbController::class, 'autoDistributeAndPromote'])->name('auto_distribute'); // <--- INI ROUTE BARUNYA
+
+        // Aksi Spesifik per ID
+        Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
+        Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
+        Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');
+        Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
     });
 
     // Persuratan
