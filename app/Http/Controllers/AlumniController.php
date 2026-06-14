@@ -92,6 +92,7 @@ class AlumniController extends Controller
             'email' => 'required|email',
             'activity_status' => 'required|string',
             'testimony' => 'nullable|string|max:1000',
+            'campus_entry_year' => 'nullable|integer|min:2000',
         ]);
 
         AlumniProfile::updateOrCreate(

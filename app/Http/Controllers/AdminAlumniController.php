@@ -54,11 +54,12 @@ class AdminAlumniController extends Controller
 
         $alumni = $query->orderBy('name', 'asc')->paginate(20)->withQueryString();
 
-        // Statistik Diperbarui untuk Lulusan SMP
+         // Statistik Diperbarui untuk Lulusan SMP
         $stats = [
             'total'             => Student::where('status', 'graduated')->count(),            
             'lanjut_sekolah'    => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C'])->count(),
-            'tidak_lanjut'      => AlumniProfile::whereIn('activity_status', ['Tidak Lanjut', 'Mencari Kerja', 'Bekerja', 'Lainnya'])->count(),
+            'tidak_lanjut'      => AlumniProfile::whereIn('activity_status', ['Tidak Lanjut', 'Mencari Kerja', 'Bekerja', 'Lainnya'])
+                                    ->whereNotNull('student_id')->count(),
         ];
 
         // Kirim variabel 'years' untuk filter tahun
@@ -126,12 +127,13 @@ class AdminAlumniController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $student = Student::findOrFail($id);
+         $student = Student::findOrFail($id);
 
         $request->validate([
             'activity_status' => 'required|string',
             'phone_number' => 'nullable|string',
             'email' => 'nullable|email',
+            'campus_entry_year' => 'nullable|integer|min:2000',
         ]);
 
         AlumniProfile::updateOrCreate(
@@ -206,26 +208,25 @@ class AdminAlumniController extends Controller
         $file = $request->file('file');
         $filePath = $file->getRealPath();
         
-        // 1. Deteksi Separator (Koma atau Titik Koma untuk Excel Indo)
-        $firstLine = fgets(fopen($filePath, 'r'));
+        // 1. Buka file dengan fopen untuk efisiensi memori (Streaming)
+        $handle = fopen($filePath, 'r');
+        $firstLine = fgets($handle);
         $separator = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
+        rewind($handle); // Kembalikan pointer ke awal file
 
-        // 2. Baca File CSV
-        $csvData = array_map(function($line) use ($separator) {
-            return str_getcsv($line, $separator);
-        }, file($filePath));
-        
-        // Hapus Header
-        $header = array_shift($csvData);
+        // Lewati baris pertama (Header)
+        $header = fgetcsv($handle, 0, $separator);
 
-        if (count($csvData) == 0) {
+        if (!$header) {
+            fclose($handle);
             return back()->with('error', 'File CSV kosong atau format tidak terbaca.');
         }
 
         DB::beginTransaction();
         try {
             $count = 0;
-            foreach ($csvData as $row) {
+            // 2. Baca baris demi baris menggunakan while loop
+            while (($row = fgetcsv($handle, 0, $separator)) !== FALSE) {
                 if (count($row) < 3) continue;
 
                 $name = $row[0];
@@ -254,6 +255,7 @@ class AdminAlumniController extends Controller
                 
                 $count++;
             }
+            fclose($handle); // Jangan lupa tutup file saat selesai
 
             DB::commit();
             
@@ -264,6 +266,7 @@ class AdminAlumniController extends Controller
             return redirect()->route('admin.alumni.index')->with('success', "Berhasil mengimport {$count} data alumni baru!");
 
         } catch (\Exception $e) {
+            if (isset($handle) && is_resource($handle)) fclose($handle);
             DB::rollBack();
             return back()->with('error', 'Gagal import: ' . $e->getMessage());
         }

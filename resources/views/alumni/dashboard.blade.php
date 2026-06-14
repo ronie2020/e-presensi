@@ -333,7 +333,7 @@
                 </div>
             </div>
 
-             {{-- === TAB 4: AKADEMIK (NILAI RAPOR) === --}}
+              {{-- === TAB 4: AKADEMIK (NILAI RAPOR) === --}}
             <div x-show="activeTab === 'akademik'" x-cloak x-transition.duration.300ms>
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden min-h-[400px]">
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
@@ -341,45 +341,108 @@
                             <i class="ph-bold ph-file-text"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-800">Riwayat Akademik</h3>
-                            <p class="text-xs text-slate-500">Nilai rapor terakhir yang tercatat di sistem.</p>
+                            <h3 class="font-bold text-slate-800">Transkrip Nilai Akademik</h3>
+                            <p class="text-xs text-slate-500">Rekapitulasi nilai rapor dari Kelas VII hingga Kelas IX.</p>
                         </div>
                     </div>
+                    
                     <div class="p-6 md:p-8">
-                        @if(isset($academic_record) && $academic_record->items->count() > 0)
-                            <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
+                        @php
+                            // Ambil daftar mata pelajaran dari database
+                            $mapelInduk = \App\Models\Subject::orderBy('order')->get();
+                        @endphp
+
+                        @if(isset($mapelInduk) && $mapelInduk->count() > 0)
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl custom-scrollbar">
+                                <table class="w-full text-sm text-left whitespace-nowrap">
+                                    <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-black tracking-wider text-center">
                                         <tr>
-                                            <th class="px-6 py-4">Mata Pelajaran</th>
-                                            <th class="px-6 py-4 text-center w-32">Nilai Akhir</th>
-                                            <th class="px-6 py-4">Catatan / Deskripsi</th>
+                                            <th rowspan="2" class="px-4 py-3 border-r border-b border-slate-200 w-10">No</th>
+                                            <th rowspan="2" class="px-4 py-3 border-r border-b border-slate-200 text-left min-w-[200px]">Mata Pelajaran</th>
+                                            <th colspan="2" class="px-4 py-2 border-r border-b border-slate-200 bg-blue-50/50 text-blue-800">Kelas VII</th>
+                                            <th colspan="2" class="px-4 py-2 border-r border-b border-slate-200 bg-emerald-50/50 text-emerald-800">Kelas VIII</th>
+                                            <th colspan="2" class="px-4 py-2 border-b border-slate-200 bg-amber-50/50 text-amber-800">Kelas IX</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="px-3 py-2 border-r border-b border-slate-200 bg-blue-50/30">Smt 1</th>
+                                            <th class="px-3 py-2 border-r border-b border-slate-200 bg-blue-50/30">Smt 2</th>
+                                            <th class="px-3 py-2 border-r border-b border-slate-200 bg-emerald-50/30">Smt 1</th>
+                                            <th class="px-3 py-2 border-r border-b border-slate-200 bg-emerald-50/30">Smt 2</th>
+                                            <th class="px-3 py-2 border-r border-b border-slate-200 bg-amber-50/30">Smt 1</th>
+                                            <th class="px-3 py-2 border-b border-slate-200 bg-amber-50/30">Smt 2</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-100">
-                                        @foreach($academic_record->items as $item)
-                                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                                <td class="px-6 py-4 font-bold text-slate-700">
-                                                    {{ $item->subject->name ?? 'Mapel Umum' }}
-                                                </td>
-                                                <td class="px-6 py-4 text-center">
-                                                    <span class="inline-block px-3 py-1 rounded-lg font-black text-rose-700 bg-rose-50 border border-rose-100">
-                                                        {{ $item->score }}
-                                                    </span>
-                                                </td>
-                                                <td class="px-6 py-4 text-slate-500 text-xs leading-relaxed">
-                                                    {{ $item->description ?? '-' }}
-                                                </td>
-                                            </tr>
+                                    <tbody class="divide-y divide-slate-100 text-center">
+                                        @php
+                                            $no = 1;
+                                            $totals = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
+                                            $counts = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
+                                        @endphp
+
+                                        @foreach($mapelInduk as $mapel)
+                                        @php
+                                            $v71 = $student->getScore($mapel->name, 7, 1);
+                                            $v72 = $student->getScore($mapel->name, 7, 2);
+                                            $v81 = $student->getScore($mapel->name, 8, 1);
+                                            $v82 = $student->getScore($mapel->name, 8, 2);
+                                            $v91 = $student->getScore($mapel->name, 9, 1);
+                                            $v92 = $student->getScore($mapel->name, 9, 2);
+
+                                            if(is_numeric($v71)) { $totals['71'] += (float)$v71; $counts['71']++; }
+                                            if(is_numeric($v72)) { $totals['72'] += (float)$v72; $counts['72']++; }
+                                            if(is_numeric($v81)) { $totals['81'] += (float)$v81; $counts['81']++; }
+                                            if(is_numeric($v82)) { $totals['82'] += (float)$v82; $counts['82']++; }
+                                            if(is_numeric($v91)) { $totals['91'] += (float)$v91; $counts['91']++; }
+                                            if(is_numeric($v92)) { $totals['92'] += (float)$v92; $counts['92']++; }
+                                        @endphp
+                                        <tr class="hover:bg-slate-50 transition-colors">
+                                            <td class="px-4 py-3 border-r border-slate-100 text-slate-500 font-medium">{{ $no++ }}</td>
+                                            <td class="px-4 py-3 border-r border-slate-100 text-left font-bold text-slate-700 whitespace-normal">{{ $mapel->name }}</td>
+                                            
+                                            {{-- Kelas 7 --}}
+                                            <td class="px-3 py-3 border-r border-slate-100 font-medium {{ is_numeric($v71) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v71 }}</td>
+                                            <td class="px-3 py-3 border-r border-slate-100 font-medium {{ is_numeric($v72) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v72 }}</td>
+                                            
+                                            {{-- Kelas 8 --}}
+                                            <td class="px-3 py-3 border-r border-slate-100 font-medium {{ is_numeric($v81) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v81 }}</td>
+                                            <td class="px-3 py-3 border-r border-slate-100 font-medium {{ is_numeric($v82) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v82 }}</td>
+                                            
+                                            {{-- Kelas 9 --}}
+                                            <td class="px-3 py-3 border-r border-slate-100 font-medium {{ is_numeric($v91) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v91 }}</td>
+                                            <td class="px-3 py-3 font-medium {{ is_numeric($v92) ? 'text-slate-800' : 'text-slate-300' }}">{{ $v92 }}</td>
+                                        </tr>
                                         @endforeach
+                                        
+                                        <!-- BARIS RATA-RATA NILAI -->
+                                        <tr class="bg-slate-100 font-black text-slate-700">
+                                            <td colspan="2" class="px-4 py-3 border-r border-slate-200 text-right uppercase tracking-wider text-xs">Rata-rata Nilai</td>
+                                            
+                                            <td class="px-3 py-3 border-r border-slate-200 text-blue-700">{{ $counts['71'] > 0 ? round($totals['71'] / $counts['71'], 1) : '-' }}</td>
+                                            <td class="px-3 py-3 border-r border-slate-200 text-blue-700">{{ $counts['72'] > 0 ? round($totals['72'] / $counts['72'], 1) : '-' }}</td>
+                                            
+                                            <td class="px-3 py-3 border-r border-slate-200 text-emerald-700">{{ $counts['81'] > 0 ? round($totals['81'] / $counts['81'], 1) : '-' }}</td>
+                                            <td class="px-3 py-3 border-r border-slate-200 text-emerald-700">{{ $counts['82'] > 0 ? round($totals['82'] / $counts['82'], 1) : '-' }}</td>
+                                            
+                                            <td class="px-3 py-3 border-r border-slate-200 text-amber-700">{{ $counts['91'] > 0 ? round($totals['91'] / $counts['91'], 1) : '-' }}</td>
+                                            <td class="px-3 py-3 text-amber-700">{{ $counts['92'] > 0 ? round($totals['92'] / $counts['92'], 1) : '-' }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
+                            
+                            {{-- Info Tambahan --}}
+                            <div class="mt-4 flex items-start gap-2 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                <i class="ph-fill ph-info text-blue-500 text-lg shrink-0"></i>
+                                <p class="text-xs text-blue-800 font-medium leading-relaxed">
+                                    Ini adalah salinan digital transkrip nilai berdasarkan Buku Induk. Tanda strip (-) menunjukkan bahwa nilai pada semester tersebut belum/tidak diinput ke dalam sistem.
+                                </p>
+                            </div>
+
                         @else
                             <div class="p-16 text-center flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
                                 <i class="ph-duotone ph-file-dashed text-5xl text-slate-300 mb-4"></i>
-                                <h4 class="font-bold text-slate-700 mb-1">Data Nilai Belum Tersedia</h4>
-                                <p class="text-slate-500 text-sm max-w-sm mx-auto">Sekolah belum menginputkan riwayat nilai atau data rapor Anda ke dalam sistem.</p>
+                                <h4 class="font-bold text-slate-700 mb-1">Data Mata Pelajaran Kosong</h4>
+                                <p class="text-slate-500 text-sm max-w-sm mx-auto">Sistem tidak menemukan master data mata pelajaran untuk menampilkan matriks nilai.</p>
                             </div>
                         @endif
                     </div>

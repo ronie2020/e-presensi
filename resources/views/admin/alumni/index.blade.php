@@ -149,7 +149,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-xs font-medium space-y-1">
+                                     <div class="text-xs font-medium space-y-1">
                                         @if($student->alumniProfile && $student->alumniProfile->phone_number)
                                             <div class="flex items-center gap-2 font-bold text-emerald-600">
                                                 <i class="ph-fill ph-whatsapp-logo text-emerald-500 text-sm"></i> {{ $student->alumniProfile->phone_number }}
@@ -161,10 +161,18 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <a href="{{ route('admin.alumni.show', $student->id) }}" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-elevate-primary hover:border-elevate-primary hover:text-white transition-all shadow-sm" title="Lihat Detail">
+                                        {{-- TOMBOL LIHAT BUKU INDUK (Data Riwayat Saat SMP) --}}
+                                        <a href="{{ route('students.show', $student->id) }}" target="_blank" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all shadow-sm" title="Lihat Arsip Buku Induk">
+                                            <i class="ph-bold ph-book-open-text text-lg"></i>
+                                        </a>
+
+                                        {{-- TOMBOL DETAIL ALUMNI (Data Tracer Study Saat Ini) --}}
+                                        <a href="{{ route('admin.alumni.show', $student->id) }}" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-elevate-primary hover:border-elevate-primary hover:text-white transition-all shadow-sm" title="Lihat Detail Alumni">
                                             <i class="ph-bold ph-eye text-lg"></i>
                                         </a>
-                                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-amber-500 hover:border-amber-500 hover:text-white transition-all shadow-sm" title="Edit Data">
+                                        
+                                        {{-- TOMBOL EDIT ALUMNI --}}
+                                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-amber-500 hover:border-amber-500 hover:text-white transition-all shadow-sm" title="Edit Data Tracer Study">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </a>
                                     </div>

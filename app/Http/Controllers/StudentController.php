@@ -32,6 +32,11 @@ class StudentController extends Controller
 
         $query = Student::with('schoolClass')
             ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
+            ->where(function($q) {
+                // GEMBOK DEPAN: Sembunyikan siswa yang sudah lulus dari Buku Induk Aktif
+                $q->where('students.status', '!=', 'graduated')
+                  ->orWhereNull('students.status');
+            })
             ->select('students.*');
 
         // Filter Wali Kelas
@@ -146,6 +151,13 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
+        // ==========================================
+        // Gembok Belakang: Blokir jika sudah Alumni
+        // ==========================================
+        if ($student->status === 'graduated') {
+            return redirect()->route('students.index')->with('error', 'Akses ditolak! Data Buku Induk siswa yang telah lulus (Alumni) dikunci secara permanen.');
+        }
+
         $classes = SchoolClass::orderBy('name', 'asc')->get();
         return view('students.edit', [
             'student' => $student,
@@ -158,6 +170,13 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
+        // ==========================================
+        // Gembok Belakang: Blokir jika sudah Alumni
+        // ==========================================
+        if ($student->status === 'graduated') {
+            return redirect()->route('students.index')->with('error', 'Akses ditolak! Data siswa yang telah lulus (Alumni) tidak dapat diedit melalui jalur ini.');
+        }
+
         // 1. Validasi data
         $rules = [
             'student_id' => ['required', Rule::unique('students', 'student_id')->ignore($student->id)],

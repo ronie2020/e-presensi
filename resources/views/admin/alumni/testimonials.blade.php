@@ -73,8 +73,8 @@
                                 "{{ Str::limit($item->testimony, 150) }}"
                             </p>
                             @if(strlen($item->testimony) > 150)
-                                {{-- Menggunakan json_encode agar aman --}}
-                                <button type="button" onclick="alert({{ json_encode($item->testimony) }})" class="text-xs font-black text-elevate-primary hover:text-elevate-dark mt-2 cursor-pointer transition-colors uppercase tracking-wider">
+                                {{-- Menggunakan fungsi custom SweetAlert --}}
+                                <button type="button" onclick="showFullTestimony({{ json_encode($item->testimony) }}, '{{ addslashes($item->student->name ?? 'Alumni') }}')" class="text-xs font-black text-elevate-primary hover:text-elevate-dark mt-2 cursor-pointer transition-colors uppercase tracking-wider">
                                     Baca selengkapnya
                                 </button>
                             @endif
@@ -103,11 +103,35 @@
                 @endforelse
             </div>
 
-            {{-- PAGINATION --}}
+           {{-- PAGINATION --}}
             <div class="mt-10">
                 {{ $testimonials->links() }}
             </div>
 
         </div>
     </div>
+
+    {{-- SWEETALERT 2 SCRIPT UNTUK MODAL TESTIMONI --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function showFullTestimony(text, name) {
+            Swal.fire({
+                title: '<span class="text-xl font-black text-elevate-dark tracking-tight">Testimoni Alumni</span>',
+                html: `
+                    <div class="text-left mt-3">
+                        <p class="text-sm text-slate-500 font-bold mb-3 uppercase tracking-wider">Dari: <span class="text-elevate-primary">${name}</span></p>
+                        <div class="bg-elevate-accent/5 p-5 rounded-2xl border border-elevate-accent/10 italic text-slate-600 leading-relaxed">
+                            "${text}"
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#3b5889',
+                confirmButtonText: 'Tutup',
+                customClass: {
+                    popup: 'rounded-[2rem] border border-slate-100 shadow-2xl font-sans',
+                    confirmButton: 'bg-elevate-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-elevate-dark transition-colors shadow-lg shadow-elevate-primary/20'
+                }
+            });
+        }
+    </script>
 </x-app-layout>
