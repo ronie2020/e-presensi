@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\AlumniProfile;
 use App\Models\Achievement; 
+use App\Models\Borrowing;
+use App\Models\GradeRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,7 +27,7 @@ class AlumniController extends Controller
         $achievements = [];
         $total_merit_points = 0;
 
-        // Cek apakah class Achievement ada di App\Models
+       // Cek apakah class Achievement ada di App\Models
         if (class_exists(\App\Models\Achievement::class)) {
             $achievements = \App\Models\Achievement::where('student_id', $student->id)
                                 ->latest('date')
@@ -35,9 +37,25 @@ class AlumniController extends Controller
             $total_merit_points = 0; 
         }
 
-        // 3. Data Perpustakaan (Opsional, set kosong dulu agar aman)
-        $library_history = [];
+        // 3. Data Perpustakaan
+        $library_history = collect([]);
         $library_visits = 0;
+        if (class_exists(\App\Models\Borrowing::class)) {       
+             $library_history = \App\Models\Borrowing::with('book')
+                                ->where('student_id', $student->id)
+                                ->orderBy('borrow_date', 'desc')
+                                ->get();
+             $library_visits = $library_history->count();
+        }
+
+        // 4. Data Akademik / Nilai Rapor
+        $academic_record = null;
+        if (class_exists(\App\Models\GradeRecord::class)) {
+             $academic_record = \App\Models\GradeRecord::with(['items.subject'])
+                                ->where('student_id', $student->id)
+                                ->latest()
+                                ->first();
+        }
 
         return view('alumni.dashboard', compact(
             'student', 
@@ -46,7 +64,8 @@ class AlumniController extends Controller
             'achievements',
             'total_merit_points',
             'library_history',
-            'library_visits'
+            'library_visits',
+            'academic_record'
         ));
     }
 
