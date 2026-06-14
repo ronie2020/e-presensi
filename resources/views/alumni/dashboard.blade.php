@@ -176,18 +176,19 @@
                         @endif
                     </div>
 
-                    {{-- MENU LAINNYA --}}
+                {{-- MENU LAINNYA --}}
                     <div class="space-y-6">
                         <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
                             <h3 class="text-base font-bold text-slate-800 mb-4 px-2">Menu Lainnya</h3>
                             <div class="space-y-3">
-                                <a href="{{ route('portal.show', $student->id) }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:text-blue-700 transition group">
+                                {{-- PERBAIKAN: Mengganti tombol "Lihat Web Publik" (portal.show) menjadi "Jejak Alumni" (public.testimonials) --}}
+                                <a href="{{ route('public.testimonials') }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:text-blue-700 transition group">
                                     <div class="w-10 h-10 rounded-xl bg-white text-slate-400 shadow-sm flex items-center justify-center group-hover:text-blue-600 transition">
-                                        <i class="ph-bold ph-globe"></i>
+                                        <i class="ph-bold ph-users-three"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <p class="font-bold text-sm">Lihat Web Publik</p>
-                                        <p class="text-[10px] text-slate-400 group-hover:text-blue-400">Tampilan profil publik</p>
+                                        <p class="font-bold text-sm">Jejak Alumni</p>
+                                        <p class="text-[10px] text-slate-400 group-hover:text-blue-400">Lihat sebaran alumni lain</p>
                                     </div>
                                     <i class="ph-bold ph-arrow-right text-sm opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                 </a>

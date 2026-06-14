@@ -49,13 +49,14 @@ class StudentPortalController extends Controller
         return view('portal.index');
     }
 
+    // FUNGSI SEARCH UNTUK GUEST (CARI NISN)
     public function search(Request $request)
     {
         $request->validate([
             'student_id' => 'required|string',
         ]);
 
-        $student = Student::where('student_id', $request->student_id)
+        $student = Student::with('graduation')->where('student_id', $request->student_id)
                     ->orWhere('nis', $request->student_id)
                     ->first();
 
@@ -65,8 +66,12 @@ class StudentPortalController extends Controller
 
         Auth::guard('student')->login($student);
 
-        // Redirect ke Alumni jika status graduated
-        if ($student->status === 'graduated') {
+        // DETEKSI ALUMNI KETAT
+        $isAlumni = $student->status === 'graduated' 
+                 || !empty($student->graduated_date) 
+                 || ($student->graduation && strtoupper($student->graduation->status) === 'LULUS');
+
+        if ($isAlumni) {
             return redirect()->route('alumni.dashboard')
                              ->with('success', 'Selamat datang di Dashboard Alumni.');
         }
@@ -75,8 +80,49 @@ class StudentPortalController extends Controller
                          ->with('success', 'Berhasil masuk ke Portal Informasi Siswa.');
     }
 
+    // FUNGSI LOGIN AUTHENTIKASI UNTUK LMS/CBT
+    public function loginPost(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|string',
+        ]);
+
+        // Coba cari student berdasarkan NISN/NIS
+        $student = Student::with('graduation')->where('student_id', $request->student_id)
+                    ->orWhere('nis', $request->student_id)
+                    ->first();
+
+        if (!$student) {
+            return back()->with('error', 'NISN tidak terdaftar di dalam sistem.');
+        }
+
+        // DETEKSI ALUMNI KETAT
+        $isAlumni = $student->status === 'graduated' 
+                 || !empty($student->graduated_date) 
+                 || ($student->graduation && strtoupper($student->graduation->status) === 'LULUS');
+
+        // Jika Alumni mencoba login ke LMS atau CBT, tolak dan tendang ke Dashboard Alumni
+        if ($isAlumni) {
+            Auth::guard('student')->login($student);
+            return redirect()->route('alumni.dashboard')
+                             ->with('success', 'Akun Anda adalah Alumni. Anda dialihkan ke Dashboard Alumni.');
+        }
+
+        // Login untuk Siswa Aktif
+        Auth::guard('student')->login($student);
+        
+        // Arahkan sesuai intended_app (LMS atau CBT)
+        if ($request->intended_app == 'lms') {
+             return redirect()->route('students.learning.index')->with('success', 'Berhasil masuk ke Ruang Belajar.');
+        } elseif ($request->intended_app == 'cbt') {
+             return redirect()->route('student.exam.index')->with('success', 'Berhasil masuk ke Ruang Ujian.');
+        }
+
+        return redirect()->route('portal.show', $student->id);
+    }
+
     // =======================================================================
-    // FUNGSI SHOW YANG SUDAH DIREFACTOR MENGGUNAKAN SERVICE PATTERN
+    // FUNGSI SHOW 
     // =======================================================================
     public function show($id, AttendanceAnalyticService $attendanceService, DisciplineService $disciplineService)
     {
@@ -90,21 +136,27 @@ class StudentPortalController extends Controller
             'schoolClass.schedules.subject', 
             'schoolClass.schedules.teacher', 
             'alumniProfile', 
-            'pointHistories'
+            'pointHistories',
+            'graduation'
         ])->findOrFail($id);
 
-        if ($student->status === 'graduated') return redirect()->route('alumni.dashboard');
+        // DETEKSI ALUMNI LEBIH KETAT
+        $isAlumni = $student->status === 'graduated' 
+                 || !empty($student->graduated_date) 
+                 || ($student->graduation && strtoupper($student->graduation->status) === 'LULUS');
+
+        if ($isAlumni) {
+            return redirect()->route('alumni.dashboard');
+        }
         
+        $isAlumni = false;
+
         if (method_exists($student, 'checkBkThresholds')) {
             $student->checkBkThresholds();
         }
         
-        $isAlumni = $student->status === 'graduated';
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
-        // ==========================================
-        //  EKSEKUSI REFACTOR SERVICES
-        // ==========================================
         // 1. Eksekusi Service Kehadiran & Keagamaan
         $academicYearStart = $attendanceService->getAcademicYearStart();
         $attStats = $attendanceService->getCurrentYearStats($id, $academicYearStart);
@@ -114,10 +166,6 @@ class StudentPortalController extends Controller
         $discProfile = $disciplineService->getDisciplineProfile($id, $academicYearStart, $attStats['raw_records']);
 
 
-        // ==========================================
-        //  LOGIKA DASHBOARD OPERASIONAL (PRIORITY)
-        // ==========================================
-        
         // A. PRIORITY EXAMS (CBT)
         $priorityExams = collect([]);
         if (class_exists(\App\Models\CbtExam::class)) {  
@@ -173,10 +221,6 @@ class StudentPortalController extends Controller
                 ->take(3) 
                 ->get();
         }
-
-        // ==========================================
-        //  DATA PENDUKUNG LAINNYA
-        // ==========================================
 
         // --- DATA RAMADHAN ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
@@ -344,37 +388,27 @@ class StudentPortalController extends Controller
 
         // --- TABS CONFIGURATION ---
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
-        if ($isAlumni) {
-            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
-            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
-        } else {
-            $tabs = array_merge($tabs, [
-                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan', 'badge' => !$todayEntry ? 1 : 0],
-                'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
-                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
-                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
-                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK', 'badge' => $unreadSystemBk > 0 ? $unreadSystemBk : 0],
-                'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
-                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'], 
-                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
-                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online', 'badge' => $pendingTasks->count()],
-                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
-                'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
-                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
-                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
-                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
-                'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
-                'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
-            ]);
-        }
+        $tabs = array_merge($tabs, [
+            'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan', 'badge' => !$todayEntry ? 1 : 0],
+            'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
+            'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
+            'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
+            'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK', 'badge' => $unreadSystemBk > 0 ? $unreadSystemBk : 0],
+            'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
+            'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'], 
+            'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
+            'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online', 'badge' => $pendingTasks->count()],
+            'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+            'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
+            'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
+            'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
+            'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
+            'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
+            'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
+        ]);
 
-        // ==========================================
-        //  COMPACT DATA 
-        // ==========================================
         $data = [
             'student' => $student, 'isAlumni' => $isAlumni, 'tabs' => $tabs, 'today' => $today,
-            
-            // Variabel Hasil Ekstrak Service Kehadiran
             'hadir' => $attStats['hadir'], 
             'terlambat' => $attStats['terlambat'], 
             'sakit' => $attStats['sakit'], 
@@ -387,8 +421,6 @@ class StudentPortalController extends Controller
             'sholat_dhuhur' => $attStats['sholat_dhuhur'],
             'attendanceHistoryYears' => $attArchive['attendance'], 
             'religionHistoryYears' => $attArchive['religion'],
-
-            // Variabel Hasil Ekstrak Service Disiplin
             'violations' => $discProfile['violations'], 
             'achievements' => $discProfile['achievements'],
             'total_violation_points' => $discProfile['total_violation_points'], 
@@ -396,8 +428,6 @@ class StudentPortalController extends Controller
             'finalScore' => $discProfile['finalScore'], 
             'priorityAlerts' => $discProfile['alerts'], 
             'amnestyTasks' => $discProfile['amnestyTasks'],
-
-            // Variabel Original Lainnya yang Belum di Service-kan
             'liaison_messages' => $liaison_messages, 
             'complaints' => $complaints, 
             'todayEntry' => $todayEntry, 
@@ -434,9 +464,6 @@ class StudentPortalController extends Controller
         return view('portal.show', $data);
     }
 
-    /**
-     * Menyimpan Rating & Feedback Sesi BK dari Siswa.
-     */
     public function storeBkFeedback(Request $request, $id)
     {
         $request->validate([
@@ -463,9 +490,6 @@ class StudentPortalController extends Controller
         return back()->with('success', 'Terima kasih! Ulasanmu membantu kami meningkatkan kualitas layanan bimbingan sekolah.');
     }
     
-    /**
-     * METHOD UNTUK MENYIMPAN JURNAL LITERASI
-     */
     public function storeLiteracy(Request $request)
     {
         $request->validate([
@@ -511,9 +535,6 @@ class StudentPortalController extends Controller
         }
     }
 
-    /**
-     * FUNGSI LAPOR PRESTASI MANDIRI
-     */
     public function storeStudentAchievement(Request $request)
     {
         $request->validate([
@@ -541,12 +562,10 @@ class StudentPortalController extends Controller
                 'status' => 'pending',
             ];
 
-            // Upload Foto Dokumentasi
             if ($request->hasFile('photo')) {
                 $data['photo_path'] = $request->file('photo')->store('achievements', 'public');
             }
 
-            // Upload File Sertifikat
             if ($request->hasFile('certificate')) {
                 $data['certificate_path'] = $request->file('certificate')->store('achievement_certificates', 'public');
             }
@@ -562,7 +581,7 @@ class StudentPortalController extends Controller
     public function printCard($id)
     {
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
-             return redirect()->route('portal.index');
+             return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
         }
 
         $student = Student::with('schoolClass')->findOrFail($id);
@@ -574,13 +593,25 @@ class StudentPortalController extends Controller
         return back()->with('error', 'Template kartu belum tersedia.');
     }
 
-   public function biodata($id)
+    public function biodata($id)
     {
-        $student = \App\Models\Student::findOrFail($id);
+        if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
+            return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
+        }
+
+        $student = \App\Models\Student::with('graduation')->findOrFail($id);
+        
+        // DETEKSI ALUMNI KETAT: Alumni tidak boleh akses print biodata aktif
+        $isAlumni = $student->status === 'graduated' 
+                 || !empty($student->graduated_date) 
+                 || ($student->graduation && strtoupper($student->graduation->status) === 'LULUS');
+
+        if ($isAlumni) {
+            return redirect()->route('alumni.dashboard')->with('error', 'Alumni tidak dapat mencetak biodata siswa aktif.');
+        }
+
         $settings = []; 
 
-        // 1. AMBIL DATA DARI TABEL ABSENSI HARIAN (AttendanceSiswa)
-        // Kita hitung total status absensi khusus untuk tipe 'Harian' atau 'Masuk'
         $sakit = \App\Models\AttendanceSiswa::where('student_id', $id)
                     ->where('status', 'Sakit')
                     ->whereIn('type', ['Harian', 'Masuk'])
@@ -592,7 +623,7 @@ class StudentPortalController extends Controller
                     ->count();
 
         $alfa = \App\Models\AttendanceSiswa::where('student_id', $id)
-                    ->whereIn('status', ['Alfa', 'Alpa', 'Alpha']) // Antisipasi beda penulisan
+                    ->whereIn('status', ['Alfa', 'Alpa', 'Alpha']) 
                     ->whereIn('type', ['Harian', 'Masuk'])
                     ->count();
 
@@ -602,7 +633,6 @@ class StudentPortalController extends Controller
             'alfa' => $alfa
         ];
 
-        // 2. Kirim data attendanceStats ke view
         return view('students.portal.biodata', compact('student', 'settings', 'attendanceStats'));
     }
 }
