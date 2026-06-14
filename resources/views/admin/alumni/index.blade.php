@@ -30,7 +30,7 @@
                         </div>
                         <div class="text-center px-6 py-4 bg-white/60 rounded-2xl border border-white backdrop-blur-md shadow-sm hidden sm:block">
                             <span class="block text-3xl font-black text-elevate-primary mb-1">
-                                {{ $stats['kuliah'] ?? 0 }}
+                                {{ $stats['lanjut_sekolah'] ?? 0 }}
                             </span>
                             <span class="text-[10px] text-elevate-dark/70 uppercase font-bold tracking-wider">Lanjut Sekolah</span>
                         </div>
@@ -129,20 +129,30 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if($student->alumniProfile)
+                                    @php
+                                        // LOGIKA BARU: Jika tidak ada profil ATAU statusnya "Mencari Kerja", anggap saja "Belum Mengisi"
+                                        $isBelumMengisi = !$student->alumniProfile || $student->alumniProfile->activity_status === 'Mencari Kerja';
+                                    @endphp
+
+                                    @if(!$isBelumMengisi)
                                         @php $status = $student->alumniProfile->activity_status; @endphp
+                                        
+                                        {{-- JIKA STATUSNYA ADA, TAMPILKAN WARNANYA --}}
                                         <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border
                                             {{ $status == 'SMA' ? 'bg-elevate-primary/10 text-elevate-primary border-elevate-primary/20' : '' }}
                                             {{ $status == 'SMK' ? 'bg-orange-50 text-orange-600 border-orange-100' : '' }}
                                             {{ $status == 'MA' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : '' }}
                                             {{ $status == 'Pesantren' ? 'bg-teal-50 text-teal-600 border-teal-100' : '' }}
-                                            {{ $status == 'Bekerja' ? 'bg-slate-100 text-slate-600 border-slate-200' : '' }}">
+                                            {{ $status == 'Bekerja' ? 'bg-slate-100 text-slate-600 border-slate-200' : '' }}
+                                            {{ $status == 'Tidak Lanjut' ? 'bg-red-50 text-red-600 border-red-200' : '' }}">
                                             {{ $status }}
                                         </span>
+                                        
                                         <div class="text-xs text-elevate-dark font-bold mt-1.5 truncate max-w-[200px]" title="{{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name }}">
                                             {{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name ?? '-' }}
                                         </div>
                                     @else
+                                        {{-- JIKA BENAR-BENAR BELUM ADA PROFIL ATAU STATUSNYA MENCARI KERJA --}}
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 uppercase tracking-wider">
                                             <i class="ph-fill ph-warning-circle text-sm"></i> Belum Mengisi
                                         </span>
@@ -161,12 +171,12 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        {{-- TOMBOL LIHAT BUKU INDUK (Data Riwayat Saat SMP) --}}
+                                        {{-- TOMBOL LIHAT BUKU INDUK --}}
                                         <a href="{{ route('students.show', $student->id) }}" target="_blank" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all shadow-sm" title="Lihat Arsip Buku Induk">
                                             <i class="ph-bold ph-book-open-text text-lg"></i>
                                         </a>
 
-                                        {{-- TOMBOL DETAIL ALUMNI (Data Tracer Study Saat Ini) --}}
+                                        {{-- TOMBOL DETAIL ALUMNI --}}
                                         <a href="{{ route('admin.alumni.show', $student->id) }}" class="inline-flex w-9 h-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-elevate-primary hover:border-elevate-primary hover:text-white transition-all shadow-sm" title="Lihat Detail Alumni">
                                             <i class="ph-bold ph-eye text-lg"></i>
                                         </a>
@@ -205,13 +215,12 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Cek Session Success
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
                     text: "{{ session('success') }}",
-                    confirmButtonColor: '#3b5889', // elevate-primary
+                    confirmButtonColor: '#3b5889',
                     confirmButtonText: 'Tutup',
                     background: '#ffffff',
                     customClass: {
@@ -220,13 +229,12 @@
                 });
             @endif
 
-            // Cek Session Error
             @if(session('error'))
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
                     text: "{{ session('error') }}",
-                    confirmButtonColor: '#e11d48', // Rose-500
+                    confirmButtonColor: '#e11d48',
                     confirmButtonText: 'Coba Lagi',
                     background: '#ffffff',
                     customClass: {
