@@ -91,7 +91,12 @@
             <div x-show="activeTab === 'ringkasan'" x-transition.duration.300ms>
                 
                 {{-- ALERT STATUS TRACER --}}
-                @if(!$isTracerFilled)
+                @php
+                    $statusAsli = $profile->activity_status ?? '';
+                    $needsUpdate = !$isTracerFilled || in_array($statusAsli, ['Mencari Kerja', 'Tidak Lanjut', 'Belum Mengisi']) || (empty($profile->campus_name) && empty($profile->company_name) && empty($profile->position) && $statusAsli !== 'Lainnya');
+                @endphp
+
+                @if($needsUpdate)
                 <div class="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 md:p-8 shadow-lg shadow-amber-900/5 mb-8 flex flex-col md:flex-row items-center gap-6 animate-pulse">
                     <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl shrink-0">
                         <i class="ph-duotone ph-warning-circle"></i>
@@ -132,27 +137,35 @@
                         </div>
 
                         @if($profile)
+                            @php
+                                // FILTER VISUAL LEGACY STATUS
+                                $displayStatus = $profile->activity_status;
+                                if(in_array($displayStatus, ['Mencari Kerja', 'Tidak Lanjut'])) {
+                                    $displayStatus = 'Belum Mengisi';
+                                }
+                            @endphp
                             <div class="flex flex-col md:flex-row gap-6 items-center md:items-start bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                                <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-sm bg-white text-slate-700">
-                                    @if(in_array($profile->activity_status, ['SMA', 'SMK', 'MA']))
+                                <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl shadow-sm bg-white text-slate-700 shrink-0">
+                                    @if(in_array($displayStatus, ['SMA', 'SMK', 'MA']))
                                         <i class="ph-duotone ph-student text-blue-500"></i>
-                                    @elseif($profile->activity_status == 'Pesantren')
+                                    @elseif($displayStatus == 'Pesantren')
                                         <i class="ph-duotone ph-mosque text-emerald-500"></i>
-                                    @elseif($profile->activity_status == 'Bekerja')
+                                    @elseif($displayStatus == 'Bekerja')
                                         <i class="ph-duotone ph-briefcase text-amber-500"></i>
                                     @else
-                                        <i class="ph-duotone ph-user text-slate-500"></i>
+                                        <i class="ph-duotone ph-warning-circle text-rose-400"></i>
                                     @endif
                                 </div>
                                 <div class="text-center md:text-left">
-                                    <span class="inline-block px-3 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                                        {{ $profile->activity_status }}
+                                    <span class="inline-block px-3 py-1 border rounded-lg text-[10px] font-bold uppercase tracking-wider mb-2
+                                        {{ $displayStatus == 'Belum Mengisi' ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-white text-slate-500 border-slate-200' }}">
+                                        {{ $displayStatus }}
                                     </span>
                                     <h4 class="text-xl font-bold text-slate-900 mb-1">
                                         {{ $profile->campus_name ?? $profile->company_name ?? 'Data Belum Lengkap' }}
                                     </h4>
                                     <p class="text-sm text-slate-500">
-                                        {{ $profile->campus_major ?? $profile->position ?? '-' }} 
+                                        {{ $profile->campus_major ?? $profile->position ?? 'Silakan isi Tracer Study untuk melengkapi data ini.' }} 
                                         @if($profile->campus_entry_year) • Angkatan {{ $profile->campus_entry_year }} @endif
                                     </p>
                                 </div>
@@ -181,7 +194,6 @@
                         <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
                             <h3 class="text-base font-bold text-slate-800 mb-4 px-2">Menu Lainnya</h3>
                             <div class="space-y-3">
-                                {{-- PERBAIKAN: Mengganti tombol "Lihat Web Publik" (portal.show) menjadi "Jejak Alumni" (public.testimonials) --}}
                                 <a href="{{ route('public.testimonials') }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:text-blue-700 transition group">
                                     <div class="w-10 h-10 rounded-xl bg-white text-slate-400 shadow-sm flex items-center justify-center group-hover:text-blue-600 transition">
                                         <i class="ph-bold ph-users-three"></i>
@@ -247,7 +259,6 @@
                                         </div>
                                         <div class="flex-grow">
                                             <div class="flex justify-between items-start mb-1">
-                                                {{-- PERBAIKAN: Memanggil kolom bawaan title dan level --}}
                                                 <h4 class="font-bold text-slate-800 text-lg">{{ $record->title ?? 'Prestasi' }}</h4>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-700">
                                                     {{ $record->level ?? '-' }}
@@ -333,7 +344,7 @@
                 </div>
             </div>
 
-              {{-- === TAB 4: AKADEMIK (NILAI RAPOR) === --}}
+            {{-- === TAB 4: AKADEMIK (NILAI RAPOR MATRIX) === --}}
             <div x-show="activeTab === 'akademik'" x-cloak x-transition.duration.300ms>
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden min-h-[400px]">
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
@@ -342,23 +353,23 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-slate-800">Transkrip Nilai Akademik</h3>
-                            <p class="text-xs text-slate-500">Rekapitulasi nilai rapor dari Kelas VII hingga Kelas IX.</p>
+                            <p class="text-xs text-slate-500">Rekapitulasi matrik nilai rapor dari Kelas VII hingga Kelas IX.</p>
                         </div>
                     </div>
                     
                     <div class="p-6 md:p-8">
                         @php
-                            // Ambil daftar mata pelajaran dari database
-                            $mapelInduk = \App\Models\Subject::orderBy('order')->get();
+                            // Ambil daftar mata pelajaran dari database yang digunakan pada Buku Induk
+                            $mapelInduk = class_exists(\App\Models\Subject::class) ? \App\Models\Subject::orderBy('order')->get() : collect();
                         @endphp
 
                         @if(isset($mapelInduk) && $mapelInduk->count() > 0)
-                            <div class="overflow-x-auto border border-slate-200 rounded-2xl custom-scrollbar">
+                            <div class="overflow-x-auto border border-slate-200 rounded-2xl custom-scrollbar shadow-sm">
                                 <table class="w-full text-sm text-left whitespace-nowrap">
                                     <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-black tracking-wider text-center">
                                         <tr>
                                             <th rowspan="2" class="px-4 py-3 border-r border-b border-slate-200 w-10">No</th>
-                                            <th rowspan="2" class="px-4 py-3 border-r border-b border-slate-200 text-left min-w-[200px]">Mata Pelajaran</th>
+                                            <th rowspan="2" class="px-4 py-3 border-r border-b border-slate-200 text-left min-w-[250px]">Mata Pelajaran</th>
                                             <th colspan="2" class="px-4 py-2 border-r border-b border-slate-200 bg-blue-50/50 text-blue-800">Kelas VII</th>
                                             <th colspan="2" class="px-4 py-2 border-r border-b border-slate-200 bg-emerald-50/50 text-emerald-800">Kelas VIII</th>
                                             <th colspan="2" class="px-4 py-2 border-b border-slate-200 bg-amber-50/50 text-amber-800">Kelas IX</th>

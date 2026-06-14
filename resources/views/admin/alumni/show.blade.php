@@ -128,23 +128,29 @@
                                 <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Jalur Pilihan</p>
                                     <div class="text-xl font-black text-elevate-dark flex items-center gap-2.5">
-                                        @php $status = $student->alumniProfile->activity_status; @endphp
+                                        @php 
+                                            // FILTER VISUAL LEGACY STATUS
+                                            $status = $student->alumniProfile->activity_status; 
+                                            if(in_array($status, ['Mencari Kerja', 'Tidak Lanjut'])) {
+                                                $status = 'Belum Mengisi';
+                                            }
+                                        @endphp
                                         <span class="w-3.5 h-3.5 rounded-full shadow-inner
                                             {{ $status == 'SMA' ? 'bg-elevate-primary' : '' }}
                                             {{ $status == 'SMK' ? 'bg-orange-500' : '' }}
                                             {{ $status == 'MA' ? 'bg-emerald-500' : '' }}
                                             {{ $status == 'Pesantren' ? 'bg-teal-500' : '' }}
                                             {{ $status == 'Bekerja' ? 'bg-slate-500' : '' }}
-                                            {{ $status == 'Lainnya' ? 'bg-purple-500' : '' }}">
+                                            {{ in_array($status, ['Lainnya', 'Belum Mengisi']) ? 'bg-rose-500' : '' }}">
                                         </span>
-                                        {{ $status }}
+                                        <span class="{{ $status == 'Belum Mengisi' ? 'text-rose-500' : '' }}">{{ $status }}</span>
                                     </div>
                                 </div>
 
                                 <div class="bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Instansi / Tempat</p>
                                     <div class="text-lg font-black text-elevate-dark leading-tight line-clamp-1" title="{{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name }}">
-                                        {{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name ?? '-' }}
+                                        {{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name ?? 'Data Belum Diinput' }}
                                     </div>
                                     @if($student->alumniProfile->campus_major || $student->alumniProfile->position)
                                         <div class="text-xs font-bold text-elevate-primary mt-1.5 uppercase tracking-wide">
@@ -198,7 +204,7 @@
                         @endif
 
                     @else
-                        {{-- JIKA BELUM MENGISI --}}
+                        {{-- JIKA BENAR-BENAR BELUM MENGISI SAMA SEKALI (Null Profile) --}}
                         <div class="bg-white rounded-[2.5rem] p-12 shadow-sm border border-slate-100 text-center flex flex-col items-center justify-center min-h-[400px]">
                             <div class="w-24 h-24 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 shadow-sm">
                                 <i class="ph-duotone ph-clipboard-text text-5xl"></i>
