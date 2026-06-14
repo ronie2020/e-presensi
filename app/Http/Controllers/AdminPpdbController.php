@@ -107,7 +107,6 @@ class AdminPpdbController extends Controller
         
         try {
             // 1. Ambil pendaftar DITERIMA yang belum ada di tabel Student
-            // PERBAIKAN: Tambahkan whereNotNull('nisn') agar query tidak bocor
             $registrants = PpdbRegistrant::where('status', 'accepted')
                 ->whereNotIn('nisn', function($q) {
                     $q->select('nisn')->from('students')->whereNotNull('nisn');
@@ -126,25 +125,40 @@ class AdminPpdbController extends Controller
                 $classIds[] = $class->id;
             }
 
-            // 3. FASE PEMBERIAN NIS (Berdasarkan Urutan Abjad Keseluruhan)
+            // 3. FASE PEMBERIAN NIS (Berdasarkan Urutan Abjad)
             $registrants = $registrants->sortBy('full_name')->values();
 
-            // Panggil helper generateNextNis untuk mendapatkan Prefix (26277) dan Sequence awal
-            $nisData = Student::generateNextNis();
-            $prefixNis = $nisData['prefix'];
-            $sequence = $nisData['sequence'];
+            $currentYearShort = date('y'); 
+            $nextYearShort = sprintf('%02d', $currentYearShort + 1); 
+            $prefixNis = $currentYearShort . $nextYearShort . '7'; 
+            
+            $lastStudent = \App\Models\Student::withTrashed()
+                ->where('student_id', 'like', $prefixNis . '%')
+                ->orderBy('student_id', 'desc')
+                ->first();
+                
+            $sequence = 1;
+            if ($lastStudent && strlen($lastStudent->student_id) >= 8) {
+                $lastSequence = (int) substr($lastStudent->student_id, -3);
+                $sequence = $lastSequence + 1;
+            }
 
             foreach ($registrants as $reg) {
-                // Simpan NIS sementara di object tanpa menyentuh NISN asli
                 $reg->generated_nis = $prefixNis . str_pad($sequence, 3, '0', STR_PAD_LEFT); 
                 $sequence++;
             }
 
-            // 4. FASE PEMERATAAN KELAS (Round-Robin berdasarkan Nilai & Gender)
+            // 4. FASE PEMERATAAN KELAS (Round-Robin)
             $males = $registrants->where('gender', 'L')->sortByDesc('average_grade')->values();
             $females = $registrants->where('gender', 'P')->sortByDesc('average_grade')->values();
 
-            $classBuckets = array_fill(0, count($classIds), collect());
+            // ==========================================
+            // PERBAIKAN BUG UTAMA: Pembuatan Keranjang
+            // ==========================================
+            $classBuckets = [];
+            for ($i = 0; $i < count($classIds); $i++) {
+                $classBuckets[] = collect(); // Membuat keranjang yang BENAR-BENAR terpisah
+            }
 
             $idx = 0;
             foreach ($males as $m) {
@@ -164,7 +178,6 @@ class AdminPpdbController extends Controller
                 $classId = $classIds[$i];
                 
                 foreach ($bucket as $studentReg) {
-                    // Copy Foto jika ada
                     $newPhotoPath = null;
                     if ($studentReg->file_photo && Storage::disk('public')->exists($studentReg->file_photo)) {
                         $ext = pathinfo($studentReg->file_photo, PATHINFO_EXTENSION);
@@ -173,12 +186,11 @@ class AdminPpdbController extends Controller
                         $newPhotoPath = $newFileName;
                     }
 
-                    // PERBAIKAN: Pemetaan field disesuaikan agar NISN asli tidak tertimpa
-                    Student::create([
-                        'student_id' => $studentReg->generated_nis, // NIS Sekolah (Contoh: 26277001)
-                        'nis' => $studentReg->generated_nis,        // NIS Sekolah
-                        'nisn' => $studentReg->nisn,                // MURNI NISN ASLI DARI PPDB
-                        
+                   Student::create([
+                        'student_id' => $studentReg->nisn,           // Mengisi NISN asli dari PPDB (Untuk form & Login)
+                        'nisn' => $studentReg->nisn,                 // Backup NISN asli
+                        'nis' => $studentReg->generated_nis,         // NIS Sekolah berformat 26277xxx
+
                         'name' => $studentReg->full_name,
                         'nik' => $studentReg->nik,
                         'gender' => $studentReg->gender,
@@ -200,14 +212,14 @@ class AdminPpdbController extends Controller
                         'join_date' => now(), 
                         
                         'status' => 'active',
-                        'class_id' => $classId, // Langsung masuk ke kelas (7A - 7F)
+                        'class_id' => $classId, 
                         'photo_path' => $newPhotoPath,
                         'general_notes' => 'Masuk melalui PPDB Terpusat. Jalur: ' . ucfirst($studentReg->track),
                         'achievements' => $studentReg->achievements ?? null,
                         
-                        // PERBAIKAN: Password default siswa menggunakan NISN
                         'password' => Hash::make($studentReg->nisn),
                     ]);
+
                     $successCount++;
                 }
             }

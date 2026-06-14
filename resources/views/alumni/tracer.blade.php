@@ -15,7 +15,7 @@
                     <i class="ph-bold ph-arrow-left"></i> Kembali ke Dashboard
                 </a>
                 <h1 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Tracer Study</h1>
-                <p class="text-slate-400 max-w-xl mx-auto">Dimana kamu melanjutkan sekolah atau bekerja saat ini? Bantu sekolah mendata sebaran alumni dengan mengisi form ini.</p>
+                <p class="text-slate-400 max-w-xl mx-auto">Dimana kamu melanjutkan sekolah saat ini? Bantu sekolah mendata sebaran alumni dengan mengisi form ini.</p>
             </div>
         </div>
 
@@ -23,7 +23,6 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 -mt-20 relative z-20">
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 
-                {{-- Tampilkan Alert Error Global jika ada error validasi dari Laravel --}}
                 @if ($errors->any())
                 <div class="bg-rose-50 border-l-4 border-rose-500 p-4 m-8 mb-0 rounded-r-2xl">
                     <div class="flex items-center gap-2 text-rose-700 font-bold mb-1">
@@ -37,9 +36,17 @@
                 </div>
                 @endif
 
+                @php
+                    // Logika Konversi Data Lama: Bekerja/Mencari Kerja dialihkan ke Tidak Lanjut
+                    $currentStatus = old('activity_status', $profile?->activity_status ?? 'SMA');
+                    if(in_array($currentStatus, ['Bekerja', 'Lainnya', 'Mencari Kerja'])) {
+                        $currentStatus = 'Tidak Lanjut';
+                    }
+                @endphp
+
                 <form action="{{ route('alumni.store_tracer') }}" method="POST" 
                       x-data="{ 
-                          status: '{{ old('activity_status', $profile?->activity_status ?? 'SMA') }}',
+                          status: '{{ $currentStatus }}',
                           rating: {{ old('rating', $profile?->rating ?? 5) }}
                       }">
                     @csrf
@@ -81,7 +88,7 @@
                                 <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shadow-sm"><i class="ph-duotone ph-backpack"></i></div>
                                 <div>
                                     <h3 class="text-lg font-black text-slate-800">Aktivitas Saat Ini</h3>
-                                    <p class="text-sm text-slate-500">Pilih kegiatan utamamu setelah lulus.</p>
+                                    <p class="text-sm text-slate-500">Pilih kegiatan utamamu setelah lulus dari SMP.</p>
                                 </div>
                             </div>
 
@@ -117,25 +124,25 @@
                                             <i class="ph-bold ph-mosque text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-teal-500"></i><span class="text-[11px] lg:text-sm">Pesantren</span>
                                         </div>
                                     </label>
-                                    {{-- Opsi Bekerja --}}
+                                    {{-- Opsi Paket C --}}
                                     <label class="cursor-pointer group">
-                                        <input type="radio" name="activity_status" value="Bekerja" x-model="status" class="peer sr-only">
+                                        <input type="radio" name="activity_status" value="Paket C" x-model="status" class="peer sr-only">
                                         <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 peer-checked:shadow-lg peer-checked:shadow-indigo-500/30 transition-all hover:border-indigo-300 hover:bg-slate-50">
-                                            <i class="ph-bold ph-briefcase text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-indigo-600"></i><span class="text-xs lg:text-sm">Bekerja</span>
+                                            <i class="ph-bold ph-certificate text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-indigo-600"></i><span class="text-xs lg:text-sm">Paket C</span>
                                         </div>
                                     </label>
-                                    {{-- Opsi Gap Year / Belum Bekerja --}}
+                                    {{-- Opsi Tidak Lanjut --}}
                                     <label class="cursor-pointer group">
-                                        <input type="radio" name="activity_status" value="Lainnya" x-model="status" class="peer sr-only">
-                                        <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-slate-700 peer-checked:text-white peer-checked:border-slate-700 peer-checked:shadow-lg peer-checked:shadow-slate-500/30 transition-all hover:border-slate-300 hover:bg-slate-50" title="Belum Bekerja / Fokus Tes CPNS dll">
-                                            <i class="ph-bold ph-coffee text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-slate-600"></i><span class="text-[11px] lg:text-sm">Lainnya</span>
+                                        <input type="radio" name="activity_status" value="Tidak Lanjut" x-model="status" class="peer sr-only">
+                                        <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-slate-700 peer-checked:text-white peer-checked:border-slate-700 peer-checked:shadow-lg peer-checked:shadow-slate-500/30 transition-all hover:border-slate-300 hover:bg-slate-50" title="Belum Melanjutkan Pendidikan">
+                                            <i class="ph-bold ph-house text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-slate-600"></i><span class="text-[11px] lg:text-sm">Tidak Lanjut</span>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
                             {{-- KONTEN DINAMIS: SEKOLAH LANJUTAN --}}
-                            <div x-show="['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)" 
+                            <div x-show="['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C'].includes(status)" 
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0"
@@ -144,10 +151,10 @@
                                 <h4 class="text-sm font-bold text-blue-800 mb-4 flex items-center gap-2"><i class="ph-fill ph-buildings"></i> Detail Sekolah Lanjutan</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="col-span-2 md:col-span-2">
-                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Nama Sekolah / Pesantren <span class="text-rose-500">*</span></label>
+                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Nama Sekolah / Pesantren / PKBM <span class="text-rose-500">*</span></label>
                                         <input type="text" name="campus_name" value="{{ old('campus_name', $profile?->campus_name ?? '') }}" placeholder="Contoh: SMAN 1 Lakbok / SMK Taruna"
                                                class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4"
-                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)">
+                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C'].includes(status)">
                                     </div>
                                     
                                     <div x-show="status !== 'Pesantren'">
@@ -161,13 +168,13 @@
                                         <input type="number" name="campus_entry_year" value="{{ old('campus_entry_year', $profile?->campus_entry_year ?? date('Y')) }}"
                                                min="2000" max="{{ date('Y') + 1 }}"
                                                class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4"
-                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)">
+                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C'].includes(status)">
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- KONTEN DINAMIS: BEKERJA / LAINNYA --}}
-                            <div x-show="['Bekerja', 'Lainnya'].includes(status)" 
+                            {{-- KONTEN DINAMIS: TIDAK LANJUT --}}
+                            <div x-show="status === 'Tidak Lanjut'" 
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0"
@@ -175,45 +182,23 @@
                                 
                                 <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ph-fill ph-info"></i> Detail Kegiatan / Pekerjaan</h4>
                                 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <template x-if="status === 'Bekerja'">
-                                        <div class="col-span-2 md:col-span-1 mb-2">
-                                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nama Tempat Kerja / Perusahaan <span class="text-rose-500">*</span></label>
-                                            <input type="text" name="company_name" value="{{ old('company_name', $profile?->company_name ?? '') }}" placeholder="Contoh: PT. Maju Mundur / Alfamart"
-                                                   class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4"
-                                                   x-bind:required="status === 'Bekerja'">
-                                        </div>
-                                    </template>
-
-                                    <div class="col-span-2" :class="status === 'Bekerja' ? 'md:col-span-1 mb-2' : ''">
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="col-span-1 mb-2">
                                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">
-                                            <span x-text="status === 'Bekerja' ? 'Posisi / Jabatan' : 'Keterangan Kegiatan / Kesibukan'"></span> <span class="text-rose-500">*</span>
+                                            Keterangan Kegiatan / Kesibukan <span class="text-rose-500">*</span>
                                         </label>
                                         <input type="text" name="position" value="{{ old('position', $profile?->position ?? '') }}" 
-                                               x-bind:placeholder="status === 'Bekerja' ? 'Contoh: Staff Gudang / Pramuniaga / Owner' : 'Contoh: Membantu Orang Tua / Persiapan Tes Masuk TNI'"
+                                               placeholder="Contoh: Membantu Orang Tua / Bekerja / Kursus"
                                                class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4" 
-                                               x-bind:required="['Bekerja', 'Lainnya'].includes(status)">
+                                               x-bind:required="status === 'Tidak Lanjut'">
                                     </div>
 
                                     <!-- UI Enhancement: Information Cards -->
-                                    <div class="col-span-2 mt-2" x-show="status === 'Bekerja'" x-cloak
-                                         x-transition:enter="transition ease-out duration-300"
-                                         x-transition:enter-start="opacity-0 translate-y-2">
-                                        <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 flex gap-3 items-start shadow-sm">
-                                            <i class="ph-fill ph-info text-indigo-500 text-xl"></i>
-                                            <p class="text-xs text-indigo-700 leading-relaxed font-medium">
-                                                <strong>Catatan Wirausaha:</strong> Jika Anda memiliki usaha sendiri, silakan isi "Nama Tempat Kerja" dengan nama toko/usaha Anda, dan isi Posisi sebagai "Pemilik" atau "Owner".
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-span-2 mt-2" x-show="status === 'Lainnya'" x-cloak
-                                         x-transition:enter="transition ease-out duration-300"
-                                         x-transition:enter-start="opacity-0 translate-y-2">
+                                    <div class="col-span-1 mt-2">
                                         <div class="bg-slate-100/50 border border-slate-200 rounded-2xl p-4 flex gap-3 items-start shadow-sm">
-                                            <i class="ph-fill ph-coffee text-slate-400 text-xl"></i>
+                                            <i class="ph-fill ph-house text-slate-400 text-xl"></i>
                                             <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                                                <strong>Gap Year / Belum Lanjut:</strong> Tidak apa-apa jika saat ini belum melanjutkan pendidikan formal atau bekerja. Silakan tuliskan kegiatan positif Anda pada kolom di atas (misal: "Kursus Bahasa", "Mengabdi di Pesantren", dsb).
+                                                <strong>Tidak Melanjutkan:</strong> Tidak masalah jika saat ini Anda belum melanjutkan pendidikan formal. Silakan tuliskan kegiatan positif Anda pada kolom di atas (misal: "Bekerja mandiri", "Membantu orang tua", "Kursus", dsb).
                                             </p>
                                         </div>
                                     </div>

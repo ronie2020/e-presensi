@@ -44,21 +44,21 @@ class AdminAlumniController extends Controller
         // Filter Aktivitas
         if ($request->filled('activity')) {
             $query->whereHas('alumniProfile', function($q) use ($request) {
-                $q->where('activity_status', $request->activity);
+                if ($request->activity == 'Tidak Lanjut') {
+                    $q->whereIn('activity_status', ['Tidak Lanjut', 'Mencari Kerja', 'Bekerja', 'Lainnya']);
+                } else {
+                    $q->where('activity_status', $request->activity);
+                }
             });
         }
 
         $alumni = $query->orderBy('name', 'asc')->paginate(20)->withQueryString();
 
-        // Statistik 
+        // Statistik Diperbarui untuk Lulusan SMP
         $stats = [
-            'total' => Student::where('status', 'graduated')->count(),            
-           
-            'kuliah' => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren'])->count(),
-            
-            'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha'])->count(),            
-          
-            'mencari' => AlumniProfile::whereIn('activity_status', ['Mencari Kerja', 'Tidak Lanjut'])->count(),
+            'total'             => Student::where('status', 'graduated')->count(),            
+            'lanjut_sekolah'    => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C'])->count(),
+            'tidak_lanjut'      => AlumniProfile::whereIn('activity_status', ['Tidak Lanjut', 'Mencari Kerja', 'Bekerja', 'Lainnya'])->count(),
         ];
 
         // Kirim variabel 'years' untuk filter tahun

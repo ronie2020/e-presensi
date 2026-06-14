@@ -17,7 +17,7 @@
             </span>
             <h2 class="text-3xl font-black text-white sm:text-4xl leading-tight">Jejak Langkah Alumni</h2>
             <p class="mt-4 text-sm md:text-base text-white/70 dark:text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed transition-colors">
-                Melihat sebaran dan kisah sukses para alumni SMPN 3 Lakbok yang telah melanjutkan ke jenjang pendidikan lebih tinggi maupun dunia profesional.
+                Melihat sebaran dan kisah sukses para alumni SMPN 3 Lakbok yang telah melanjutkan ke jenjang pendidikan lebih tinggi maupun kegiatan lainnya.
             </p>
         </div>
 
@@ -40,8 +40,8 @@
                 <p class="text-[10px] font-bold text-elevate-accent uppercase tracking-wider">Pesantren</p>
             </div>
             <div class="bg-white/5 dark:bg-slate-800/40 backdrop-blur-md border border-white/10 dark:border-slate-700/50 rounded-[2rem] p-6 text-center hover:bg-white/10 dark:hover:bg-slate-800/60 transition-all duration-300 group shadow-lg" data-aos="fade-up" data-aos-delay="400">
-                <p class="text-4xl font-black text-slate-300 mb-2 group-hover:scale-110 transition-transform">{{ $alumniStats['bekerja'] ?? 0 }}</p>
-                <p class="text-[10px] font-bold text-elevate-accent uppercase tracking-wider">Bekerja</p>
+                <p class="text-4xl font-black text-slate-300 mb-2 group-hover:scale-110 transition-transform">{{ $alumniStats['tidak_lanjut'] ?? 0 }}</p>
+                <p class="text-[10px] font-bold text-elevate-accent uppercase tracking-wider">Tidak Lanjut</p>
             </div>
         </div>
 
@@ -65,14 +65,21 @@
                                             <div class="w-full h-full flex items-center justify-center bg-elevate-primary text-white font-bold text-xl">{{ substr($testi->student->name ?? 'A', 0, 1) }}</div>
                                         @endif
                                     </div>
-                                    <div>
+                                    <div class="flex-1 min-w-0">
                                         <h4 class="font-black text-white text-base leading-tight line-clamp-1">{{ $testi->student->name ?? 'Alumni' }}</h4>
-                                        <p class="text-[10px] text-elevate-primary dark:text-elevate-accent font-black uppercase tracking-widest mt-0.5 transition-colors">
-                                            {{ $testi->activity_status }} 
-                                            @if($testi->campus_name || $testi->company_name)
-                                                <span class="text-white/60 font-bold">@ {{ Str::limit($testi->campus_name ?? $testi->company_name, 20) }}</span>
-                                            @endif
-                                        </p>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                                            {{-- Menambahkan Tahun Lulus disini --}}
+                                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-elevate-accent/20 text-elevate-accent uppercase tracking-wider border border-elevate-accent/20">
+                                                Lulusan {{ $testi->student->graduation_year ?? ($testi->student->graduated_date ? \Carbon\Carbon::parse($testi->student->graduated_date)->year : '-') }}
+                                            </span>
+                                            
+                                            <span class="text-[10px] text-white/70 font-bold uppercase tracking-widest transition-colors flex items-center gap-1">
+                                                {{ in_array($testi->activity_status, ['Bekerja', 'Mencari Kerja', 'Lainnya']) ? 'Tidak Lanjut' : $testi->activity_status }} 
+                                                @if($testi->campus_name || $testi->company_name)
+                                                    <span class="text-white/40 truncate max-w-[100px]">@ {{ Str::limit($testi->campus_name ?? $testi->company_name, 20) }}</span>
+                                                @endif
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 

@@ -19,16 +19,27 @@ class PromotionController extends Controller
         
         $students = [];
         
-        // Jika admin sudah memilih kelas asal, panggil data siswa di kelas tersebut
         if ($request->has('from_class_id') && $request->from_class_id != '') {
-            $students = Student::where('class_id', $request->from_class_id)
-                ->where(function($q) {
-                    // Pastikan tidak memanggil siswa yang sudah lulus
-                    $q->where('status', '!=', 'graduated')
-                      ->orWhereNull('status');
-                })
-                ->orderBy('name', 'asc')
-                ->get();
+            $fromClassId = $request->from_class_id;
+            
+            $query = Student::with('schoolClass')->where(function($q) {
+                // Pastikan tidak memanggil siswa yang sudah lulus
+                $q->where('status', '!=', 'graduated')
+                  ->orWhereNull('status');
+            });
+
+            // LOGIKA BARU: Jika memilih "Semua Tingkat" (Contoh: level_7)
+            if (str_starts_with($fromClassId, 'level_')) {
+                $level = substr($fromClassId, 6); // Ambil angka tingkatnya, misal "7"
+                // Cari ID semua kelas yang namanya berawalan "7" (7A, 7B, 7C, dst)
+                $levelClassIds = SchoolClass::where('name', 'like', $level . '%')->pluck('id');
+                $query->whereIn('class_id', $levelClassIds);
+            } else {
+                // Jika memilih 1 kelas spesifik
+                $query->where('class_id', $fromClassId);
+            }
+
+            $students = $query->orderBy('name', 'asc')->get();
         }
 
         return view('promotions.index', compact('classes', 'students'));
@@ -39,20 +50,20 @@ class PromotionController extends Controller
      */
     public function process(Request $request)
     {
-        // 1. Validasi Input (Diperketat untuk target_action)
+        // 1. Validasi Input
         $request->validate([
-            'from_class_id' => 'required|exists:classes,id',
+            'from_class_id' => 'required',
             'student_ids'   => 'required|array',
             'student_ids.*' => 'exists:students,id',
-            'academic_year' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'], // Format YYYY/YYYY
+            'academic_year' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'], 
             'target_action' => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    // Jika valuenya 'alumni', berarti valid
-                    if ($value === 'alumni') {
+                    // Valid jika tujuannya alumni atau fitur acak (roll_X)
+                    if ($value === 'alumni' || str_starts_with($value, 'roll_')) {
                         return;
                     }
-                    // Jika bukan 'alumni', pastikan ID kelas tujuan benar-benar ada di database
+                    // Jika bukan keduanya, pastikan ID kelas tujuan ada
                     if (!SchoolClass::where('id', $value)->exists()) {
                         $fail('Tujuan pemindahan kelas tidak valid atau tidak ditemukan.');
                     }
@@ -71,59 +82,127 @@ class PromotionController extends Controller
         // Menggunakan Database Transaction
         DB::beginTransaction();
         try {
+            
+            // ==========================================
+            // LOGIKA 1: PROSES KELULUSAN / ALUMNI
+            // ==========================================
             if ($request->target_action === 'alumni') {
-                // ==========================================
-                // PROSES KELULUSAN / ALUMNI
-                // ==========================================
                 
-                // 1. Update status siswa di tabel utama
                 Student::whereIn('id', $studentIds)->update([
                     'status'         => 'graduated',
-                    'class_id'       => null, // Dikeluarkan dari kelas aktif
+                    'class_id'       => null, 
                     'graduated_date' => now()
                 ]);
                 
-                // 2. Rekam ke tabel Riwayat (Mencatat mereka lulus dari kelas mana)
                 $historyData = [];
                 $now = now()->toDateTimeString();
-                foreach ($studentIds as $id) {
+                // Ambil data siswa untuk mengetahui kelas terakhir mereka
+                $selectedStudents = Student::whereIn('id', $studentIds)->get();
+                
+                foreach ($selectedStudents as $student) {
                     $historyData[] = [
-                        'student_id'    => $id,
-                        'class_id'      => $request->from_class_id, // Mencatat kelas terakhir (kelas asal)
+                        'student_id'    => $student->id,
+                        'class_id'      => $student->class_id, // Kelas asal
                         'academic_year' => $request->academic_year,
-                        // 'status' => 'graduated', // Hilangkan komentar ini jika tabel history punya kolom status
                         'created_at'    => $now,
                         'updated_at'    => $now,
                     ];
                 }
                 \App\Models\StudentClassHistory::insert($historyData);
-                
                 $message = "Berhasil! {$count} Siswa telah diluluskan dan menjadi alumni.";
                 
-            } else {
-                // ==========================================
-                // NAIK KELAS / PINDAH KELAS
-                // ==========================================
+            } 
+            // ==========================================
+            // LOGIKA 2: ROLLING/ACAK TINGKAT MASSAL
+            // ==========================================
+            elseif (str_starts_with($request->target_action, 'roll_')) {
+                
+                $level = substr($request->target_action, 5); // misal "8"
+                $targetClasses = SchoolClass::where('name', 'like', $level . '%')->orderBy('name')->get();
+
+                if ($targetClasses->isEmpty()) {
+                    return back()->with('error', "Gagal! Kelas tujuan untuk tingkat {$level} tidak ditemukan (Belum ada kelas 8A, 8B, dst di master data).");
+                }
+
+                $selectedStudents = Student::whereIn('id', $studentIds)->get();
+
+                // Pisahkan berdasarkan Gender
+                $males = $selectedStudents->where('gender', 'L')->values();
+                $females = $selectedStudents->where('gender', 'P')->values();
+
+                // Siapkan Keranjang Kelas
+                $classBuckets = [];
+                for ($i = 0; $i < $targetClasses->count(); $i++) {
+                    $classBuckets[] = collect();
+                }
+
+                // Bagikan Laki-laki secara Round-Robin
+                $idx = 0;
+                foreach ($males as $m) {
+                    $classBuckets[$idx]->push($m);
+                    $idx = ($idx + 1) % $targetClasses->count();
+                }
+
+                // Bagikan Perempuan secara Round-Robin
+                $idx = 0;
+                foreach ($females as $f) {
+                    $classBuckets[$idx]->push($f);
+                    $idx = ($idx + 1) % $targetClasses->count();
+                }
+
+                $historyData = [];
+                $now = now()->toDateTimeString();
+
+                // Simpan ke Database
+                foreach ($classBuckets as $i => $bucket) {
+                    $targetClassId = $targetClasses[$i]->id;
+                    $bucketStudentIds = $bucket->pluck('id')->toArray();
+
+                    if (!empty($bucketStudentIds)) {
+                        // Update Kelas Siswa
+                        Student::whereIn('id', $bucketStudentIds)->update([
+                            'class_id' => $targetClassId,
+                            'status' => 'active'
+                        ]);
+
+                        // Catat ke History
+                        foreach ($bucketStudentIds as $id) {
+                            $historyData[] = [
+                                'student_id'    => $id,
+                                'class_id'      => $targetClassId,
+                                'academic_year' => $request->academic_year,
+                                'created_at'    => $now,
+                                'updated_at'    => $now,
+                            ];
+                        }
+                    }
+                }
+                
+                \App\Models\StudentClassHistory::insert($historyData);
+                $message = "Keajaiban Terjadi! {$count} Siswa berhasil diacak merata dan dipindahkan ke seluruh Kelas {$level}.";
+
+            }
+            // ==========================================
+            // LOGIKA 3: NAIK KELAS / PINDAH 1 KELAS SPESIFIK
+            // ==========================================
+            else {
                 $targetClass = SchoolClass::findOrFail($request->target_action);
                 
-                // Proteksi: Jangan pindahkan ke kelas yang sama
                 if ($request->from_class_id == $targetClass->id) {
                     return back()->with('error', 'Kelas tujuan tidak boleh sama dengan kelas asal!');
                 }
 
-                // 1. Update kelas saat ini di tabel Students
                 Student::whereIn('id', $studentIds)->update([
                     'class_id' => $targetClass->id,
-                    'status'   => 'active' // Pastikan statusnya aktif
+                    'status'   => 'active' 
                 ]);
 
-                // 2. Rekam ke tabel Riwayat (Mencatat mereka masuk ke kelas baru)
                 $historyData = [];
                 $now = now()->toDateTimeString();
                 foreach ($studentIds as $id) {
                     $historyData[] = [
                         'student_id'    => $id,
-                        'class_id'      => $targetClass->id, // Mencatat kelas tujuan baru
+                        'class_id'      => $targetClass->id, 
                         'academic_year' => $request->academic_year,
                         'created_at'    => $now,
                         'updated_at'    => $now,
@@ -135,7 +214,8 @@ class PromotionController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('promotions.index')->with('success', $message);
+            return redirect()->route('promotions.index', ['from_class_id' => $request->from_class_id])
+                             ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
