@@ -32,6 +32,7 @@ use App\Models\Schedule;
 use App\Models\CbtExam; 
 use App\Models\CbtStudentExam; 
 use App\Models\AcademicCalendar;
+use App\Models\AcademicYear;
 use App\Models\StudentPointHistory;
 use Illuminate\Support\Facades\Storage;
 
@@ -124,7 +125,7 @@ class StudentPortalController extends Controller
     // =======================================================================
     // FUNGSI SHOW 
     // =======================================================================
-    public function show($id, AttendanceAnalyticService $attendanceService, DisciplineService $disciplineService)
+     public function show(Request $request, $id, AttendanceAnalyticService $attendanceService, DisciplineService $disciplineService)
     {
         // 1. VALIDASI AKSES
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
@@ -275,17 +276,40 @@ class StudentPortalController extends Controller
              $library_history = Borrowing::with('book')->where('student_id', $id)->orderBy('borrow_date', 'desc')->take(5)->get();
              $library_visits = Borrowing::where('student_id', $id)->count();
         }
-        if (class_exists(Book::class)) {
+       if (class_exists(Book::class)) {
             $ebooks = Book::whereNotNull('ebook_path')->latest()->get();
             if(class_exists(EbookRead::class)) {
                 $ebookHistory = EbookRead::where('student_id', $id)->with('book')->latest()->get()->unique('book_id')->take(5);
             }
         }
 
+        // --- FILTER TAHUN AJARAN & SEMESTER (UNTUK RAPOR) ---
+        $years = collect([]);
+        $selectedYear = '2024/2025';
+        $selectedSemester = 1;
+        
+        if (class_exists(AcademicYear::class)) {
+            $years = AcademicYear::select('name')->distinct()->orderBy('name', 'desc')->get();
+            $activeYear = AcademicYear::where('is_active', true)->first();
+
+            $selectedYear = $request->query('academic_year', $activeYear ? $activeYear->name : '2024/2025');
+            
+            $defaultSemester = 1;
+            if ($activeYear && $activeYear->semester == 'Genap') {
+                $defaultSemester = 2;
+            }
+            $selectedSemester = $request->query('semester', $defaultSemester);
+        }
+
         // --- DATA AKADEMIK ---
         $academic_record = null; $chartData = ['labels' => [], 'scores' => []];
         if (class_exists(GradeRecord::class)) {
-             $academic_record = GradeRecord::with(['items.subject'])->where('student_id', $id)->latest()->first();
+             $academic_record = GradeRecord::with(['items.subject'])
+                ->where('student_id', $id)
+                ->where('academic_year', $selectedYear)
+                ->where('semester', $selectedSemester)
+                ->first();
+                
              if ($academic_record) {
                 foreach($academic_record->items as $item) {
                     $chartData['labels'][] = $item->subject->name ?? 'Mapel';
@@ -442,6 +466,9 @@ class StudentPortalController extends Controller
             'ebookHistory' => $ebookHistory, 
             'academic_record' => $academic_record, 
             'chartData' => $chartData, 
+            'years' => $years,
+            'selectedYear' => $selectedYear,
+            'selectedSemester' => $selectedSemester,
             'teaching_journals' => $teaching_journals,
             'bkSessions' => $bkSessions,
             'todayRamadanLog' => $todayRamadanLog, 

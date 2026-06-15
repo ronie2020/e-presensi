@@ -13,6 +13,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsExport;
 use Maatwebsite\Excel\Validators\ValidationException;
+use App\Models\AcademicYear;
+use App\Models\GradeRecord;
 
 class StudentController extends Controller
 {
@@ -27,7 +29,7 @@ class StudentController extends Controller
         // --- PERBAIKAN DI SINI ---
         $search = $request->get('search');
         $filter_class_id = $request->get('filter_class_id');
-        $filter_status = $request->get('filter_status'); // Variabel ini sebelumnya belum didefinisikan
+        $filter_status = $request->get('filter_status'); 
         // -------------------------
 
         $query = Student::with('schoolClass')
@@ -78,9 +80,9 @@ class StudentController extends Controller
         });
 
         $students = $query->orderBy('classes.name', 'asc') 
-                         ->orderBy('students.name', 'asc')
-                         ->paginate(10)
-                         ->appends(request()->query());
+                          ->orderBy('students.name', 'asc')
+                          ->paginate(10)
+                          ->appends(request()->query());
 
         return view('students.index', [
             'classes' => $classes,
@@ -124,7 +126,6 @@ class StudentController extends Controller
         $data = $request->except(['_token', '_method', 'photo']);
 
         // 3. FIX: Generate Default Password (NISN)
-        // Agar siswa manual bisa login nantinya jika sistem password diaktifkan
         $data['password'] = Hash::make($request->student_id);
 
         // 4. Proses Upload Foto (Jika Ada)
@@ -139,10 +140,38 @@ class StudentController extends Controller
         return redirect()->route('students.index')->with('success', 'Siswa berhasil ditambahkan.');
     }
 
-    public function show(Student $student)
+    /**
+     * Menampilkan profil siswa beserta filter nilai yang dinamis.
+     */
+    public function show(Request $request, Student $student)
     {
+        // 1. Ambil daftar semua tahun ajaran untuk Dropdown (secara dinamis dari database)
+        $years = AcademicYear::select('name')->distinct()->orderBy('name', 'desc')->get();
+        $activeYear = AcademicYear::where('is_active', true)->first();
+
+        // 2. Tangkap filter dari URL (Jika tidak ada, gunakan tahun aktif saat ini)
+        $selectedYear = $request->query('academic_year', $activeYear ? $activeYear->name : '2024/2025');
+        
+        // 3. Konversi Ganjil/Genap ke angka 1 atau 2 untuk default
+        $defaultSemester = 1;
+        if ($activeYear && $activeYear->semester == 'Genap') {
+            $defaultSemester = 2;
+        }
+        $selectedSemester = $request->query('semester', $defaultSemester);
+
+        // 4. Ambil nilai (Grade Record) beserta item mapelnya berdasarkan filter
+        $academic_record = GradeRecord::with('items.subject')
+                            ->where('student_id', $student->id)
+                            ->where('academic_year', $selectedYear)
+                            ->where('semester', $selectedSemester)
+                            ->first();
+
         return view('students.show', [
-            'student' => $student
+            'student' => $student,
+            'academic_record' => $academic_record,
+            'years' => $years,
+            'selectedYear' => $selectedYear,
+            'selectedSemester' => $selectedSemester,
         ]);
     }
 
@@ -151,10 +180,7 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
-        // ==========================================
         // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin dan TU
-        // MENGGUNAKAN SPATIE PERMISSION
-        // ==========================================
         if ($student->status === 'graduated' && !Auth::user()->hasAnyRole(['Admin', 'TU'])) {
             return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni dikunci dan hanya dapat diperbarui oleh Admin TU.');
         }
@@ -171,10 +197,7 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        // ==========================================
-        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin dan TU
-        // MENGGUNAKAN SPATIE PERMISSION
-        // ==========================================
+        // Gembok Belakang: Blokir jika sudah Alumni
         if ($student->status === 'graduated' && !Auth::user()->hasAnyRole(['Admin', 'TU'])) {
             return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni tidak dapat diedit melalui jalur ini.');
         }
@@ -191,15 +214,13 @@ class StudentController extends Controller
         $request->validate($rules);
 
         // Ambil data input
-        $data = $request->except(['_token', '_method', 'photo', 'password']); // Jangan update password sembarangan
+        $data = $request->except(['_token', '_method', 'photo', 'password']); 
 
         // 2. Proses Upload Foto
         if ($request->hasFile('photo')) {
-            // Hapus foto lama jika ada
             if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
                 Storage::disk('public')->delete($student->photo_path);
             }
-            // Simpan foto baru
             $path = $request->file('photo')->store('students', 'public');
             $data['photo_path'] = $path;
         }
@@ -207,15 +228,10 @@ class StudentController extends Controller
        // 3. Update Database
         $student->update($data);
         
-        // ==========================================
-        // PENENTUAN ARAH KEMBALI (REDIRECT) SETELAH SIMPAN
-        // ==========================================
         if ($student->status === 'graduated') {
-            // Jika yang diedit adalah alumni, arahkan kembali ke halaman alumni
             return redirect()->route('admin.alumni.index')->with('success', 'Data Buku Induk alumni berhasil diperbarui.');
         }
 
-        // Jika yang diedit adalah siswa aktif biasa, arahkan kembali ke halaman siswa
         return redirect()->route('students.index', request()->query())->with('success', 'Data Buku Induk siswa berhasil diperbarui.');
     }
 
@@ -224,7 +240,6 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        // Hapus foto jika ada (opsional, tergantung kebijakan soft delete)
         if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
            Storage::disk('public')->delete($student->photo_path);
         }
@@ -239,7 +254,6 @@ class StudentController extends Controller
     public function destroyBatch(Request $request)
     {
         $ids = explode(',', $request->ids);
-        // Hapus foto jika ada
         $students = Student::whereIn('id', $ids)->get();
         foreach($students as $student) {
             if ($student->photo_path && \Storage::disk('public')->exists($student->photo_path)) {
@@ -284,10 +298,7 @@ class StudentController extends Controller
     }
 
     /**
-     * =========================================================
-     * FUNGSI BARU: Cetak Kartu OSIS Massal berdasarkan Kelas
-     * Atau Spesifik berdasarkan ID yang dipilih via Checkbox
-     * =========================================================
+     * Cetak Kartu OSIS Massal
      */
     public function printBatch(Request $request)
     {
@@ -302,13 +313,11 @@ class StudentController extends Controller
                   ->orWhereNull('status');
             });
 
-        // 1. Jika URL memiliki parameter 'ids' (Cetak Terpilih via Checkbox)
         if ($request->has('ids')) {
             $ids = explode(',', $request->ids);
             $students = $query->whereIn('id', $ids)->orderBy('name', 'asc')->get();
             $className = 'Siswa Terpilih (' . count($students) . ' Orang)';
         } 
-        // 2. Jika URL memiliki parameter 'class_id' (Cetak 1 Kelas Penuh)
         else {
             $class = SchoolClass::find($request->class_id);
             $students = $query->where('class_id', $request->class_id)->orderBy('name', 'asc')->get();

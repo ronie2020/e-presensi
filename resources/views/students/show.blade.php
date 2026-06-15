@@ -298,6 +298,42 @@
                 </thead>
                <tbody>
                     @php
+                        // --- LOGIKA CERDAS PENCARIAN NILAI BERDASARKAN TAHUN AJARAN ---
+                        $activeYearStr = \App\Models\AcademicYear::where('is_active', true)->first()->name ?? '2024/2025';
+                        $activeStartYear = (int) substr($activeYearStr, 0, 4);
+
+                        $ta7 = ''; $ta8 = ''; $ta9 = '';
+                        
+                        // Jika Alumni, hitung mundur dari tahun lulus
+                        if ($student->status === 'graduated' || !empty($student->graduated_date)) {
+                            $gradYear = !empty($student->graduated_date) 
+                                ? (int) \Carbon\Carbon::parse($student->graduated_date)->format('Y') 
+                                : $activeStartYear;
+                            
+                            $ta9 = ($gradYear - 1) . '/' . $gradYear;
+                            $ta8 = ($gradYear - 2) . '/' . ($gradYear - 1);
+                            $ta7 = ($gradYear - 3) . '/' . ($gradYear - 2);
+                        } else {
+                            $level = 7;
+                            $className = $student->schoolClass->name ?? '';
+                            if (preg_match('/^VIII|^8/i', $className)) $level = 8;
+                            if (preg_match('/^IX|^9/i', $className)) $level = 9;
+
+                            $ta7 = ($activeStartYear - ($level - 7)) . '/' . ($activeStartYear - ($level - 7) + 1);
+                            $ta8 = ($activeStartYear - ($level - 8)) . '/' . ($activeStartYear - ($level - 8) + 1);
+                            $ta9 = ($activeStartYear - ($level - 9)) . '/' . ($activeStartYear - ($level - 9) + 1);
+                        }
+
+                        // Ambil SEMUA nilai siswa ini sekaligus
+                        $mappedScores = [];
+                        $allGrades = \App\Models\GradeRecord::with('items.subject')->where('student_id', $student->id)->get();
+                        foreach($allGrades as $rec) {
+                            foreach($rec->items as $item) {
+                                $subjName = strtolower(trim($item->subject->name ?? ''));
+                                $mappedScores[$rec->academic_year][$rec->semester][$subjName] = $item->score;
+                            }
+                        }
+
                         $mapelInduk = \App\Models\Subject::orderBy('order')->get();
                         $no = 1;
 
@@ -308,13 +344,14 @@
 
                     @foreach($mapelInduk as $mapel)
                     @php
-                        // Tarik data nilai aslinya
-                        $v71 = $student->getScore($mapel->name, 7, 1);
-                        $v72 = $student->getScore($mapel->name, 7, 2);
-                        $v81 = $student->getScore($mapel->name, 8, 1);
-                        $v82 = $student->getScore($mapel->name, 8, 2);
-                        $v91 = $student->getScore($mapel->name, 9, 1);
-                        $v92 = $student->getScore($mapel->name, 9, 2);
+                        $mName = strtolower(trim($mapel->name));
+                        // Petakan nilai langsung dari dictionary tahun ajaran
+                        $v71 = $mappedScores[$ta7][1][$mName] ?? '-';
+                        $v72 = $mappedScores[$ta7][2][$mName] ?? '-';
+                        $v81 = $mappedScores[$ta8][1][$mName] ?? '-';
+                        $v82 = $mappedScores[$ta8][2][$mName] ?? '-';
+                        $v91 = $mappedScores[$ta9][1][$mName] ?? '-';
+                        $v92 = $mappedScores[$ta9][2][$mName] ?? '-';
 
                         // Cek jika nilainya angka (bukan '-' atau kosong), masukkan ke perhitungan total
                         if(is_numeric($v71)) { $totals['71'] += (float)$v71; $counts['71']++; }
