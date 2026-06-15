@@ -37,7 +37,8 @@ class KioskController extends Controller
         
         // FIX TIMEZONE: Pastikan waktu dari Kiosk dikonversi ke zona waktu lokal (Asia/Jakarta)
         $scanTime = $request->time ? Carbon::parse($request->time)->setTimezone(config('app.timezone', 'Asia/Jakarta')) : Carbon::now();
-// 1. Cari Siswa
+        
+        // 1. Cari Siswa
         $student = Student::where('student_id', $request->student_id)
                             ->orWhere('rfid_id', $request->student_id)
                             ->orWhere('nisn', $request->student_id)
@@ -59,8 +60,10 @@ class KioskController extends Controller
             } elseif ($scanType === 'Ekstrakurikuler') {
                 $res = $attendanceService->processExtra($student, $request->extra_id, $scanTime);
             } else {
-                // Tipe Harian, panggil mode 'kiosk' agar strict mode berjalan
-                $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, 'kiosk');
+                // PERBAIKAN: Beritahu sistem bahwa admin mem-Bypass secara manual (Pilih Masuk atau Pulang secara paksa)
+                // Jika dari aplikasi kiosk tidak didefinisikan secara khusus (karena Auto), tetap serahkan ke 'kiosk'
+                $modeForService = in_array($scanType, ['Masuk', 'Pulang']) ? $scanType : 'kiosk';
+                $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, $modeForService);
             }
 
             if (!$res['success']) {
@@ -127,7 +130,6 @@ class KioskController extends Controller
                 $scanType = $scan['type'] ?? 'Harian';
 
                 // Eksekusi tanpa melempar output agar loop tidak berhenti
-                // Eksekusi tanpa melempar output agar loop tidak berhenti meskipun telat/gagal
                 if ($scanType === 'Makan') {
                     $attendanceService->processMeal($student, $scanTime);
                 } elseif (in_array($scanType, ['Dhuha', 'Dhuhur'])) {
@@ -135,7 +137,9 @@ class KioskController extends Controller
                 } elseif ($scanType === 'Ekstrakurikuler') {
                     $attendanceService->processExtra($student, $scan['extra_id'] ?? null, $scanTime);
                 } else {
-                    $attendanceService->processDailyScan($student, $scanTime, null, null, $schedule, 'kiosk');
+                    // Terapkan Logika Bypass yang sama di Offline mode
+                    $modeForService = in_array($scanType, ['Masuk', 'Pulang']) ? $scanType : 'kiosk';
+                    $attendanceService->processDailyScan($student, $scanTime, null, null, $schedule, $modeForService);
                 }
                 $processed++;
             } catch (\Exception $e) {

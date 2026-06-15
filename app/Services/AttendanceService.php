@@ -23,9 +23,7 @@ class AttendanceService
     {
         $schedule = ScheduleSpecial::where('date', $date->toDateString())->first();
         if (!$schedule) {
-            // Menggunakan Carbon translatedFormat agar otomatis menyesuaikan bahasa
             $dayName = $date->locale('id')->translatedFormat('l');
-            // Antisipasi penulisan Jum'at menjadi Jumat
             if (in_array($dayName, ['Jumat', "Jum'at"])) $dayName = 'Jumat';
 
             $schedule = ScheduleRegular::where('day_name', $dayName == 'Jumat' ? 'Jumat' : 'Biasa')->first();
@@ -35,7 +33,6 @@ class AttendanceService
 
     /**
      * Proses Absen Harian (Masuk / Pulang)
-     * $source = 'kiosk' (Ketat/Strict) atau 'guru' (Fleksibel)
      */
     public function processDailyScan($student, Carbon $scanTime, $lat, $long, $schedule, $source = 'kiosk')
     {
@@ -43,7 +40,6 @@ class AttendanceService
         $timeNow = $scanTime->toTimeString();
         $now = clone $scanTime;
 
-        // Ambil batas waktu (Fallback jika kosong)
         $scheduleStartIn  = $schedule->start_in ?? '06:00:00'; 
         $scheduleLimit    = $schedule->end_in ?? '07:15:00'; 
         $scheduleStartOut = $schedule->start_out ?? '14:00:00'; 
@@ -51,20 +47,32 @@ class AttendanceService
 
         return DB::transaction(function () use ($student, $todayDate, $timeNow, $now, $lat, $long, $scheduleStartIn, $scheduleLimit, $scheduleStartOut, $scheduleEndOut, $source) {
             
-            // FIX RACE CONDITION (KUNCI MUTLAK):
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
-            // Cek apakah data absen sudah ada
             $existingAttendance = AttendanceSiswa::where('student_id', $student->id)
                 ->where('attendance_date', $todayDate)
                 ->whereIn('type', ['Masuk', 'Pulang', 'Harian']) 
                 ->first(); 
 
-            // SKENARIO A: BELUM ABSEN MASUK
-            if (!$existingAttendance || !$existingAttendance->time_in || $existingAttendance->time_in == '00:00:00') {
+            $hasClockedIn = $existingAttendance && $existingAttendance->time_in && $existingAttendance->time_in != '00:00:00';
+            $hasClockedOut = $existingAttendance && $existingAttendance->time_out && $existingAttendance->time_out != '00:00:00';
+
+            // Tentukan niat scan: Apakah mau MASUK atau PULANG?
+            $isIntentMasuk = ($source === 'Masuk') || ($source === 'kiosk' && $timeNow < $scheduleStartOut);
+
+            // ============================================
+            // SKENARIO A: ABSEN MASUK
+            // ============================================
+            if ($isIntentMasuk) {
                 
-                // [KHUSUS KIOSK] Blokir jika terlalu pagi atau malam
-                if ($source === 'kiosk') {
+                // 1. GEMBOK ANTI-TIMPA MASUK (Solusi Masalah Keterlambatan Numpuk)
+                if ($hasClockedIn) {
+                    $jamMasuk = Carbon::parse($existingAttendance->time_in)->format('H:i');
+                    return ['success' => false, 'code' => 409, 'message' => "SUDAH ABSEN MASUK PADA {$jamMasuk}"];
+                }
+
+                // 2. Blokir jika terlalu pagi / malam
+                if ($source === 'kiosk' || $source === 'Masuk') {
                     if ($timeNow < $scheduleStartIn) {
                         return ['success' => false, 'code' => 400, 'message' => 'Belum Waktunya Masuk (Mulai: ' . Carbon::parse($scheduleStartIn)->format('H:i') . ')'];
                     }
@@ -76,29 +84,38 @@ class AttendanceService
                 $limitTime = Carbon::createFromTimeString($scheduleLimit);
                 $isLate = $now->gt($limitTime);
                 $finalStatus = $isLate ? 'Terlambat' : 'Hadir';
-                $notesContext = ($source === 'kiosk') ? 'Kiosk' : 'Guru';
+                $notesContext = ($source === 'kiosk' || $source === 'Masuk') ? 'Kiosk' : 'Guru';
                 $finalNotes = $isLate ? "Terlambat (Limit: {$scheduleLimit})" : "Hadir Tepat Waktu ({$notesContext})";
 
-                $attendanceRecord = AttendanceSiswa::create([
-                    'student_id'      => $student->id,
-                    'attendance_date' => $todayDate,
-                    'type'            => 'Harian', 
-                    'status'          => $finalStatus,  
-                    'time_in'         => $timeNow,
-                    'lat_in'          => $lat,   
-                    'long_in'         => $long,  
-                    'notes'           => $finalNotes,
-                ]);
+                if ($existingAttendance) {
+                     $existingAttendance->update([
+                        'status'          => $finalStatus,  
+                        'time_in'         => $timeNow,
+                        'lat_in'          => $lat,   
+                        'long_in'         => $long,  
+                        'notes'           => $finalNotes,
+                     ]);
+                     $attendanceRecord = $existingAttendance;
+                } else {
+                     $attendanceRecord = AttendanceSiswa::create([
+                        'student_id'      => $student->id,
+                        'attendance_date' => $todayDate,
+                        'type'            => 'Harian', 
+                        'status'          => $finalStatus,  
+                        'time_in'         => $timeNow,
+                        'lat_in'          => $lat,   
+                        'long_in'         => $long,  
+                        'notes'           => $finalNotes,
+                    ]);
+                }
 
-                // TRIGGER POIN & BK UNTUK KETERLAMBATAN
                if ($isLate) {
-                    $this->logActivity($student, 'Violation', 'Terlambat Masuk', "Terlambat hadir (Limit: {$scheduleLimit})", -5);
+                    $this->logActivity($student, 'Pelanggaran', 'Terlambat Masuk', "Terlambat hadir (Limit: {$scheduleLimit})", -5);
                     $student->checkBkThresholds();
                 }
 
-                // Pesan dinamis sesuai status kehadiran
                 $pesanMasuk = $isLate 
-                    ? "TERLAMBAT! Anda melewati batas waktu masuk ({$scheduleLimit})." 
+                    ? "TERLAMBAT! Anda melewati batas masuk ({$scheduleLimit})." 
                     : "HADIR TEPAT WAKTU! Absen masuk berhasil.";
 
                 return [
@@ -109,33 +126,39 @@ class AttendanceService
                     'note' => $finalNotes
                 ];
             } 
-            // SKENARIO B: SUDAH ABSEN MASUK -> MAU PULANG
+            
+            // ============================================
+            // SKENARIO B: ABSEN PULANG
+            // ============================================
             else {
-                if ($existingAttendance->time_out) {
-                    return ['success' => false, 'code' => 409, 'message' => 'Sudah Absen Pulang (' . Carbon::parse($existingAttendance->time_out)->format('H:i') . ')'];
+                
+                // 1. Tolak jika belum absen masuk sama sekali
+                if (!$hasClockedIn) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Anda belum Absen Masuk hari ini!'];
                 }
 
-                // Cek Cooldown (HANYA KIOSK: Mencegah Spam Scan mandiri oleh siswa)
-                if ($existingAttendance->time_in && $source === 'kiosk') {
-                    $timeIn = Carbon::parse($existingAttendance->time_in);
-                    $diffMinutes = $timeIn->diffInMinutes($now);
-                    
-                    if ($diffMinutes < 5) {
-                        return ['success' => false, 'code' => 429, 'message' => 'Anda baru saja absen masuk. Tunggu beberapa saat sebelum scan lagi.'];
-                    }
+                // 2. GEMBOK ANTI-TIMPA PULANG (Solusi Spam Pulang)
+                if ($hasClockedOut) {
+                    $jamPulang = Carbon::parse($existingAttendance->time_out)->format('H:i');
+                    return ['success' => false, 'code' => 409, 'message' => "SUDAH ABSEN PULANG PADA {$jamPulang}"];
+                }
+
+                // 3. Mencegah spam klik instan setelah masuk (Jeda 5 Menit)
+                $timeIn = Carbon::parse($existingAttendance->time_in);
+                if ($timeIn->diffInMinutes($now) < 5) {
+                    return ['success' => false, 'code' => 429, 'message' => 'Tunggu 5 menit setelah Absen Masuk!'];
                 }
 
                 $startOutTime = Carbon::createFromTimeString($scheduleStartOut);
                 $isEarly = $now->lt($startOutTime);
                 
-                // Blokir kepulangan jika belum waktunya (HANYA KIOSK)
-                if ($isEarly && $source === 'kiosk') {
-                    return ['success' => false, 'code' => 400, 'message' => 'Belum Waktunya Pulang! Jadwal pulang dimulai pukul: ' . $startOutTime->format('H:i')];
+                // 4. Blokir pulang jika belum jamnya
+                if ($isEarly && ($source === 'kiosk' || $source === 'Pulang')) {
+                    return ['success' => false, 'code' => 400, 'message' => 'Belum Waktunya Pulang! (Mulai: ' . $startOutTime->format('H:i') . ')'];
                 }
                 
-                $notesContext = ($source === 'kiosk') ? 'Kiosk' : 'Guru';
+                $notesContext = ($source === 'kiosk' || $source === 'Pulang') ? 'Kiosk' : 'Guru';
                 
-                // Beri label spesifik jika pulang awal
                 $finalNotes = $isEarly 
                     ? ($existingAttendance->notes ? $existingAttendance->notes . " | Pulang Cepat ({$notesContext})" : "Pulang Cepat ({$notesContext})")
                     : ($existingAttendance->notes ? $existingAttendance->notes . " | Pulang ({$notesContext})" : "Pulang Sekolah ({$notesContext})");
@@ -158,15 +181,11 @@ class AttendanceService
         });
     }
     
-    /**
-     * Proses Absen Keagamaan
-     */
     public function processReligious($student, $type, Carbon $scanTime)
     {
         return DB::transaction(function () use ($student, $type, $scanTime) {
             $todayDate = $scanTime->toDateString();
 
-            // FIX RACE CONDITION
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
             $exists = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $todayDate)
@@ -180,7 +199,7 @@ class AttendanceService
                 'time_in' => $scanTime->toTimeString(), 'notes' => "Sholat $type"
             ]);
 
-            $this->logActivity($student, 'Religious', "Shalat $type", "Melaksanakan shalat $type berjamaah", 5);
+            $this->logActivity($student, 'Ibadah', "Shalat $type", "Melaksanakan shalat $type berjamaah", 5);
             $colName = ($type == 'Dhuha') ? 'prayer_dhuha' : 'prayer_dzuhur';
             StudentHabit::updateOrCreate(['student_id' => $student->id, 'report_date' => $todayDate], [$colName => true]);
             $student->checkBkThresholds();
@@ -189,15 +208,11 @@ class AttendanceService
         });
     }
 
-    /**
-     * Proses Absen Makan Bergizi
-     */
     public function processMeal($student, Carbon $scanTime)
     {
         return DB::transaction(function () use ($student, $scanTime) {
             $todayDate = $scanTime->toDateString();
 
-            // FIX RACE CONDITION
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
             $existing = AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $todayDate)
@@ -211,7 +226,7 @@ class AttendanceService
                 'time_in' => $scanTime->toTimeString()
             ]);
 
-            $this->logActivity($student, 'Meal', 'Makan Bergizi', "Mengambil jatah makan siang", 2);
+            $this->logActivity($student, 'Kesehatan', 'Makan Bergizi', "Mengambil jatah makan siang", 2);
             StudentHabit::updateOrCreate(['student_id' => $student->id, 'report_date' => $todayDate], ['habit_5' => true, 'habit_5_menu' => 'Menu Sekolah (MBG)']);
 
             $count = AttendanceSiswa::whereDate('attendance_date', $todayDate)->where('type', 'Meal')->count();
@@ -219,9 +234,6 @@ class AttendanceService
         });
     }
 
-    /**
-     * Proses Absen Ekstrakurikuler
-     */
     public function processExtra($student, $extraId, Carbon $scanTime)
     {
         if (!$extraId) return ['success' => false, 'code' => 422, 'message' => 'Pilih kegiatan ekstrakurikuler dulu!'];
@@ -231,21 +243,17 @@ class AttendanceService
         return DB::transaction(function () use ($student, $extra, $extraId, $scanTime) {
             $todayDate = $scanTime->toDateString();
             
-            // FIX RACE CONDITION
             \App\Models\Student::where('id', $student->id)->lockForUpdate()->first();
 
-            // CEK APAKAH SUDAH PERNAH ABSEN EKSKUL INI HARI INI
             $alreadyExists = ExtracurricularAttendance::where('extracurricular_id', $extraId)
                 ->where('student_id', $student->id)
                 ->where('date', $todayDate)
                 ->exists();
 
             if ($alreadyExists) {
-                // KEMBALIKAN ERROR (success: false) AGAR KIOSK MENOLAK (MUNCUL WARNA MERAH)
                 return ['success' => false, 'code' => 409, 'message' => "SUDAH absen {$extra->name} hari ini!"];
             }
 
-            // JIKA BELUM, SIMPAN DATA BARU
             $mainAtt = AttendanceSiswa::updateOrCreate(
                 ['student_id' => $student->id, 'attendance_date' => $todayDate, 'type' => 'Extracurricular'],
                 ['status' => 'Hadir', 'time_in' => $scanTime->toTimeString(), 'activity' => $extra->name]
@@ -262,7 +270,7 @@ class AttendanceService
             $points = $isMember ? 5 : 0;
             $statusPoin = $isMember ? "(+5 Poin)" : "(Tamu)";
             
-            $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", $points);
+            $this->logActivity($student, 'Ekstrakurikuler', $extra->name, "Hadir kegiatan {$extra->name}", $points);
             $msg = "Hadir {$extra->name} {$statusPoin}";
 
             $mainAtt->setAttribute('extra_name', $extra->name);
@@ -275,13 +283,14 @@ class AttendanceService
      */
     public function logActivity($student, $type, $name, $desc, $points) 
     {
+        // BENAR-BENAR BERSIH: Kita hanya mengirim data untuk kolom yang pasti ada di database.
+        // HAPUS key 'type' secara permanen dari blok create ini!
         ActivityLog::create([
-            'student_id' => $student->id, 
-            'type' => 'Pelanggaran',     // <-- TAMBAHKAN BARIS INI AGAR TIDAK ERROR DATABASE LAGI
-            'activity_type' => $type,    // Wajib (Baru)
+            'student_id'    => $student->id, 
+            'activity_type' => $type, 
             'activity_name' => $name,
-            'description' => $desc, 
-            'point_earned' => $points
+            'description'   => $desc, 
+            'point_earned'  => $points
         ]);
         
         if($points != 0) {

@@ -212,7 +212,7 @@
                                 </button>
                             </form>
 
-                            {{-- FORM 1B: IMPORT EXCEL (PERBAIKAN @submit.prevent & TAHUN/SEMESTER) --}}
+                            {{-- FORM 1B: IMPORT EXCEL --}}
                             <form x-show="importMode" @submit.prevent="previewFile($event, $el)" action="{{ route('grades.import') }}" method="POST" enctype="multipart/form-data" class="flex-1 flex flex-col gap-4" style="display: none;">
                                 @csrf
                                 <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex gap-4 items-center">
@@ -304,7 +304,7 @@
                                 </button>
                             </form>
 
-                            {{-- FORM 2B: IMPORT SISWA (PERBAIKAN @submit.prevent & TAHUN/SEMESTER) --}}
+                            {{-- FORM 2B: IMPORT SISWA --}}
                             <form x-show="importMode" @submit.prevent="previewFile($event, $el)" action="{{ route('grades.import_student') }}" method="POST" enctype="multipart/form-data" class="flex-1 flex flex-col gap-4" style="display: none;">
                                 @csrf
                                 <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex gap-4 items-center">
@@ -381,7 +381,7 @@
 
                             <hr class="border-slate-100 mb-4">
 
-                            {{-- Form Upload Leger (PERBAIKAN @submit.prevent) --}}
+                            {{-- Form Upload Leger --}}
                             <form @submit.prevent="previewFile($event, $el)" action="{{ route('grades.import_leger') }}" method="POST" enctype="multipart/form-data" class="flex-1 flex flex-col gap-4">
                                 @csrf
                                 <div class="space-y-3">
@@ -468,14 +468,17 @@
                         </form>
                     </div>
                 </div>
-            </div>
 
-            {{-- ======================================================= --}}
-            {{-- MODAL PREVIEW EXCEL (BARU) --}}
-            {{-- ======================================================= --}}
-            <div x-show="previewModal" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            </div>
+        </div>
+
+        {{-- ======================================================= --}}
+        {{-- MODAL PREVIEW EXCEL (BARU) --}}
+        {{-- ======================================================= --}}
+        <template x-teleport="body">
+            <div x-show="previewModal" style="display: none;" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 font-sans text-slate-800">
                 <!-- Backdrop -->
-                <div x-show="previewModal" x-transition.opacity class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="previewModal = false"></div>
+                <div x-show="previewModal" x-transition.opacity class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" @click="previewModal = false"></div>
                 
                 <!-- Modal Box -->
                 <div x-show="previewModal" 
@@ -485,7 +488,7 @@
                      x-transition:leave="transition ease-in duration-200 transform"
                      x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                      x-transition:leave-end="opacity-0 translate-y-8 scale-95"
-                     class="relative w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-100">
+                     class="relative w-full max-w-5xl min-w-0 bg-white rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100">
                     
                     <!-- Header Modal -->
                     <div class="p-6 md:p-8 bg-gradient-to-r from-[#e5eff5] to-white border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
@@ -507,7 +510,7 @@
                     </div>
 
                     <!-- Body Modal (Table Preview) -->
-                    <div class="p-6 md:p-8 overflow-auto bg-slate-50 flex-1 custom-scrollbar">
+                    <div class="p-6 md:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 flex-1 min-h-0 min-w-0 w-full custom-scrollbar">
                         <div class="bg-white p-4 rounded-2xl border border-emerald-100 shadow-sm mb-4 flex items-start gap-3">
                             <i class="ph-fill ph-info text-emerald-500 text-lg mt-0.5"></i>
                             <p class="text-xs font-medium text-slate-600 leading-relaxed">
@@ -515,8 +518,9 @@
                             </p>
                         </div>
 
-                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-                            <table class="w-full text-left text-xs whitespace-nowrap">
+                        <!-- Table Wrapper -->
+                        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white custom-scrollbar pb-2 w-full">
+                            <table class="w-full text-left text-xs whitespace-nowrap min-w-max">
                                 <thead class="bg-slate-100 text-[#2c3f61]">
                                     <tr>
                                         <th class="px-4 py-3 font-black uppercase tracking-wider text-center w-10 border-b border-slate-200">#</th>
@@ -536,7 +540,7 @@
                                     </template>
                                     <!-- Jika data lebih dari 5 baris -->
                                     <tr x-show="totalDataRows > 5">
-                                        <td :colspan="previewHeaders.length + 1" class="px-4 py-4 text-center text-slate-400 font-bold bg-slate-50 italic">
+                                        <td :colspan="previewHeaders.length + 1" class="px-4 py-4 text-center text-slate-400 font-bold bg-slate-50 italic border-t border-slate-100">
                                             ... dan <span x-text="totalDataRows - 5"></span> baris data lainnya disembunyikan.
                                         </td>
                                     </tr>
@@ -558,8 +562,8 @@
                     </div>
                 </div>
             </div>
+        </template>
 
-        </div>
     </div>
 
     {{-- Script Tambahan untuk membaca file Excel di Frontend --}}
