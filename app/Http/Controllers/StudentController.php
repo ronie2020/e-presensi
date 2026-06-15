@@ -149,13 +149,13 @@ class StudentController extends Controller
     /**
      * Menampilkan Form Edit (Buku Induk).
      */
-    public function edit(Student $student)
+     public function edit(Student $student)
     {
         // ==========================================
-        // Gembok Belakang: Blokir jika sudah Alumni
+        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin
         // ==========================================
-        if ($student->status === 'graduated') {
-            return redirect()->route('students.index')->with('error', 'Akses ditolak! Data Buku Induk siswa yang telah lulus (Alumni) dikunci secara permanen.');
+        if ($student->status === 'graduated' && Auth::user()->role !== 'Admin') {
+            return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni dikunci dan hanya dapat diperbarui oleh Admin TU.');
         }
 
         $classes = SchoolClass::orderBy('name', 'asc')->get();
@@ -171,11 +171,12 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         // ==========================================
-        // Gembok Belakang: Blokir jika sudah Alumni
+        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin
         // ==========================================
-        if ($student->status === 'graduated') {
-            return redirect()->route('students.index')->with('error', 'Akses ditolak! Data siswa yang telah lulus (Alumni) tidak dapat diedit melalui jalur ini.');
+        if ($student->status === 'graduated' && Auth::user()->role !== 'Admin') {
+            return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni tidak dapat diedit melalui jalur ini.');
         }
+
 
         // 1. Validasi data
         $rules = [

@@ -13,8 +13,11 @@
                     <h1 class="text-3xl font-black text-blue-900 tracking-tight">Edit Buku Induk Siswa</h1>
                     <p class="text-slate-500 text-sm mt-1">Lengkapi data detail siswa: <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">{{ $student->name }}</span></p>
                 </div>
-                {{-- Tombol Kembali membawa parameter query yang sedang aktif --}}
-                <a href="{{ route('students.index', request()->query()) }}" class="btn-back-confirm px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
+                {{-- Tombol Kembali menyesuaikan status siswa --}}
+                @php
+                    $backUrl = $student->status === 'graduated' ? route('admin.alumni.index') : route('students.index', request()->query());
+                @endphp
+                <a href="{{ $backUrl }}" class="btn-back-confirm px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
                 </a>
             </div>
@@ -35,31 +38,33 @@
             @endif
 
             {{-- ========================================================= --}}
-            {{-- BLOKIR TAMPILAN JIKA STATUS SISWA ADALAH ALUMNI / LULUS --}}
+            {{-- BANNER PERINGATAN JIKA STATUS SISWA ADALAH ALUMNI / LULUS --}}
             {{-- ========================================================= --}}
             @if($student->status === 'graduated')
-                <div class="bg-white rounded-[2.5rem] p-12 text-center shadow-xl shadow-slate-200/50 border border-slate-100 mt-6 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
-                    <div class="w-24 h-24 bg-rose-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 text-rose-500 shadow-sm border border-rose-100 rotate-12 relative z-10">
-                        <i class="ph-duotone ph-lock-key text-5xl -rotate-12"></i>
+                <div class="mb-6 p-5 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05]"></div>
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0 text-amber-600 border border-amber-200 relative z-10">
+                        <i class="ph-duotone ph-warning text-2xl"></i>
                     </div>
-                    <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-2 relative z-10">Akses Buku Induk Dikunci</h2>
-                    <p class="text-slate-500 font-medium mb-8 max-w-lg mx-auto relative z-10">
-                        Siswa atas nama <span class="font-bold text-slate-700">{{ $student->name }}</span> telah berstatus <b>Alumni (Lulus)</b>. 
-                        Untuk menjaga validitas riwayat sekolah, data Buku Induk siswa ini telah dikunci permanen.
-                    </p>
-                    <div class="flex items-center justify-center gap-4 relative z-10">
-                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="px-8 py-3.5 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center gap-2 transform active:scale-95">
-                            <i class="ph-bold ph-pencil-simple"></i> Beralih ke Data Alumni
+                    <div class="relative z-10 flex-1">
+                        <h3 class="font-black text-amber-800 text-lg">Mode Edit Arsip Alumni Terbuka</h3>
+                        <p class="text-amber-700/80 text-sm font-medium mt-0.5">
+                            Siswa ini telah berstatus <b>Alumni (Lulus)</b>. Segala perubahan yang Anda lakukan akan langsung memperbarui arsip permanen Buku Induk sekolah.
+                        </p>
+                    </div>
+                    <div class="relative z-10 shrink-0 mt-2 md:mt-0">
+                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="px-4 py-2 bg-white border border-amber-300 text-amber-700 font-bold rounded-xl hover:bg-amber-100 transition-all text-sm flex items-center gap-2 shadow-sm">
+                            <i class="ph-bold ph-graduation-cap"></i> Form Tracer Study
                         </a>
                     </div>
                 </div>
-            @else
-                {{-- JIKA BUKAN ALUMNI, TAMPILKAN FORM SEPERTI BIASA --}}
-                <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden" x-data="{ tab: 'pribadi' }">
-                    
-                    {{-- TAB NAVIGATION --}}
-                    <div class="bg-blue-50/30 border-b border-slate-200 px-6 pt-4 flex gap-2 overflow-x-auto custom-scrollbar">
+            @endif
+
+            {{-- FORM TAMPIL UNTUK SEMUA --}}
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden" x-data="{ tab: 'pribadi' }">
+                
+                {{-- TAB NAVIGATION --}}
+                <div class="bg-blue-50/30 border-b border-slate-200 px-6 pt-4 flex gap-2 overflow-x-auto custom-scrollbar">
                         @foreach(['pribadi' => 'A. Pribadi', 'tempat_tinggal' => 'B. Alamat', 'kesehatan' => 'C. Kesehatan', 'pendidikan' => 'D. Pendidikan', 'orangtua' => 'E. Ortu & Wali', 'tamat' => 'F. Mutasi & Tamat'] as $key => $label)
                             <button type="button" @click="tab = '{{ $key }}'" 
                                 :class="{ 
@@ -545,17 +550,21 @@
 
 
                         {{-- FOOTER --}}
-                        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
-                            <p class="text-xs text-slate-400 italic">* Pastikan data sudah benar sebelum disimpan.</p>
-                            <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg shadow-blue-900/30 transition-all transform active:scale-95 flex items-center gap-2">
-                                <i class="ph-bold ph-floppy-disk"></i>
-                                Simpan Perubahan
-                            </button>
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <p class="text-xs text-slate-400 italic text-center md:text-left">* Pastikan data sudah benar sebelum disimpan.</p>
+                            <div class="flex items-center gap-3 w-full md:w-auto">
+                                <a href="{{ $backUrl }}" class="btn-back-confirm px-6 py-3 bg-white text-slate-600 border border-slate-300 font-bold rounded-xl hover:bg-slate-50 transition-all text-center flex-1 md:flex-none">
+                                    Batal
+                                </a>
+                                <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg shadow-blue-900/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 flex-1 md:flex-none">
+                                    <i class="ph-bold ph-floppy-disk"></i>
+                                    Simpan Perubahan
+                                </button>
+                            </div>
                         </div>
 
                     </form>
                 </div>
-            @endif
         </div>
     </div>
 
@@ -601,8 +610,8 @@
                 el.addEventListener('input', () => { formIsDirty = true; });
             });
 
-            const btnBack = document.querySelector('.btn-back-confirm');
-            if(btnBack) {
+            const btnBackElements = document.querySelectorAll('.btn-back-confirm');
+            btnBackElements.forEach(btnBack => {
                 btnBack.addEventListener('click', function(e) {
                     if (formIsDirty) {
                         e.preventDefault();
@@ -628,7 +637,7 @@
                         });
                     }
                 });
-            }
+            });
 
             // 4. LOADING SAAT SIMPAN
             const form = document.getElementById('edit-student-form');
