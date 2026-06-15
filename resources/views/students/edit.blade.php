@@ -133,8 +133,8 @@
                                         <input type="text" name="nik" value="{{ old('nik', $student->nik) }}" placeholder="Nomor Induk Kependudukan 16 Digit" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono input-watch">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kelas Saat Ini *</label>
-                                        <select name="class_id" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kelas Saat Ini {{ $student->status === 'graduated' ? '' : '*' }}</label>
+                                        <select name="class_id" {{ $student->status === 'graduated' ? '' : 'required' }} class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                             <option value="">-- Pilih Kelas --</option>
                                             @foreach($classes as $c)
                                                 <option value="{{ $c->id }}" {{ old('class_id', $student->class_id) == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>

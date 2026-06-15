@@ -149,12 +149,13 @@ class StudentController extends Controller
     /**
      * Menampilkan Form Edit (Buku Induk).
      */
-     public function edit(Student $student)
+    public function edit(Student $student)
     {
         // ==========================================
-        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin
+        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin dan TU
+        // MENGGUNAKAN SPATIE PERMISSION
         // ==========================================
-        if ($student->status === 'graduated' && Auth::user()->role !== 'Admin') {
+        if ($student->status === 'graduated' && !Auth::user()->hasAnyRole(['Admin', 'TU'])) {
             return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni dikunci dan hanya dapat diperbarui oleh Admin TU.');
         }
 
@@ -171,18 +172,18 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         // ==========================================
-        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin
+        // Gembok Belakang: Blokir jika sudah Alumni, KECUALI untuk Admin dan TU
+        // MENGGUNAKAN SPATIE PERMISSION
         // ==========================================
-        if ($student->status === 'graduated' && Auth::user()->role !== 'Admin') {
+        if ($student->status === 'graduated' && !Auth::user()->hasAnyRole(['Admin', 'TU'])) {
             return redirect()->route('students.index')->with('error', 'Akses ditolak! Arsip alumni tidak dapat diedit melalui jalur ini.');
         }
 
-
-        // 1. Validasi data
+       // 1. Validasi data
         $rules = [
             'student_id' => ['required', Rule::unique('students', 'student_id')->ignore($student->id)],
             'name' => 'required|string|max:255',
-            'class_id' => 'required|integer|exists:classes,id',
+            'class_id' => $student->status === 'graduated' ? 'nullable|integer|exists:classes,id' : 'required|integer|exists:classes,id',
             'rfid_id' => ['nullable', Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id')],
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
@@ -203,9 +204,18 @@ class StudentController extends Controller
             $data['photo_path'] = $path;
         }
 
-        // 3. Update Database
+       // 3. Update Database
         $student->update($data);
         
+        // ==========================================
+        // PENENTUAN ARAH KEMBALI (REDIRECT) SETELAH SIMPAN
+        // ==========================================
+        if ($student->status === 'graduated') {
+            // Jika yang diedit adalah alumni, arahkan kembali ke halaman alumni
+            return redirect()->route('admin.alumni.index')->with('success', 'Data Buku Induk alumni berhasil diperbarui.');
+        }
+
+        // Jika yang diedit adalah siswa aktif biasa, arahkan kembali ke halaman siswa
         return redirect()->route('students.index', request()->query())->with('success', 'Data Buku Induk siswa berhasil diperbarui.');
     }
 
