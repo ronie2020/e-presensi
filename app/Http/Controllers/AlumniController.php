@@ -18,6 +18,7 @@ class AlumniController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
+        
         // --- Load relasi classHistories untuk Jejak Kelas ---
         $student->load('classHistories.schoolClass');
         

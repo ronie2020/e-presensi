@@ -43,7 +43,7 @@
                                 @else
                                     {{ substr($student->name, 0, 2) }}
                                 @endif
-                            </div>
+                             </div>
                             <div class="flex-1">
                                 <h3 class="text-lg font-black text-elevate-dark leading-tight">{{ $student->name }}</h3>
                                 <p class="text-sm font-medium text-slate-500 mt-1">{{ $student->nisn ?? $student->student_id }} | <span class="font-bold">Lulusan {{ $student->graduation_year ?? ($student->graduated_date ? \Carbon\Carbon::parse($student->graduated_date)->year : '-') }}</span></p>
