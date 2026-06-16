@@ -46,7 +46,7 @@
             $popupId = 'pengumuman_' . $popupAnnouncement->id;
             $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : asset('images/logo-sekolah.png');
             $popupTitle = $popupAnnouncement->title;
-            $popupMessage = Str::limit(strip_tags($popupAnnouncement->content), 200);
+            $popupMessage = strip_tags($popupAnnouncement->content);
         }
 
         // Tema warna default disesuaikan dengan Microsoft Elevate
@@ -158,7 +158,7 @@
                             <span class="inline-flex items-center rounded-lg {{ $colorTheme['badge_bg'] }} px-3 py-1.5 text-[10px] font-black uppercase tracking-widest {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> Pengumuman</span>
                             <h3 id="modal-title" class="text-2xl font-black text-elevate-dark leading-tight">{{ $popupTitle }}</h3>
                         </div>
-                        <div class="prose prose-sm text-slate-500 mb-6 font-medium leading-relaxed"><p>{{ $popupMessage }}</p></div>
+                       <div class="prose prose-sm text-slate-500 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2"><p>{{ $popupMessage }}</p></div>
                         <div class="flex flex-col gap-3 mt-auto">
                             <button @click="closeInfoPopup(false)" class="w-full text-center justify-center items-center rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-3.5 text-xs font-black text-white shadow-lg shadow-elevate-primary/20 {{ $colorTheme['btn_hover'] }} transition-all">SAYA MENGERTI</button>
                             <button @click="closeInfoPopup(true)" class="text-xs font-bold text-slate-400 hover:text-elevate-peach transition-colors text-center py-2">Jangan tampilkan pengumuman ini lagi</button>

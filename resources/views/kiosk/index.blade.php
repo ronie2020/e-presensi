@@ -23,72 +23,81 @@
 </div>
 
 <!-- CONTAINER UTAMA - DIKUNCI H-SCREEN AGAR TIDAK MELAR -->
-<div class="h-screen w-full bg-slate-200 relative overflow-hidden font-sans text-slate-800 selection:bg-blue-500 selection:text-white flex flex-col" x-data="kioskData()" @open-ekskul-modal.window="openExtraModal()">
+<div class="h-screen w-full bg-slate-900 relative overflow-hidden font-sans text-slate-800 selection:bg-blue-500 selection:text-white flex flex-col" x-data="kioskData()" @open-ekskul-modal.window="openExtraModal()">
     
-    <!-- Background Texture -->
+    <!-- Background Texture & Image -->
     <div class="absolute inset-0 z-0 pointer-events-none">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
-        <div class="absolute -top-[10%] -left-[5%] w-[60%] h-[50%] bg-blue-300/30 rounded-br-full blur-3xl mix-blend-multiply"></div>
-        <div class="absolute top-[20%] right-[-10%] w-[50%] h-[80%] bg-amber-300/20 rounded-tl-[100px] blur-3xl mix-blend-multiply"></div>
+        <!-- Latar Belakang Gambar Sekolah -->
+        <div class="absolute inset-0 bg-[url('{{ asset('images/netila.jpg') }}')] bg-cover bg-center bg-no-repeat"></div>
+        
+        <!-- Overlay Gelap & Efek Blur untuk visibilitas Kiosk -->
+        <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"></div>
+
+        <div class="absolute -top-[10%] -left-[5%] w-[60%] h-[50%] bg-blue-500/20 rounded-br-full blur-[100px] mix-blend-screen"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[50%] h-[80%] bg-cyan-400/10 rounded-tl-[100px] blur-[100px] mix-blend-screen"></div>
     </div>
 
     <!-- MAIN WRAPPER: DIKUNCI flex-1 min-h-0 -->
-    <div class="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row flex-1 min-h-0 p-4 md:p-6 gap-6 relative z-10">
+    <!-- Penyesuaian gap dan padding agar lebih lega -->
+    <div class="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row flex-1 min-h-0 p-4 md:p-8 gap-8 relative z-10">
         
         <!-- BAGIAN KIRI: KONTROL & SCANNER (min-h-0 agar flexbox anak bisa mengecil) -->
-        <div class="flex-1 flex flex-col w-full relative min-h-0">
+        <div class="flex-1 flex flex-col w-full relative min-h-0 gap-6">
             
             <!-- Header (Logo & Sekolah) -->
-            <div class="flex items-center gap-5 mb-6 bg-slate-100/90 backdrop-blur-md p-4 rounded-[2rem] border border-slate-300 shadow-lg shadow-slate-300/30 shrink-0">
-                <div class="p-3 bg-slate-200 rounded-2xl border border-slate-300">
+            <!-- Menggunakan white/80 dan backdrop-blur-xl agar terlihat tembus pandang elegan -->
+            <div class="flex items-center gap-5 bg-white/80 backdrop-blur-xl p-4 rounded-[2rem] border border-white/50 shadow-xl shadow-slate-900/10 shrink-0">
+                <div class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <x-application-logo class="w-10 h-10 md:w-12 md:h-12 text-slate-800 fill-current" />
                 </div>
                 <div class="flex-1 flex justify-between items-center">
                     <div>
-                        <h1 class="text-xl md:text-3xl font-black text-slate-800 tracking-tight">SMP Negeri 3 Lakbok</h1>
-                        <p class="text-blue-600 font-bold tracking-wide mt-0.5 text-xs md:text-sm">Absensi Station</p>
+                        <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">SMP Negeri 3 Lakbok</h1>
+                        <p class="text-blue-600 font-bold tracking-wide text-xs">Absensi Station</p>
                     </div>
-                    <button type="button" onclick="exitKiosk()" class="px-4 py-2 bg-slate-200 hover:bg-rose-100 text-slate-600 hover:text-rose-600 rounded-xl font-bold text-xs md:text-sm transition-colors flex items-center gap-2 border border-slate-300 shadow-sm">
+                    <button type="button" onclick="exitKiosk()" class="px-4 py-2 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 rounded-xl font-bold text-xs transition-colors flex items-center gap-2 border border-slate-200 shadow-sm">
                         <i class="ph-bold ph-sign-out text-lg"></i> <span class="hidden md:inline">Keluar</span>
                     </button>
                 </div>
             </div>
 
             <!-- PANEL SCANNER UTAMA -->
-            <div class="w-full bg-slate-100/90 backdrop-blur-md border border-slate-300 rounded-[2.5rem] p-6 shadow-xl shadow-slate-300/40 relative flex-1 flex flex-col min-h-0">
+            <div class="w-full bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2.5rem] p-6 shadow-2xl shadow-slate-900/10 relative flex-1 flex flex-col min-h-0">
                 
                 <!-- Status & Active Mode Indicator -->
-                <div class="flex justify-between items-center mb-4 px-2 shrink-0">
-                    <div id="active-mode-badge" class="px-5 py-2.5 rounded-2xl bg-slate-800 text-slate-100 font-bold tracking-wider uppercase text-xs md:text-sm shadow-md flex items-center gap-2 transition-all">
+                <div class="flex justify-between items-center mb-5 px-2 shrink-0">
+                    <div id="active-mode-badge" class="px-5 py-2 rounded-xl bg-slate-800 text-slate-100 font-bold tracking-wider uppercase text-xs shadow-md flex items-center gap-2 transition-all">
                         <i class="ph-fill ph-sun-dim text-lg text-blue-400"></i> <span>ABSEN MASUK</span>
                     </div>
-                    <span class="text-[10px] md:text-xs bg-slate-200 text-slate-600 border border-slate-300 px-3 py-1.5 rounded-xl shadow-sm font-bold uppercase tracking-wider transition-colors" id="manual-indicator">Auto Mode</span>
+                    <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm font-bold uppercase tracking-wider transition-colors" id="manual-indicator">Auto Mode</span>
                 </div>
 
-                <!-- BOX SCANNER TARGET (flex-1 min-h-0 agar menyesuaikan sisa layar) -->
+                <!-- BOX SCANNER TARGET -->
                 <div id="status-box" class="w-full flex-1 min-h-0 flex flex-col relative transition-all duration-500 group">
-                    <div class="absolute inset-0 bg-slate-200/50 rounded-[2rem] border-2 border-dashed border-slate-400/50 flex overflow-hidden">
+                    <div class="absolute inset-0 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-300 flex overflow-hidden">
                         
                         <!-- State: Standby -->
                         <div id="state-standby" class="w-full h-full flex flex-col items-center justify-center p-6 relative z-10 transition-all duration-300">
-                            <div class="w-24 h-24 bg-slate-100 rounded-[2rem] shadow-sm border border-slate-300 flex items-center justify-center mb-4 relative">
-                                <i class="ph-duotone ph-barcode text-6xl text-slate-500 relative z-10"></i>
+                            <!-- Warna Ikon Diperbaiki: text-blue-500 agar tidak ghaib -->
+                            <div class="w-20 h-20 bg-white rounded-[1.5rem] shadow-sm border border-slate-200 flex items-center justify-center mb-4 relative group-hover:scale-105 transition-transform">
+                                <i class="ph-duotone ph-barcode text-5xl text-blue-500 relative z-10"></i>
                             </div>
                             <h2 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight text-center">SIAP SCAN BARCODE</h2>
-                            <p class="text-slate-600 text-xs md:text-sm mt-2 font-bold text-center">Dekatkan kartu identitas Anda ke scanner</p>
-                            <p id="ekskul-name-display" class="hidden text-rose-600 mt-4 font-bold text-xs bg-rose-100 border border-rose-200 px-5 py-2 rounded-full uppercase tracking-wider shadow-sm"></p>
+                            <p class="text-slate-500 text-xs mt-2 font-bold text-center">Dekatkan kartu identitas Anda ke scanner</p>
+                            <p id="ekskul-name-display" class="hidden text-rose-600 mt-4 font-bold text-xs bg-rose-50 border border-rose-200 px-5 py-2 rounded-full uppercase tracking-wider shadow-sm"></p>
                         </div>
 
                         <!-- State: Result -->
-                        <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full rounded-[2rem] flex-col items-center justify-center overflow-hidden p-6 transition-all duration-300 bg-slate-100/95 backdrop-blur-sm">
+                        <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full rounded-[2rem] flex-col items-center justify-center overflow-hidden p-6 transition-all duration-300 bg-white/95 backdrop-blur-md">
                             <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- MODE SELECTOR (Tombol Grid di Bawah) -->
-                <div class="mt-4 w-full relative z-20 shrink-0">
-                    <div class="grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
+                <!-- MODE SELECTOR (Tombol Grid di Bawah - Dirampingkan) -->
+                <!-- py-2.5 atau py-3 agar tidak terlalu gemuk -->
+                <div class="mt-5 w-full relative z-20 shrink-0">
+                    <div class="grid grid-cols-3 lg:grid-cols-6 gap-2">
                         @foreach([
                             ['label' => 'Masuk (F1)', 'type' => 'Masuk', 'bg' => 'bg-slate-800', 'hover' => 'hover:bg-slate-900', 'text' => 'text-slate-100'],
                             ['label' => 'Pulang (F2)', 'type' => 'Pulang', 'bg' => 'bg-blue-600', 'hover' => 'hover:bg-blue-700', 'text' => 'text-slate-100'],
@@ -96,13 +105,13 @@
                             ['label' => 'Dhuha (F4)', 'type' => 'Dhuha', 'bg' => 'bg-emerald-600', 'hover' => 'hover:bg-emerald-700', 'text' => 'text-slate-100'],
                             ['label' => 'Dhuhur (F5)', 'type' => 'Dhuhur', 'bg' => 'bg-emerald-600', 'hover' => 'hover:bg-emerald-700', 'text' => 'text-slate-100'],
                         ] as $btn)
-                        <button type="button" data-mode="{{ $btn['type'] }}" class="mode-btn {{ $btn['bg'] }} {{ $btn['hover'] }} py-3 md:py-4 rounded-xl md:rounded-2xl transition-all duration-300 flex flex-col items-center justify-center shadow-md shadow-slate-400/30 active:scale-95 text-center px-2 border-2 border-transparent">
-                            <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider {{ $btn['text'] }}">{{ $btn['label'] }}</span>
+                        <button type="button" data-mode="{{ $btn['type'] }}" class="mode-btn {{ $btn['bg'] }} {{ $btn['hover'] }} py-2.5 md:py-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center shadow-md active:scale-95 text-center px-1 border-2 border-transparent">
+                            <span class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider {{ $btn['text'] }}">{{ $btn['label'] }}</span>
                         </button>
                         @endforeach
                         
-                        <button type="button" id="btn-ekskul" class="bg-rose-600 hover:bg-rose-700 py-3 md:py-4 rounded-xl md:rounded-2xl transition-all duration-300 flex flex-col items-center justify-center shadow-md shadow-slate-400/30 active:scale-95 text-center px-2 border-2 border-transparent">
-                            <span class="text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-100">Ekskul (F6)</span>
+                        <button type="button" id="btn-ekskul" class="bg-rose-500 hover:bg-rose-600 py-2.5 md:py-3 rounded-xl transition-all duration-300 flex flex-col items-center justify-center shadow-md active:scale-95 text-center px-1 border-2 border-transparent">
+                            <span class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-slate-100">Ekskul (F6)</span>
                         </button>
                     </div>
                 </div>
@@ -110,40 +119,40 @@
         </div>
 
         <!-- BAGIAN KANAN: JAM & LOG -->
-        <!-- min-h-0 sangat penting di sini agar box kanan tidak memanjang lebih dari layar -->
-        <div class="w-full lg:w-[420px] flex flex-col relative z-20 shrink-0 min-h-0 h-full">
+        <div class="w-full lg:w-[400px] flex flex-col relative z-20 shrink-0 min-h-0 h-full gap-6">
             
             <!-- Digital Clock -->
-            <div class="w-full bg-gradient-to-r from-blue-600 to-sky-600 rounded-[2.5rem] p-6 shadow-xl shadow-slate-300/40 flex flex-col justify-center items-center relative overflow-hidden mb-6 shrink-0 border border-blue-700/50">
+            <!-- Dibuat sedikit lebih slim -->
+            <div class="w-full bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem] p-5 shadow-2xl shadow-blue-900/20 flex flex-col justify-center items-center relative overflow-hidden shrink-0 border border-blue-400/30">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
                 <span id="kiosk-clock" class="text-5xl lg:text-6xl font-black text-white font-mono tracking-tighter drop-shadow-md relative z-10">00:00:00</span>
-                <div class="mt-3 inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-full relative z-10">
-                    <span class="w-2.5 h-2.5 rounded-full bg-white animate-pulse shadow-[0_0_8px_rgba(255,255,255,0.8)]"></span>
-                    <p class="text-[10px] font-bold text-white uppercase tracking-widest">Sistem Aktif</p>
+                <div class="mt-2 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full relative z-10">
+                    <span class="w-2 h-2 rounded-full bg-cyan-300 animate-pulse shadow-[0_0_8px_rgba(103,232,249,0.8)]"></span>
+                    <p class="text-[9px] font-bold text-cyan-50 uppercase tracking-widest">Sistem Aktif</p>
                 </div>
             </div>
 
             <!-- List Aktivitas Feed -->
-            <div class="flex-1 w-full flex flex-col bg-slate-100/90 backdrop-blur-md border border-slate-300 rounded-[2.5rem] p-5 md:p-6 shadow-xl shadow-slate-300/40 min-h-0">
+            <div class="flex-1 w-full flex flex-col bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2.5rem] p-5 shadow-2xl shadow-slate-900/10 min-h-0">
                 
-                <div class="pb-3 border-b border-slate-300 mb-4 flex items-center gap-3 shrink-0">
-                     <div class="w-10 h-10 rounded-xl bg-slate-200 text-blue-700 flex items-center justify-center shrink-0 border border-slate-300">
-                        <i class="ph-bold ph-list-dashes text-xl"></i>
+                <div class="pb-3 border-b border-slate-200 mb-4 flex items-center gap-3 shrink-0">
+                     <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                        <i class="ph-bold ph-list-dashes text-lg"></i>
                     </div>
                     <div>
-                        <h2 class="text-base md:text-lg font-black text-slate-800">Aktivitas Siswa</h2>
-                        <p class="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Sinkronisasi Real-Time</p>
+                        <h2 class="text-base font-black text-slate-800 leading-tight">Aktivitas Siswa</h2>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Sinkronisasi Real-Time</p>
                     </div>
                 </div>
 
-                <!-- WADAH SCROLL UTAMA -->
-                <!-- Ini yang membuat daftar panjang hanya ter-scroll di dalam kotak ini saja -->
                 <div class="flex-1 overflow-y-auto custom-scrollbar relative pr-2">
                     <ul id="scan-log-list" class="space-y-3 pb-4">
                         <li id="empty-log" class="flex flex-col items-center justify-center py-20 opacity-80 h-full">
-                            <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-3 text-slate-400 border border-slate-300">
+                            <!-- Warna ikon diperbaiki: text-slate-400 agar terlihat -->
+                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center mb-3 text-slate-400 border border-slate-200 shadow-sm">
                                 <i class="ph-duotone ph-list-magnifying-glass text-3xl"></i>
                             </div>
-                            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Antrean Kosong</p>
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Antrean Kosong</p>
                         </li>
                     </ul>
                 </div>
@@ -156,26 +165,26 @@
 
     <!-- Modal Ekskul AlpineJS -->
     <div x-show="showExtraModal" x-transition class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" x-cloak>
-        <div class="bg-slate-100 rounded-[2.5rem] border border-slate-300 p-8 w-full max-w-lg shadow-2xl relative" @click.away="closeModal()">
+        <div class="bg-white rounded-[2.5rem] border border-slate-200 p-8 w-full max-w-lg shadow-2xl relative" @click.away="closeModal()">
             <h3 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
                     <i class="ph-bold ph-trophy text-xl"></i>
                 </div> 
                 Pilih Ekstrakurikuler
             </h3>
-            <div class="grid grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+            <div class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
                 @forelse($extracurriculars as $ex)
-                    <button type="button" @click="selectExtra('{{ $ex->id }}', '{{ $ex->name }}')" class="p-3 md:p-4 bg-slate-200 hover:bg-rose-100 border border-slate-300 hover:border-rose-300 rounded-xl md:rounded-2xl text-left transition-all group shadow-sm">
-                        <span class="font-bold text-slate-700 group-hover:text-rose-700 text-xs md:text-sm block">{{ $ex->name }}</span>
+                    <button type="button" @click="selectExtra('{{ $ex->id }}', '{{ $ex->name }}')" class="p-3 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xl text-left transition-all group shadow-sm">
+                        <span class="font-bold text-slate-700 group-hover:text-rose-700 text-xs block">{{ $ex->name }}</span>
                     </button>
                 @empty
-                    <div class="col-span-2 text-center py-10 bg-slate-200 rounded-2xl border border-dashed border-slate-400">
-                        <i class="ph-duotone ph-warning-circle text-4xl text-slate-500 mb-2"></i>
-                        <p class="text-slate-600 text-sm font-bold uppercase tracking-widest">Data Kosong</p>
+                    <div class="col-span-2 text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                        <i class="ph-duotone ph-warning-circle text-4xl text-slate-400 mb-2"></i>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Data Kosong</p>
                     </div>
                 @endforelse
             </div>
-            <button type="button" @click="closeModal()" class="mt-6 w-full py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-colors uppercase tracking-widest text-xs shadow-sm border border-slate-300">Batal / Tutup</button>
+            <button type="button" @click="closeModal()" class="mt-6 w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-colors uppercase tracking-widest text-[10px] shadow-sm border border-slate-200">Batal / Tutup</button>
         </div>
     </div>
 
@@ -272,7 +281,7 @@
             'Makan': { bg: 'bg-orange-500', text: 'text-slate-100', icon: 'ph-bowl-food', label: 'AMBIL MAKAN' },
             'Dhuha': { bg: 'bg-emerald-600', text: 'text-slate-100', icon: 'ph-sun-horizon', label: 'SHOLAT DHUHA' },
             'Dhuhur': { bg: 'bg-emerald-600', text: 'text-slate-100', icon: 'ph-mosque', label: 'SHOLAT DHUHUR' },
-            'Ekstrakurikuler': { bg: 'bg-rose-600', text: 'text-slate-100', icon: 'ph-basketball', label: 'EKSKUL' }
+            'Ekstrakurikuler': { bg: 'bg-rose-500', text: 'text-slate-100', icon: 'ph-basketball', label: 'EKSKUL' }
         };
 
         const toMinutes = (str) => { if(!str) return 0; const [h,m] = str.split(':'); return parseInt(h)*60 + parseInt(m); };
@@ -316,25 +325,25 @@
             
             let badgeIconColor = mode === 'Masuk' ? 'text-blue-400' : 'text-slate-200';
             modeBadge.innerHTML = `<i class="ph-fill ${config.icon} text-lg ${badgeIconColor}"></i> <span>${config.label}</span>`;
-            modeBadge.className = `px-5 py-2.5 rounded-2xl ${config.bg} ${config.text} font-bold tracking-wider uppercase text-xs md:text-sm shadow-md flex items-center gap-2 transition-all`;
+            modeBadge.className = `px-4 py-2 rounded-xl ${config.bg} ${config.text} font-bold tracking-wider uppercase text-xs shadow-md flex items-center gap-2 transition-all`;
 
             if(isManual) {
                 manualIndicator.textContent = manualText;
-                manualIndicator.classList.remove('bg-slate-200', 'text-slate-600', 'border-slate-300');
-                manualIndicator.classList.add('bg-rose-100', 'text-rose-700', 'border-rose-300');
+                manualIndicator.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
+                manualIndicator.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
             } else {
                 manualIndicator.textContent = manualText;
-                manualIndicator.classList.add('bg-slate-200', 'text-slate-600', 'border-slate-300');
-                manualIndicator.classList.remove('bg-rose-100', 'text-rose-700', 'border-rose-300');
+                manualIndicator.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
+                manualIndicator.classList.remove('bg-rose-50', 'text-rose-600', 'border-rose-200');
             }
 
             document.querySelectorAll('.mode-btn, #btn-ekskul').forEach(btn => {
                 if(btn.getAttribute('data-mode') === mode || (mode === 'Ekstrakurikuler' && btn.id === 'btn-ekskul')) {
-                    btn.classList.remove('opacity-60', 'scale-95');
-                    btn.classList.add('border-slate-800/20', 'scale-105', 'shadow-xl'); 
+                    btn.classList.remove('opacity-50', 'scale-95');
+                    btn.classList.add('border-slate-900/10', 'scale-105', 'shadow-lg'); 
                 } else {
-                    btn.classList.add('opacity-60'); 
-                    btn.classList.remove('border-slate-800/20', 'scale-105', 'shadow-xl');
+                    btn.classList.add('opacity-50'); 
+                    btn.classList.remove('border-slate-900/10', 'scale-105', 'shadow-lg');
                 }
             });
             
@@ -387,51 +396,50 @@
             
             let borderColor, badgeBg, badgeText, iconName;
             if (type === 'error') {
-                borderColor = 'border-rose-400'; badgeBg = 'bg-rose-200'; badgeText = 'text-rose-800'; iconName = 'ph-x-circle';
+                borderColor = 'border-rose-200'; badgeBg = 'bg-rose-100'; badgeText = 'text-rose-700'; iconName = 'ph-x-circle';
             } 
             else if (type === 'warning') {
-                borderColor = 'border-amber-400'; badgeBg = 'bg-amber-200'; badgeText = 'text-amber-800'; iconName = 'ph-clock'; message = message || 'Terlambat';
+                borderColor = 'border-amber-200'; badgeBg = 'bg-amber-100'; badgeText = 'text-amber-700'; iconName = 'ph-clock'; message = message || 'Terlambat';
             } 
             else if (mode === 'Pulang') {
-                borderColor = 'border-blue-400'; badgeBg = 'bg-blue-200'; badgeText = 'text-blue-800'; iconName = 'ph-moon-stars'; message = 'Pulang Sukses'; 
+                borderColor = 'border-blue-200'; badgeBg = 'bg-blue-50'; badgeText = 'text-blue-700'; iconName = 'ph-moon-stars'; message = 'Pulang Sukses'; 
             } 
             else if (type === 'makan') {
-                borderColor = 'border-orange-400'; badgeBg = 'bg-orange-200'; badgeText = 'text-orange-800'; iconName = 'ph-bowl-food'; message = message || 'Ambil Makan';
+                borderColor = 'border-orange-200'; badgeBg = 'bg-orange-50'; badgeText = 'text-orange-700'; iconName = 'ph-bowl-food'; message = message || 'Ambil Makan';
             } 
             else {
-                borderColor = 'border-emerald-400'; badgeBg = 'bg-emerald-200'; badgeText = 'text-emerald-800'; iconName = 'ph-check-circle'; message = 'Tepat Waktu';
+                borderColor = 'border-emerald-200'; badgeBg = 'bg-emerald-50'; badgeText = 'text-emerald-700'; iconName = 'ph-check-circle'; message = 'Tepat Waktu';
             }
 
-            let avatarContent = `<span class="text-xl font-black text-slate-500">${initial}</span>`;
+            let avatarContent = `<span class="text-xl font-black text-slate-400">${initial}</span>`;
             if (photoPath) {
                 let fullUrl = photoPath.startsWith('http') ? photoPath : `/storage/${photoPath}`;
-                avatarContent = `<img src="${fullUrl}" alt="${name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.outerHTML='<span class=\\'text-xl font-black text-slate-500\\'>${initial}</span>';">`;
+                avatarContent = `<img src="${fullUrl}" alt="${name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.outerHTML='<span class=\\'text-xl font-black text-slate-400\\'>${initial}</span>';">`;
             }
 
-            li.className = `flex p-3 md:p-4 rounded-xl md:rounded-2xl border ${borderColor} bg-slate-50 shadow-sm animate-fade-in-left transition-all justify-between items-center`;
+            li.className = `flex p-3 rounded-xl border ${borderColor} bg-white shadow-sm animate-fade-in-left transition-all justify-between items-center`;
             li.innerHTML = `
-                <div class="flex items-center gap-3 md:gap-4 min-w-0">
-                    <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-200 overflow-hidden flex items-center justify-center border border-slate-300">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-50 overflow-hidden flex items-center justify-center border border-slate-200">
                         ${avatarContent}
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <p class="text-slate-800 font-bold truncate text-xs md:text-sm leading-tight">${name}</p>
+                        <p class="text-slate-800 font-bold truncate text-xs leading-tight">${name}</p>
                         <div class="flex items-center mt-1">
-                            <span class="text-[9px] md:text-[10px] font-bold ${badgeBg} ${badgeText} px-2 py-0.5 md:py-1 rounded-md flex items-center gap-1 shadow-sm uppercase tracking-wide border border-transparent">
+                            <span class="text-[9px] font-bold ${badgeBg} ${badgeText} px-2 py-0.5 rounded flex items-center gap-1 uppercase tracking-wide">
                                 ${message} <i class="ph-fill ${iconName}"></i>
                             </span>
                         </div>
                     </div>
                 </div>
                 <div class="flex-shrink-0 pl-2">
-                    <div class="text-slate-700 text-[10px] md:text-[11px] font-bold tracking-widest bg-slate-200 px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-slate-300">
+                    <div class="text-slate-500 text-[9px] font-bold tracking-widest bg-slate-50 px-2 py-1 rounded border border-slate-200">
                         ${time}
                     </div>
                 </div>
             `;
             
             logList.prepend(li);
-            // Simpan lebih banyak log sebelum dihapus agar bisa discroll panjang
             if (logList.children.length > 50) logList.removeChild(logList.lastElementChild);
         }
 
@@ -481,15 +489,15 @@
             
             stateResult.innerHTML = `
                 <div class="relative w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-6">
-                    <div class="absolute inset-0 border-4 border-slate-300 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
                     <div class="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div class="w-14 h-14 md:w-16 md:h-16 bg-slate-200 rounded-full flex items-center justify-center">
+                    <div class="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
                         <i class="ph-duotone ${config.icon} text-2xl md:text-3xl text-blue-600"></i>
                     </div>
                 </div>
                 <p class="text-sm md:text-base font-black tracking-widest uppercase text-slate-800 animate-pulse">MEMPROSES DATA...</p>
             `;
-            stateResult.className = `absolute inset-0 z-30 w-full h-full rounded-[2rem] flex flex-col items-center justify-center overflow-hidden p-6 transition-all duration-300 bg-slate-100/95 backdrop-blur-sm`;
+            stateResult.className = `absolute inset-0 z-30 w-full h-full rounded-[2rem] flex flex-col items-center justify-center overflow-hidden p-6 transition-all duration-300 bg-white/95 backdrop-blur-md`;
 
             try {
                 const body = { student_id: data, type: currentScanMode, extra_id: window.selectedExtraId, lat: null, long: null };
@@ -511,10 +519,10 @@
                  if (response.status === 419 || response.status === 401) {
                     playBeep('error');
                     stateResult.innerHTML = `
-                        <div class="bg-rose-100 p-4 md:p-5 rounded-[2rem] mb-4 border border-rose-300"><i class="ph-bold ph-warning-circle text-5xl md:text-6xl text-rose-600"></i></div>
+                        <div class="bg-rose-50 p-4 md:p-5 rounded-[2rem] mb-4 border border-rose-200"><i class="ph-bold ph-warning-circle text-5xl md:text-6xl text-rose-500"></i></div>
                         <h2 class="text-xl md:text-2xl font-black text-rose-700 text-center mb-2 tracking-tight uppercase">SESI BERAKHIR</h2>
-                        <p class="text-slate-700 text-xs md:text-sm mb-6 font-bold">Harap muat ulang halaman</p>
-                        <button onclick="window.location.reload()" class="px-6 md:px-8 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-300 transition-colors uppercase tracking-widest text-[10px] md:text-xs">
+                        <p class="text-slate-500 text-xs md:text-sm mb-6 font-bold">Harap muat ulang halaman</p>
+                        <button onclick="window.location.reload()" class="px-6 md:px-8 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-lg transition-colors uppercase tracking-widest text-[10px] md:text-xs">
                             <i class="ph-bold ph-arrows-clockwise mr-1"></i> Muat Ulang
                         </button>
                     `;
@@ -535,11 +543,11 @@
                     else if (currentScanMode === 'Makan') speakSapaan(`Selamat makan, ${shortName}.`);
                     else speakSapaan(`Selamat datang, ${shortName}.`);
                     
-                    let bgClass = isLate ? "bg-amber-100" : (currentScanMode === 'Pulang' ? "bg-blue-100" : "bg-emerald-100");
-                    let borderClass = isLate ? "border-amber-300" : (currentScanMode === 'Pulang' ? "border-blue-300" : "border-emerald-300");
-                    let textClass = isLate ? "text-amber-800" : (currentScanMode === 'Pulang' ? "text-blue-800" : "text-emerald-800");
+                    let bgClass = isLate ? "bg-amber-50" : (currentScanMode === 'Pulang' ? "bg-blue-50" : "bg-emerald-50");
+                    let borderClass = isLate ? "border-amber-200" : (currentScanMode === 'Pulang' ? "border-blue-200" : "border-emerald-200");
+                    let textClass = isLate ? "text-amber-700" : (currentScanMode === 'Pulang' ? "text-blue-700" : "text-emerald-700");
                     let iconClass = isLate ? "ph-warning-circle" : "ph-check-circle";
-                    let iconBgClass = isLate ? "bg-amber-200" : (currentScanMode === 'Pulang' ? "bg-blue-200" : "bg-emerald-200");
+                    let iconBgClass = isLate ? "bg-amber-100" : (currentScanMode === 'Pulang' ? "bg-blue-100" : "bg-emerald-100");
                     
                     showResultUI(bgClass, borderClass, textClass, iconClass, iconBgClass, result.student_name, result.message);
                     addToLog(result.student_name, statusType, result.message, displayTime, currentScanMode, result.photo_path);
@@ -549,14 +557,14 @@
                     speakSapaan(response.status === 404 ? 'Kartu tidak terdaftar.' : `Maaf, ${result.message}`);
                     
                     const errorMsg = result.message || 'Data tidak ditemukan';
-                    showResultUI("bg-rose-100", "border-rose-300", "text-rose-800", "ph-x-circle", "bg-rose-200", result.student_name || "Siswa Tidak Dikenal", errorMsg);
+                    showResultUI("bg-rose-50", "border-rose-200", "text-rose-700", "ph-x-circle", "bg-rose-100", result.student_name || "Siswa Tidak Dikenal", errorMsg);
                     addToLog(result.student_name || "Gagal Scan", 'error', errorMsg, displayTime, currentScanMode, result.photo_path);
                 }
 
             } catch (error) {
                 console.error(error);
                 playBeep('error');
-                showResultUI("bg-rose-100", "border-rose-300", "text-rose-800", "ph-warning-octagon", "bg-rose-200", "SYSTEM ERROR", "Gagal Menghubungi Server");
+                showResultUI("bg-rose-50", "border-rose-200", "text-rose-700", "ph-warning-octagon", "bg-rose-100", "SYSTEM ERROR", "Gagal Menghubungi Server");
             } finally {
                 setTimeout(() => {
                     stateResult.classList.add('hidden'); 
@@ -573,11 +581,11 @@
             
             stateResult.innerHTML = `
                 <div class="flex flex-col items-center animate-bounce-in text-center w-full">
-                    <div class="w-24 h-24 md:w-28 md:h-28 ${iconBgClass} rounded-full flex items-center justify-center mb-6 shadow-sm border border-slate-300/50">
+                    <div class="w-24 h-24 md:w-28 md:h-28 ${iconBgClass} rounded-full flex items-center justify-center mb-6 shadow-sm border border-white/50">
                         <i class="ph-fill ${iconClass} text-5xl md:text-6xl ${textClass}"></i>
                     </div>
-                    <h2 class="text-2xl md:text-4xl font-black text-slate-800 leading-tight mb-4 w-full truncate px-4">${name || 'Siswa'}</h2>
-                    <p class="text-[10px] md:text-xs font-bold ${textClass} px-5 md:px-6 py-2 md:py-2.5 bg-slate-50/80 backdrop-blur-sm rounded-full shadow-sm border border-slate-300/50 uppercase tracking-widest">${message}</p>
+                    <h2 class="text-2xl md:text-4xl font-black text-slate-800 leading-tight mb-3 w-full truncate px-4">${name || 'Siswa'}</h2>
+                    <p class="text-[10px] md:text-xs font-bold ${textClass} px-5 py-2 bg-white/60 backdrop-blur-sm rounded-full shadow-sm border border-white/50 uppercase tracking-widest">${message}</p>
                 </div>
             `;
         }
@@ -637,8 +645,8 @@
 </script>
 
 <style>
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     

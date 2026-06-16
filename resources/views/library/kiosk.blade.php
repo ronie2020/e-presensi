@@ -1,36 +1,39 @@
 @extends('layouts.kiosk-layout')
 
 @section('content')
-<div class="h-screen w-full bg-slate-900 flex relative overflow-hidden font-sans selection:bg-cyan-500 selection:text-white">
+<div class="h-screen w-full flex relative overflow-hidden font-sans selection:bg-elevate-primary selection:text-white bg-elevate-dark">
     
+    <!-- BACKGROUND IMAGE & OVERLAY (ELEVATE NAVY TINT) -->
+    <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('images/netila.jpg') }}');">
+        <!-- Overlay Biru Navy: Mengatasi overexposed agar gambar redup elegan dan UI di depannya stand-out -->
+        <div class="absolute inset-0 bg-elevate-dark/70 backdrop-blur-[3px]"></div>
+    </div>
+
     <!-- OVERLAY START (Untuk Audio Context Browser) -->
-    <div id="start-overlay" class="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500">
+    <div id="start-overlay" class="fixed inset-0 z-[100] bg-elevate-dark/95 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="text-center space-y-8 animate-enter">
             <div class="relative inline-block">
-                <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-20 animate-pulse"></div>
-                <i class="ph-duotone ph-desktop-tower text-9xl text-white relative z-10"></i>
+                <div class="absolute inset-0 bg-elevate-primary blur-3xl opacity-30 animate-pulse"></div>
+                <i class="ph-duotone ph-desktop-tower text-9xl text-elevate-accent relative z-10"></i>
             </div>
             <div>
                 <h1 class="text-4xl font-black text-white tracking-tight">KIOSK PERPUSTAKAAN</h1>
-                <p class="text-slate-400 mt-2 font-medium">Klik tombol di bawah untuk mengaktifkan sistem suara & scanner.</p>
+                <p class="text-elevate-soft mt-2 font-medium">Klik tombol di bawah untuk mengaktifkan sistem suara & scanner.</p>
             </div>
-            <button onclick="startKiosk()" class="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl text-xl shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 overflow-hidden">
+            <button onclick="startKiosk()" class="group relative px-8 py-4 bg-elevate-primary hover:bg-elevate-accent text-white font-bold rounded-2xl text-xl shadow-lg shadow-elevate-primary/30 transition-all hover:scale-105 active:scale-95 overflow-hidden">
                 <span class="relative z-10 flex items-center gap-3">
                     <i class="ph-bold ph-power"></i> AKTIFKAN SISTEM
                 </span>
-                <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </button>
         </div>
     </div>
 
-    <!-- Background FX -->
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 z-50 shadow-[0_0_20px_rgba(56,189,248,0.5)]"></div>
-    <div class="absolute -top-[20%] -left-[10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[150px] animate-pulse"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px]"></div>
-    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
+   <!-- Background FX (Gradient dari tema) -->
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-elevate-gradient-main z-50 shadow-[0_0_15px_rgba(86,187,241,0.6)]"></div>
+    <div class="absolute -top-[20%] -left-[10%] w-[800px] h-[800px] bg-elevate-primary/20 rounded-full blur-[150px] animate-pulse pointer-events-none"></div>
 
-    <!-- Tombol Kembali -->
-    <a href="{{ route('library.dashboard') }}" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
+    <!-- Tombol Kembali (Di atas background gelap) -->
+    <a href="{{ route('library.dashboard') }}" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/20 shadow-lg group backdrop-blur-md">
         <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-bold text-xs uppercase tracking-wider">Dashboard</span>
     </a>
@@ -43,60 +46,62 @@
             
             <!-- Header -->
             <div class="text-center mb-6 w-full flex flex-col items-center shrink-0">
-                <div class="inline-flex items-center justify-center p-3 mb-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 shadow-2xl backdrop-blur-sm">
+                <div class="inline-flex items-center justify-center p-3 mb-4 bg-white/10 rounded-2xl border border-white/20 shadow-lg backdrop-blur-md">
                     <img src="{{ asset('img/logo_sekolah.png') }}" onerror="this.style.display='none';" alt="Logo" class="w-14 h-14 object-contain">
                 </div>
                 
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-white tracking-tight uppercase leading-tight drop-shadow-sm">
+                <h1 class="text-4xl font-black text-white tracking-tight uppercase leading-tight drop-shadow-md">
                     Selamat Datang
                 </h1>
                 
                 <!-- Jam Digital -->
-                <div class="mt-4 px-6 py-2 rounded-full bg-slate-800/30 border border-slate-700/30 backdrop-blur-md">
-                    <span id="kiosk-clock" class="text-3xl font-black text-slate-200 font-mono tracking-widest">00:00:00</span>
+                <div class="mt-4 px-6 py-2 rounded-full bg-white/20 border border-white/30 shadow-lg backdrop-blur-xl">
+                    <span id="kiosk-clock" class="text-3xl font-black text-white font-mono tracking-widest drop-shadow-md">00:00:00</span>
                 </div>
             </div>
 
             <!-- MODE SWITCHER -->
-            <div class="flex bg-slate-800/50 p-1.5 rounded-2xl border border-slate-700 mb-6 backdrop-blur-md">
-                <button onclick="setMode('attendance')" id="btn-mode-attendance" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-blue-600 text-white shadow-lg shadow-blue-900/50 interactive-btn">
+            <div class="flex bg-elevate-dark/40 p-1.5 rounded-2xl border border-white/20 mb-6 backdrop-blur-xl shadow-lg">
+                <button onclick="setMode('attendance')" id="btn-mode-attendance" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-elevate-primary text-white shadow-md shadow-elevate-primary/30 interactive-btn">
                     <i class="ph-bold ph-user-check"></i> Absensi Masuk
                 </button>
-                <button onclick="setMode('check')" id="btn-mode-check" class="px-6 py-2.5 rounded-xl font-bold text-sm text-slate-400 hover:text-white transition-all flex items-center gap-2 interactive-btn">
+                <button onclick="setMode('check')" id="btn-mode-check" class="px-6 py-2.5 rounded-xl font-bold text-sm text-white/70 hover:text-white transition-all flex items-center gap-2 interactive-btn bg-transparent">
                     <i class="ph-bold ph-info"></i> Cek Status
                 </button>
             </div>
 
-            <!-- BOX SCANNER -->
-            <div id="status-box" class="w-full max-w-2xl aspect-[16/7] bg-slate-800/40 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-slate-700 hover:border-blue-500/50 shadow-2xl">
+            <!-- BOX SCANNER (Warna Putih menonjol di atas navy) -->
+            <div id="status-box" class="w-full max-w-2xl aspect-[16/7] bg-white/95 backdrop-blur-xl rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-elevate-soft hover:border-elevate-accent/50 shadow-2xl">
                 
                 <!-- Laser Animation -->
-                <div id="scan-laser" class="absolute top-0 left-8 right-8 h-1.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_#22d3ee] z-20 animate-scan-y opacity-70"></div>
+                <div id="scan-laser" class="absolute top-0 left-8 right-8 h-1.5 bg-gradient-to-r from-transparent via-elevate-accent to-transparent shadow-[0_0_20px_theme(colors.elevate.accent)] z-20 animate-scan-y opacity-80"></div>
 
                 <!-- State: Standby -->
                 <div id="state-standby" class="flex flex-col items-center z-10 transition-transform duration-300 group-hover:scale-105">
                     <div class="relative mb-4">
-                         <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full animate-pulse"></div>
-                         <i class="ph-duotone ph-scan text-7xl text-cyan-400 relative z-10 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]"></i>
+                         <div class="absolute inset-0 bg-elevate-primary/10 blur-2xl rounded-full animate-pulse"></div>
+                         <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center relative z-10 border-4 border-white shadow-inner">
+                             <i class="ph-bold ph-scan text-5xl text-elevate-primary drop-shadow-md"></i>
+                         </div>
                     </div>
-                    <p class="text-3xl font-black text-white tracking-wide">TEMPEL KARTU</p>
-                    <p class="text-cyan-300/70 mt-1 font-bold text-sm tracking-widest uppercase" id="instruction-text">Untuk Absensi Perpustakaan</p>
+                    <p class="text-3xl font-black text-elevate-dark tracking-wide">TEMPEL KARTU</p>
+                    <p class="text-elevate-primary mt-1 font-bold text-sm tracking-widest uppercase" id="instruction-text">Untuk Absensi Perpustakaan</p>
                 </div>
 
                 <!-- State: Result -->
-                <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full bg-slate-900 rounded-[2.5rem] flex-col items-center justify-center border border-slate-700 overflow-hidden p-6 text-center">
+                <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full bg-elevate-surface rounded-[2.5rem] flex-col items-center justify-center border border-elevate-soft overflow-hidden p-6 text-center shadow-inner">
                     <!-- Injected via JS -->
                 </div>
             </div>
             
             <!-- OVERDUE ALERT BANNER -->
-            <div id="overdue-alert" class="hidden mt-6 w-full max-w-2xl bg-rose-500/10 border border-rose-500/50 rounded-2xl p-4 flex items-center gap-4 animate-bounce-in">
-                <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shrink-0 animate-pulse">
+            <div id="overdue-alert" class="hidden mt-6 w-full max-w-2xl bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center gap-4 animate-bounce-in shadow-lg">
+                <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shrink-0 animate-pulse shadow-md shadow-rose-500/30">
                     <i class="ph-bold ph-warning text-white text-xl"></i>
                 </div>
                 <div class="text-left">
-                    <h4 class="text-rose-400 font-bold text-sm uppercase">Peringatan Keterlambatan</h4>
-                    <p class="text-rose-200 text-xs mt-0.5">Harap segera kembalikan buku: <span id="overdue-titles" class="font-bold text-white"></span></p>
+                    <h4 class="text-rose-600 font-bold text-sm uppercase">Peringatan Keterlambatan</h4>
+                    <p class="text-rose-800 text-xs mt-0.5 font-medium">Harap segera kembalikan buku: <span id="overdue-titles" class="font-bold"></span></p>
                 </div>
             </div>
 
@@ -106,10 +111,10 @@
         <div class="hidden lg:flex w-[380px] h-full flex-col gap-6 shrink-0">
             
             <!-- 1. List Pengunjung -->
-            <div class="flex-1 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col relative z-20">
-                <div class="p-6 bg-slate-900/50 border-b border-slate-700/50 flex justify-between items-center">
-                    <h2 class="text-lg font-black text-white flex items-center gap-2">
-                        <i class="ph-fill ph-users-three text-blue-500"></i> Pengunjung
+            <div class="flex-1 bg-white/95 backdrop-blur-xl border border-elevate-soft shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col relative z-20">
+                <div class="p-6 bg-elevate-soft/50 border-b border-elevate-soft flex justify-between items-center">
+                    <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2">
+                        <i class="ph-fill ph-users-three text-elevate-primary"></i> Pengunjung
                     </h2>
                     <div class="flex h-2.5 w-2.5 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -118,70 +123,66 @@
                 </div>
                 <div class="flex-1 overflow-y-auto p-5 custom-scrollbar relative">
                     <ul id="scan-log-list" class="space-y-3 pb-10">
-                        <li id="empty-log" class="flex flex-col items-center justify-center py-20 opacity-30">
-                            <i class="ph-duotone ph-ghost text-5xl text-slate-400 mb-2"></i>
-                            <p class="text-slate-400 text-xs font-bold uppercase">Belum ada data</p>
+                        <li id="empty-log" class="flex flex-col items-center justify-center py-20 opacity-60">
+                            <i class="ph-duotone ph-ghost text-5xl text-elevate-primary/30 mb-2"></i>
+                            <p class="text-elevate-dark/40 text-xs font-bold uppercase">Belum ada data</p>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <!-- 2. Rekomendasi Buku (FIXED IMAGE LOGIC) -->
-            <div class="h-1/3 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 shadow-xl rounded-[2.5rem] p-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="ph-duotone ph-books text-6xl text-purple-400"></i>
+            <!-- 2. Rekomendasi Buku -->
+            <div class="h-1/3 bg-white/95 backdrop-blur-xl border border-elevate-soft shadow-2xl rounded-[2.5rem] p-6 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i class="ph-duotone ph-books text-6xl text-elevate-primary"></i>
                 </div>
-                <h3 class="text-sm font-bold text-purple-400 uppercase tracking-wider mb-4">Rekomendasi Hari Ini</h3>
-                
+                <h3 class="text-sm font-bold text-elevate-primary uppercase tracking-wider mb-4">Rekomendasi Hari Ini</h3>                
                 <div class="relative h-full overflow-hidden" id="book-slider">
-                    @foreach($recommendations as $index => $book)
+                    @forelse($recommendations as $index => $book)
                     <div class="book-slide absolute inset-0 transition-opacity duration-1000 {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' }}">
                         <div class="flex gap-4 items-start">
                             
-                            {{-- LOGIC GAMBAR BUKU CERDAS --}}
-                            <div class="w-16 h-24 bg-slate-700 rounded-lg shadow-lg shrink-0 overflow-hidden relative">
+                            <!-- LOGIC GAMBAR BUKU CERDAS -->
+                            <div class="w-16 h-24 bg-elevate-soft rounded-lg shadow-sm shrink-0 overflow-hidden relative border border-elevate-primary/10">
                                 @php
-                                    // Cek apakah data gambar adalah URL (http/https) atau Path Lokal
                                     $imageSrc = null;
                                     if (!empty($book->cover_path)) {
                                         if (filter_var($book->cover_path, FILTER_VALIDATE_URL)) {
-                                            $imageSrc = $book->cover_path; // Gunakan langsung jika URL
+                                            $imageSrc = $book->cover_path;
                                         } else {
-                                            $imageSrc = asset('storage/' . $book->cover_path); // Tambah storage/ jika path lokal
+                                            $imageSrc = asset('storage/' . $book->cover_path);
                                         }
                                     }
                                 @endphp
 
                                 @if($imageSrc)
-                                    {{-- Tampilkan Gambar --}}
                                     <img src="{{ $imageSrc }}" 
                                          class="w-full h-full object-cover" 
                                          alt="{{ $book->title }}"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     
-                                    {{-- Fallback (hidden by default, muncul jika gambar error/404) --}}
-                                    <div class="w-full h-full bg-gradient-to-br from-purple-900 to-slate-900 hidden flex-col items-center justify-center p-1 text-center absolute inset-0">
-                                        <i class="ph-duotone ph-book-open text-white/30 text-xl mb-1"></i>
-                                        <span class="text-[8px] text-white/50 leading-tight">{{ substr($book->title, 0, 15) }}...</span>
+                                    <div class="w-full h-full bg-gradient-to-br from-elevate-soft to-white hidden flex-col items-center justify-center p-1 text-center absolute inset-0">
+                                        <i class="ph-duotone ph-book-open text-elevate-primary/50 text-xl mb-1"></i>
+                                        <span class="text-[8px] text-elevate-dark/60 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
                                     </div>
                                 @else
-                                    {{-- Fallback jika data cover_path kosong --}}
-                                    <div class="w-full h-full bg-gradient-to-br from-purple-900 to-slate-900 flex flex-col items-center justify-center p-1 text-center">
-                                        <i class="ph-duotone ph-book-open text-white/30 text-xl mb-1"></i>
-                                        <span class="text-[8px] text-white/50 leading-tight">{{ substr($book->title, 0, 15) }}...</span>
+                                    <div class="w-full h-full bg-gradient-to-br from-elevate-soft to-white flex flex-col items-center justify-center p-1 text-center">
+                                        <i class="ph-duotone ph-book-open text-elevate-primary/50 text-xl mb-1"></i>
+                                        <span class="text-[8px] text-elevate-dark/60 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
                                     </div>
                                 @endif
                             </div>
                             
                             <div>
-                                <h4 class="text-white font-bold text-sm line-clamp-2 leading-tight">{{ $book->title }}</h4>
-                                <p class="text-slate-400 text-xs mt-1">{{ $book->author }}</p>
-                                <div class="flex flex-wrap gap-1 mt-2">
-                                    <span class="px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-bold rounded border border-purple-500/30">
+                                <h4 class="text-elevate-dark font-bold text-sm line-clamp-2 leading-tight">{{ $book->title }}</h4>
+                                <p class="text-slate-500 text-xs mt-1 font-medium">{{ $book->author }}</p>
+                                <div class="flex flex-wrap gap-1.5 mt-2">
+                                    <span class="px-2 py-0.5 bg-elevate-soft text-elevate-primary text-[10px] font-bold rounded border border-elevate-primary/10">
                                         {{ $book->category->name ?? 'Umum' }}
                                     </span>
+                                   
                                     @if(!empty($book->location))
-                                        <span class="px-2 py-0.5 bg-slate-700/50 text-slate-400 text-[10px] font-bold rounded border border-slate-600/30">
+                                        <span class="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded border border-slate-200">
                                             Rak: {{ $book->location }}
                                         </span>
                                     @endif
@@ -189,7 +190,13 @@
                             </div>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <!-- EMPTY STATE REKOMENDASI -->
+                    <div class="absolute inset-0 flex flex-col items-center justify-center opacity-80">
+                        <i class="ph-duotone ph-books text-5xl text-elevate-primary/30 mb-3"></i>
+                        <p class="text-elevate-dark/50 text-xs font-bold uppercase text-center tracking-widest">Belum ada rekomendasi<br>buku hari ini</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -221,8 +228,9 @@
         const btnChk = document.getElementById('btn-mode-check');
         const instruct = document.getElementById('instruction-text');
         
-        const activeClass = "bg-blue-600 text-white shadow-lg shadow-blue-900/50";
-        const inactiveClass = "text-slate-400 hover:text-white";
+        // Perubahan class untuk tema Elevate
+        const activeClass = "bg-elevate-primary text-white shadow-md shadow-elevate-primary/30";
+        const inactiveClass = "text-white/70 hover:text-white bg-transparent";
 
         if(mode === 'attendance') {
             btnAtt.className = `px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeClass} interactive-btn`;
@@ -230,7 +238,7 @@
             instruct.innerText = "Untuk Absensi Perpustakaan";
         } else {
             btnAtt.className = `px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${inactiveClass} interactive-btn`;
-            btnChk.className = `px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-purple-600 text-white shadow-lg shadow-purple-900/50 interactive-btn`;
+            btnChk.className = `px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-elevate-dark text-white shadow-md shadow-elevate-dark/30 interactive-btn border border-white/20`;
             instruct.innerText = "Untuk Cek Status Peminjaman";
         }
         document.getElementById('scan-input').focus();
@@ -241,14 +249,12 @@
         const statusBox = document.getElementById('status-box');
         const stateResult = document.getElementById('state-result');
         const logList = document.getElementById('scan-log-list');
-        const emptyLogMsg = document.getElementById('empty-log');
         const laser = document.getElementById('scan-laser');
         const overdueAlert = document.getElementById('overdue-alert');
 
         // OPTIMISASI FOCUS KEEPER (AGRESIF)
         const keepFocus = () => {
             const active = document.activeElement;
-            // Jangan rebut fokus jika user sedang menekan tombol mode/link
             if (active && (active.tagName === 'BUTTON' || active.tagName === 'A' || active.classList.contains('interactive-btn'))) return;
             scanInput.focus();
         };
@@ -256,13 +262,13 @@
         document.addEventListener('click', keepFocus);
         scanInput.addEventListener('blur', () => { setTimeout(keepFocus, 100); });
 
-          // Event Keydown untuk mendeteksi Enter dari scanner lebih akurat
+        // Event Keydown untuk mendeteksi Enter dari scanner
         scanInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Mencegah submit default
+                e.preventDefault();
                 const code = scanInput.value.trim();
                 if(code) {
-                    scanInput.value = ''; // Bersihkan input segera
+                    scanInput.value = ''; 
                     processScanData(code);
                 }
             }
@@ -300,11 +306,12 @@
             if(!code || isProcessing) return;
             isProcessing = true;
             
-            // UI Loading
+            // UI Loading (Elevate Mode)
             laser.style.display = 'none'; 
             stateResult.classList.remove('hidden'); stateResult.classList.add('flex');
-            stateResult.innerHTML = '<div class="w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="mt-4 text-lg text-cyan-200 font-bold animate-pulse uppercase">Memproses...</p>';
-            overdueAlert.classList.add('hidden'); // Reset alert
+            stateResult.className = "absolute inset-0 z-30 w-full h-full bg-white/95 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center border border-elevate-soft overflow-hidden p-6 text-center shadow-inner";
+            stateResult.innerHTML = '<div class="w-12 h-12 border-4 border-elevate-primary border-t-transparent rounded-full animate-spin mx-auto"></div><p class="mt-4 text-lg text-elevate-primary font-bold animate-pulse uppercase">Memproses...</p>';
+            overdueAlert.classList.add('hidden'); 
 
             try {
                 const res = await fetch('{{ route('library.kiosk.process') }}', {
@@ -318,56 +325,55 @@
                 if(data.success) {
                     playBeep('success');
                     
-                    // GAMIFIKASI: ULANG TAHUN
+                    // GAMIFIKASI: ULANG TAHUN & THEME DYNAMIC
                     let specialEffect = '';
-                    let titleText = data.student_name;
-                    let subtitleText = data.message;
-                    let boxColorClass = "bg-emerald-600 shadow-[0_0_80px_rgba(16,185,129,0.5)]";
+                    let innerTextColor = "text-elevate-dark";
+                    let boxColorClass = "bg-elevate-soft border-2 border-elevate-primary/20 shadow-2xl shadow-elevate-primary/10";
 
                     if(data.is_birthday) {
-                        playBeep('birthday'); // Logic sound ultah
-                        titleText = `🎉 ${data.student_name} 🎉`;
-                        boxColorClass = "bg-pink-600 shadow-[0_0_80px_rgba(219,39,119,0.5)]";
-                        specialEffect = '<div class="absolute inset-0 animate-ping opacity-20 bg-white rounded-[2.5rem]"></div>';
+                        playBeep('birthday'); 
+                        boxColorClass = "bg-pink-50 border-2 border-pink-200 shadow-2xl shadow-pink-500/20";
+                        innerTextColor = "text-pink-900";
+                        specialEffect = '<div class="absolute inset-0 animate-ping opacity-20 bg-pink-300 rounded-[2.5rem]"></div>';
                     }
 
                     if(currentMode === 'check') {
-                         statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-purple-600 rounded-[2.5rem] flex flex-col items-center justify-center shadow-[0_0_80px_rgba(147,51,234,0.5)] transform scale-[1.02] transition-all z-50 relative overflow-hidden";
+                         statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-white rounded-[2.5rem] flex flex-col items-center justify-center border-2 border-elevate-primary shadow-2xl shadow-elevate-primary/20 transform scale-[1.02] transition-all z-50 relative overflow-hidden";
                          stateResult.innerHTML = `
-                            <div class="flex flex-col items-center animate-bounce-in">
-                                <h2 class="text-3xl font-black text-white text-center leading-none mb-4">${data.student_name}</h2>
+                            <div class="flex flex-col items-center animate-bounce-in bg-white w-full h-full justify-center">
+                                <h2 class="text-3xl font-black text-elevate-dark text-center leading-none mb-6">${data.student_name}</h2>
                                 <div class="flex gap-4">
-                                    <div class="bg-purple-800/50 p-3 rounded-xl border border-purple-400/30 text-center">
-                                        <span class="text-2xl font-black text-white block">${data.active_loans}</span>
-                                        <span class="text-[10px] text-purple-200 uppercase font-bold">Dipinjam</span>
+                                    <div class="bg-elevate-soft p-4 rounded-2xl border border-elevate-primary/20 text-center min-w-[120px]">
+                                        <span class="text-3xl font-black text-elevate-primary block mb-1">${data.active_loans}</span>
+                                        <span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Dipinjam</span>
                                     </div>
-                                    <div class="bg-${data.has_overdue ? 'rose' : 'emerald'}-800/50 p-3 rounded-xl border border-${data.has_overdue ? 'rose' : 'emerald'}-400/30 text-center">
-                                        <span class="text-2xl font-black text-white block"><i class="ph-bold ${data.has_overdue ? 'ph-warning' : 'ph-check'}"></i></span>
-                                        <span class="text-[10px] text-white uppercase font-bold">${data.has_overdue ? 'Denda' : 'Aman'}</span>
+                                    <div class="bg-${data.has_overdue ? 'rose' : 'emerald'}-50 p-4 rounded-2xl border border-${data.has_overdue ? 'rose' : 'emerald'}-200 text-center min-w-[120px]">
+                                        <span class="text-3xl font-black text-${data.has_overdue ? 'rose' : 'emerald'}-600 block mb-1"><i class="ph-bold ${data.has_overdue ? 'ph-warning' : 'ph-check'}"></i></span>
+                                        <span class="text-xs text-${data.has_overdue ? 'rose' : 'emerald'}-700 uppercase font-bold tracking-wider">${data.has_overdue ? 'Denda' : 'Aman'}</span>
                                     </div>
                                 </div>
                             </div>`;
                     } else {
-                        // Attendance Mode
+                        // Attendance Mode (Elevate Theme)
                         statusBox.className = `w-full max-w-2xl aspect-[16/7] ${boxColorClass} rounded-[2.5rem] flex flex-col items-center justify-center transform scale-[1.02] transition-all z-50 relative overflow-hidden`;
                         
                         stateResult.innerHTML = `
                             ${specialEffect}
-                            <div class="relative z-10 flex flex-col items-center animate-bounce-in">
-                                <div class="bg-white/20 p-3 rounded-full mb-3 backdrop-blur-md border border-white/20">
-                                    <i class="ph-bold ph-check text-3xl text-white"></i>
+                            <div class="relative z-10 flex flex-col items-center animate-bounce-in w-full h-full justify-center ${data.is_birthday ? 'bg-pink-50' : 'bg-elevate-soft'}">
+                                <div class="${data.is_birthday ? 'bg-pink-100 text-pink-600' : 'bg-elevate-primary text-white shadow-md shadow-elevate-primary/30'} p-4 rounded-full mb-4">
+                                    <i class="ph-bold ph-check text-4xl"></i>
                                 </div>
-                                <h2 class="text-4xl font-black text-white text-center leading-none tracking-tight mb-2">${data.message}</h2>
-                                <p class="text-lg text-white/90 font-bold px-4 py-1 rounded-full uppercase tracking-widest text-center">
+                                <h2 class="text-4xl font-black ${innerTextColor} text-center leading-none tracking-tight mb-3">${data.message}</h2>
+                                <p class="text-sm font-bold px-5 py-1.5 rounded-full uppercase tracking-widest text-center ${data.is_birthday ? 'bg-pink-100 text-pink-700' : 'bg-white text-elevate-primary shadow-sm'}">
                                     ${data.sub_message || 'Kunjungan Tercatat'}
                                 </p>
-                                ${data.visit_count ? `<p class="text-[10px] text-white/70 mt-2 font-mono">Total Kunjungan #${data.visit_count}</p>` : ''}
+                                ${data.visit_count ? `<p class="text-[11px] ${data.is_birthday ? 'text-pink-600' : 'text-elevate-primary/70'} mt-3 font-mono font-bold">Total Kunjungan #${data.visit_count}</p>` : ''}
                             </div>`;
                         
                         addToLog(data.student_name, true, data.mode === 'check' ? 'Cek Status' : 'Kunjungan');
                     }
 
-                    // OVERDUE WARNING LOGIC
+                    // OVERDUE WARNING
                     if(data.has_overdue) {
                         document.getElementById('overdue-titles').innerText = data.overdue_titles;
                         overdueAlert.classList.remove('hidden');
@@ -375,26 +381,29 @@
                     }
 
                 } else {
+                    // Error Mode
                     playBeep('error');
-                    statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-rose-600 rounded-[2.5rem] flex flex-col items-center justify-center shadow-[0_0_80px_rgba(225,29,72,0.5)] transform scale-[1.02] transition-all z-50 relative overflow-hidden";
+                    statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-rose-50 rounded-[2.5rem] flex flex-col items-center justify-center border-2 border-rose-200 shadow-2xl shadow-rose-500/20 transform scale-[1.02] transition-all z-50 relative overflow-hidden";
                     stateResult.innerHTML = `
-                         <div class="bg-white/20 p-3 rounded-full mb-3 backdrop-blur-md border border-white/20">
-                            <i class="ph-bold ph-x text-3xl text-white"></i>
-                        </div>
-                        <h2 class="text-4xl font-black text-white text-center drop-shadow-lg mb-2">GAGAL</h2>
-                        <p class="text-sm text-rose-100 bg-rose-800/30 px-4 py-1.5 rounded-full border border-rose-400/30 font-bold">${data.message}</p>`;
+                         <div class="bg-rose-50 w-full h-full flex flex-col items-center justify-center">
+                             <div class="bg-rose-100 p-4 rounded-full mb-4 shadow-sm text-rose-600">
+                                <i class="ph-bold ph-x text-4xl"></i>
+                            </div>
+                            <h2 class="text-4xl font-black text-rose-900 text-center mb-3">GAGAL</h2>
+                            <p class="text-sm text-rose-800 bg-rose-100 px-5 py-2 rounded-full font-bold border border-rose-200">${data.message}</p>
+                        </div>`;
                 }
             } catch (err) {
                 playBeep('error');
-                statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-slate-800 rounded-[2.5rem] border-4 border-rose-500 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(225,29,72,0.3)]";
-                stateResult.innerHTML = `<p class="text-rose-400 font-bold text-xl uppercase tracking-widest">ERROR KONEKSI</p>`;
+                statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-white rounded-[2.5rem] border-4 border-rose-500 flex flex-col items-center justify-center shadow-2xl shadow-rose-500/20 z-50 relative overflow-hidden";
+                stateResult.innerHTML = `<div class="bg-white w-full h-full flex items-center justify-center"><p class="text-rose-600 font-bold text-xl uppercase tracking-widest">ERROR KONEKSI</p></div>`;
             }
 
             setTimeout(() => {
                 stateResult.classList.add('hidden'); stateResult.classList.remove('flex');
-                statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-slate-800/40 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-slate-700 hover:border-blue-500/50 shadow-2xl";
+                statusBox.className = "w-full max-w-2xl aspect-[16/7] bg-white/95 backdrop-blur-xl rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-elevate-soft hover:border-elevate-accent/50 shadow-2xl";
                 laser.style.display = 'block'; 
-                overdueAlert.classList.add('hidden'); // Hide alert on reset
+                overdueAlert.classList.add('hidden');
                 isProcessing = false; scanInput.focus();
             }, 3000);
         }
@@ -408,7 +417,6 @@
         });
     });
     
-    // Sound Engine
     function playBeep(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
@@ -448,19 +456,21 @@
         const initial = name.charAt(0).toUpperCase();
         const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
         
-        const colors = status ? "border-slate-700 bg-slate-800/50" : "border-rose-500/30 bg-rose-900/20";
-        const avatar = status ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white" : "bg-rose-600 text-white";
+        const colors = status ? "border-elevate-soft bg-white" : "border-rose-200 bg-rose-50";
+        const avatar = status ? "bg-elevate-soft text-elevate-primary" : "bg-rose-100 text-rose-600";
+        const textNameColor = status ? "text-elevate-dark" : "text-rose-900";
+        const textMsgColor = status ? "text-slate-500" : "text-rose-600";
 
         li.className = `flex items-center gap-3 p-3 rounded-2xl border ${colors} shadow-sm animate-fade-in-left`;
         li.innerHTML = `
-            <div class="w-10 h-10 rounded-xl ${avatar} flex items-center justify-center font-black text-sm shrink-0 shadow-lg">
+            <div class="w-10 h-10 rounded-xl ${avatar} flex items-center justify-center font-black text-sm shrink-0">
                 ${initial}
             </div>
             <div class="min-w-0 flex-1">
-                <p class="text-white font-bold text-sm truncate">${name}</p>
+                <p class="${textNameColor} font-bold text-sm truncate">${name}</p>
                 <div class="flex justify-between items-center">
-                    <p class="text-[10px] text-slate-400 uppercase font-bold">${message}</p>
-                    <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded">${time}</span>
+                    <p class="text-[10px] ${textMsgColor} uppercase font-bold tracking-wider">${message}</p>
+                    <span class="text-[9px] font-mono text-elevate-primary bg-elevate-soft px-1.5 py-0.5 rounded font-bold">${time}</span>
                 </div>
             </div>`;
         list.prepend(li);
