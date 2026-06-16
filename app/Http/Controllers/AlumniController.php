@@ -18,6 +18,8 @@ class AlumniController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
+        // --- Load relasi classHistories untuk Jejak Kelas ---
+        $student->load('classHistories.schoolClass');
         
         // 1. Data Tracer Study
         $profile = AlumniProfile::where('student_id', $student->id)->first();

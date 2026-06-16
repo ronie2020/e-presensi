@@ -458,6 +458,47 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- TAMBAHAN: JEJAK KELAS ALUMNI --}}
+                <div class="mt-8 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden min-h-[200px]">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl shrink-0">
+                            <i class="ph-bold ph-path"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800">Jejak Kelas</h3>
+                            <p class="text-xs text-slate-500">Riwayat kelas yang pernah Anda tempati selama bersekolah.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 md:p-8">
+                        @if(isset($student->classHistories) && count($student->classHistories) > 0)
+                            <div class="flex flex-col space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                                @foreach($student->classHistories->sortBy('academic_year') as $history)
+                                    <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                        <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-indigo-100 text-indigo-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                                            <i class="ph-bold ph-door"></i>
+                                        </div>
+                                        <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-2xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow">
+                                            <div class="flex items-center justify-between mb-1">
+                                                <div class="font-black text-slate-800 text-lg">Kelas {{ $history->schoolClass->name ?? '?' }}</div>
+                                                <div class="text-xs font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg">{{ $history->academic_year }}</div>
+                                            </div>
+                                            <p class="text-xs text-slate-500">Riwayat penempatan kelas otomatis dari sistem akademik.</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center flex flex-col items-center justify-center py-8">
+                                <i class="ph-duotone ph-clock text-4xl text-slate-200 mb-3"></i>
+                                <p class="text-slate-400 text-sm">Belum ada rekam jejak kelas.</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                {{-- END JEJAK KELAS --}}
+
             </div>
 
         </div>

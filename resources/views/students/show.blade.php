@@ -442,6 +442,31 @@
                     <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: center;">{{ $attendanceStats['alfa'] }} Hari</td>
                 </tr>
             </table>
+
+            <!-- J. RIWAYAT KELAS (TAMBAHAN BARU) -->
+            <div class="header-section print-break">J. RIWAYAT KELAS (JEJAK AKADEMIK)</div>
+            <table class="table-induk" style="width: 100%; border: 1.5px solid #000; margin-bottom: 20px; text-align: center;">
+                <thead style="background-color: #f8fafc;">
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 6px; width: 10%;">No</th>
+                        <th style="border: 1px solid #000; padding: 6px; width: 45%;">Tahun Ajaran</th>
+                        <th style="border: 1px solid #000; padding: 6px; width: 45%;">Duduk di Kelas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($student->classHistories->sortBy('academic_year') as $index => $history)
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $index + 1 }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">{{ $history->academic_year }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">{{ $history->schoolClass->name ?? 'Kelas Dihapus' }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" style="border: 1px solid #000; padding: 10px; font-style: italic; color: #64748b;">Belum ada catatan riwayat kelas untuk siswa ini.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
            
            <!-- AREA TANDA TANGAN (MENGGUNAKAN FLEXBOX) -->
             <div class="print-break-avoid" style="margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
