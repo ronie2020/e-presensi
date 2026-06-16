@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsExport;
+use App\Exports\AttendanceExport;
 use Maatwebsite\Excel\Validators\ValidationException;
 use App\Models\AcademicYear;
 use App\Models\GradeRecord;
@@ -340,5 +341,23 @@ class StudentController extends Controller
     public function card(Student $student)
     {
         return view('students.osis_card', compact('student')); 
+    }
+
+     /**
+     * Mengekspor Format Daftar Hadir Siswa Kosong per Kelas
+     */
+    public function exportAttendance(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required|exists:classes,id',
+        ]);
+
+        $class = SchoolClass::find($request->class_id);
+        
+        // Membersihkan nama kelas dari karakter yang mungkin tidak didukung oleh file system
+        $cleanClassName = preg_replace('/[^A-Za-z0-9\-]/', '_', $class->name);
+        $fileName = 'Daftar_Hadir_Kelas_' . $cleanClassName . '.xlsx';
+
+        return Excel::download(new AttendanceExport($class->id), $fileName);
     }
 }

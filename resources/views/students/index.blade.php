@@ -231,8 +231,13 @@
 
                                 <div class="flex flex-wrap justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                                     <a href="{{ route('students.export') }}" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
-                                        <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> Export
+                                        <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> Master Export
                                     </a>
+
+                                    {{-- ---> TAMBAHAN TOMBOL BARU DI SINI <--- --}}
+                                    <button type="button" onclick="exportAttendanceSheet()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl hover:bg-blue-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap" title="Lihat Laporan Absen Harian">
+                                        <i class="ph-bold ph-calendar-check text-lg"></i> Rekap Absen
+                                    </button>
                                     
                                     <button type="button" id="btn-delete-selected" onclick="deleteSelected()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl hover:bg-rose-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-trash text-lg"></i> Hapus (<span id="delete-selected-count">0</span>)
@@ -661,6 +666,26 @@
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
         }
         
+        // FUNGSI JS DOWNLOAD FORMAT EXCEL KOSONG UNTUK MANUAL (INI YANG BENAR)
+        function exportAttendanceSheet() {
+            const classSelect = document.querySelector('select[name="filter_class_id"]');
+            const classId = classSelect ? classSelect.value : '';
+            
+            if (!classId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Kelas Terlebih Dahulu!',
+                    text: 'Silakan filter/pilih kelas di kotak pencarian sebelum mengunduh format daftar hadir excel.',
+                    confirmButtonColor: '#3b5889',
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
+                return;
+            }
+            
+            // Arahkan ke endpoint export excel
+            window.location.href = `/students/export-attendance?class_id=${classId}`;
+        }
+        
         // FUNGSI JS HAPUS SATUAN (BARU)
         function confirmDelete(button) {
             const id = button.getAttribute('data-id');
@@ -683,6 +708,7 @@
                 }
             });
         }
+        
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
         function deleteSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
