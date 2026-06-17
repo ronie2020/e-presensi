@@ -81,6 +81,7 @@ use App\Http\Middleware\CheckSebMode;
 
 use App\Http\Controllers\AdminAlumniController;
 use App\Http\Controllers\AcademicCalendarController; 
+use App\Http\Controllers\AttendanceConfigController;
 
 // Buku Penghubung, Pengaduan & Kebiasaan Guru
 use App\Http\Controllers\LiaisonBookController;
@@ -650,11 +651,17 @@ Route::middleware('auth')->group(function () {
     
     // --- ROUTE KALENDER PENDIDIKAN ---
     Route::prefix('admin/academic-calendar')->name('admin.academic-calendar.')->group(function() {
-        Route::get('/', [AcademicCalendarController::class, 'index'])->name('index');
+        Route::get('/', [AcademicCalendarController::class, 'index'])->name('index');        
         Route::post('/', [AcademicCalendarController::class, 'store'])->name('store');
         Route::put('/{id}', [AcademicCalendarController::class, 'update'])->name('update');
         Route::delete('/{id}', [AcademicCalendarController::class, 'destroy'])->name('destroy');
     });
+
+    // --- ROUTE PENGATURAN JAM MESIN ABSEN ---   
+    Route::prefix('admin/attendance-config')->name('admin.attendance-config.')->group(function() {
+        Route::get('/', [AttendanceConfigController::class, 'index'])->name('index');
+        Route::put('/', [AttendanceConfigController::class, 'update'])->name('update');
+    });  
 
     Route::get('/settings/academic', [AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [AcademicYearController::class, 'store'])->name('settings.academic.store');

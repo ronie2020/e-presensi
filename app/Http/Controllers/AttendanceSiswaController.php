@@ -6,38 +6,54 @@ use App\Models\AttendanceSiswa;
 use App\Models\Student;
 use App\Models\Extracurricular;
 use Illuminate\Http\Request;
+use App\Models\AttendanceConfig;
 use Carbon\Carbon;
 use App\Jobs\SendWaScanNotificationJob;
 use App\Services\AttendanceService;
 
 class AttendanceSiswaController extends Controller
 {
-    // Konfigurasi Jam 
-    private $timeConfig = [
-        'dhuha_start' => '07:30', 'dhuha_end' => '08:00',
-        'makan_start' => '09:00', 'makan_end' => '10:00',
-        'dhuhur_start' => '11:45', 'dhuhur_end' => '13:30',
+   
+public function showScanner(AttendanceService $attendanceService)
+{
+    $today = Carbon::today();
+    $schedule = $attendanceService->getTodaySchedule($today);
+
+    // 1. Ambil data dari database (Buat otomatis jika tabel masih kosong)
+    $configDb = AttendanceConfig::firstOrCreate(
+        ['id' => 1], 
+        [
+            'dhuha_start' => '07:30:00', 'dhuha_end' => '08:00:00',
+            'makan_start' => '09:00:00', 'makan_end' => '10:00:00',
+            'dhuhur_start' => '11:45:00', 'dhuhur_end' => '13:30:00'
+        ]
+    );
+
+    // 2. Format ke H:i (Jam:Menit) agar cocok dengan kebutuhan JavaScript di frontend
+    $timeConfig = [
+        'dhuha_start'  => Carbon::parse($configDb->dhuha_start)->format('H:i'),
+        'dhuha_end'    => Carbon::parse($configDb->dhuha_end)->format('H:i'),
+        'makan_start'  => Carbon::parse($configDb->makan_start)->format('H:i'),
+        'makan_end'    => Carbon::parse($configDb->makan_end)->format('H:i'),
+        'dhuhur_start' => Carbon::parse($configDb->dhuhur_start)->format('H:i'),
+        'dhuhur_end'   => Carbon::parse($configDb->dhuhur_end)->format('H:i'),
     ];
 
-    public function showScanner(AttendanceService $attendanceService)
-    {
-        $today = Carbon::today();
-        $schedule = $attendanceService->getTodaySchedule($today);
+    $defaultSchedule = [
+        'start_in' => '06:00:00', 'end_in' => '07:00:00',
+        'start_out'=> '14:00:00', 'end_out'=> '17:00:00'
+    ];
 
-        $defaultSchedule = [
-            'start_in' => '06:00:00', 'end_in' => '07:00:00',
-            'start_out'=> '14:00:00', 'end_out'=> '17:00:00'
-        ];
-
-        $scheduleConfig = array_merge($this->timeConfig, [
-            'type'        => $schedule ? (get_class($schedule) == 'App\Models\ScheduleSpecial' ? 'Special' : 'Regular') : 'Regular',
-            'is_holiday'  => $schedule ? ($schedule->is_holiday ?? false) : false,
-            'description' => $schedule ? ($schedule->description ?? 'KBM Normal') : 'KBM Normal',
-            'start_in'    => $schedule->start_in ?? $defaultSchedule['start_in'],
-            'end_in'      => $schedule->end_in ?? $defaultSchedule['end_in'],
-            'start_out'   => $schedule->start_out ?? $defaultSchedule['start_out'],
-            'end_out'     => $schedule->end_out ?? $defaultSchedule['end_out'],
-        ]);
+    // 3. Gabungkan dengan variabel bawaan Anda sebelumnya
+    $scheduleConfig = array_merge($timeConfig, [
+        'type'        => $schedule ? (get_class($schedule) == 'App\Models\ScheduleSpecial' ? 'Special' : 'Regular') : 'Regular',
+        'is_holiday'  => $schedule ? ($schedule->is_holiday ?? false) : false,
+        'description' => $schedule ? ($schedule->description ?? 'KBM Normal') : 'KBM Normal',
+        'start_in'    => $schedule->start_in ?? $defaultSchedule['start_in'],
+        'end_in'      => $schedule->end_in ?? $defaultSchedule['end_in'],
+        'start_out'   => $schedule->start_out ?? $defaultSchedule['start_out'],
+        'end_out'     => $schedule->end_out ?? $defaultSchedule['end_out'],
+    ]);
 
         $statsConfig = [
             'total_target'  => Student::where('status', 'active')->count(),

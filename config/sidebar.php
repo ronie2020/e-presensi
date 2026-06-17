@@ -454,6 +454,13 @@ return [
                 'roles' => ['Admin', 'TU']
             ],
             [
+                'name' => 'Jam Mesin Absen',
+                'route' => 'admin.attendance-config.index',
+                'active_check' => 'admin.attendance-config.*',
+                'icon' => 'ph-timer',
+                'roles' => ['Admin', 'Kepala Sekolah'] 
+            ],
+            [
                 'name' => 'Data Kelas',
                 'route' => 'classes.index',
                 'icon' => 'ph-chalkboard',
