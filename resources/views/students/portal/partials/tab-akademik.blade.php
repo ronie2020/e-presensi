@@ -81,9 +81,6 @@
                                     {{ $item->subject->name ?? 'Mapel Dihapus' }}
                                 </td>
                                 <td class="px-6 py-5 text-center">
-                                    <span class="inline-block font-black text-elevate-dark text-lg">{{ $item->score }}</span>
-                                </td>
-                                <td class="px-6 py-5 text-center">
                                     @php 
                                         $gradeColor = match($item->predicate) { 
                                             'A' => 'bg-emerald-50 text-emerald-600 border-emerald-200', 
@@ -150,7 +147,7 @@
                         <th colspan="2" class="border border-slate-200 p-3 bg-emerald-100">Kelas VIII</th>
                         <th colspan="2" class="border border-slate-200 p-3 bg-amber-100">Kelas IX</th>
                     </tr>
-                    <tr class="text-[10px] md:text-xs uppercase tracking-wider text-slate-600">
+                     <tr class="text-[10px] md:text-xs uppercase tracking-wider text-slate-600">
                         <th class="border border-slate-200 p-2 bg-blue-50">Smt 1</th>
                         <th class="border border-slate-200 p-2 bg-blue-50">Smt 2</th>
                         <th class="border border-slate-200 p-2 bg-emerald-50">Smt 1</th>
