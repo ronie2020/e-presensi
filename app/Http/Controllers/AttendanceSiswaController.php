@@ -70,11 +70,11 @@ class AttendanceSiswaController extends Controller
         $schedule = $attendanceService->getTodaySchedule($scanTime);
 
         try {
-            switch ($request->type) {
+           switch ($request->type) {
                 case 'Masuk':
                 case 'Pulang':
-                    // Panggil mode 'guru' (Mengizinkan pulang awal / masuk telat tanpa pemblokiran layar merah)
-                    $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, 'guru');
+                    // Sistem akan membaca: 'guru_Masuk' atau 'guru_Pulang'
+                    $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, 'guru_' . $request->type);
                     break;
                 case 'Dhuha':
                 case 'Dhuhur':

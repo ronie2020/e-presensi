@@ -58,7 +58,7 @@ class AttendanceService
             $hasClockedOut = $existingAttendance && $existingAttendance->time_out && $existingAttendance->time_out != '00:00:00';
 
             // Tentukan niat scan: Apakah mau MASUK atau PULANG?
-            $isIntentMasuk = ($source === 'Masuk') || ($source === 'kiosk' && $timeNow < $scheduleStartOut);
+            $isIntentMasuk = str_contains($source, 'Masuk') || ($source === 'kiosk' && $timeNow < $scheduleStartOut);
 
             // ============================================
             // SKENARIO A: ABSEN MASUK
