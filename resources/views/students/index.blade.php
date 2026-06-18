@@ -732,5 +732,25 @@
                 }
             });
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Ambil posisi scroll dari Session Storage
+            let scrollPosition = sessionStorage.getItem('scrollPosition');
+            
+            // 2. Jika ada posisi yang tersimpan, kembalikan scroll ke titik tersebut
+            if (scrollPosition) {
+                window.scrollTo({
+                    top: parseInt(scrollPosition),
+                    behavior: 'auto'
+                });
+                // Hapus session setelah digunakan agar tidak nyangkut saat pindah menu lain
+                sessionStorage.removeItem('scrollPosition');
+            }
+        });
+
+        // 3. Simpan posisi scroll tepat sebelum halaman melakukan reload/submit form
+        window.addEventListener("beforeunload", function() {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
     </script>
 </x-app-layout>
