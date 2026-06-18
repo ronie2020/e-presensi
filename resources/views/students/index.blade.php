@@ -36,7 +36,7 @@
                     
                     {{-- Action Buttons --}}
                     <div class="flex flex-wrap justify-center gap-3">
-                        <button onclick="document.getElementById('modalTambahSiswa').classList.remove('hidden')" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
+                        <button onclick="document.getElementById('input_student_id').focus(); document.getElementById('input_student_id').scrollIntoView({behavior: 'smooth', block: 'center'});" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
                             <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-plus text-sm"></i>
                             </div>
@@ -507,16 +507,19 @@
                     form.addEventListener('submit', function() {
                         const btn = this.querySelector('button[type="submit"]');
                         if(btn) {
-                            btn.disabled = true;
-                            const icon = btn.querySelector('i');
-                            if(icon) {
-                                icon.className = 'ph-bold ph-spinner animate-spin text-lg';
-                            }
-                            const span = btn.querySelector('span');
-                            if(span) {
-                                span.innerText = btnText;
-                            }
-                            btn.classList.add('opacity-75', 'cursor-not-allowed');
+                            // Tambahkan setTimeout agar aksi submit browser dijalankan lebih dulu sebelum tombol dimatikan
+                            setTimeout(() => {
+                                btn.disabled = true;
+                                const icon = btn.querySelector('i');
+                                if(icon) {
+                                    icon.className = 'ph-bold ph-spinner animate-spin text-lg';
+                                }
+                                const span = btn.querySelector('span');
+                                if(span) {
+                                    span.innerText = btnText;
+                                }
+                                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                            }, 50);
                         }
                     });
                 }
