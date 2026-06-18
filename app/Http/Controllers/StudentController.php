@@ -109,10 +109,12 @@ class StudentController extends Controller
     {
         // 1. Validasi Data Lengkap
         $rules = [
-            'student_id' => ['required', 'string', 'max:255', Rule::unique('students', 'student_id')],
+            // Cek Unik namun abaikan data yang sudah dihapus (whereNull deleted_at)
+            'student_id' => ['required', 'string', 'max:255', Rule::unique('students', 'student_id')->whereNull('deleted_at')],
             'name' => 'required|string|max:255',
             'class_id' => 'required|integer|exists:classes,id',
-            'rfid_id' => ['nullable', 'string', 'max:255', Rule::unique('students', 'rfid_id')->whereNotNull('rfid_id')],
+            // Cek Unik RFID abaikan yang sudah dihapus
+            'rfid_id' => ['nullable', 'string', 'max:255', Rule::unique('students', 'rfid_id')->whereNotNull('rfid_id')->whereNull('deleted_at')],
             'parent_wa_number' => 'nullable|string|max:20',
             // Validasi Foto
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -120,8 +122,15 @@ class StudentController extends Controller
             'gender' => 'required|in:L,P',
         ];
 
+        // Custom Error Message
+        $messages = [
+            'student_id.unique' => 'NIS/NISN ini sudah terdaftar pada siswa aktif (belum dihapus).',
+            'rfid_id.unique' => 'Kartu RFID ini sudah digunakan oleh siswa lain.',
+            'photo.max' => 'Ukuran foto terlalu besar, maksimal 2MB.',
+        ];
+
         // Validasi field tambahan jika ada (nullable agar tidak error di quick register)
-        $request->validate($rules);
+        $request->validate($rules, $messages);
 
         // 2. Ambil semua data input kecuali token, method, dan photo
         $data = $request->except(['_token', '_method', 'photo']);
@@ -205,14 +214,19 @@ class StudentController extends Controller
 
        // 1. Validasi data
         $rules = [
-            'student_id' => ['required', Rule::unique('students', 'student_id')->ignore($student->id)],
+            'student_id' => ['required', Rule::unique('students', 'student_id')->ignore($student->id)->whereNull('deleted_at')],
             'name' => 'required|string|max:255',
             'class_id' => $student->status === 'graduated' ? 'nullable|integer|exists:classes,id' : 'required|integer|exists:classes,id',
-            'rfid_id' => ['nullable', Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id')],
+            'rfid_id' => ['nullable', Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id')->whereNull('deleted_at')],
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
+
+        $messages = [
+            'student_id.unique' => 'NIS/NISN ini sudah terdaftar pada siswa aktif.',
+            'rfid_id.unique' => 'Kartu RFID ini sudah digunakan oleh siswa lain.',
+        ];
         
-        $request->validate($rules);
+        $request->validate($rules, $messages);
 
         // Ambil data input
         $data = $request->except(['_token', '_method', 'photo', 'password']); 
@@ -245,6 +259,11 @@ class StudentController extends Controller
            Storage::disk('public')->delete($student->photo_path);
         }
 
+        // FIX: Hapus juga akun user agar NISN/Username tidak bentrok saat didaftarkan ulang
+        if ($student->user) {
+            $student->user->delete();
+        }
+
         $student->delete();
         return redirect()->route('students.index')->with('success', 'Siswa berhasil dihapus.');
     }
@@ -256,13 +275,21 @@ class StudentController extends Controller
     {
         $ids = explode(',', $request->ids);
         $students = Student::whereIn('id', $ids)->get();
+
         foreach($students as $student) {
-            if ($student->photo_path && \Storage::disk('public')->exists($student->photo_path)) {
-                \Storage::disk('public')->delete($student->photo_path);
+            if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
+                Storage::disk('public')->delete($student->photo_path);
             }
+
+            // FIX: Hapus akun user
+            if ($student->user) {
+                $student->user->delete();
+            }
+
+            // Hapus di dalam loop agar soft deletes model dan observer tereksekusi dengan benar
+            $student->delete();
         }
         
-        Student::whereIn('id', $ids)->delete();
         return back()->with('success', count($ids) . ' Data siswa berhasil dihapus.');
     }
 

@@ -1,38 +1,34 @@
-<table>
-    {{-- KOP SURAT --}}
+<table style="border-collapse: collapse; font-family: Arial, sans-serif;">
+    {{-- KOP SURAT (Judul) --}}
     <tr>
-        <td colspan="36" style="text-align: center; font-weight: bold; font-size: 14px;">DAFTAR HADIR SISWA</td>
+        <td colspan="3" style="text-align: center; font-weight: bold; font-size: 14px; height: 30px; vertical-align: middle;">DAFTAR NAMA SISWA</td>
     </tr>
     <tr>
-        <td colspan="36" style="text-align: center; font-weight: bold; font-size: 14px;">NAMA SEKOLAH ANDA DISINI</td>
-    </tr>
-    <tr>
-        <td colspan="36" style="text-align: center; font-weight: bold; font-size: 12px;">TAHUN PELAJARAN {{ $tahunPelajaran }}</td>
-    </tr>
-    <tr>
-        <td colspan="36"></td> {{-- Spacer --}}
+        <td colspan="3"></td> {{-- Spacer / Jarak --}}
     </tr>
 
-    {{-- INFO KELAS --}}
+    {{-- INFO KELAS & TAHUN PELAJARAN --}}
     <tr>
-        <td colspan="36" style="font-size: 11px;">
-            Kelas: <b>{{ $class->name }}</b> | Wali Kelas: ....................................... | Bulan: ..............................
-        </td>
+        <td style="font-weight: bold; font-size: 11px;">TAHUN PELAJARAN</td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">: {{ $tahunPelajaran ?? '2024/2025' }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; font-size: 11px;">KELAS</td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">: {{ $class->name }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; font-size: 11px;">WALI KELAS</td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">: .......................................</td>
+    </tr>
+    <tr>
+        <td colspan="3"></td> {{-- Spacer / Jarak --}}
     </tr>
 
-    {{-- HEADER TABEL --}}
+    {{-- HEADER TABEL (Sesuai Gambar Terbaru) --}}
     <tr>
-        <th rowspan="2" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">NO. URUT</th>
-        <th rowspan="2" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">NISN / NIS</th>
-        <th rowspan="2" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">NAMA SISWA</th>
-        <th rowspan="2" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">L/P</th>
-        <th colspan="31" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">TANGGAL</th>
-        <th rowspan="2" style="text-align: center; font-weight: bold; background-color: #f3f4f6;">KET</th>
-    </tr>
-    <tr>
-        @for ($i = 1; $i <= 31; $i++)
-            <th style="text-align: center; font-weight: bold; background-color: #f3f4f6;">{{ $i }}</th>
-        @endfor
+        <th style="text-align: center; font-weight: bold; vertical-align: middle; border: 1px solid black; width: 5px; background-color: #f3f4f6; height: 25px;">No.</th>
+        <th style="text-align: center; font-weight: bold; vertical-align: middle; border: 1px solid black; width: 20px; background-color: #f3f4f6;">NIS / NISN</th>
+        <th style="text-align: center; font-weight: bold; vertical-align: middle; border: 1px solid black; width: 45px; background-color: #f3f4f6;">NAMA SISWA</th>
     </tr>
 
     {{-- ISI DATA SISWA --}}
@@ -47,37 +43,48 @@
             if($s->gender == 'P') $perempuan++;
         @endphp
         <tr>
-            <td style="text-align: center;">{{ $index + 1 }}</td>
-            <td style="text-align: center; text-transform: uppercase;">{{ $s->student_id }} / {{ $s->nis }}</td>
-            <td style="text-transform: uppercase;">{{ $s->name }}</td>
-            <td style="text-align: center;">{{ $s->gender }}</td>
-            {{-- Kotak Kosong untuk Absensi --}}
-            @for ($i = 1; $i <= 31; $i++)
-                <td></td>
-            @endfor
-            <td></td> {{-- Keterangan --}}
+            <td style="text-align: center; border: 1px solid black; height: 22px;">{{ $index + 1 }}</td>
+            <td style="text-align: center; border: 1px solid black;">{{ $s->student_id }}</td>
+            <td style="border: 1px solid black; text-transform: uppercase;">{{ $s->name }}</td>
         </tr>
     @endforeach
 
-    {{-- FOOTER REKAPITULASI --}}
-    <tr><td colspan="36"></td></tr>
+    {{-- FOOTER REKAPITULASI & TTD WALI KELAS --}}
     <tr>
-        <td colspan="3"><b>Rekapitulasi:</b></td>
-        <td colspan="33"></td>
+        <td colspan="3"></td>
     </tr>
     <tr>
-        <td colspan="2">Laki - Laki</td>
-        <td>: {{ $laki }} Orang</td>
-        <td colspan="33"></td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">Laki - Laki</td>
+        <td style="font-weight: bold; font-size: 11px;">: {{ $laki }} Orang</td>
     </tr>
     <tr>
-        <td colspan="2">Perempuan</td>
-        <td>: {{ $perempuan }} Orang</td>
-        <td colspan="33"></td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">Perempuan</td>
+        <td style="font-weight: bold; font-size: 11px;">: {{ $perempuan }} Orang</td>
     </tr>
     <tr>
-        <td colspan="2"><b>Jumlah Total</b></td>
-        <td><b>: {{ $laki + $perempuan }} Orang</b></td>
-        <td colspan="33"></td>
+        <td colspan="2" style="font-weight: bold; font-size: 11px;">Jumlah</td>
+        <td style="font-weight: bold; font-size: 11px;">: {{ $laki + $perempuan }} Orang</td>
+    </tr>
+    
+    {{-- Ruang Tanda Tangan --}}
+    <tr>
+        <td colspan="3"></td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+        <td style="text-align: center; font-size: 11px;">Mengetahui,</td>
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+        <td style="text-align: center; font-size: 11px;">Wali Kelas</td>
+    </tr>
+    <tr>
+        <td colspan="3" style="height: 50px;"></td> {{-- Jarak untuk TTD --}}
+    </tr>
+    <tr>
+        <td colspan="2"></td>
+        <td style="text-align: center; font-weight: bold; font-size: 11px; text-decoration: underline;">
+            ( .......................................... )
+        </td>
     </tr>
 </table>
