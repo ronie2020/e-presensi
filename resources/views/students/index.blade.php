@@ -69,36 +69,51 @@
                                     </div>
                                 </div>
 
+                                {{-- PENTING: PENANGKAP ERROR VALIDASI DARI SERVER --}}
+                                @if ($errors->any())
+                                    <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3">
+                                        <i class="ph-fill ph-warning-circle text-rose-500 text-xl shrink-0 mt-0.5"></i>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-rose-700 mb-1">Gagal memproses data!</h4>
+                                            <ul class="text-xs text-rose-600 font-medium space-y-1 list-disc list-inside">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <form id="quick-register-form" action="{{ route('students.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ photoPreview: null }">
                                     @csrf
                                     
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">NIS / NISN <span class="text-rose-500">*</span></label>
+                                        <label for="input_student_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">NIS / NISN <span class="text-rose-500">*</span></label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                                 <i class="ph-bold ph-identification-card"></i>
                                             </div>
-                                            <input type="text" name="student_id" value="{{ old('student_id') }}" required placeholder="Nomor Induk"
+                                            <input type="text" id="input_student_id" name="student_id" value="{{ old('student_id') }}" required placeholder="Nomor Induk"
                                                 class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all placeholder:font-normal">
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Nama Lengkap <span class="text-rose-500">*</span></label>
+                                        <label for="input_name" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                                 <i class="ph-bold ph-user"></i>
                                             </div>
-                                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="Nama Sesuai Ijazah"
+                                            <input type="text" id="input_name" name="name" value="{{ old('name') }}" required placeholder="Nama Sesuai Ijazah"
                                                 class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all placeholder:font-normal">
                                         </div>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Kelas <span class="text-rose-500">*</span></label>
+                                            <label for="input_class_id" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Kelas <span class="text-rose-500">*</span></label>
                                             <div class="relative">
-                                                <select name="class_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
+                                                <select id="input_class_id" name="class_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
                                                     <option value="">Pilih</option>
                                                     @foreach ($classes as $class)
                                                         <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
@@ -110,11 +125,11 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Gender <span class="text-rose-500">*</span></label>
+                                            <label for="input_gender" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Gender <span class="text-rose-500">*</span></label>
                                             <div class="relative">
-                                                <select name="gender" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
-                                                    <option value="L">Laki-laki</option>
-                                                    <option value="P">Perempuan</option>
+                                                <select id="input_gender" name="gender" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
+                                                    <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                                    <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
                                                 </select>
                                                 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                             </div>
@@ -123,7 +138,7 @@
 
                                     {{-- FOTO --}}
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Foto (Opsional)</label>
+                                        <label for="input_photo" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Foto (Opsional)</label>
                                         <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                                             <div class="shrink-0 w-12 h-12 rounded-xl bg-white border border-slate-200 overflow-hidden flex items-center justify-center shadow-sm">
                                                 <template x-if="photoPreview">
@@ -133,7 +148,7 @@
                                                     <i class="ph-duotone ph-camera text-slate-300 text-2xl"></i>
                                                 </template>
                                             </div>
-                                            <input type="file" name="photo" accept="image/*" 
+                                            <input type="file" id="input_photo" name="photo" accept="image/*" 
                                                 @change="const file = $event.target.files[0]; const reader = new FileReader(); reader.onload = (e) => { photoPreview = e.target.result }; reader.readAsDataURL(file)"
                                                 class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-accent/20 file:text-elevate-primary hover:file:bg-elevate-accent/30 cursor-pointer"/>
                                         </div>
@@ -142,18 +157,18 @@
                                     {{-- RFID & WA --}}
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">RFID (Opsional)</label>
+                                            <label for="input_rfid" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">RFID (Opsional)</label>
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-scan"></i></div>
-                                                <input type="text" name="rfid_id" value="{{ old('rfid_id') }}" placeholder="Scan..."
+                                                <input type="text" id="input_rfid" name="rfid_id" value="{{ old('rfid_id') }}" placeholder="Scan..."
                                                     class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark">
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">WA Ortu</label>
+                                            <label for="input_parent_wa" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">WA Ortu</label>
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-500"><i class="ph-bold ph-whatsapp-logo"></i></div>
-                                                <input type="text" name="parent_wa_number" value="{{ old('parent_wa_number') }}" placeholder="628..."
+                                                <input type="text" id="input_parent_wa" name="parent_wa_number" value="{{ old('parent_wa_number') }}" placeholder="628..."
                                                     class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark">
                                             </div>
                                         </div>
@@ -167,7 +182,7 @@
                             </div>
                         </div>
 
-                        {{-- IMPORT EXCEL (Tetap menggunakan nuansa Emerald karena identik dengan excel/sukses) --}}
+                        {{-- IMPORT EXCEL --}}
                         <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[2.5rem] border border-emerald-100 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                             <div class="relative z-10">
                                 <h3 class="text-sm font-black text-emerald-900 mb-1 flex items-center gap-2">
@@ -177,13 +192,13 @@
                                 
                                 <form id="import-form" action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
                                     @csrf
-                                    <label class="flex-1 cursor-pointer">
+                                    <label for="file_upload" class="flex-1 cursor-pointer">
                                         <div class="bg-white border border-dashed border-emerald-300 rounded-xl py-3 px-4 text-center transition-all hover:border-emerald-500 hover:bg-emerald-50/50 truncate">
                                             <span class="text-xs font-bold text-emerald-600 truncate flex items-center justify-center gap-2">
                                                 <i class="ph-bold ph-upload-simple"></i> Pilih File...
                                             </span>
                                         </div>
-                                        <input type="file" name="file" id="file" required class="hidden" onchange="this.previousElementSibling.querySelector('span').innerHTML = '<i class=\'ph-bold ph-check\'></i> File Dipilih'">
+                                        <input type="file" name="file" id="file_upload" required class="hidden" onchange="this.previousElementSibling.querySelector('span').innerHTML = '<i class=\'ph-bold ph-check\'></i> File Dipilih'">
                                     </label>
                                     <button type="submit" class="py-3 px-5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-xs shadow-md shadow-emerald-500/20 flex items-center gap-2">
                                         <span>Upload</span>
@@ -209,11 +224,11 @@
                                 <form action="{{ route('students.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                                     <div class="relative flex-1 sm:w-48">
                                         <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="search" placeholder="Cari nama / NISN..." value="{{ request('search') }}"
+                                        <input type="text" id="search_input" aria-label="Cari nama atau NISN" name="search" placeholder="Cari nama / NISN..." value="{{ request('search') }}"
                                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark shadow-sm">
                                     </div>
                                     
-                                    <select name="filter_class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-32">
+                                    <select name="filter_class_id" id="filter_class_id" aria-label="Filter Kelas" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-32">
                                         <option value="">Semua Kelas</option>
                                         @foreach ($classes as $class)
                                             <option value="{{ $class->id }}" {{ request('filter_class_id') == $class->id ? 'selected' : '' }}>
@@ -222,7 +237,7 @@
                                         @endforeach
                                     </select>
 
-                                    <select name="filter_status" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36">
+                                    <select name="filter_status" id="filter_status" aria-label="Filter Status" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36">
                                         <option value="">Semua Status</option>
                                         <option value="lengkap" {{ request('filter_status') == 'lengkap' ? 'selected' : '' }}>Sudah Lengkap</option>
                                         <option value="belum_lengkap" {{ request('filter_status') == 'belum_lengkap' ? 'selected' : '' }}>Belum Lengkap</option>
@@ -234,7 +249,6 @@
                                         <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> Master Export
                                     </a>
 
-                                    {{-- ---> TAMBAHAN TOMBOL BARU DI SINI <--- --}}
                                     <button type="button" onclick="exportAttendanceSheet()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl hover:bg-blue-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap" title="Lihat Laporan Absen Harian">
                                         <i class="ph-bold ph-calendar-check text-lg"></i> Rekap Absen
                                     </button>
@@ -260,7 +274,7 @@
                                 <thead class="bg-slate-50/50 border-b border-slate-100 sticky top-0 z-20">
                                     <tr>
                                         <th class="px-6 py-4 text-center w-10">
-                                            <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
+                                            <input type="checkbox" id="selectAll" aria-label="Pilih semua siswa" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
                                         </th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/3">Identitas Siswa</th>
                                         <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/6">Kelas</th>
@@ -272,7 +286,7 @@
                                     @forelse ($students as $student)
                                         <tr class="hover:bg-slate-50/80 transition-colors group">
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" value="{{ $student->id }}" class="student-checkbox rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
+                                                <input type="checkbox" id="checkbox_{{ $student->id }}" aria-label="Pilih siswa {{ $student->name }}" value="{{ $student->id }}" class="student-checkbox rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-4">
@@ -401,13 +415,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                    <input type="text" name="date" value="{{ date('Y-m-d') }}" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark" placeholder="dd/mm/yyyy">
+                    <label for="absen_date" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
+                    <input type="text" id="absen_date" name="date" value="{{ date('Y-m-d') }}" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark" placeholder="dd/mm/yyyy">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status Kehadiran</label>
-                    <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark">
+                    <label for="absen_status" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status Kehadiran</label>
+                    <select id="absen_status" name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark">
                         <option value="Hadir">Hadir (Manual)</option>
                         <option value="Sakit">Sakit</option>
                         <option value="Izin">Izin</option>
@@ -418,18 +432,18 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                        <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
+                        <label for="absen_time_in" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
+                        <input type="time" id="absen_time_in" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
-                        <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
+                        <label for="absen_time_out" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
+                        <input type="time" id="absen_time_out" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
                     </div>
                 </div>
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                    <textarea name="notes" rows="2" placeholder="Contoh: Datang terlambat karena ban bocor..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-sm font-medium text-elevate-dark"></textarea>
+                    <label for="absen_notes" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
+                    <textarea id="absen_notes" name="notes" rows="2" placeholder="Contoh: Datang terlambat karena ban bocor..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-sm font-medium text-elevate-dark"></textarea>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-transform active:scale-95">Simpan Data</button>
@@ -466,7 +480,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 0. INISIALISASI FLATPICKR (Dibungkus pengecekan agar tidak error jika internet lambat)
+            // 0. INISIALISASI FLATPICKR
             if (typeof flatpickr !== 'undefined') {
                 flatpickr(".datepicker", {
                     altInput: true,
@@ -477,7 +491,7 @@
                 });
             }
 
-            // 1. FLASH MESSAGES (SUCCESS / ERROR)
+            // 1. FLASH MESSAGES (SUCCESS / ERROR GLOBAL)
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',
@@ -507,7 +521,7 @@
                     form.addEventListener('submit', function() {
                         const btn = this.querySelector('button[type="submit"]');
                         if(btn) {
-                            // Tambahkan setTimeout agar aksi submit browser dijalankan lebih dulu sebelum tombol dimatikan
+                            // setTimeout penting agar proses submit tidak dibatalkan browser saat klik
                             setTimeout(() => {
                                 btn.disabled = true;
                                 const icon = btn.querySelector('i');
@@ -642,7 +656,6 @@
             }
         });
 
-      
         // FUNGSI JS CETAK KARTU MASSAL BERDASARKAN KELAS
         function printBatchCards() {
             const classSelect = document.querySelector('select[name="filter_class_id"]');
@@ -669,7 +682,7 @@
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
         }
         
-        // FUNGSI JS DOWNLOAD FORMAT EXCEL KOSONG UNTUK MANUAL (INI YANG BENAR)
+        // FUNGSI JS DOWNLOAD FORMAT EXCEL KOSONG UNTUK MANUAL
         function exportAttendanceSheet() {
             const classSelect = document.querySelector('select[name="filter_class_id"]');
             const classId = classSelect ? classSelect.value : '';
@@ -685,31 +698,7 @@
                 return;
             }
             
-            // Arahkan ke endpoint export excel
             window.location.href = `/students/export-attendance?class_id=${classId}`;
-        }
-        
-        // FUNGSI JS HAPUS SATUAN (BARU)
-        function confirmDelete(button) {
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            
-            Swal.fire({
-                title: 'Hapus Siswa?',
-                text: `Data siswa "${name}" beserta riwayat absen akan dihapus permanen.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Cari form berdasarkan ID dan submit langsung
-                    document.getElementById('form-delete-' + id).submit();
-                }
-            });
         }
         
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
