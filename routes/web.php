@@ -88,7 +88,6 @@ use App\Http\Controllers\LiaisonBookController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\TeacherHabitController; 
 
-
 // CONTROLLER BIMBINGAN KONSELING (BK)
 use App\Http\Controllers\BkStudentController; 
 use App\Http\Controllers\BkTeacherController; 
@@ -295,13 +294,10 @@ Route::middleware('auth')->group(function () {
     // ===== ROUTE homeroom <---
     // =========================================================================
     Route::get('/homeroom/dashboard', [\App\Http\Controllers\HomeroomController::class, 'index'])->name('homeroom.dashboard');
-    Route::get('/homeroom/print', [\App\Http\Controllers\HomeroomController::class, 'print'])->name('homeroom.print'); // <--- TAMBAHKAN BARIS INI
-    Route::get('/homeroom/export', [\App\Http\Controllers\HomeroomController::class, 'export'])->name('homeroom.export'); // <--- ROUTE EXCEL BARU
+    Route::get('/homeroom/print', [\App\Http\Controllers\HomeroomController::class, 'print'])->name('homeroom.print');
+    Route::get('/homeroom/export', [\App\Http\Controllers\HomeroomController::class, 'export'])->name('homeroom.export'); 
     Route::get('/admin/bk/early-warning', [\App\Http\Controllers\BkTeacherController::class, 'earlyWarning'])->name('admin.bk.early_warning');
     // =========================================================================
-    
-    //Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-   // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // =========================================================================
     //  ROUTE REKAPITULASI KELAS (SUMMARY)    
@@ -350,9 +346,9 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     // Manajemen Master Data (SISWA & KELAS)
     // =========================================================================
-     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
+    Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
-    Route::get('/students/export-attendance', [StudentController::class, 'exportAttendance'])->name('students.exportAttendance'); // <--- TAMBAHKAN ROUTE INI DI SINI
+    Route::get('/students/export-attendance', [StudentController::class, 'exportAttendance'])->name('students.exportAttendance'); 
     Route::get('/students/print-batch', [StudentController::class, 'printBatch'])->name('students.printBatch');
     Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');   
@@ -503,8 +499,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('permit')->name('permit.')->group(function() {
         Route::get('/', [StudentPermitController::class, 'index'])->name('index');
         Route::get('/history', [StudentPermitController::class, 'history'])->name('history');
-        
-        // [PERBAIKAN] Tambahkan Route untuk Analytics di sini!
         Route::get('/analytics', [StudentPermitController::class, 'analytics'])->name('analytics');
         
         //--- Cetak & Export
@@ -691,7 +685,7 @@ Route::middleware('auth')->group(function () {
     // Action Simpan Checklist
     Route::post('/reports/store-class', [ReportController::class, 'storeClassAttendance'])->name('reports.storeClass');
 
-    // Route Admin PPDB
+   // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
@@ -700,11 +694,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/print-recap', [AdminPpdbController::class, 'printRecap'])->name('print.recap');
         Route::get('/reports/print-mass-letters', [AdminPpdbController::class, 'printMassLetters'])->name('print.mass_letters');
         
+        // --- TAMBAHAN CETAK & EXCEL KELAS ---
+        Route::get('/reports/print-class-distribution', [AdminPpdbController::class, 'printClassDistribution'])->name('print.class_distribution');
+        Route::get('/reports/export-class-distribution', [AdminPpdbController::class, 'exportClassDistributionExcel'])->name('export.class_distribution');
+        
         // Aksi Massal & Pengaturan
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
         Route::post('/bulk-update-status', [AdminPpdbController::class, 'bulkUpdateStatus'])->name('bulk_update_status');
         Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
-        Route::post('/auto-distribute', [AdminPpdbController::class, 'autoDistributeAndPromote'])->name('auto_distribute'); // <--- INI ROUTE BARUNYA
+        Route::post('/auto-distribute', [AdminPpdbController::class, 'autoDistributeAndPromote'])->name('auto_distribute');
 
         // Aksi Spesifik per ID
         Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
@@ -717,7 +715,7 @@ Route::middleware('auth')->group(function () {
     // Persuratan
      Route::prefix('letters')->name('letters.')->group(function () {
         Route::resource('incoming', LetterIncomingController::class);
-        Route::resource('outgoing', LetterOutgoingController::class); // Tambahkan baris ini
+        Route::resource('outgoing', LetterOutgoingController::class); 
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
         Route::resource('spt', SptController::class);
     });

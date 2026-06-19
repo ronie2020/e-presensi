@@ -163,16 +163,11 @@
                 </div>
                 
                 {{-- Fitur Aksi Massal & Pencarian --}}
-                <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
+                <div class="flex flex-col md:flex-row flex-wrap items-center gap-2 w-full xl:w-auto">
                     
-                    {{-- Tombol Cetak Data --}}
-                    <a href="{{ route('admin.ppdb.print.recap', request()->query()) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark rounded-xl font-bold text-xs hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-sm">
-                        <i class="ph-bold ph-printer text-base"></i> Cetak
-                    </a>
-
-                    {{-- FITUR BARU: Dropdown Aksi Massal --}}
-                    <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto">
-                        <select id="bulkActionSelect" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:ring-elevate-accent/30 focus:border-elevate-accent outline-none shadow-sm cursor-pointer w-full md:w-auto">
+                    {{-- Dropdown Aksi Massal (Berlaku Semua Tab) --}}
+                    <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
+                        <select id="bulkActionSelect" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 focus:ring-elevate-accent/30 focus:border-elevate-accent outline-none shadow-sm cursor-pointer w-full sm:w-auto">
                             <option value="">-- Aksi Massal --</option>
                             <option value="status_verified">Set: Terverifikasi</option>
                             <option value="status_accepted">Set: Diterima</option>
@@ -181,22 +176,39 @@
                                 <option value="promote" class="text-emerald-600 font-black">Promote ke Induk</option>
                             @endif
                         </select>
-                        <button type="button" onclick="executeBulkAction()" class="px-4 py-1.5 bg-elevate-primary text-white rounded-lg font-bold text-xs hover:bg-elevate-dark transition shadow-sm whitespace-nowrap">
+                        <button type="button" onclick="executeBulkAction()" class="px-4 py-2 bg-elevate-primary text-white rounded-lg font-bold text-xs hover:bg-elevate-dark transition shadow-sm whitespace-nowrap">
                             Terapkan
                         </button>
                     </div>
 
-                    {{-- Tombol Bagi Kelas & Generate NIS Otomatis (Khusus Tab Diterima) --}}
+                    {{-- Tombol-Tombol Khusus Tab "Diterima" --}}
                     @if(request('status') == 'accepted')
-                        <form action="{{ route('admin.ppdb.auto_distribute') }}" method="POST" id="autoDistributeForm" class="m-0 p-0 hidden md:block">
+                        {{-- Bagi Kelas --}}
+                        <form action="{{ route('admin.ppdb.auto_distribute') }}" method="POST" id="autoDistributeForm" class="m-0 p-0 w-full sm:w-auto">
                             @csrf
-                            <button type="button" onclick="confirmAutoDistribute()" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-sm border border-indigo-700">
+                            <button type="button" onclick="confirmAutoDistribute()" class="w-full px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-sm border border-indigo-700 whitespace-nowrap">
                                 <i class="ph-bold ph-magic-wand text-base"></i> Bagi Kelas
                             </button>
                         </form>
+
+                        {{-- Cetak PDF Kelas --}}
+                        <a href="{{ route('admin.ppdb.print.class_distribution') }}" target="_blank" class="px-4 py-2 bg-sky-600 text-white rounded-xl font-bold text-xs hover:bg-sky-700 transition flex items-center justify-center gap-2 shadow-sm border border-sky-700 w-full sm:w-auto whitespace-nowrap">
+                            <i class="ph-bold ph-printer text-base"></i> PDF Kelas
+                        </a>
+                        
+                        {{-- Cetak Excel Kelas --}}
+                        <a href="{{ route('admin.ppdb.export.class_distribution') }}" class="px-4 py-2 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-sm border border-emerald-700 w-full sm:w-auto whitespace-nowrap">
+                            <i class="ph-bold ph-microsoft-excel-logo text-base"></i> Excel Kelas
+                        </a>
+                    @else
+                        {{-- Tombol Cetak Rekap (Hanya muncul jika bukan tab diterima) --}}
+                        <a href="{{ route('admin.ppdb.print.recap', request()->query()) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark rounded-xl font-bold text-xs hover:bg-slate-50 transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="ph-bold ph-printer text-base"></i> Cetak Semua
+                        </a>
                     @endif
 
-                    <form method="GET" class="relative group w-full md:w-56">
+                    {{-- Search Box --}}
+                    <form method="GET" class="relative group w-full md:w-56 mt-2 xl:mt-0">
                         <input type="hidden" name="status" value="{{ request('status') }}">
                         <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa..." 
@@ -217,7 +229,6 @@
                         <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-100">
                             <tr>
                                 <th class="px-5 py-4 w-10 text-center">
-                                    {{-- Checkbox ALL kini selalu aktif --}}
                                     <input type="checkbox" id="checkAll" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-4 h-4 cursor-pointer bg-white">
                                 </th>
                                 <th class="px-5 py-4">Data Siswa</th>

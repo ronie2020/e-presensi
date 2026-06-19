@@ -98,7 +98,7 @@ class AdminPpdbController extends Controller
     }
 
     // =========================================================================
-    // FITUR BARU: UPDATE STATUS MASSAL
+    // FITUR: UPDATE STATUS MASSAL
     // =========================================================================
     public function bulkUpdateStatus(Request $request)
     {
@@ -513,5 +513,90 @@ class AdminPpdbController extends Controller
         }
 
         return view('admin.ppdb.print_mass_letters', compact('registrants'));
+    }
+
+    // =========================================================================
+    // FITUR BARU: PDF & EXCEL PEMBAGIAN KELAS
+    // =========================================================================
+    public function printClassDistribution()
+    {
+        $year = date('Y');
+        // Ambil kelas yang memiliki siswa, urutkan nama siswa sesuai abjad
+        $classes = SchoolClass::with(['students' => function($q) {
+            $q->orderBy('name', 'asc');
+        }])->whereHas('students')->get();
+
+        return view('admin.ppdb.print_class_distribution', compact('classes', 'year'));
+    }
+
+    public function exportClassDistributionExcel()
+    {
+        // Ambil kelas yang memiliki siswa
+        $classes = SchoolClass::with(['students' => function($q) {
+            $q->orderBy('name', 'asc');
+        }])->whereHas('students')->get();
+
+        $year = date('Y');
+        $fileName = 'pembagian-kelas-7-' . date('Y-m-d') . '.csv';
+
+        $headers = array(
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $callback = function() use($classes, $year) {
+            $file = fopen('php://output', 'w');
+
+            // Header Surat Utama
+            fputcsv($file, ['PENGUMUMAN PEMBAGIAN KELAS 7']);
+            fputcsv($file, ['TAHUN PELAJARAN ' . $year . '/' . ($year + 1)]);
+            fputcsv($file, []); // Baris kosong pembatas
+
+            foreach ($classes as $class) {
+                // Lewati jika kelas kosong
+                if ($class->students->count() > 0) {
+                    
+                    // Header per Kelas
+                    fputcsv($file, ['KELAS: ' . $class->name]);
+                    fputcsv($file, ['No', 'NIS', 'NISN', 'Nama Lengkap', 'L/P', 'Asal Sekolah']);
+
+                    $no = 1;
+                    $males = 0;
+                    $females = 0;
+
+                    foreach ($class->students as $student) {
+                        fputcsv($file, [
+                            $no++,
+                            "'" . $student->nis,  // Tanda kutip agar angka tidak berubah jadi format scientific
+                            "'" . $student->nisn, 
+                            $student->name,
+                            $student->gender,
+                            $student->school_origin ?? '-'
+                        ]);
+
+                        // Hitung jenis kelamin untuk rekap
+                        if ($student->gender == 'L') $males++;
+                        if ($student->gender == 'P') $females++;
+                    }
+
+                    // Rekapitulasi di bawah kelas
+                    fputcsv($file, []); // Baris kosong
+                    fputcsv($file, ['REKAPITULASI KELAS ' . $class->name]);
+                    fputcsv($file, ['Laki-laki', $males]);
+                    fputcsv($file, ['Perempuan', $females]);
+                    fputcsv($file, ['Total Keseluruhan', $class->students->count()]);
+                    
+                    // Jarak yang cukup jauh untuk kelas berikutnya
+                    fputcsv($file, []);
+                    fputcsv($file, []); 
+                }
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
