@@ -691,7 +691,7 @@ Route::middleware('auth')->group(function () {
     // Action Simpan Checklist
     Route::post('/reports/store-class', [ReportController::class, 'storeClassAttendance'])->name('reports.storeClass');
 
-   // Route Admin PPDB
+    // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
@@ -702,6 +702,7 @@ Route::middleware('auth')->group(function () {
         
         // Aksi Massal & Pengaturan
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
+        Route::post('/bulk-update-status', [AdminPpdbController::class, 'bulkUpdateStatus'])->name('bulk_update_status');
         Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
         Route::post('/auto-distribute', [AdminPpdbController::class, 'autoDistributeAndPromote'])->name('auto_distribute'); // <--- INI ROUTE BARUNYA
 

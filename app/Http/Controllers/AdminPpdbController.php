@@ -97,6 +97,38 @@ class AdminPpdbController extends Controller
         return redirect()->back()->with('success', 'Status pendaftaran berhasil diperbarui.');
     }
 
+    // =========================================================================
+    // FITUR BARU: UPDATE STATUS MASSAL
+    // =========================================================================
+    public function bulkUpdateStatus(Request $request)
+    {
+        $request->validate([
+            'selected_ids' => 'required|array',
+            'selected_ids.*' => 'exists:ppdb_registrants,id',
+            'bulk_status' => 'required|in:pending,verified,accepted,rejected'
+        ]);
+
+        try {
+            PpdbRegistrant::whereIn('id', $request->selected_ids)
+                ->update(['status' => $request->bulk_status]);
+
+            // Translasi status untuk pesan sukses
+            $statusLabels = [
+                'pending' => 'PENDING',
+                'verified' => 'TERVERIFIKASI',
+                'accepted' => 'DITERIMA',
+                'rejected' => 'DITOLAK'
+            ];
+            
+            $label = $statusLabels[$request->bulk_status];
+
+            return redirect()->back()->with('success', count($request->selected_ids) . " calon siswa berhasil diubah statusnya menjadi $label.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
+
    // =========================================================================
     // AUTOMATISASI NISN, PEMBAGIAN KELAS (7A-7F), & PROMOTE
     // =========================================================================
@@ -152,12 +184,10 @@ class AdminPpdbController extends Controller
             $males = $registrants->where('gender', 'L')->sortByDesc('average_grade')->values();
             $females = $registrants->where('gender', 'P')->sortByDesc('average_grade')->values();
 
-            // ==========================================
-            // PERBAIKAN BUG UTAMA: Pembuatan Keranjang
-            // ==========================================
+            // Pembuatan Keranjang
             $classBuckets = [];
             for ($i = 0; $i < count($classIds); $i++) {
-                $classBuckets[] = collect(); // Membuat keranjang yang BENAR-BENAR terpisah
+                $classBuckets[] = collect();
             }
 
             $idx = 0;
@@ -187,9 +217,9 @@ class AdminPpdbController extends Controller
                     }
 
                    Student::create([
-                        'student_id' => $studentReg->nisn,           // Mengisi NISN asli dari PPDB (Untuk form & Login)
-                        'nisn' => $studentReg->nisn,                 // Backup NISN asli
-                        'nis' => $studentReg->generated_nis,         // NIS Sekolah berformat 26277xxx
+                        'student_id' => $studentReg->nisn,           
+                        'nisn' => $studentReg->nisn,                 
+                        'nis' => $studentReg->generated_nis,         
 
                         'name' => $studentReg->full_name,
                         'nik' => $studentReg->nik,
@@ -233,9 +263,6 @@ class AdminPpdbController extends Controller
         }
     }
     
-    /**
-     * FITUR UTAMA: Promote ke Data Siswa (Single)
-     */
     public function promoteToStudent($id)
     {
         $registrant = PpdbRegistrant::findOrFail($id);
@@ -244,14 +271,12 @@ class AdminPpdbController extends Controller
             return back()->with('error', 'Hanya siswa DITERIMA yang bisa masuk Data Induk.');
         }
 
-        // Cek Duplikasi NISN
         if (Student::where('nisn', $registrant->nisn)->exists()) {
             return back()->with('error', 'Siswa dengan NISN ini sudah ada di Data Induk.');
         }
 
         DB::beginTransaction();
         try {
-            // 1. Copy Foto
             $newPhotoPath = null;
             if ($registrant->file_photo && Storage::disk('public')->exists($registrant->file_photo)) {
                 $ext = pathinfo($registrant->file_photo, PATHINFO_EXTENSION);
@@ -260,11 +285,9 @@ class AdminPpdbController extends Controller
                 $newPhotoPath = $newFileName;
             }
 
-            // 2. Generate NIS Menggunakan Helper di Model Student
             $nisData = Student::generateNextNis();
             $generatedNis = $nisData['prefix'] . str_pad($nisData['sequence'], 3, '0', STR_PAD_LEFT);
 
-            // 3. Simpan ke Students
             $student = Student::create([
                 'student_id' => $generatedNis, 
                 'nis' => $generatedNis,        
@@ -277,23 +300,19 @@ class AdminPpdbController extends Controller
                 'religion' => $registrant->religion, 
                 'address' => $registrant->address,
                 'phone' => $registrant->student_phone,
-                
-                // Data Ortu
                 'father_name' => $registrant->father_name,
                 'mother_name' => $registrant->mother_name,
                 'father_job' => $registrant->parent_job,
                 'parent_phone' => $registrant->parent_phone,
                 'parent_wa_number' => $registrant->parent_phone, 
                 'parent_income' => $registrant->parent_income,
-                
-                // Akademik
                 'school_origin' => $registrant->school_origin,
                 'join_date' => now(),
                 'status' => 'active',
-                'class_id' => null, // Belum punya kelas
+                'class_id' => null, 
                 'photo_path' => $newPhotoPath,
                 'general_notes' => 'Masuk Jalur ' . ucfirst($registrant->track) . ' (' . $registrant->academic_year . ')',
-                'password' => Hash::make($registrant->nisn), // Ubah password ke NISN
+                'password' => Hash::make($registrant->nisn),
             ]);
 
             DB::commit();
@@ -307,15 +326,10 @@ class AdminPpdbController extends Controller
         }
     }
 
-    /**
-     * FITUR BULK PROMOTE (Pindah Massal)    
-     */
     public function bulkPromote(Request $request)
     {
-        // 1. Cegah Time Out (Set max execution time 5 menit)
         set_time_limit(300);
 
-        // 2. Validasi Input 
         $request->validate([
             'selected_ids' => 'required|array',
             'selected_ids.*' => 'exists:ppdb_registrants,id', 
@@ -328,26 +342,22 @@ class AdminPpdbController extends Controller
 
         DB::beginTransaction();
         try {
-            // 3. Ambil data pendaftar 
             $registrants = PpdbRegistrant::whereIn('id', $ids)
                 ->where('status', 'accepted')
                 ->lockForUpdate() 
                 ->get();
 
-            // Persiapan sequence NIS dari Model Student
             $nisData = Student::generateNextNis();
             $yearShort = $nisData['prefix'];
             $sequence = $nisData['sequence'];
 
             foreach ($registrants as $registrant) {
-                // Cek Duplikasi NISN
                 if (Student::where('nisn', $registrant->nisn)->exists()) {
                     $failCount++;
                     $failedNames[] = $registrant->full_name . " (NISN Duplikat)";
                     continue;
                 }
 
-                // Copy Foto
                 $newPhotoPath = null;
                 if ($registrant->file_photo && Storage::disk('public')->exists($registrant->file_photo)) {
                     $ext = pathinfo($registrant->file_photo, PATHINFO_EXTENSION);
@@ -356,10 +366,8 @@ class AdminPpdbController extends Controller
                     $newPhotoPath = $newFileName;
                 }
 
-                // Generate NIS Unik
                 $generatedNis = $yearShort . str_pad($sequence, 3, '0', STR_PAD_LEFT);
                 
-                // Simpan Data
                 Student::create([
                     'student_id' => $generatedNis,
                     'nis' => $generatedNis,
@@ -384,7 +392,7 @@ class AdminPpdbController extends Controller
                     'class_id' => null,
                     'photo_path' => $newPhotoPath,
                     'general_notes' => 'Masuk Jalur ' . ucfirst($registrant->track) . ' (' . $registrant->academic_year . ')',
-                    'password' => Hash::make($registrant->nisn), // Ubah password ke NISN
+                    'password' => Hash::make($registrant->nisn),
                 ]);
 
                 $sequence++; 
@@ -426,9 +434,6 @@ class AdminPpdbController extends Controller
         return view('ppdb.success', compact('registrant')); 
     }   
 
-    /**
-     * Halaman Laporan & Statistik
-     */
     public function reports()
     {
         $year = date('Y');
@@ -447,11 +452,7 @@ class AdminPpdbController extends Controller
 
         return view('admin.ppdb.reports', compact('genderStats', 'trackStats', 'totalAccepted', 'totalRegistrants'));
     }
-    // --- LOGIKA EXPORT & PRINT MASSAL ---
 
-    /**
-     * Export Excel
-     */
     public function exportExcel()
     {
         $fileName = 'data-ppdb-' . date('Y-m-d') . '.csv';
