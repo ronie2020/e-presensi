@@ -16,7 +16,6 @@ use App\Models\BkCategory;
 use App\Models\DisciplineRecord;
 use App\Models\AttendanceSiswa;
 use Carbon\Carbon;
-
 use Spatie\Permission\Traits\HasRoles;
 
 class Student extends Authenticatable

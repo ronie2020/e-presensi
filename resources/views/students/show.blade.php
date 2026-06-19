@@ -292,84 +292,21 @@
                         <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
                         <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
                         <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
-                        <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
+                       <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 1</th>
                         <th style="border: 1px solid #000; padding: 4px; width: 10%;">Smt 2</th>
                     </tr>
                 </thead>
                <tbody>
-                    @php
-                        // --- LOGIKA CERDAS PENCARIAN NILAI BERDASARKAN TAHUN AJARAN ---
-                        $activeYearStr = \App\Models\AcademicYear::where('is_active', true)->first()->name ?? '2024/2025';
-                        $activeStartYear = (int) substr($activeYearStr, 0, 4);
-
-                        $ta7 = ''; $ta8 = ''; $ta9 = '';
-                        
-                        // Jika Alumni, hitung mundur dari tahun lulus
-                        if ($student->status === 'graduated' || !empty($student->graduated_date)) {
-                            $gradYear = !empty($student->graduated_date) 
-                                ? (int) \Carbon\Carbon::parse($student->graduated_date)->format('Y') 
-                                : $activeStartYear;
-                            
-                            $ta9 = ($gradYear - 1) . '/' . $gradYear;
-                            $ta8 = ($gradYear - 2) . '/' . ($gradYear - 1);
-                            $ta7 = ($gradYear - 3) . '/' . ($gradYear - 2);
-                        } else {
-                            $level = 7;
-                            $className = $student->schoolClass->name ?? '';
-                            if (preg_match('/^VIII|^8/i', $className)) $level = 8;
-                            if (preg_match('/^IX|^9/i', $className)) $level = 9;
-
-                            $ta7 = ($activeStartYear - ($level - 7)) . '/' . ($activeStartYear - ($level - 7) + 1);
-                            $ta8 = ($activeStartYear - ($level - 8)) . '/' . ($activeStartYear - ($level - 8) + 1);
-                            $ta9 = ($activeStartYear - ($level - 9)) . '/' . ($activeStartYear - ($level - 9) + 1);
-                        }
-
-                        // Ambil SEMUA nilai siswa ini sekaligus
-                        $mappedScores = [];
-                        $allGrades = \App\Models\GradeRecord::with('items.subject')->where('student_id', $student->id)->get();
-                        foreach($allGrades as $rec) {
-                            foreach($rec->items as $item) {
-                                $subjName = strtolower(trim($item->subject->name ?? ''));
-                                $mappedScores[$rec->academic_year][$rec->semester][$subjName] = $item->score;
-                            }
-                        }
-
-                        $mapelInduk = \App\Models\Subject::orderBy('order')->get();
-                        $no = 1;
-
-                        // Siapkan array untuk menampung total nilai & jumlah mapel per semester
-                        $totals = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
-                        $counts = ['71' => 0, '72' => 0, '81' => 0, '82' => 0, '91' => 0, '92' => 0];
-                    @endphp
-
-                    @foreach($mapelInduk as $mapel)
-                    @php
-                        $mName = strtolower(trim($mapel->name));
-                        // Petakan nilai langsung dari dictionary tahun ajaran
-                        $v71 = $mappedScores[$ta7][1][$mName] ?? '-';
-                        $v72 = $mappedScores[$ta7][2][$mName] ?? '-';
-                        $v81 = $mappedScores[$ta8][1][$mName] ?? '-';
-                        $v82 = $mappedScores[$ta8][2][$mName] ?? '-';
-                        $v91 = $mappedScores[$ta9][1][$mName] ?? '-';
-                        $v92 = $mappedScores[$ta9][2][$mName] ?? '-';
-
-                        // Cek jika nilainya angka (bukan '-' atau kosong), masukkan ke perhitungan total
-                        if(is_numeric($v71)) { $totals['71'] += (float)$v71; $counts['71']++; }
-                        if(is_numeric($v72)) { $totals['72'] += (float)$v72; $counts['72']++; }
-                        if(is_numeric($v81)) { $totals['81'] += (float)$v81; $counts['81']++; }
-                        if(is_numeric($v82)) { $totals['82'] += (float)$v82; $counts['82']++; }
-                        if(is_numeric($v91)) { $totals['91'] += (float)$v91; $counts['91']++; }
-                        if(is_numeric($v92)) { $totals['92'] += (float)$v92; $counts['92']++; }
-                    @endphp
+                    @foreach($raportRows as $index => $row)
                     <tr>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $no++ }}</td>
-                        <td style="border: 1px solid #000; padding: 4px; text-align: left;">{{ $mapel->name }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v71 }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v72 }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v81 }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v82 }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v91 }}</td>
-                        <td style="border: 1px solid #000; padding: 4px;">{{ $v92 }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $index + 1 }}</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: left;">{{ $row['name'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['71'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['72'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['81'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['82'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['91'] }}</td>
+                        <td style="border: 1px solid #000; padding: 4px;">{{ $row['92'] }}</td>
                     </tr>
                     @endforeach
                     
@@ -378,55 +315,30 @@
                         <td colspan="2" style="border: 1px solid #000; padding: 4px; font-weight: bold; text-align: right; background-color: #f8fafc;">Rata-rata Nilai</td>
                         
                         <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['71'] > 0 ? round($totals['71'] / $counts['71'], 1) : '-' }}
+                            {{ $averages['71'] }}
                         </td>
                         <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['72'] > 0 ? round($totals['72'] / $counts['72'], 1) : '-' }}
-                        </td>
-                        
-                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['81'] > 0 ? round($totals['81'] / $counts['81'], 1) : '-' }}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['82'] > 0 ? round($totals['82'] / $counts['82'], 1) : '-' }}
+                            {{ $averages['72'] }}
                         </td>
                         
                         <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['91'] > 0 ? round($totals['91'] / $counts['91'], 1) : '-' }}
+                            {{ $averages['81'] }}
                         </td>
                         <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
-                            {{ $counts['92'] > 0 ? round($totals['92'] / $counts['92'], 1) : '-' }}
+                            {{ $averages['82'] }}
+                        </td>
+                        
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            {{ $averages['91'] }}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; font-weight: bold; background-color: #f8fafc;">
+                            {{ $averages['92'] }}
                         </td>
                     </tr>
                 </tbody>
             </table>
            
             <!-- I. REKAP ABSENSI REAL-TIME (DARI SCANNER) -->
-            @php
-                // Paksa ambil data terbaru dan perluas filter pencariannya (termasuk Pulang dan Null)
-                if(empty($attendanceStats)) {
-                    $s_sakit = \App\Models\AttendanceSiswa::where('student_id', $student->id)
-                                ->where('status', 'Sakit')
-                                ->where(function($q) {
-                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
-                                })->count();
-                                
-                    $s_izin  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
-                                ->where('status', 'Izin')
-                                ->where(function($q) {
-                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
-                                })->count();
-                                
-                    $s_alfa  = \App\Models\AttendanceSiswa::where('student_id', $student->id)
-                                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])
-                                ->where(function($q) {
-                                    $q->whereIn('type', ['Harian', 'Masuk', 'Pulang'])->orWhereNull('type');
-                                })->count();
-                                
-                    $attendanceStats = ['sakit' => $s_sakit, 'izin' => $s_izin, 'alfa' => $s_alfa];
-                }
-            @endphp
-            
             <div class="header-section" style="margin-top: 20px;">I. AKUMULASI KEHADIRAN (SISTEM ABSENSI HARIAN)</div>
             <table class="table-induk" style="width: 50%; border: 1.5px solid #000; margin-bottom: 20px;">
                 <tr>
