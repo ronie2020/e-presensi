@@ -164,10 +164,8 @@ class Student extends Authenticatable
      */
     public function schoolClass(): BelongsTo
     {
+        // FIX: Menghapus unreachable code ($a = ...) yang bisa menyebabkan fatal error
         return $this->belongsTo(SchoolClass::class, 'class_id');
-         $a = $record->absent_a ?: '-';
-
-        return "{$s} / {$i} / {$a}";    
     }
 
     /**
@@ -478,6 +476,7 @@ class Student extends Authenticatable
             }
         }
     }
+    
     /**
      * Relasi ke riwayat poin tahunan (Arsip Tutup Buku)
      */
