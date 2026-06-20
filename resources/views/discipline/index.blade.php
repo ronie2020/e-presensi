@@ -230,42 +230,65 @@
             <!-- BAGIAN 3: RIWAYAT / LOG -->
             @if(isset($historyRecords))
             <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-10">
-                <div class="p-6 border-b border-slate-100 bg-elevate-peach-light/20 flex flex-col lg:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
-                            <div class="w-2 h-6 bg-elevate-accent rounded-full"></div>
-                            Log Aktivitas
-                        </h3>
-                        <p class="text-sm font-medium text-elevate-text/60 mt-1">Riwayat input poin terbaru.</p>
+                <div class="p-6 border-b border-slate-100 bg-elevate-peach-light/20 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
+                    
+                    {{-- Judul & Badge Jumlah Data --}}
+                    <div class="shrink-0 flex items-center justify-between w-full xl:w-auto">
+                        <div>
+                            <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
+                                <div class="w-2 h-6 bg-elevate-accent rounded-full"></div>
+                                Log Aktivitas
+                                <span class="text-xs font-bold text-elevate-primary bg-white px-2.5 py-1 rounded-lg border border-elevate-peach shadow-sm ml-2">
+                                    {{ $historyRecords->total() }} Data
+                                </span>
+                            </h3>
+                            <p class="text-sm font-medium text-elevate-text/60 mt-1">Riwayat input poin terbaru.</p>
+                        </div>
                     </div>
                 
-                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                        <form action="{{ route('discipline.index') }}" method="GET" class="flex flex-col sm:flex-row w-full gap-2">
-                            <input type="date" name="filter_date" value="{{ request('filter_date') }}" 
-                                class="rounded-xl border-slate-200 text-sm py-2.5 px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto font-medium">
-                            
-                            <div class="relative w-full sm:w-auto group">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
-                                    class="rounded-xl border-slate-200 text-sm py-2.5 pl-9 pr-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full font-medium">
-                                <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary"></i>
-                            </div>
-                            
-                            <button type="submit" class="bg-elevate-dark hover:bg-elevate-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-elevate-dark/20 transition-all flex items-center justify-center gap-2">
+                    {{-- Form Filter --}}
+                    <form action="{{ route('discipline.index') }}" method="GET" class="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full xl:w-auto overflow-x-auto pb-2 sm:pb-0 custom-scrollbar">
+                        
+                        {{-- Filter Tanggal --}}
+                        <input type="date" name="filter_date" value="{{ request('filter_date') }}" title="Pilih Tanggal"
+                            class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
+                        
+                        {{-- Filter Kelas --}}
+                        <select name="filter_class" class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
+                            <option value="">Semua Kelas</option>
+                            @foreach($classes ?? [] as $cls)
+                                <option value="{{ $cls->id }}" {{ request('filter_class') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
+                            @endforeach
+                        </select>
+
+                        {{-- Filter Jenis Kejadian --}}
+                        <select name="filter_type" class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
+                            <option value="">Semua Jenis</option>
+                            <option value="Pelanggaran" {{ request('filter_type') == 'Pelanggaran' ? 'selected' : '' }}>🔴 Pelanggaran</option>
+                            <option value="Kebaikan" {{ request('filter_type') == 'Kebaikan' ? 'selected' : '' }}>🟢 Prestasi</option>
+                        </select>
+                        
+                        {{-- Input Pencarian --}}
+                        <div class="relative w-full sm:w-auto shrink-0 group">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
+                                class="h-[42px] rounded-xl border-slate-200 text-sm pl-9 pr-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-[180px] font-medium bg-white">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary"></i>
+                        </div>
+                        
+                        {{-- Grup Tombol Aksi --}}
+                        <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                            <button type="submit" class="h-[42px] flex-1 sm:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-5 rounded-xl text-sm font-bold shadow-md shadow-elevate-dark/20 transition-all flex items-center justify-center gap-2">
                                 Cari
                             </button>
                             
-                            @if(request('search') || request('filter_date'))
-                                <a href="{{ route('discipline.index') }}" class="bg-elevate-peach-light hover:bg-elevate-peach text-elevate-primary px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center border border-elevate-peach">
+                            @if(request('search') || request('filter_date') || request('filter_class') || request('filter_type'))
+                                <a href="{{ route('discipline.index') }}" class="h-[42px] flex-1 sm:flex-none bg-elevate-peach-light hover:bg-elevate-peach text-elevate-primary px-5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center border border-elevate-peach">
                                     Reset
                                 </a>
                             @endif
-                        </form>
-
-                        <div class="text-xs font-bold text-elevate-primary bg-elevate-peach-light px-3 py-2.5 rounded-xl border border-elevate-peach shadow-sm whitespace-nowrap">
-                            {{ $historyRecords->total() }} Data
                         </div>
-                    </div>
-                </div>             
+                    </form>
+                </div>            
                 <div class="overflow-x-auto w-full custom-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-elevate-peach-light/30 border-b border-slate-100">
@@ -307,33 +330,13 @@
                                             {{ $sign }}{{ $record->disciplineType?->point_value ?? 0 }}
                                         </span>
                                     </td>
+                                   
                                     <td class="px-6 py-4 text-right">
                                         {{-- NULL-SAFE OPERATORS APPLIED HERE --}}
                                         <span class="text-xs font-bold text-elevate-text/70">{{ $record->recorder?->name ?? 'Sistem' }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <form action="{{ route('discipline.destroy', $record->id) }}" method="POST" 
-                                            onsubmit="event.preventDefault(); 
-                                                        const form = this;
-                                                        Swal.fire({
-                                                            title: 'Hapus Riwayat?',
-                                                            text: 'Data poin siswa akan kembali disesuaikan. Yakin ingin menghapus?',
-                                                            icon: 'warning',
-                                                            showCancelButton: true,
-                                                            confirmButtonColor: '#e11d48',
-                                                            cancelButtonColor: '#94a3b8',
-                                                            confirmButtonText: 'Ya, Hapus!',
-                                                            cancelButtonText: 'Batal',
-                                                            reverseButtons: true,
-                                                            customClass: {
-                                                                popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                                                                confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                                                                cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
-                                                            },
-                                                            buttonsStyling: false
-                                                        }).then((result) => {
-                                                            if (result.isConfirmed) form.submit();
-                                                        });">
+                                    <td class="px-6 py-4 text-center">                                       
+                                        <form action="{{ route('discipline.destroy', $record->id) }}" method="POST" class="form-delete-record">
                                             @csrf 
                                             @method('DELETE')
                                             <button type="submit" class="text-slate-300 hover:text-rose-500 transition-colors p-2 rounded-lg hover:bg-rose-50" title="Hapus Riwayat">
@@ -518,11 +521,37 @@
         let html5QrcodeScanner = null;
         let currentTargetInput = null;
         
-        let tsViolation, tsMerit;
+       let tsViolation, tsMerit;
 
         document.addEventListener("DOMContentLoaded", function() {
             tsViolation = new TomSelect("#student_select_violation", { create: false, sortField: { field: "text", direction: "asc" }});
             tsMerit = new TomSelect("#student_select_merit", { create: false, sortField: { field: "text", direction: "asc" }});
+            
+            // Optimasi SweetAlert Delete (Agar tidak mengulang script berkali-kali)
+            document.querySelectorAll('.form-delete-record').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Hapus Riwayat?',
+                        text: 'Data poin siswa akan kembali disesuaikan. Yakin ingin menghapus?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#94a3b8',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) this.submit();
+                    });
+                });
+            });
         });
 
         function updateStatus(message) {

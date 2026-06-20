@@ -44,6 +44,7 @@ return [
             [
                 'name' => 'Scan Aktifitas',
                 'route' => 'scan.show',
+                'active_check' => 'scan.*',
                 'icon' => 'ph-scan',
                 'roles' => ['*']     
             ],
@@ -71,18 +72,21 @@ return [
             [
                 'name' => 'Rekap Harian',
                 'route' => 'reports.daily',
+                'active_check' => 'reports.daily',
                 'icon' => 'ph-chart-bar',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'TU']
             ],
             [
                 'name' => 'Rekap Keagamaan',
                 'route' => 'reports.religious',
+                'active_check' => 'reports.religious',
                 'icon' => 'ph-star',
-                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran'] // Guru Agama biasanya masuk Guru Mapel
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran']
             ],
             [
                 'name' => 'Rekap Kelas',
                 'route' => 'reports.class',
+                'active_check' => 'reports.class',
                 'icon' => 'ph-chalkboard-teacher',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'TU']
             ],
@@ -208,12 +212,14 @@ return [
             [
                 'name' => 'Catatan Disiplin',
                 'route' => 'discipline.index',
+                'active_check' => ['discipline.index', 'discipline.create', 'discipline.edit', 'discipline.show'],
                 'icon' => 'ph-warning-circle',
                 'roles' => ['Admin', 'Guru Piket', 'Wali Kelas', 'Kepala Sekolah', 'Guru']
             ],
             [
                 'name' => 'Analitik Disiplin', 
                 'route' => 'discipline.analytics',
+                'active_check' => 'discipline.analytics',
                 'icon' => 'ph-chart-pie-slice',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas']
             ],
@@ -234,6 +240,7 @@ return [
             [
                 'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
+                'active_check' => 'students.*',
                 'icon' => 'ph-student',               
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Wali Kelas', 'Guru', 'Guru Mata Pelajaran', 'Guru Piket']
             ],
@@ -263,12 +270,14 @@ return [
             [
                 'name' => 'Data & Jadwal',
                 'route' => 'extracurriculars.index',
+                'active_check' => ['extracurriculars.index', 'extracurriculars.create', 'extracurriculars.edit'],
                 'icon' => 'ph-calendar-check',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Guru']
             ],
             [
                 'name' => 'Peserta Ekskul',
                 'route' => 'extracurriculars.members',
+                'active_check' => 'extracurriculars.members',
                 'icon' => 'ph-users-three',
                 'roles' => ['Admin', 'TU', 'Guru']
             ],
@@ -374,12 +383,14 @@ return [
             [
                 'name' => 'Dashboard Pustaka',
                 'route' => 'library.dashboard',
+                'active_check' => 'library.dashboard',
                 'icon' => 'ph-books',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Guru']
             ],
             [
                 'name' => 'Sirkulasi',
                 'route' => 'library.circulation.index',
+                'active_check' => ['library.circulation.index', 'library.circulation.create', 'library.circulation.edit'],
                 'icon' => 'ph-arrows-left-right',
                 'roles' => ['Admin', 'TU'] 
             ],
@@ -400,7 +411,7 @@ return [
             [
                 'name' => 'Data Buku',
                 'route' => 'library.books.index',
-                'active_check' => 'library.books.index',
+                'active_check' => 'library.books.*',
                 'icon' => 'ph-book-bookmark',
                 'roles' => ['Admin', 'TU']
             ],
@@ -414,6 +425,7 @@ return [
             [
                 'name' => 'Bebas Pustaka',
                 'route' => 'library.tools.bebas_pustaka',
+                'active_check' => 'library.tools.bebas_pustaka',
                 'icon' => 'ph-certificate',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
@@ -450,6 +462,7 @@ return [
             [
                 'name' => 'Atur Jadwal',
                 'route' => 'schedules.index',
+                'active_check' => 'schedules.*',
                 'icon' => 'ph-clock',
                 'roles' => ['Admin', 'TU']
             ],
@@ -463,12 +476,14 @@ return [
             [
                 'name' => 'Data Kelas',
                 'route' => 'classes.index',
+                'active_check' => 'classes.*',
                 'icon' => 'ph-chalkboard',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
             [
                 'name' => 'Data Pengguna',
                 'route' => 'users.index',
+                'active_check' => 'users.*',
                 'icon' => 'ph-users',
                 'roles' => ['Admin'] 
             ],
@@ -484,7 +499,6 @@ return [
                 'route' => 'admin.bk.early_warning',
                 'active_check' => 'admin.bk.early_warning',
                 'icon' => 'ph-siren',
-                // Sesuaikan siapa saja yang berhak melihat peringatan siswa bermasalah
                 'roles' => ['Admin', 'Guru Piket', 'Kepala Sekolah']
             ]
         ]

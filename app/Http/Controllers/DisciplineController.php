@@ -27,7 +27,7 @@ class DisciplineController extends Controller
     /**
      * Menampilkan halaman utama Catatan Disiplin (Dashboard Guru).
      */
-    public function index(Request $request)
+     public function index(Request $request)
     {
         // ==========================================
         // 1. QUERY OPTIMAL & DATA MASTER
@@ -43,13 +43,13 @@ class DisciplineController extends Controller
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
             ->where("{$typeTable}.type", 'Pelanggaran')
-            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
+            ->whereDate("{$recordTable}.date", '>=', $academicYearStart);
 
         $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
             ->where("{$typeTable}.type", 'Kebaikan')
-            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
+            ->whereDate("{$recordTable}.date", '>=', $academicYearStart);
 
         // Ambil data siswa dengan relasi kelas     
         $studentsRaw = Student::with('schoolClass')
@@ -116,7 +116,7 @@ class DisciplineController extends Controller
                 ];
             });
 
-        // Top 10 Prestasi
+       // Top 10 Prestasi
         $topMerits = $studentsRaw->where('total_merit', '>', 0)
             ->sortByDesc('total_merit')
             ->take(10)
@@ -129,35 +129,50 @@ class DisciplineController extends Controller
             });
 
         // ==========================================
-        // 5. DATA RIWAYAT (TABEL BAWAH)
+        // 5. DATA RIWAYAT (TABEL BAWAH) & FILTER
         // ==========================================
         $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])
-            ->whereDate('created_at', '>=', $academicYearStart)
+            ->whereDate('date', '>=', $academicYearStart)
             ->latest(); 
 
+        // Filter Pencarian Nama
         if ($request->has('search') && $request->search != '') {
             $query->whereHas('student', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
+        // Filter Tanggal
         if ($request->has('filter_date') && $request->filter_date != '') {
             $query->whereDate('date', $request->filter_date);
         }
+        
+        // Filter Kelas (DIPERBAIKI)
+        if ($request->has('filter_class') && $request->filter_class != '') {
+            $query->whereHas('student.schoolClass', fn($q) => $q->where('id', $request->filter_class));
+        }
+
+        // Filter Jenis (Kebaikan / Pelanggaran)
+        if ($request->has('filter_type') && $request->filter_type != '') {
+            $query->whereHas('disciplineType', fn($q) => $q->where('type', $request->filter_type));
+        }
 
         $historyRecords = $query->paginate(10)->withQueryString();
+        
+        // Ambil data kelas untuk Dropdown Filter
+        $classes = \App\Models\SchoolClass::orderBy('name', 'asc')->get();
 
         return view('discipline.index', compact(
             'students', 'violationTypes', 'meritTypes', 
             'classSummaries', 'topViolators', 'topMerits', 'historyRecords', 
-            'todayViolations', 'todayMerits'
+            'todayViolations', 'todayMerits', 'classes'
         ));
     }
 
- public function analytics()
+public function analytics()
     {
         $academicYearStart = $this->getAcademicYearStart();
         
         // 1. Ambil data dasar
         $historyRecords = DisciplineRecord::with('disciplineType')
-            ->whereDate('created_at', '>=', $academicYearStart)
+            ->whereDate('date', '>=', $academicYearStart)
             ->get();
         
         $studentTable = app(Student::class)->getTable();
@@ -168,13 +183,13 @@ class DisciplineController extends Controller
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
             ->where("{$typeTable}.type", 'Pelanggaran')
-            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
+            ->whereDate("{$recordTable}.date", '>=', $academicYearStart);
 
         $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
             ->where("{$typeTable}.type", 'Kebaikan')
-            ->whereDate("{$recordTable}.created_at", '>=', $academicYearStart);
+            ->whereDate("{$recordTable}.date", '>=', $academicYearStart);
 
         $students = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
@@ -183,7 +198,7 @@ class DisciplineController extends Controller
             ->selectSub($meritSubquery, 'total_merit')
             ->get();
 
-        // 2. Rekap Per Kelas
+      // 2. Rekap Per Kelas
         $classSummaries = $students->groupBy(fn($s) => $s->schoolClass->name ?? 'Tanpa Kelas')
             ->map(fn($group, $key) => (object)[
                 'class_name' => $key,
@@ -191,7 +206,16 @@ class DisciplineController extends Controller
                 'total_merit' => $group->sum('total_merit')
             ])->sortBy('class_name', SORT_NATURAL);
 
-        $topViolators = $students->where('total_violation', '>', 0)->sortByDesc('total_violation')->take(10);
+        $topViolators = $students->where('total_violation', '>', 0)
+            ->sortByDesc('total_violation')
+            ->take(10)
+            ->map(function($student) {
+                return (object) [
+                    'name' => $student->name,
+                    'class_name' => $student->schoolClass->name ?? '-',
+                    'total_violation' => $student->total_violation
+                ];
+            });
 
         // 3. LOGIKA TREN BULANAN (Hanya untuk Tahun Ajaran Ini)
         $monthlyTrend = DisciplineRecord::select(
