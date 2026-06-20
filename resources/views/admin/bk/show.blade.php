@@ -190,7 +190,6 @@
                                 @endif
                             </div>
                         </div>
-                        
                     <!-- KARTU 2: Detail Pengajuan -->
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 break-inside-avoid relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-accent to-elevate-primary"></div>
