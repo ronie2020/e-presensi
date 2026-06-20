@@ -77,9 +77,17 @@
                                 }
                             @endphp
                             <tr class="hover:bg-elevate-soft/30 transition-colors group">
+                                <!-- KOLOM 1: MATA PELAJARAN -->
                                 <td class="px-6 py-5 font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">
                                     {{ $item->subject->name ?? 'Mapel Dihapus' }}
                                 </td>
+                                
+                                <!-- KOLOM 2: NILAI ANGKA (INI YANG SEBELUMNYA HILANG) -->
+                                <td class="px-6 py-5 text-center font-bold text-elevate-dark">
+                                    {{ $item->score ?? '-' }}
+                                </td>
+
+                                <!-- KOLOM 3: PREDIKAT (DENGAN BADGE WARNA) -->
                                 <td class="px-6 py-5 text-center">
                                     @php 
                                         $gradeColor = match($item->predicate) { 
@@ -90,9 +98,11 @@
                                         }; 
                                     @endphp
                                     <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border {{ $gradeColor }} shadow-sm">
-                                        {{ $item->predicate }}
+                                        {{ $item->predicate ?? '-' }}
                                     </span>
                                 </td>
+
+                                <!-- KOLOM 4: DESKRIPSI -->
                                 <td class="px-6 py-5 text-slate-500 hidden md:table-cell max-w-sm leading-relaxed text-xs font-medium">
                                     {{Str::limit($item->description, 100) ?? '-' }}
                                 </td>
