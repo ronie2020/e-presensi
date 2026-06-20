@@ -227,13 +227,19 @@
                                 <tr class="group hover:bg-slate-50/80 transition-colors">
                                     <td class="p-5 pl-8 align-top">
                                         <div class="flex items-center gap-3.5">
-                                            {{-- Avatar Initials --}}
+                                            {{-- Avatar Initials (Diperbaiki) --}}
                                             <div class="w-10 h-10 rounded-2xl bg-elevate-accent/10 text-elevate-primary flex items-center justify-center font-black text-sm shrink-0 border border-elevate-accent/20 group-hover:bg-elevate-primary group-hover:text-white transition-colors shadow-sm">
-                                                {{ substr($item->student->name, 0, 1) }}
+                                                {{ substr($item->student?->name ?? '?', 0, 1) }}
                                             </div>
                                             <div>
-                                                <p class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors leading-tight line-clamp-2">{{ $item->student->name }}</p>
-                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{{ $item->student->schoolClass->name ?? '-' }}</p>
+                                                {{-- Nama Siswa (Diperbaiki) --}}
+                                                <p class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors leading-tight line-clamp-2">
+                                                    {{ $item->student?->name ?? 'Siswa Dihapus / Tidak Ditemukan' }}
+                                                </p>
+                                                {{-- Nama Kelas (Diperbaiki) --}}
+                                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+                                                    {{ $item->student?->schoolClass?->name ?? '-' }}
+                                                </p>
                                                 <div class="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400 font-medium">
                                                     <i class="ph-bold ph-calendar-blank"></i>
                                                     {{ \Carbon\Carbon::parse($item->created_at)->format('d M, H:i') }}

@@ -22,8 +22,8 @@ class LiteracyJournal extends Model
     protected $dates = ['verified_at'];
 
     // Relasi ke Siswa
-    public function student()
+   public function student()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class)->withTrashed();
     }
 }
