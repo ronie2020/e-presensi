@@ -35,7 +35,7 @@
                     
                     <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                         @forelse($criticalViolations as $cv)
-                            <div class="bg-slate-800 rounded-[2rem] p-6 border border-rose-900/50 hover:border-rose-500/50 transition-colors shadow-lg relative overflow-hidden group">
+                            <div onclick="window.location.href='{{ route('admin.bk.show', $cv->id) }}'" class="cursor-pointer bg-slate-800 rounded-[2rem] p-6 border border-rose-900/50 hover:border-rose-500/50 transition-colors shadow-lg relative overflow-hidden group">
                                 <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                                     <i class="ph-fill ph-siren text-8xl text-rose-500"></i>
                                 </div>
@@ -43,13 +43,13 @@
                                 <div class="flex justify-between items-start mb-4 relative z-10">
                                     <div class="flex items-center gap-4">
                                         <div class="w-14 h-14 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-bold text-xl border-2 border-slate-600">
-                                            {{ substr($cv->student->name, 0, 1) }}
+                                            {{ substr($cv->student?->name ?? '?', 0, 1) }}
                                         </div>
                                         <div>
-                                            <h4 class="font-bold text-white text-lg">{{ $cv->student->name }}</h4>
+                                            <h4 class="font-bold text-white text-lg group-hover:text-rose-400 transition-colors">{{ $cv->student?->name ?? 'Data Siswa Dihapus' }}</h4>
                                             <p class="text-xs text-slate-400 mt-0.5">
-                                                <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300 mr-1">Kelas {{ $cv->student->schoolClass->name ?? '-' }}</span> 
-                                                NISN: {{ $cv->student->student_id }}
+                                                <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300 mr-1">Kelas {{ $cv->student?->schoolClass?->name ?? '-' }}</span> 
+                                                NISN: {{ $cv->student?->student_id ?? '-' }}
                                             </p>
                                         </div>
                                     </div>
@@ -58,14 +58,17 @@
                                     </span>
                                 </div>
                                 
-                                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/50 text-sm text-rose-200 font-mono mb-5 shadow-inner relative z-10">
-                                    <i class="ph-fill ph-robot text-rose-500 mr-1"></i> {!! nl2br(e($cv->initial_message)) !!}
+                                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/50 text-sm text-rose-200 font-mono mb-5 shadow-inner relative z-10 flex items-start gap-3">
+                                    <i class="ph-fill ph-robot text-rose-500 text-lg shrink-0 mt-0.5"></i> 
+                                    <div class="leading-relaxed">
+                                        {!! nl2br(e($cv->initial_message)) !!}
+                                    </div>
                                 </div>
 
                                 <div class="relative z-10">
-                                    <a href="{{ route('admin.bk.show', $cv->id) }}" class="w-full flex items-center justify-center gap-2 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-rose-900/50 active:scale-95">
+                                    <div class="w-full flex items-center justify-center gap-2 py-3.5 bg-rose-600 group-hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-rose-900/50 active:scale-95">
                                         <i class="ph-bold ph-shield-check text-lg"></i> Proses Kasus Ini
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                         @empty
@@ -89,7 +92,7 @@
                     
                     <div class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                         @forelse($meritsToAppreciate as $ma)
-                            <div class="bg-slate-800 rounded-[2rem] p-6 border border-emerald-900/50 hover:border-emerald-500/50 transition-colors shadow-lg relative overflow-hidden group">
+                            <div onclick="window.location.href='{{ route('admin.bk.show', $ma->id) }}'" class="cursor-pointer bg-slate-800 rounded-[2rem] p-6 border border-emerald-900/50 hover:border-emerald-500/50 transition-colors shadow-lg relative overflow-hidden group">
                                 <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
                                     <i class="ph-fill ph-star text-8xl text-emerald-500"></i>
                                 </div>
@@ -97,12 +100,12 @@
                                 <div class="flex justify-between items-start mb-4 relative z-10">
                                     <div class="flex items-center gap-4">
                                         <div class="w-14 h-14 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 font-bold text-xl border-2 border-slate-600">
-                                            {{ substr($ma->student->name, 0, 1) }}
+                                            {{ substr($ma->student?->name ?? '?', 0, 1) }}
                                         </div>
                                         <div>
-                                            <h4 class="font-bold text-white text-lg">{{ $ma->student->name }}</h4>
+                                            <h4 class="font-bold text-white text-lg group-hover:text-emerald-400 transition-colors">{{ $ma->student?->name ?? 'Data Siswa Dihapus' }}</h4>
                                             <p class="text-xs text-slate-400 mt-0.5">
-                                                <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300 mr-1">Kelas {{ $ma->student->schoolClass->name ?? '-' }}</span>
+                                                <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300 mr-1">Kelas {{ $ma->student?->schoolClass?->name ?? '-' }}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -111,14 +114,17 @@
                                     </span>
                                 </div>
                                 
-                                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/50 text-sm text-emerald-200 font-mono mb-5 shadow-inner relative z-10">
-                                    <i class="ph-fill ph-robot text-emerald-500 mr-1"></i> {!! nl2br(e($ma->initial_message)) !!}
+                                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/50 text-sm text-emerald-200 font-mono mb-5 shadow-inner relative z-10 flex items-start gap-3">
+                                    <i class="ph-fill ph-robot text-emerald-500 text-lg shrink-0 mt-0.5"></i> 
+                                    <div class="leading-relaxed">
+                                        {!! nl2br(e($ma->initial_message)) !!}
+                                    </div>
                                 </div>
 
                                 <div class="relative z-10">
-                                    <a href="{{ route('admin.bk.show', $ma->id) }}" class="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-emerald-900/50 active:scale-95">
+                                    <div class="w-full flex items-center justify-center gap-2 py-3.5 bg-emerald-600 group-hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-emerald-900/50 active:scale-95">
                                         <i class="ph-bold ph-gift text-lg"></i> Berikan Reward / Selesai
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                         @empty

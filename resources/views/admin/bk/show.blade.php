@@ -148,26 +148,26 @@
                                         <img class="w-full h-full rounded-xl object-cover" src="{{ asset('storage/' . $session->student->photo_path) }}" alt="Foto Siswa">
                                     @else
                                         <div class="w-full h-full rounded-xl bg-slate-50 flex items-center justify-center text-elevate-primary text-3xl font-black">
-                                            {{ substr($session->student->name ?? 'X', 0, 1) }}
+                                            {{ substr($session->student?->name ?? 'X', 0, 1) }}
                                         </div>
                                     @endif
                                 </div>
                             </div>
                             
-                            <div class="font-black text-xl text-elevate-dark leading-tight">{{ $session->student->name ?? 'Siswa Terhapus' }}</div>
+                            <div class="font-black text-xl text-elevate-dark leading-tight">{{ $session->student?->name ?? 'Siswa Terhapus' }}</div>
                             <div class="text-[10px] font-black text-elevate-primary bg-elevate-accent/10 px-3 py-1 rounded-full mt-2 border border-elevate-accent/20 uppercase tracking-wider">
-                                {{ $session->student->schoolClass->name ?? 'Tanpa Kelas' }}
+                                {{ $session->student?->schoolClass?->name ?? 'Tanpa Kelas' }}
                             </div>
                         </div>
 
                         <div class="space-y-4 relative z-10">
                             <div class="flex justify-between items-center p-4 bg-slate-50 border border-slate-100 rounded-2xl">
                                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">NIS / NISN</span>
-                                <span class="text-xs font-bold text-elevate-dark font-mono bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">{{ $session->student->nis ?? '-' }} / {{ $session->student->student_id ?? '-' }}</span>
+                                <span class="text-xs font-bold text-elevate-dark font-mono bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">{{ $session->student?->nis ?? '-' }} / {{ $session->student?->student_id ?? '-' }}</span>
                             </div>
                             
                             <div class="print:hidden space-y-2">
-                                @if($session->student->parent_wa_number ?? false)
+                                @if($session->student && $session->student->parent_wa_number)
                                     @php
                                         $waMessage = "Salam hormat Bapak/Ibu Orang Tua/Wali dari " . ($session->student->name ?? '') . ",\n\nKami dari pihak Bimbingan Konseling sekolah ingin berdiskusi terkait ananda. Mohon konfirmasi ketersediaan Bapak/Ibu untuk komunikasi lebih lanjut. Terima kasih.";
                                         $waLink = "https://wa.me/" . preg_replace('/^0/', '62', $session->student->parent_wa_number) . "?text=" . urlencode($waMessage);
@@ -182,7 +182,7 @@
                                     </div>
                                 @endif
 
-                                @if(Route::has('admin.discipline.student_history'))
+                                @if($session->student && Route::has('admin.discipline.student_history'))
                                     <a href="{{ route('admin.discipline.student_history', $session->student->id) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3.5 bg-white text-elevate-dark font-bold text-sm rounded-xl border border-slate-200 hover:border-elevate-primary hover:text-elevate-primary transition-all shadow-sm">
                                         <i class="ph-bold ph-shield-warning text-xl"></i> 
                                         Rekam Kedisiplinan
@@ -190,8 +190,7 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
-
+                        
                     <!-- KARTU 2: Detail Pengajuan -->
                     <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 break-inside-avoid relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-accent to-elevate-primary"></div>

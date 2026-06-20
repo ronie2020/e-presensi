@@ -333,8 +333,8 @@
                             {{-- INTERAKTIF UX: Seluruh Baris Bisa Diklik Menuju Detail --}}
                             <tr class="hover:bg-slate-50/80 transition-colors group cursor-pointer" onclick="window.location.href='{{ route('admin.bk.show', $session->id) }}'">
                                 
-                                {{-- CHECKBOX ITEM --}}
-                                <td class="px-6 py-5 pl-8 w-12 print:hidden align-top" onclick="event.stopPropagation();">
+                                {{-- CHECKBOX ITEM (Diperbaiki dengan @click.stop) --}}
+                                <td class="px-6 py-5 pl-8 w-12 print:hidden align-top" @click.stop>
                                     <input type="checkbox" class="session-checkbox w-4 h-4 rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary transition-colors cursor-pointer shadow-sm" value="{{ $session->id }}" x-model="selected">
                                 </td>
 
@@ -345,19 +345,19 @@
                                             @if($session->student && $session->student->photo_path)
                                                 <img src="{{ asset('storage/' . $session->student->photo_path) }}" class="w-full h-full object-cover">
                                             @else
-                                                {{ substr($session->student->name ?? '?', 0, 1) }}
+                                                {{ substr($session->student?->name ?? '?', 0, 1) }}
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="font-black text-elevate-dark group-hover:text-elevate-primary transition-colors leading-tight line-clamp-1">{{ $session->student->name ?? 'Data Terhapus' }}</div>
-                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $session->student->schoolClass->name ?? '-' }}</div>
+                                            <div class="font-black text-elevate-dark group-hover:text-elevate-primary transition-colors leading-tight line-clamp-1">{{ $session->student?->name ?? 'Data Terhapus' }}</div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{{ $session->student?->schoolClass?->name ?? '-' }}</div>
                                         </div>
                                     </div>
                                 </td>
                                     <td class="px-6 py-5 align-top">
                                         <div class="flex flex-wrap items-center gap-2 mb-2">
                                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[9px] font-black uppercase tracking-wider print:border-none print:px-0 print:py-0 print:bg-transparent shadow-sm">
-                                                <i class="ph-bold ph-tag print:hidden text-elevate-primary"></i> {{ $session->category->name ?? 'Umum' }}
+                                                <i class="ph-bold ph-tag print:hidden text-elevate-primary"></i> {{ $session->category?->name ?? 'Umum' }}
                                             </span>
                                             
                                             @if($session->is_system_generated ?? false)
@@ -376,7 +376,8 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <p class="text-sm text-slate-600 font-medium leading-relaxed truncate w-48 italic print:w-auto print:whitespace-normal" title="{{ $session->initial_message }}">
+                                        {{-- Diperbaiki menggunakan line-clamp agar lebih dinamis --}}
+                                        <p class="text-sm text-slate-600 font-medium leading-relaxed line-clamp-2 max-w-xs md:max-w-md italic print:max-w-none print:whitespace-normal" title="{{ $session->initial_message }}">
                                             "{{ $session->initial_message }}"
                                         </p>
                                         
@@ -431,11 +432,11 @@
                                 </td>
                                 <td class="px-6 py-5 text-center print:hidden pr-8 align-top">
                                     <div class="flex items-center justify-end gap-2">
-                                        {{-- TOMBOL SHORTCUT WA (Tanpa masuk halaman detail) --}}
+                                        {{-- TOMBOL SHORTCUT WA (Tanpa masuk halaman detail - Diperbaiki dgn @click.stop) --}}
                                         @if($session->student && $session->student->parent_wa_number)
                                             <a href="https://wa.me/{{ preg_replace('/^0/', '62', $session->student->parent_wa_number) }}" 
                                                target="_blank" 
-                                               onclick="event.stopPropagation();" 
+                                               @click.stop 
                                                class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-slate-200 text-emerald-500 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all shadow-sm" title="WA Orang Tua">
                                                 <i class="ph-fill ph-whatsapp-logo text-xl"></i>
                                             </a>

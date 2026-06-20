@@ -120,9 +120,9 @@ class BkTeacherController extends Controller
                     $no = 1;
                     foreach ($sessionsExport as $session) {
                         $row['No']  = $no++;
-                        $row['Nama Siswa']    = $session->student->name ?? 'Data Terhapus';
-                        $row['Kelas']    = $session->student->schoolClass->name ?? '-';
-                        $row['Kategori/Topik']  = $session->category->name ?? 'Umum';
+                        $row['Nama Siswa']    = $session->student?->name ?? 'Data Terhapus';
+                        $row['Kelas']    = $session->student?->schoolClass?->name ?? '-';
+                        $row['Kategori/Topik']  = $session->category?->name ?? 'Umum';
                         $row['Pesan Pengajuan']  = str_replace(["\r", "\n"], " ", $session->initial_message); // Bersihkan enter
                         $row['Metode']  = $session->method == 'online' ? 'Online' : 'Tatap Muka';
                         

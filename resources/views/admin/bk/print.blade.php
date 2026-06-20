@@ -160,13 +160,13 @@
                     <th style="width: 100px;">Tgl Lapor</th>
                 </tr>
             </thead>
-            <tbody>
+           <tbody>
                 @forelse($sessions as $index => $session)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td style="text-transform: uppercase; font-weight: bold;">{{ $session->student->name ?? 'Data Terhapus' }}</td>
-                    <td class="text-center">{{ $session->student->schoolClass->name ?? '-' }}</td>
-                    <td class="text-center">{{ $session->category->name ?? 'Umum' }}</td>
+                    <td style="text-transform: uppercase; font-weight: bold;">{{ $session->student?->name ?? 'Data Terhapus' }}</td>
+                    <td class="text-center">{{ $session->student?->schoolClass?->name ?? '-' }}</td>
+                    <td class="text-center">{{ $session->category?->name ?? 'Umum' }}</td>
                     <td class="text-italic">
                         @if($session->is_system_generated)
                             <strong>[SISTEM]</strong> 
