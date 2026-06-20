@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LmsAssignment extends Model
 {
     use HasFactory;
-    
+
     protected $guarded = ['id'];
     
     protected $casts = [
@@ -23,13 +23,18 @@ class LmsAssignment extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
-    public function submissions() {
+     public function submissions() {
         return $this->hasMany(LmsSubmission::class, 'assignment_id');
     }
     
-    // RELASI BARU KE SOAL
+    // RELASI BARU KE SOAL KUIS BIASA
     public function questions() {
         return $this->hasMany(LmsQuizQuestion::class, 'assignment_id');
+    }
+
+    // RELASI BARU KE SOAL VIDEO INTERAKTIF
+    public function interactiveQuestions() {
+        return $this->hasMany(LmsInteractiveQuestion::class, 'assignment_id');
     }
 
     public function isSubmittedBy($studentId) {

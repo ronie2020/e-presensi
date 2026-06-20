@@ -185,7 +185,7 @@
                         <h3 class="text-xl font-bold text-elevate-dark">Tidak Ada Tugas</h3>
                         <p class="text-elevate-dark/60 font-medium mt-1">Hore! Kamu bebas dari tugas untuk saat ini.</p>
                     </div>
-                @else
+                 @else
                     @foreach($assignments as $index => $task)
                         @php
                             $mySubmission = $task->submissions->first(); 
@@ -204,6 +204,10 @@
                                 $typeIcon = 'ph-link';
                                 $typeColor = 'text-elevate-peach-dark bg-elevate-peach-light/30 border-elevate-peach/30';
                                 $typeLabel = 'Tugas Link';
+                            } elseif($task->assignment_type == 'interactive_video') {
+                                $typeIcon = 'ph-youtube-logo';
+                                $typeColor = 'text-red-600 bg-red-50 border-red-100';
+                                $typeLabel = 'Video Interaktif';
                             }
                         @endphp
 
@@ -267,7 +271,7 @@
                                 </div>
                             </div>
 
-                            <div class="px-6 md:px-8 pb-8">
+                             <div class="px-6 md:px-8 pb-8">
                                 <div class="prose prose-sm max-w-none text-elevate-dark/80 bg-elevate-soft/30 p-6 rounded-2xl border border-elevate-soft mb-6 leading-relaxed">
                                     {{ $task->description }}
                                 </div>
@@ -283,6 +287,14 @@
                                                 <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                                                 <i class="ph-bold ph-play-circle text-xl text-elevate-accent"></i>
                                                 <span class="relative">Mulai Kerjakan Kuis</span>
+                                            </a>
+                                            
+                                        {{-- VIDEO INTERAKTIF (BARU) --}}
+                                        @elseif($task->assignment_type == 'interactive_video')
+                                            <a href="{{ route('students.learning.play', $subject->id) }}" class="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition shadow-lg shadow-red-600/20 flex items-center justify-center gap-2 group/btn relative overflow-hidden active:scale-[0.98]">
+                                                <div class="absolute inset-0 bg-white/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+                                                <i class="ph-bold ph-play-circle text-xl"></i>
+                                                <span class="relative">Buka Player Interaktif</span>
                                             </a>
 
                                         {{-- TUGAS LINK (GURU) --}}

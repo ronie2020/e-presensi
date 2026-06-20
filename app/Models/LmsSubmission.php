@@ -11,7 +11,7 @@ class LmsSubmission extends Model
 
     protected $table = 'lms_submissions';
 
-    protected $fillable = [
+     protected $fillable = [
         'assignment_id',
         'student_id',
         'file_path',       
@@ -20,6 +20,7 @@ class LmsSubmission extends Model
         'grade',           
         'teacher_feedback',
         'status',          
+        'highest_watched_second', // Tambahan untuk rekam jejak anti-skip video
         'submitted_at',    
     ];
 
@@ -38,13 +39,20 @@ class LmsSubmission extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    /**
-     * [PERBAIKAN PENTING]
+    /**    
      * Relasi ini mengarah ke model LmsSubmissionAnswer yang baru.
      * Tanpa ini, halaman penilaian guru akan kosong.
      */
     public function answers()
     {
         return $this->hasMany(LmsSubmissionAnswer::class, 'submission_id');
+    }
+
+    /**
+     * Relasi ke rekaman jawaban kuis pada video interaktif
+     */
+    public function interactiveAnswers()
+    {
+        return $this->hasMany(LmsInteractiveAnswer::class, 'submission_id');
     }
 }
