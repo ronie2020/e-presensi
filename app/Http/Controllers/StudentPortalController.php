@@ -620,13 +620,14 @@ class StudentPortalController extends Controller
         return back()->with('error', 'Template kartu belum tersedia.');
     }
 
-    public function biodata($id)
+   public function biodata($id)
     {
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
             return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
         }
 
-        $student = \App\Models\Student::with('graduation')->findOrFail($id);
+        // Tambahkan relasi classHistories.schoolClass agar riwayat jejak akademik dapat ditampilkan
+        $student = \App\Models\Student::with(['classHistories.schoolClass', 'graduation'])->findOrFail($id);
         
         // DETEKSI ALUMNI KETAT: Alumni tidak boleh akses print biodata aktif
         $isAlumni = $student->status === 'graduated' 
@@ -639,6 +640,8 @@ class StudentPortalController extends Controller
 
         $settings = []; 
 
+        // LOGIKA BUKU INDUK ARSIP PERMANEN: 
+        // Tarik SEMUA data absen dari awal siswa masuk tanpa filter tahun ajaran.
         $sakit = \App\Models\AttendanceSiswa::where('student_id', $id)
                     ->where('status', 'Sakit')
                     ->whereIn('type', ['Harian', 'Masuk'])
