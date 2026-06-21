@@ -295,13 +295,16 @@
         {{-- MODAL REVIEW JAWABAN (ELEVATE THEME) --}}
         <div x-show="showReviewModal" style="display: none;" 
              class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true">
-             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+             
+             {{-- PERBAIKAN 1: Gunakan Flexbox Center alih-alih items-end / inline-block --}}
+             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                 <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
 
-                <div class="inline-block align-bottom bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full border border-slate-100">
+                {{-- PERBAIKAN 2: Tambahkan flex flex-col dan max-h-[90vh] agar modal menyesuaikan layar --}}
+                <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-3xl w-full border border-slate-100 flex flex-col max-h-[90vh]">
                     
-                    {{-- Header Modal --}}
-                    <div class="bg-elevate-peach-light/30 px-6 py-5 border-b border-elevate-peach/30 flex justify-between items-center sticky top-0 z-10">
+                    {{-- Header Modal (Dibuat shrink-0 agar tidak menyusut) --}}
+                    <div class="bg-elevate-peach-light/30 px-6 py-5 border-b border-elevate-peach/30 flex justify-between items-center shrink-0">
                         <div>
                             <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
                                 <i class="ph-bold ph-check-square-offset text-elevate-peach-dark"></i> Koreksi Jawaban
@@ -313,8 +316,8 @@
                         </button>
                     </div>
 
-                    {{-- Isi Jawaban --}}
-                    <div class="px-6 py-6 max-h-[60vh] overflow-y-auto bg-white space-y-6 custom-scrollbar">
+                    {{-- Isi Jawaban (Dibuat flex-1 agar mengisi ruang tengah dan bisa di-scroll) --}}
+                    <div class="px-6 py-6 overflow-y-auto bg-white space-y-6 custom-scrollbar flex-1">
                         <template x-if="activeReview && activeReview.answers.length > 0">
                             <template x-for="(ans, index) in activeReview.answers" :key="index">
                                 <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-elevate-accent/30 transition-all">
@@ -360,8 +363,8 @@
                         </template>
                     </div>
 
-                    {{-- Footer Kalkulator --}}
-                    <div class="bg-elevate-soft/50 px-6 py-5 border-t border-slate-100 sticky bottom-0 z-10" x-show="activeReview && activeReview.answers.length > 0">
+                    {{-- Footer Kalkulator (Dibuat shrink-0 agar selalu menempel di bawah) --}}
+                    <div class="bg-elevate-soft/50 px-6 py-5 border-t border-slate-100 shrink-0" x-show="activeReview && activeReview.answers.length > 0">
                         <div class="flex flex-col sm:flex-row justify-between items-center gap-5">
                             <div class="text-elevate-dark/60 text-xs font-bold flex items-center gap-2">
                                 <i class="ph-fill ph-info text-elevate-primary text-lg"></i> 
