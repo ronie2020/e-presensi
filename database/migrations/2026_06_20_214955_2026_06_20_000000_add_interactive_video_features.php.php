@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    public function up()
+   public function up()
     {
         // 1. UPDATE TABEL lms_assignments
-        // Karena kolom assignment_type sudah ada, kita MODIFIKASI ENUM-nya menggunakan perintah SQL murni.
-        // Ini adalah cara paling aman di Laravel untuk mengupdate tipe ENUM.
-        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type ENUM('file_upload', 'link', 'quiz', 'interactive_video') NOT NULL DEFAULT 'file_upload'");
+        // UBAH DARI ENUM MENJADI VARCHAR AGAR AMAN DI HOSTING DAN TIDAK ERROR DATA TRUNCATED
+        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
 
         Schema::table('lms_assignments', function (Blueprint $table) {
             // Tambahkan kolom youtube_url HANYA jika kolom tersebut belum ada
@@ -90,7 +89,7 @@ return new class extends Migration
             }
         });
         
-        // Kembalikan ENUM seperti semula (tanpa interactive_video) jika di-rollback
-        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type ENUM('file_upload', 'link', 'quiz') NOT NULL DEFAULT 'file_upload'");
+        // Kembalikan ke VARCHAR jika di-rollback agar tidak memicu error ENUM lagi
+        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
     }
 };
