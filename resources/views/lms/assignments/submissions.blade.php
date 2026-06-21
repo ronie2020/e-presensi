@@ -68,15 +68,17 @@
 
             {{-- TABEL SISWA --}}
             <div class="animate-enter bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden min-h-[600px] flex flex-col" style="animation-delay: 100ms">
-                <div class="p-6 md:p-8 border-b border-slate-100 bg-elevate-gradient-card flex flex-col md:flex-row justify-between items-center gap-5">
-                    <h3 class="font-black text-elevate-dark text-xl flex items-center gap-3">
+                
+                {{-- PERBAIKAN RESPONSIVE DI SINI --}}
+                <div class="p-6 md:p-8 border-b border-slate-100 bg-elevate-gradient-card flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
+                    <h3 class="font-black text-elevate-dark text-xl flex items-center gap-3 shrink-0">
                         <span class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-elevate-primary shadow-sm border border-slate-100"><i class="ph-bold ph-list-checks"></i></span>
                         Daftar Pengumpulan
                     </h3>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
+                    <div class="flex flex-wrap gap-3 w-full xl:w-auto items-center justify-start xl:justify-end">
                         @if($assignment->is_bulk || $allStudents->count() > 30)
-                            <div class="relative w-full sm:w-48 group">
+                            <div class="relative w-full sm:w-[calc(50%-0.375rem)] md:w-auto md:flex-1 xl:flex-none xl:w-40 group">
                                 <select id="classFilter" class="w-full pl-4 pr-10 py-3.5 bg-elevate-soft focus:bg-white border-slate-200 rounded-2xl text-sm font-bold focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all appearance-none cursor-pointer text-elevate-dark shadow-sm">
                                     <option value="">Semua Kelas</option>
                                     @foreach($allStudents->pluck('schoolClass.name')->unique()->sort() as $className)
@@ -87,15 +89,26 @@
                             </div>
                         @endif
 
-                        <div class="relative w-full sm:w-64 group">
+                        {{-- Filter Status Penilaian --}}
+                        <div class="relative w-full sm:w-[calc(50%-0.375rem)] md:w-auto md:flex-1 xl:flex-none xl:w-40 group">
+                            <select id="statusFilter" class="w-full pl-4 pr-10 py-3.5 bg-elevate-soft focus:bg-white border-slate-200 rounded-2xl text-sm font-bold focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all appearance-none cursor-pointer text-elevate-dark shadow-sm">
+                                <option value="">Semua Status</option>
+                                <option value="ungraded">Menunggu Dinilai</option>
+                                <option value="graded">Sudah Dinilai</option>
+                                <option value="missing">Belum Kumpul</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down"></i></div>
+                        </div>
+
+                        <div class="relative w-full sm:flex-1 md:w-auto xl:flex-none xl:w-56 group">
                             <input type="text" id="tableSearch" placeholder="Cari nama siswa..." class="pl-12 pr-4 py-3.5 bg-elevate-soft focus:bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-elevate-accent/30 focus:border-elevate-accent w-full transition-all text-elevate-dark shadow-sm">
                             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-magnifying-glass text-lg"></i></div>
                         </div>
 
                         {{-- TOMBOL SIMPAN SEMUA --}}
-                        <button type="button" onclick="saveAllGrades()" class="w-full sm:w-auto px-6 py-3.5 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 border border-transparent">
+                        <button type="button" onclick="saveAllGrades()" class="w-full sm:w-auto px-6 py-3.5 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 border border-transparent shrink-0">
                             <i class="ph-bold ph-floppy-disk text-lg"></i>
-                            Simpan Semua
+                            <span class="whitespace-nowrap">Simpan Semua</span>
                         </button>
                     </div>
                 </div>
@@ -123,6 +136,12 @@
                                     }
                                     $ansCount = $submission ? $submission->answers->count() : 0;
                                     
+                                    // Logika status untuk filter javascript
+                                    $rowStatus = 'missing';
+                                    if ($submission) {
+                                        $rowStatus = isset($submission->grade) ? 'graded' : 'ungraded';
+                                    }
+
                                     $mappedAnswers = [];
                                     if ($submission && $assignment->assignment_type == 'quiz') {
                                         $mappedAnswers = $submission->answers->map(function($ans) {
@@ -138,7 +157,8 @@
                                     }
                                 @endphp
 
-                                <tr class="group hover:bg-elevate-soft/30 transition-colors student-row" data-class="{{ $student->schoolClass->name ?? '-' }}">
+                                {{-- TAMBAHAN: Menyisipkan atribut data-status --}}
+                                <tr class="group hover:bg-elevate-soft/30 transition-colors student-row" data-class="{{ $student->schoolClass->name ?? '-' }}" data-status="{{ $rowStatus }}">
                                     <!-- Siswa -->
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-4">
@@ -245,6 +265,13 @@
 
                                     <td class="px-6 py-4 text-right whitespace-nowrap">
                                         @if($submission)
+                                            {{-- TOMBOL ANALISIS DETAIL KUIS --}}
+                                            @if($assignment->assignment_type == 'quiz')
+                                                <a href="{{ route('lms.submissions.detail', $submission->id) }}" class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 inline-flex items-center justify-center shadow-sm hover:bg-blue-600 hover:text-white transition-all active:scale-95 mr-1" title="Lihat Analisis Detail">
+                                                    <i class="ph-bold ph-chart-bar text-lg"></i>
+                                                </a>
+                                            @endif
+
                                             <button type="button" onclick="document.getElementById('form-grade-{{$submission->id}}').submit()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-elevate-primary inline-flex items-center justify-center shadow-sm hover:bg-elevate-soft hover:border-elevate-accent/50 transition-all active:scale-95" title="Simpan Individu">
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                             </button>
@@ -493,20 +520,24 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('tableSearch');
             const classFilter = document.getElementById('classFilter');
+            const statusFilter = document.getElementById('statusFilter'); // TAMBAHAN
             const tableRows = document.querySelectorAll('.student-row');
             
             function applyFilters() {
                 const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
                 const classVal = classFilter ? classFilter.value : '';
+                const statusVal = statusFilter ? statusFilter.value : ''; // TAMBAHAN
 
                 tableRows.forEach(row => {
                     const textContent = row.textContent.toLowerCase();
                     const rowClass = row.getAttribute('data-class');
+                    const rowStatus = row.getAttribute('data-status'); // TAMBAHAN
                     
                     const matchesSearch = textContent.includes(searchVal);
                     const matchesClass = classVal === '' || rowClass === classVal;
+                    const matchesStatus = statusVal === '' || rowStatus === statusVal; // TAMBAHAN
 
-                    if (matchesSearch && matchesClass) {
+                    if (matchesSearch && matchesClass && matchesStatus) {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
@@ -519,6 +550,9 @@
             }
             if (classFilter) {
                 classFilter.addEventListener('change', applyFilters);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', applyFilters); // TAMBAHAN
             }
         });
     </script>

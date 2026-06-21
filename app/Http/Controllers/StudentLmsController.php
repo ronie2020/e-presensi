@@ -210,7 +210,7 @@ class StudentLmsController extends Controller
     /**
      * Submit Kuis (Logika Lama Dipertahankan)
      */
-    public function submitQuiz(Request $request, $id)
+     public function submitQuiz(Request $request, $id)
     {
         $student = Auth::guard('student')->user();
         $assignment = LmsAssignment::with('questions')->findOrFail($id);
@@ -218,31 +218,73 @@ class StudentLmsController extends Controller
         $totalScore = 0;
         $maxScore = 0;
         
-        foreach ($assignment->questions as $question) {
-            $userAnswer = $request->input('answers.' . $question->id);
-            
-            if ($question->question_type == 'multiple_choice') {
-                if ($userAnswer == $question->correct_answer) {
-                    $totalScore += $question->points;
-                }
-                $maxScore += $question->points;
-            } else {
-                $maxScore += $question->points;
-            }
-        }
-
-        $finalGrade = ($maxScore > 0) ? round(($totalScore / $maxScore) * 100) : 0;
-
-        LmsSubmission::create([
+        // 1. Buat Submission (Draft awal)
+        $submission = LmsSubmission::create([
             'assignment_id' => $assignment->id,
             'student_id' => $student->id,
-            'grade' => $finalGrade,
+            'grade' => 0, // Set 0 dulu, akan diupdate nanti
             'submitted_at' => now(),
             'student_note' => 'Kuis Online (Auto-graded)',
             'teacher_feedback' => 'Nilai otomatis dari sistem.'
         ]);
 
+        // 2. Loop setiap pertanyaan dan simpan jawaban spesifiknya
+        foreach ($assignment->questions as $question) {
+            $userAnswer = $request->input('answers.' . $question->id);
+            $isCorrect = false;
+            $pointsEarned = 0;
+            
+            if ($question->question_type == 'multiple_choice') {
+                if ($userAnswer == $question->correct_answer) {
+                    $isCorrect = true;
+                    $pointsEarned = $question->points;
+                    $totalScore += $pointsEarned;
+                }
+                $maxScore += $question->points;
+            } else {
+                $maxScore += $question->points; // Esai ditambahkan ke maxScore tapi belum dapat points otomatis
+            }
+
+            // Simpan detail jawaban siswa ke tabel LmsSubmissionAnswer
+            \App\Models\LmsSubmissionAnswer::create([
+                'submission_id' => $submission->id,
+                'question_id' => $question->id,
+                'answer_text' => $userAnswer,
+                'points' => $pointsEarned,
+                'is_correct' => $isCorrect
+            ]);
+        }
+
+        // 3. Kalkulasi dan Update Nilai Akhir (Skala 100)
+        $finalGrade = ($maxScore > 0) ? round(($totalScore / $maxScore) * 100) : 0;
+        $submission->update(['grade' => $finalGrade]);
+
         return redirect()->route('students.learning.subject.show', $assignment->subject_id)
             ->with('success', 'Kuis selesai! Nilai Anda: ' . $finalGrade);
+    }
+
+    /**
+     * TAMBAHAN: Method untuk Melacak Durasi Belajar Siswa
+     */
+    public function logTime(Request $request)
+    {
+        $request->validate([
+            'material_id' => 'required|integer',
+            'time_spent' => 'required|integer', // dalam hitungan detik
+        ]);
+
+        $log = \App\Models\LmsMaterialLog::firstOrCreate(
+            [
+                'student_id' => Auth::guard('student')->id(), 
+                'material_id' => $request->material_id
+            ],
+            ['time_spent_seconds' => 0]
+        );
+
+        // Akumulasikan detik belajar
+        $log->time_spent_seconds += $request->time_spent;
+        $log->save();
+
+        return response()->json(['status' => 'success', 'logged_seconds' => $request->time_spent]);
     }
 }

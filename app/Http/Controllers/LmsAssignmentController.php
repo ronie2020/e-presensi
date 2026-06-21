@@ -323,6 +323,22 @@ class LmsAssignmentController extends Controller
         return view('lms.assignments.submissions', compact('assignment', 'submissions', 'allStudents'));
     }
 
+     /**
+     * TAMBAHAN: Melihat Detail Jawaban Kuis Siswa
+     */
+    public function showSubmissionDetail(LmsSubmission $submission)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $submission->assignment->teacher_id !== $user->id) {
+            abort(403);
+        }
+
+        // Load relasi ke tugas, siswa, dan jawaban detailnya
+        $submission->load(['assignment', 'student.schoolClass', 'answers.question']);
+
+        return view('lms.assignments.submission_detail', compact('submission'));
+    }
+
     public function grade(Request $request, LmsSubmission $submission)
     {
         $user = Auth::user();

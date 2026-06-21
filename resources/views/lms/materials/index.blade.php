@@ -202,32 +202,38 @@
                                     </p>
                                 </div>
 
-                                {{-- Footer Actions --}}
-                                <div class="pt-5 border-t border-slate-100 mt-auto flex items-center justify-between relative z-10">
-                                    <div class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
-                                        <i class="ph-fill ph-clock"></i> {{ $material->created_at->diffForHumans() }}
+                               {{-- Footer Actions --}}
+                                <div class="pt-5 border-t border-slate-100 mt-auto flex flex-wrap items-center justify-between gap-3 relative z-10">
+                                    <div class="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 truncate">
+                                        <i class="ph-fill ph-clock shrink-0"></i> 
+                                        <span class="truncate">{{ $material->created_at->diffForHumans() }}</span>
                                     </div>
                                     
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1.5 shrink-0">
                                         {{-- Tombol Buka --}}
-                                        <a href="{{ $finalUrl }}" target="{{ $targetAttr }}" class="w-12 h-12 rounded-2xl bg-elevate-dark text-white hover:bg-elevate-primary transition-all flex items-center justify-center active:scale-95 shadow-md shadow-elevate-dark/20" title="Buka / Download">
+                                        <a href="{{ $finalUrl }}" target="{{ $targetAttr }}" class="w-10 h-10 rounded-xl bg-elevate-dark text-white hover:bg-elevate-primary transition-all flex items-center justify-center active:scale-95 shadow-md shadow-elevate-dark/20 shrink-0" title="Buka / Download">
                                             @if($realType == 'video' || $realType == 'link')
-                                                <i class="ph-bold ph-arrow-square-out text-xl"></i>
+                                                <i class="ph-bold ph-arrow-square-out text-lg"></i>
                                             @else
-                                                <i class="ph-bold ph-download-simple text-xl"></i>
+                                                <i class="ph-bold ph-download-simple text-lg"></i>
                                             @endif
                                         </a>
 
-                                        {{-- Tombol Edit --}}
-                                        <a href="{{ route('lms.materials.edit', $material->id) }}" class="w-12 h-12 rounded-2xl bg-white text-[#D83B01] hover:bg-[#FFEFD6] transition-all flex items-center justify-center active:scale-95 border border-[#FFD8A8] shadow-sm" title="Edit Materi">
-                                            <i class="ph-bold ph-pencil-simple text-xl"></i>
+                                        {{-- Tombol Lihat Pembaca --}}
+                                        <a href="{{ route('lms.materials.readers', $material->id) }}" class="w-10 h-10 rounded-xl bg-white text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center active:scale-95 border border-blue-200 shadow-sm shrink-0" title="Riwayat Pembaca">
+                                            <i class="ph-bold ph-users text-lg"></i>
                                         </a>
 
+                                        {{-- Tombol Edit --}}
+                                        <a href="{{ route('lms.materials.edit', $material->id) }}" class="w-10 h-10 rounded-xl bg-white text-[#D83B01] hover:bg-[#FFEFD6] transition-all flex items-center justify-center active:scale-95 border border-[#FFD8A8] shadow-sm shrink-0" title="Edit Materi">
+                                            <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                        </a>
+                                        
                                         {{-- Tombol Hapus --}}
-                                        <form action="{{ route('lms.materials.destroy', $material->id) }}" method="POST" class="form-delete-material">
+                                        <form action="{{ route('lms.materials.destroy', $material->id) }}" method="POST" class="form-delete-material shrink-0 m-0">
                                             @csrf @method('DELETE')
-                                            <button type="button" class="btn-delete w-12 h-12 rounded-2xl bg-white text-[#D13438] hover:bg-[#FDE7E9] transition-all flex items-center justify-center active:scale-95 border border-[#F4C3C9] shadow-sm" title="Hapus Materi">
-                                                <i class="ph-bold ph-trash text-xl"></i>
+                                            <button type="button" class="btn-delete w-10 h-10 rounded-xl bg-white text-[#D13438] hover:bg-[#FDE7E9] transition-all flex items-center justify-center active:scale-95 border border-[#F4C3C9] shadow-sm" title="Hapus Materi">
+                                                <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
                                         </form>
                                     </div>

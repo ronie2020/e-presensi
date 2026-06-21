@@ -381,6 +381,10 @@
                 activeInteractiveQuiz: null,
                 selectedInteractiveAnswer: null,
 
+                //  State Pelacakan Waktu
+                timeSpent: 0,
+                lastLogTime: Date.now(),
+
                 get groupedSyllabus() {
                     let groups = [];
                     let currentGroup = null;
@@ -413,7 +417,7 @@
                     return ytMatch ? ytMatch[1] : null;
                 },
                 
-                initPlayer() {
+                 initPlayer() {
                     if(this.syllabus.length === 0) return;
                     let target = this.syllabus.find(item => !item.completed && !item.locked);
                     this.activeItem = target || this.syllabus[0];
@@ -421,6 +425,14 @@
                     if (this.activeItem.type === 'assignment' && this.activeItem.assignment_type === 'interactive_video') {
                         setTimeout(() => this.initInteractiveVideo(this.activeItem), 500);
                     }
+
+                    // TAMBAHAN: Mulai pelacakan waktu
+                    this.lastLogTime = Date.now();
+                    
+                    // Event ketika browser ditutup / refresh agar waktu terakhir tetap terkirim
+                    window.addEventListener('beforeunload', () => {
+                        this.sendLogTime(true);
+                    });
                 },
 
                 get currentIndex() { return this.syllabus.findIndex(item => item.id === this.activeItem.id); },
@@ -470,6 +482,9 @@
                     if (this.currentIndex + 1 < this.syllabus.length) {
                         this.changeContent(this.syllabus[this.currentIndex + 1]);
                     } else {
+                        // Jika selesai, kirim durasi materi terakhir dulu
+                        this.sendLogTime();
+
                         Swal.fire({
                             icon: 'success', 
                             title: 'Selesai!',
@@ -483,6 +498,10 @@
                 },
 
                 changeContent(newItem) {
+                    // Kirim rekapan waktu item yang lama ke server sebelum pindah
+                    if (this.activeItem && this.activeItem.id !== newItem.id) {
+                        this.sendLogTime();
+                    }
                     this.isTransitioning = true;
                     
                     // Cleanup Video Player
@@ -504,6 +523,45 @@
                             this.initInteractiveVideo(newItem);
                         }
                     }, 300);
+                },
+
+                 // Fungsi Mengirim Waktu ke Server
+                sendLogTime(isUnloading = false) {
+                    @if(!isset($isPreview))
+                    if (!this.activeItem || this.activeItem.type === 'assignment') return;
+
+                    // Hitung durasi (detik) sejak log terakhir
+                    this.timeSpent = Math.floor((Date.now() - this.lastLogTime) / 1000);
+                    
+                    // Jangan kirim jika terlalu cepat (misal kurang dari 3 detik)
+                    if (this.timeSpent < 3) {
+                        this.lastLogTime = Date.now();
+                        return;
+                    }
+
+                    const materialId = this.activeItem.db_id;
+                    const timeSpent = this.timeSpent;
+
+                    if (isUnloading && navigator.sendBeacon) {
+                        // Gunakan sendBeacon karena ini dipicu saat tab browser ditutup
+                        let formData = new FormData();
+                        formData.append('material_id', materialId);
+                        formData.append('time_spent', timeSpent);
+                        formData.append('_token', '{{ csrf_token() }}');
+                        navigator.sendBeacon('{{ route("students.learning.log-time") }}', formData);
+                    } else {
+                        // Gunakan fetch biasa jika sekadar pindah materi
+                        fetch('{{ route("students.learning.log-time") }}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                            body: JSON.stringify({ material_id: materialId, time_spent: timeSpent })
+                        }).catch(err => console.error('Gagal log waktu:', err));
+                    }
+
+                    // Reset Timer untuk materi selanjutnya
+                    this.lastLogTime = Date.now();
+                    this.timeSpent = 0;
+                    @endif
                 },
 
                 // -------------------------------------------------------------

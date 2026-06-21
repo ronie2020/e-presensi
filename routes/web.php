@@ -258,6 +258,7 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
        
         // Route AJAX untuk auto-save / menandai materi selesai dibaca
         Route::post('/mark-material', [\App\Http\Controllers\StudentLearningController::class, 'markMaterialComplete'])->name('mark-material');
+        Route::post('/log-time', [StudentLmsController::class, 'logTime'])->name('log-time'); // <--- TAMBAHAN ROUTE LOG WAKTU
     });
 
     // B. UJIAN SISWA (CBT)    
@@ -317,6 +318,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/preview-player/{subject}/{class}', [\App\Http\Controllers\LmsMaterialController::class, 'previewPlayer'])->name('preview.player');
 
         Route::resource('materials', LmsMaterialController::class);
+        // Route untuk melihat log pembaca materi
+        Route::get('/materials/{material}/readers', [\App\Http\Controllers\LmsMaterialController::class, 'readers'])->name('materials.readers');
         Route::resource('assignments', LmsAssignmentController::class);
          // --- ROUTE BARU: PREVIEW MODE GURU ---
         Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');      

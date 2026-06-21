@@ -319,6 +319,35 @@ class LmsMaterialController extends Controller
         return back()->with('error', 'File tidak ditemukan.');
     }
 
+    /**
+     * TAMBAHAN: Melihat Riwayat & Durasi Baca Siswa
+     */
+    public function readers($id)
+    {
+        $material = LmsMaterial::findOrFail($id);
+        
+        if (Auth::user()->role !== 'admin' && $material->teacher_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Cari materi yang sama (bulk siblings) jika dikirim ke banyak kelas
+        $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
+            ->where('title', $material->title)
+            ->where('created_at', $material->created_at)
+            ->pluck('id');
+
+        // Ambil log membaca
+        $logs = \App\Models\LmsMaterialLog::with('student.schoolClass')
+            ->whereIn('material_id', $siblings)
+            ->get()
+            ->sortBy(function($log) {
+                // Urutkan berdasarkan kelas lalu nama siswa
+                return $log->student->schoolClass->name . $log->student->name;
+            });
+
+        return view('lms.materials.readers', compact('material', 'logs'));
+    }
+
   /**
      * TAMPILAN PREVIEW UNTUK GURU
      */

@@ -150,7 +150,7 @@
                                     </div>
                                 </div>
 
-                                {{-- Statistik Pengumpulan --}}
+                               {{-- Statistik Pengumpulan --}}
                                 <div class="mb-6 relative z-10">
                                     <div class="flex justify-between text-xs font-bold text-slate-500 mb-2">
                                         <span>Total Pengumpulan</span>
@@ -162,8 +162,7 @@
                                 </div>
 
                                 {{-- Footer Actions --}}
-                                <div class="pt-5 border-t border-slate-100 mt-auto flex items-center justify-between gap-2 relative z-10">
-                                    
+                                <div class="pt-5 border-t border-slate-100 mt-auto flex flex-wrap items-center justify-between gap-2 relative z-10">
                                     {{-- Tombol Periksa (Utama) --}}
                                     <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-elevate-dark hover:bg-elevate-primary text-white px-3 py-3 rounded-2xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn border border-transparent active:scale-95" title="Periksa Jawaban Siswa">
                                         <i class="ph-bold ph-list-checks text-lg text-elevate-accent"></i>
@@ -181,7 +180,7 @@
                                     </a>
 
                                     {{-- Tombol Hapus (Merah) --}}
-                                    <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task shrink-0">
+                                    <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task shrink-0 m-0">
                                         @csrf @method('DELETE')
                                         <button type="button" class="btn-delete w-12 h-12 rounded-2xl bg-white border border-[#F4C3C9] text-[#D13438] hover:bg-[#FDE7E9] transition-all flex items-center justify-center shadow-sm active:scale-95" title="Hapus Latihan">
                                             <i class="ph-bold ph-trash text-xl"></i>
