@@ -296,12 +296,12 @@
         <div x-show="showReviewModal" style="display: none;" 
              class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true">
              
-             {{-- PERBAIKAN 1: Gunakan Flexbox Center alih-alih items-end / inline-block --}}
-             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+             {{-- PERBAIKAN FINAL: Gunakan padding konstan dan hapus text-center / sm:p-0 --}}
+             <div class="flex items-center justify-center min-h-screen p-4 md:p-8">
                 <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
 
-                {{-- PERBAIKAN 2: Tambahkan flex flex-col dan max-h-[90vh] agar modal menyesuaikan layar --}}
-                <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-3xl w-full border border-slate-100 flex flex-col max-h-[90vh]">
+                {{-- Hapus sm:my-8 agar tinggi maksimal 90vh tidak bertabrakan dengan margin --}}
+                <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-3xl w-full border border-slate-100 flex flex-col max-h-[90vh] md:max-h-[85vh]">
                     
                     {{-- Header Modal (Dibuat shrink-0 agar tidak menyusut) --}}
                     <div class="bg-elevate-peach-light/30 px-6 py-5 border-b border-elevate-peach/30 flex justify-between items-center shrink-0">
