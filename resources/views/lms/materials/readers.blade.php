@@ -63,11 +63,19 @@
                                         @endphp
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="font-bold text-gray-900">{{ $log->student->name }}</div>
-                                                <div class="text-xs text-gray-500">NIS: {{ $log->student->nis }}</div>
+                                                {{-- PERBAIKAN: Handle jika data siswa terhapus/null --}}
+                                                <div class="font-bold text-gray-900">{{ $log->student->name ?? 'Siswa (Telah Lulus/Dihapus)' }}</div>
+                                                <div class="text-xs text-gray-500">NIS: {{ $log->student->nis ?? '-' }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
-                                                {{ $log->student->schoolClass->name ?? '-' }}
+                                                {{-- PERBAIKAN: Tampilkan Badge Alumni jika tidak punya kelas --}}
+                                                @if(isset($log->student) && $log->student->schoolClass)
+                                                    {{ $log->student->schoolClass->name }}
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wider">
+                                                        <i class="ph-bold ph-graduation-cap text-sm"></i> Alumni / Lulus
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold border {{ $color }}">

@@ -307,7 +307,7 @@ class LmsMaterialController extends Controller
     /**
      * Download Helper (Opsional, jika tombol download spesifik dibutuhkan)
      */
-    public function download($id)
+     public function download($id)
     {
         $material = LmsMaterial::with('attachments')->findOrFail($id);
         $attachment = $material->attachments->where('file_type', 'file')->first();
@@ -318,31 +318,38 @@ class LmsMaterialController extends Controller
 
         return back()->with('error', 'File tidak ditemukan.');
     }
+  
 
     /**
      * TAMBAHAN: Melihat Riwayat & Durasi Baca Siswa
      */
     public function readers($id)
     {
-        $material = LmsMaterial::findOrFail($id);
-        
-        if (Auth::user()->role !== 'admin' && $material->teacher_id !== Auth::id()) {
+        $user = Auth::user();
+        $material = LmsMaterial::with('subject')->findOrFail($id);
+
+        if ($user->role !== 'admin' && $material->teacher_id !== $user->id) {
             abort(403);
         }
 
-        // Cari materi yang sama (bulk siblings) jika dikirim ke banyak kelas
+        // 1. Cari semua materi kembaran (siblings) jika ini adalah bulk upload
         $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
             ->pluck('id');
 
-        // Ambil log membaca
+        // 2. Ambil data log pembaca dari semua materi kembaran
         $logs = \App\Models\LmsMaterialLog::with('student.schoolClass')
             ->whereIn('material_id', $siblings)
             ->get()
             ->sortBy(function($log) {
+                // PERBAIKAN: Gunakan null-safe operator (?->) dan null coalescing (??)
+                // Jika schoolClass null, anggap namanya string kosong agar tidak error
+                $className = $log->student?->schoolClass?->name ?? '';
+                $studentName = $log->student?->name ?? '';
+                
                 // Urutkan berdasarkan kelas lalu nama siswa
-                return $log->student->schoolClass->name . $log->student->name;
+                return $className . '-' . $studentName;
             });
 
         return view('lms.materials.readers', compact('material', 'logs'));
