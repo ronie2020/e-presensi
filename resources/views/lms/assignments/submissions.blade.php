@@ -292,101 +292,116 @@
             </div>
         </div>
 
-        {{-- MODAL REVIEW JAWABAN (ELEVATE THEME) --}}
-        <div x-show="showReviewModal" style="display: none;" 
-             class="fixed inset-0 z-[999] w-screen overflow-y-auto" role="dialog" aria-modal="true">
-             
-             {{-- 1. BACKDROP: Dikeluarkan dari dalam flex container agar tidak memutus kalkulasi tinggi flexbox --}}
-             <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
+        {{-- MODAL REVIEW JAWABAN MENGGUNAKAN X-TELEPORT --}}
+        <template x-teleport="body">
+            <div x-show="showReviewModal" style="display: none;" class="relative z-[9999]" role="dialog" aria-modal="true">
+                
+                {{-- 1. BACKDROP --}}
+                <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" 
+                     x-show="showReviewModal"
+                     x-transition.opacity.duration.300ms
+                     @click="showReviewModal = false"></div>
 
-             {{-- 2. WRAPPER: Mengubah min-h-screen menjadi min-h-full. Ini adalah solusi standar Tailwind UI agar modal selalu di tengah. --}}
-             <div class="flex min-h-full items-center justify-center p-4 md:p-8">
-
-                {{-- Hapus sm:my-8 agar tinggi maksimal 90vh tidak bertabrakan dengan margin --}}
-                <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-3xl w-full border border-slate-100 flex flex-col max-h-[90vh] md:max-h-[85vh]">
-                    
-                    {{-- Header Modal (Dibuat shrink-0 agar tidak menyusut) --}}
-                    <div class="bg-elevate-peach-light/30 px-6 py-5 border-b border-elevate-peach/30 flex justify-between items-center shrink-0">
-                        <div>
-                            <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
-                                <i class="ph-bold ph-check-square-offset text-elevate-peach-dark"></i> Koreksi Jawaban
-                            </h3>
-                            <p class="text-xs text-elevate-dark/70 font-bold mt-1" x-text="'Siswa: ' + (activeReview ? activeReview.student_name : '-')"></p>
-                        </div>
-                        <button @click="showReviewModal = false" class="bg-white border border-slate-200 rounded-full p-2 text-slate-400 hover:text-elevate-dark hover:bg-elevate-soft transition-colors shadow-sm active:scale-95">
-                            <i class="ph-bold ph-x text-lg"></i>
-                        </button>
-                    </div>
-
-                    {{-- Isi Jawaban (Dibuat flex-1 agar mengisi ruang tengah dan bisa di-scroll) --}}
-                    <div class="px-6 py-6 overflow-y-auto bg-white space-y-6 custom-scrollbar flex-1">
-                        <template x-if="activeReview && activeReview.answers.length > 0">
-                            <template x-for="(ans, index) in activeReview.answers" :key="index">
-                                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-elevate-accent/30 transition-all">
-                                    <div class="flex gap-4 mb-4">
-                                        <span class="bg-elevate-soft text-elevate-primary w-8 h-8 flex items-center justify-center rounded-xl font-black text-sm shrink-0 border border-slate-100" x-text="index + 1"></span>
-                                        <p class="text-sm font-bold text-elevate-dark pt-1.5" x-text="ans.question_text"></p>
-                                    </div>
-                                    <div class="pl-12 space-y-3">
-                                        <div class="bg-elevate-surface p-4 rounded-xl border border-slate-100">
-                                            <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-1.5">Jawaban Siswa</p>
-                                            <p class="text-sm text-elevate-dark font-medium whitespace-pre-line leading-relaxed" x-text="ans.student_answer ? ans.student_answer : '(Kosong)'"></p>
-                                        </div>
-
-                                        {{-- JIKA ESSAI (Input Manual Guru) --}}
-                                        <template x-if="ans.type === 'essay'">
-                                            <div class="p-4 bg-[#FFEFD6] rounded-xl border border-[#FFD8A8] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                                <div>
-                                                    <p class="text-[10px] font-bold text-[#D83B01] uppercase tracking-wider mb-1"><i class="ph-bold ph-pencil-simple"></i> Koreksi Manual</p>
-                                                    <p class="text-xs text-[#D83B01]/80 font-bold">Baca jawaban, lalu input poin yang sesuai.</p>
-                                                </div>
-                                                <div class="flex items-center gap-3">
-                                                    <span class="text-xs font-black text-[#D83B01] uppercase">Poin:</span>
-                                                    <input type="number" x-model.number="ans.score" min="0" :max="ans.max_points"
-                                                           class="w-20 text-center rounded-xl border-[#FFD8A8] focus:ring-[#D83B01] focus:border-[#D83B01] bg-white text-base font-black text-[#D83B01] shadow-sm py-2">
-                                                    <span class="text-sm font-black text-[#D83B01]/60">/ <span x-text="ans.max_points"></span></span>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
+                {{-- 2. WRAPPER SCROLL VERTICAL & FLEX CENTERING --}}
+                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                    {{-- min-h-full sangat krusial di sini bersama p-4 --}}
+                    <div class="flex min-h-full items-center justify-center p-4 md:p-8">
+                        
+                        {{-- 3. MODAL PANEL (Dengan animasi transisi scale) --}}
+                        <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all w-full sm:max-w-3xl border border-slate-100 flex flex-col max-h-[90vh] md:max-h-[85vh]"
+                             x-show="showReviewModal"
+                             x-transition:enter="ease-out duration-300"
+                             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave="ease-in duration-200"
+                             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                             @click.stop>
+                            
+                            {{-- Header Modal (Dibuat shrink-0 agar tidak menyusut) --}}
+                            <div class="bg-elevate-peach-light/30 px-6 py-5 border-b border-elevate-peach/30 flex justify-between items-center shrink-0">
+                                <div>
+                                    <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
+                                        <i class="ph-bold ph-check-square-offset text-elevate-peach-dark"></i> Koreksi Jawaban
+                                    </h3>
+                                    <p class="text-xs text-elevate-dark/70 font-bold mt-1" x-text="'Siswa: ' + (activeReview ? activeReview.student_name : '-')"></p>
                                 </div>
-                            </template>
-                        </template>
-
-                        {{-- JIKA DATA KOSONG --}}
-                        <template x-if="!activeReview || activeReview.answers.length === 0">
-                            <div class="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-200 rounded-[2rem]">
-                                <div class="w-20 h-20 bg-[#FDE7E9] text-[#D13438] rounded-full flex items-center justify-center mb-4 text-4xl shadow-sm">
-                                    <i class="ph-duotone ph-warning-circle"></i>
-                                </div>
-                                <h4 class="font-black text-xl text-elevate-dark">Data Jawaban Kosong</h4>
-                                <p class="text-sm text-slate-500 max-w-sm mx-auto mt-2 font-medium leading-relaxed">Siswa ini melakukan submit sebelum sistem diperbarui, atau terjadi kesalahan database. Harap hapus submission ini dan minta siswa mengerjakan ulang.</p>
-                            </div>
-                        </template>
-                    </div>
-
-                    {{-- Footer Kalkulator (Dibuat shrink-0 agar selalu menempel di bawah) --}}
-                    <div class="bg-elevate-soft/50 px-6 py-5 border-t border-slate-100 shrink-0" x-show="activeReview && activeReview.answers.length > 0">
-                        <div class="flex flex-col sm:flex-row justify-between items-center gap-5">
-                            <div class="text-elevate-dark/60 text-xs font-bold flex items-center gap-2">
-                                <i class="ph-fill ph-info text-elevate-primary text-lg"></i> 
-                                <span>Poin dihitung otomatis dari <br class="sm:hidden">(PG + Input Esai).</span>
-                            </div>
-                            <div class="flex items-center gap-5 w-full sm:w-auto">
-                                <div class="text-right">
-                                    <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Total Nilai</p>
-                                    <p class="text-3xl font-black text-elevate-dark" x-text="calculateTotal()"></p>
-                                </div>
-                                <button type="button" @click="applyToTable()"
-                                        class="flex-1 sm:flex-none px-6 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 active:scale-95 border border-transparent">
-                                    <i class="ph-bold ph-check-circle text-lg"></i> Terapkan Nilai
+                                <button @click="showReviewModal = false" class="bg-white border border-slate-200 rounded-full p-2 text-slate-400 hover:text-elevate-dark hover:bg-elevate-soft transition-colors shadow-sm active:scale-95">
+                                    <i class="ph-bold ph-x text-lg"></i>
                                 </button>
+                            </div>
+
+                            {{-- Isi Jawaban (Dibuat flex-1 agar mengisi ruang tengah dan bisa di-scroll) --}}
+                            <div class="px-6 py-6 overflow-y-auto bg-white space-y-6 custom-scrollbar flex-1">
+                                <template x-if="activeReview && activeReview.answers.length > 0">
+                                    <template x-for="(ans, index) in activeReview.answers" :key="index">
+                                        <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-elevate-accent/30 transition-all">
+                                            <div class="flex gap-4 mb-4">
+                                                <span class="bg-elevate-soft text-elevate-primary w-8 h-8 flex items-center justify-center rounded-xl font-black text-sm shrink-0 border border-slate-100" x-text="index + 1"></span>
+                                                <p class="text-sm font-bold text-elevate-dark pt-1.5" x-text="ans.question_text"></p>
+                                            </div>
+                                            <div class="pl-12 space-y-3">
+                                                <div class="bg-elevate-surface p-4 rounded-xl border border-slate-100">
+                                                    <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-1.5">Jawaban Siswa</p>
+                                                    <p class="text-sm text-elevate-dark font-medium whitespace-pre-line leading-relaxed" x-text="ans.student_answer ? ans.student_answer : '(Kosong)'"></p>
+                                                </div>
+
+                                                {{-- JIKA ESSAI (Input Manual Guru) --}}
+                                                <template x-if="ans.type === 'essay'">
+                                                    <div class="p-4 bg-[#FFEFD6] rounded-xl border border-[#FFD8A8] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                        <div>
+                                                            <p class="text-[10px] font-bold text-[#D83B01] uppercase tracking-wider mb-1"><i class="ph-bold ph-pencil-simple"></i> Koreksi Manual</p>
+                                                            <p class="text-xs text-[#D83B01]/80 font-bold">Baca jawaban, lalu input poin yang sesuai.</p>
+                                                        </div>
+                                                        <div class="flex items-center gap-3">
+                                                            <span class="text-xs font-black text-[#D83B01] uppercase">Poin:</span>
+                                                            <input type="number" x-model.number="ans.score" min="0" :max="ans.max_points"
+                                                                   class="w-20 text-center rounded-xl border-[#FFD8A8] focus:ring-[#D83B01] focus:border-[#D83B01] bg-white text-base font-black text-[#D83B01] shadow-sm py-2">
+                                                            <span class="text-sm font-black text-[#D83B01]/60">/ <span x-text="ans.max_points"></span></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                {{-- JIKA DATA KOSONG --}}
+                                <template x-if="!activeReview || activeReview.answers.length === 0">
+                                    <div class="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-200 rounded-[2rem]">
+                                        <div class="w-20 h-20 bg-[#FDE7E9] text-[#D13438] rounded-full flex items-center justify-center mb-4 text-4xl shadow-sm">
+                                            <i class="ph-duotone ph-warning-circle"></i>
+                                        </div>
+                                        <h4 class="font-black text-xl text-elevate-dark">Data Jawaban Kosong</h4>
+                                        <p class="text-sm text-slate-500 max-w-sm mx-auto mt-2 font-medium leading-relaxed">Siswa ini melakukan submit sebelum sistem diperbarui, atau terjadi kesalahan database. Harap hapus submission ini dan minta siswa mengerjakan ulang.</p>
+                                    </div>
+                                </template>
+                            </div>
+
+                            {{-- Footer Kalkulator (Dibuat shrink-0 agar selalu menempel di bawah) --}}
+                            <div class="bg-elevate-soft/50 px-6 py-5 border-t border-slate-100 shrink-0" x-show="activeReview && activeReview.answers.length > 0">
+                                <div class="flex flex-col sm:flex-row justify-between items-center gap-5">
+                                    <div class="text-elevate-dark/60 text-xs font-bold flex items-center gap-2">
+                                        <i class="ph-fill ph-info text-elevate-primary text-lg"></i> 
+                                        <span>Poin dihitung otomatis dari <br class="sm:hidden">(PG + Input Esai).</span>
+                                    </div>
+                                    <div class="flex items-center gap-5 w-full sm:w-auto">
+                                        <div class="text-right">
+                                            <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Total Nilai</p>
+                                            <p class="text-3xl font-black text-elevate-dark" x-text="calculateTotal()"></p>
+                                        </div>
+                                        <button type="button" @click="applyToTable()"
+                                                class="flex-1 sm:flex-none px-6 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 active:scale-95 border border-transparent">
+                                            <i class="ph-bold ph-check-circle text-lg"></i> Terapkan Nilai
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
