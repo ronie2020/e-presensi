@@ -294,11 +294,13 @@
 
         {{-- MODAL REVIEW JAWABAN (ELEVATE THEME) --}}
         <div x-show="showReviewModal" style="display: none;" 
-             class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true">
+             class="fixed inset-0 z-[999] w-screen overflow-y-auto" role="dialog" aria-modal="true">
              
-             {{-- PERBAIKAN FINAL: Gunakan padding konstan dan hapus text-center / sm:p-0 --}}
-             <div class="flex items-center justify-center min-h-screen p-4 md:p-8">
-                <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
+             {{-- 1. BACKDROP: Dikeluarkan dari dalam flex container agar tidak memutus kalkulasi tinggi flexbox --}}
+             <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
+
+             {{-- 2. WRAPPER: Mengubah min-h-screen menjadi min-h-full. Ini adalah solusi standar Tailwind UI agar modal selalu di tengah. --}}
+             <div class="flex min-h-full items-center justify-center p-4 md:p-8">
 
                 {{-- Hapus sm:my-8 agar tinggi maksimal 90vh tidak bertabrakan dengan margin --}}
                 <div class="relative bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:max-w-3xl w-full border border-slate-100 flex flex-col max-h-[90vh] md:max-h-[85vh]">
