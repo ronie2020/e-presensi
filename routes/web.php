@@ -322,8 +322,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/materials/{material}/readers', [\App\Http\Controllers\LmsMaterialController::class, 'readers'])->name('materials.readers');
         Route::resource('assignments', LmsAssignmentController::class);
          // --- ROUTE BARU: PREVIEW MODE GURU ---
-        Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');      
+        Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');  
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
+         // ---> submission detail <---
+        Route::get('/submissions/{submission}/detail', [LmsAssignmentController::class, 'showSubmissionDetail'])->name('submissions.detail');
+
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
         Route::delete('/submissions/{id}', [LmsAssignmentController::class, 'destroySubmission'])->name('submissions.destroy');
         
