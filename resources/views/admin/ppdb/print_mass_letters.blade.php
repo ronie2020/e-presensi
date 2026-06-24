@@ -253,9 +253,14 @@
                     <p>Ditetapkan di : Lakbok</p>
                     <p class="mb-4">Pada tanggal &nbsp;: {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
                     
-                    <p class="font-bold">Kepala Sekolah,</p>
-                    
-                    <div style="height: 55px;"></div>
+                    <p class="font-bold">Kepala Sekolah,</p>                    
+                     
+                    <div style="height: 60px; position: relative;"> 
+                        <img src="{{ asset('img/ttd_stempel.jpg') }}" 
+                        alt="Tanda Tangan dan Stempel" 
+                        style="height: 120px; position: absolute; top: -30px; left: -75px; mix-blend-mode: multiply;" 
+                        onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/e/e0/Placeholder_Signature.png'; this.style.filter='hue-rotate(200deg)'; this.style.left='0px';">
+                    </div>
                     
                     <p class="font-bold underline whitespace-nowrap">TANTAN SUTANDI NUGRAHA,S.Si,M.Pd.</p>
                     <p>NIP. 19820928 201101 1 002</p>
