@@ -726,6 +726,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/store-class', [ReportController::class, 'storeClassAttendance'])->name('reports.storeClass');
 
    // Route Admin PPDB
+    // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
@@ -737,6 +738,8 @@ Route::middleware('auth')->group(function () {
         // --- TAMBAHAN CETAK & EXCEL KELAS ---
         Route::get('/reports/print-class-distribution', [AdminPpdbController::class, 'printClassDistribution'])->name('print.class_distribution');
         Route::get('/reports/export-class-distribution', [AdminPpdbController::class, 'exportClassDistributionExcel'])->name('export.class_distribution');
+               
+        Route::get('/print-mpls', [AdminPpdbController::class, 'printMplsCards'])->name('print_mpls');
         
         // Aksi Massal & Pengaturan
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');

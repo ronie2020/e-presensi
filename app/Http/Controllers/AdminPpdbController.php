@@ -634,4 +634,31 @@ class AdminPpdbController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Cetak Kartu MPLS Massal (Untuk Siswa Baru yang sudah dipromote)
+     */
+    public function printMplsCards(Request $request)
+    {
+        $year = $request->input('year', date('Y'));
+
+        // Mengambil data dari tabel students yang berelasi dengan ppdb_registrants melalui NISN
+        // Filter khusus untuk siswa kelas 7 (Siswa Baru)
+        $students = \App\Models\Student::with('schoolClass')
+            ->join('ppdb_registrants', 'students.nisn', '=', 'ppdb_registrants.nisn')
+            ->select('students.*', 'ppdb_registrants.registration_number')
+            ->where('ppdb_registrants.academic_year', $year)
+            ->whereHas('schoolClass', function($query) {
+                $query->where('name', 'like', '7%'); // Asumsi nama kelas dimulai dengan angka 7 (7A, 7B, dll)
+            })
+            ->orderBy('students.class_id')
+            ->orderBy('students.name')
+            ->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('error', 'Belum ada data siswa baru yang dipetakan ke kelas untuk dicetak kartu MPLS-nya.');
+        }
+
+        return view('admin.ppdb.mpls_card_batch', compact('students', 'year'));
+    }
 }

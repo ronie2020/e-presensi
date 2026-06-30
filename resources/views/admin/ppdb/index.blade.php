@@ -164,6 +164,7 @@
                 
                 {{-- Fitur Aksi Massal & Pencarian --}}
                 <div class="flex flex-col md:flex-row flex-wrap items-center gap-2 w-full xl:w-auto">
+
                     
                     {{-- Dropdown Aksi Massal (Berlaku Semua Tab) --}}
                     <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 w-full sm:w-auto">
@@ -180,6 +181,10 @@
                             Terapkan
                         </button>
                     </div>
+                    
+                    <a href="{{ route('admin.ppdb.print_mpls', ['year' => request('year')]) }}" target="_blank" class="px-5 py-2.5 bg-sky-600 text-white rounded-xl font-bold text-xs hover:bg-sky-700 transition flex items-center justify-center gap-2 shadow-sm border border-sky-700 w-full md:w-auto">
+                        <i class="ph-bold ph-identification-card text-base"></i> Cetak Kartu MPLS
+                    </a>
 
                     {{-- Tombol-Tombol Khusus Tab "Diterima" --}}
                     @if(request('status') == 'accepted')
