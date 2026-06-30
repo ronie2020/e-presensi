@@ -77,12 +77,14 @@
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                     <div class="space-y-3 w-full">
-                        <div class="flex flex-wrap items-center gap-2">
+                         <div class="flex flex-wrap items-center gap-2">
                             <span class="bg-elevate-dark shadow-sm text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border border-transparent">
-                                {{ $session->schoolClass->name ?? 'Kelas' }}
+                                <!-- Ganti $session->schoolClass menjadi: -->
+                                {{ $session->timetable->studentClass->name ?? 'Kelas' }}
                             </span>
                             <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                <i class="ph-bold ph-clock"></i> {{ $session->started_at->format('H:i') }}
+                                <!-- Ganti $session->started_at menjadi mengambil dari slot waktu -->
+                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time)->format('H:i') }}
                             </span>
 
                             @if(!$isOpen)
@@ -95,8 +97,9 @@
                                 </span>
                             @endif
                         </div>
-                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-elevate-dark break-words">
-                            {{ $session->subject->name ?? 'Mata Pelajaran' }}
+                         <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-elevate-dark break-words">
+                            <!-- Ganti $session->subject menjadi: -->
+                            {{ $session->timetable->subject->name ?? 'Mata Pelajaran' }}
                         </h1>
                     </div>
                     

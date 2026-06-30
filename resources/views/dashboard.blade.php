@@ -450,6 +450,13 @@
                 </div>
             </div>
         </div>
+        
+        {{-- WIDGET JADWAL MENGAJAR GURU --}}
+        @if(Auth::user()->hasRole(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas']))
+            <div class="animate-enter no-print" style="animation-delay: 750ms">
+                @include('timetable.widget_guru')
+            </div>
+        @endif
 
         {{-- TABLES SECTION --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 page-break-inside-avoid">

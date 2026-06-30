@@ -107,15 +107,16 @@
                         {{-- KANAN: Detail Mengajar --}}
                         <div class="p-6 md:p-8 flex-1 flex flex-col justify-between">
                             <div>
-                                <div class="flex flex-wrap items-center gap-2 mb-4">
+                                 <div class="flex flex-wrap items-center gap-2 mb-4">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
-                                        <i class="ph-bold ph-book-open"></i> {{ $history->subject->name ?? 'Mata Pelajaran' }}
+                                        <!-- Ganti $history->subject menjadi: -->
+                                        <i class="ph-bold ph-book-open"></i> {{ $history->timetable->subject->name ?? 'Mata Pelajaran' }}
                                     </span>
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-elevate-soft text-elevate-primary border border-slate-200">
-                                        <i class="ph-bold ph-users-three"></i> Kelas {{ $history->schoolClass->name ?? '-' }}
+                                        <!-- Ganti $history->schoolClass menjadi: -->
+                                        <i class="ph-bold ph-users-three"></i> Kelas {{ $history->timetable->studentClass->name ?? '-' }}
                                     </span>
-                                </div>
-                                
+                                </div>                                
                                 <h3 class="text-xl sm:text-2xl font-black text-elevate-dark leading-tight mb-2 group-hover:text-elevate-primary transition-colors">
                                     {{ $history->topic ?? 'Tidak Ada Topik' }}
                                 </h3>

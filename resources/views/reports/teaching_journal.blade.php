@@ -95,10 +95,14 @@
                                     </td>
                                     <td class="px-6 py-5 align-top">
                                         <div class="font-black text-elevate-dark text-base">{{ $session->teacher->name ?? '-' }}</div>
-                                        <div class="text-xs font-bold text-elevate-primary mt-1 flex items-center gap-1.5"><i class="ph-bold ph-book-open"></i> {{ $session->schedule->subject->name ?? '-' }}</div>
+                                        <div class="text-xs font-bold text-elevate-primary mt-1 flex items-center gap-1.5">
+                                            <i class="ph-bold ph-book-open"></i> {{ $session->timetable->subject->name ?? '-' }}
+                                        </div>
                                     </td>
                                     <td class="px-6 py-5 text-center align-top">
-                                        <span class="inline-block px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-xs bg-white text-slate-600 shadow-sm">{{ $session->schedule->schoolClass->name ?? '-' }}</span>
+                                        <span class="inline-block px-3 py-1.5 rounded-lg border border-slate-200 font-bold text-xs bg-white text-slate-600 shadow-sm">
+                                            {{ $session->timetable->studentClass->name ?? '-' }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-5 align-top">
                                         <p class="font-black text-elevate-dark mb-1.5">{{ $session->topic ?? 'Tanpa Topik' }}</p>

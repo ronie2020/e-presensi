@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeachingSession;
-use App\Models\Schedule;
+use App\Models\Timetable; // <-- DIUBAH DARI SCHEDULE KE TIMETABLE
 use App\Models\Student;
 use App\Models\ClassAttendance;
 use App\Models\DisciplineRecord; 
@@ -17,31 +17,31 @@ use Carbon\Carbon;
 class TeachingController extends Controller
 {
     /**
-     * DASHBOARD JADWAL
-     * Optimasi: Menggunakan Eager Loading 'todaySession'
+     * DASHBOARD JADWAL MENGAJAR HARI INI
      */
     public function index()
     {
         $teacherId = Auth::id();
-        
         Carbon::setLocale('id');
-        $todayName = Carbon::now()->translatedFormat('l'); 
+        $todayName = Carbon::now('Asia/Jakarta')->translatedFormat('l'); 
 
-        // Load 'todaySession' agar tidak query database di dalam loop Blade
-        $schedules = Schedule::with(['schoolClass', 'subject', 'todaySession'])
+        // MENGAMBIL DATA DARI MESIN GENERATOR (TIMETABLE)
+        $schedules = Timetable::with(['studentClass', 'subject', 'timeslot', 'todaySession'])
                     ->where('teacher_id', $teacherId)
-                    ->where('day', $todayName)
-                    ->orderBy('start_time', 'asc')
-                    ->get();
+                    ->where('day_of_week', $todayName)
+                    ->get()
+                    ->sortBy(function($jadwal) {
+                        return $jadwal->timeslot->order_sequence ?? 0;
+                    });
 
         return view('teaching.index', compact('schedules'));
     }
 
     // --- MULAI KELAS ---
-    public function start($schedule_id)
+    public function start($timetable_id)
     {
-        $existingSession = TeachingSession::where('schedule_id', $schedule_id)
-                            ->whereDate('date', Carbon::today())
+        $existingSession = TeachingSession::where('schedule_id', $timetable_id)
+                            ->whereDate('date', Carbon::today('Asia/Jakarta'))
                             ->first();
 
         if ($existingSession) {
@@ -49,10 +49,10 @@ class TeachingController extends Controller
         }
 
         $session = TeachingSession::create([
-            'schedule_id' => $schedule_id,
+            'schedule_id' => $timetable_id, // Menyimpan ID Timetable
             'teacher_id' => Auth::id(),
-            'date' => Carbon::today(),
-            'started_at' => Carbon::now(),
+            'date' => Carbon::today('Asia/Jakarta'),
+            'started_at' => Carbon::now('Asia/Jakarta'),
             'status' => 'open'
         ]);
 
@@ -62,20 +62,13 @@ class TeachingController extends Controller
     // --- HALAMAN KELAS BERLANGSUNG (LIVE) ---
     public function show($id)
     {
-        // Load semua relasi yang dibutuhkan
-        $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances'])
+        $session = TeachingSession::with(['timetable.studentClass.students', 'timetable.subject', 'timetable.timeslot', 'attendances'])
                     ->findOrFail($id);
         
-        // 1. Ambil Data Siswa & Urutkan
-        $allStudents = $session->schedule->schoolClass->students->sortBy('name');
-        
-        // 2. Ambil Absensi & Key By ID agar mudah diakses di Blade
+        $allStudents = $session->timetable->studentClass->students->sortBy('name');
         $attendances = $session->attendances->keyBy('student_id');
-        
-        // 3. Cek Status Kelas
         $isOpen = $session->status == 'open';
 
-        // 4. LOGIKA STATISTIK
         $stats = [
             'present'    => $attendances->where('status', 'present')->count(),
             'sick'       => $attendances->where('status', 'sick')->count(),
@@ -89,11 +82,10 @@ class TeachingController extends Controller
     // --- HALAMAN EDIT (REVISI SETELAH TUTUP) ---
     public function edit($id)
     {
-        // Sama seperti show, tapi diarahkan ke view teaching.edit
-        $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances'])
+        $session = TeachingSession::with(['timetable.studentClass.students', 'timetable.subject', 'timetable.timeslot', 'attendances'])
                     ->findOrFail($id);
         
-        $allStudents = $session->schedule->schoolClass->students->sortBy('name');
+        $allStudents = $session->timetable->studentClass->students->sortBy('name');
         $attendances = $session->attendances->keyBy('student_id');
 
         return view('teaching.edit', compact('session', 'allStudents', 'attendances'));
@@ -134,22 +126,18 @@ class TeachingController extends Controller
     public function history(Request $request)
     {
         $teacherId = Auth::id();
-        Carbon::setLocale('id'); // Pastikan bahasa Indonesia untuk Carbon
+        Carbon::setLocale('id'); 
         
-        // 1. Tangkap tipe filter (Harian, Mingguan, Bulanan)
         $filterType = $request->input('filter_type', 'monthly');
-        
-        // 2. Tangkap nilai filter sesuai tipe yang dipilih (Hanya menangkap input yang aktif)
         $filterValue = $request->input("filter_value_{$filterType}");
 
-        // Jika nilai filter kosong (akses pertama kali), set ke default hari ini/minggu ini/bulan ini
         if (!$filterValue) {
-            if ($filterType === 'daily') $filterValue = Carbon::now()->format('Y-m-d');
-            elseif ($filterType === 'weekly') $filterValue = Carbon::now()->format('Y-\WW'); // Format: 2026-W21
-            else $filterValue = Carbon::now()->format('Y-m');
+            if ($filterType === 'daily') $filterValue = Carbon::now('Asia/Jakarta')->format('Y-m-d');
+            elseif ($filterType === 'weekly') $filterValue = Carbon::now('Asia/Jakarta')->format('Y-\WW'); 
+            else $filterValue = Carbon::now('Asia/Jakarta')->format('Y-m');
         }
 
-        $query = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
+        $query = TeachingSession::with(['timetable.studentClass', 'timetable.subject', 'timetable.timeslot'])
                     ->withCount([
                         'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'Hadir']); },
                         'attendances as terlambat' => function($q){ $q->whereIn('status', ['late', 'Terlambat']); },
@@ -160,35 +148,26 @@ class TeachingController extends Controller
                     ->where('teacher_id', $teacherId)
                     ->where('status', 'closed');
 
-        $filterLabel = ''; // Label dinamis untuk ditampilkan di View ketika data kosong
+        $filterLabel = ''; 
 
-        // 3. Aplikasikan Query Berdasarkan Tipe Waktu
         if ($filterType === 'daily') {
             $query->whereDate('date', $filterValue);
             $filterLabel = 'tanggal ' . Carbon::parse($filterValue)->translatedFormat('d F Y');
-            
         } elseif ($filterType === 'weekly') {
-            // Parsing format 2026-W21 dari input type="week"
             $parts = explode('-W', $filterValue);
             if (count($parts) == 2) {
-                $startOfWeek = Carbon::now()->setISODate($parts[0], $parts[1])->startOfWeek();
+                $startOfWeek = Carbon::now('Asia/Jakarta')->setISODate($parts[0], $parts[1])->startOfWeek();
                 $endOfWeek = $startOfWeek->copy()->endOfWeek();
-                
                 $query->whereBetween('date', [$startOfWeek->format('Y-m-d'), $endOfWeek->format('Y-m-d')]);
                 $filterLabel = 'minggu ' . $startOfWeek->translatedFormat('d M') . ' s/d ' . $endOfWeek->translatedFormat('d M Y');
             }
-            
-        } else { // monthly
+        } else { 
             $date = Carbon::parse($filterValue . '-01');
-            $query->whereMonth('date', $date->month)
-                  ->whereYear('date', $date->year);
+            $query->whereMonth('date', $date->month)->whereYear('date', $date->year);
             $filterLabel = 'bulan ' . $date->translatedFormat('F Y');
         }
 
-        $histories = $query->orderBy('date', 'desc')
-                           ->orderBy('started_at', 'desc')
-                           ->paginate(10)
-                           ->withQueryString();
+        $histories = $query->orderBy('date', 'desc')->orderBy('started_at', 'desc')->paginate(10)->withQueryString();
 
         return view('teaching.history', compact('histories', 'filterType', 'filterValue', 'filterLabel'));
     }
@@ -196,47 +175,30 @@ class TeachingController extends Controller
     // --- SCAN RFID ---
     public function scan(Request $request)
     {
-        $request->validate([
-            'rfid' => 'required',
-            'session_id' => 'required'
-        ]);
+        $request->validate(['rfid' => 'required', 'session_id' => 'required']);
 
-        // Cari siswa berdasarkan RFID atau NIS
-        $student = Student::where('student_id', $request->rfid) 
-                   ->orWhere('nis', $request->rfid) 
-                   ->first();
+        $student = Student::where('student_id', $request->rfid)->orWhere('nis', $request->rfid)->first();
 
-        if (!$student) {
-            return response()->json(['status' => 'error', 'message' => 'Kartu tidak dikenali']);
-        }
+        if (!$student) return response()->json(['status' => 'error', 'message' => 'Kartu tidak dikenali']);
 
-        $session = TeachingSession::with('schedule')->find($request->session_id);
+        $session = TeachingSession::with('timetable')->find($request->session_id);
 
-        if ($student->class_id != $session->schedule->school_class_id) {
+        if ($student->class_id != $session->timetable->class_id) {
             return response()->json(['status' => 'error', 'message' => 'Siswa salah kelas!']);
         }
 
-        $existing = ClassAttendance::where('teaching_session_id', $session->id)
-                    ->where('student_id', $student->id)
-                    ->first();
+        $existing = ClassAttendance::where('teaching_session_id', $session->id)->where('student_id', $student->id)->first();
 
-        if ($existing) {
-            return response()->json(['status' => 'warning', 'message' => 'Siswa sudah absen sebelumnya.', 'student' => $student]);
-        }
+        if ($existing) return response()->json(['status' => 'warning', 'message' => 'Siswa sudah absen sebelumnya.', 'student' => $student]);
 
         ClassAttendance::create([
             'teaching_session_id' => $session->id,
             'student_id' => $student->id,
             'status' => 'present',
-            'scanned_at' => Carbon::now()
+            'scanned_at' => Carbon::now('Asia/Jakarta')
         ]);
 
-        return response()->json([
-            'status' => 'success', 
-            'message' => 'Absen berhasil', 
-            'student' => $student,
-            'time' => Carbon::now()->format('H:i')
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Absen berhasil', 'student' => $student, 'time' => Carbon::now('Asia/Jakarta')->format('H:i')]);
     }
 
     // --- ABSEN MANUAL & EDIT STATUS ---
@@ -245,76 +207,46 @@ class TeachingController extends Controller
         $request->validate([
             'session_id' => 'required|exists:teaching_sessions,id',
             'student_id' => 'required|exists:students,id',
-            'status'     => 'nullable|in:present,sick,permission,alpha', // Nullable jika ingin reset
+            'status'     => 'nullable|in:present,sick,permission,alpha', 
         ]);
 
         if(is_null($request->status)) {
-             // Jika status dikirim null (Reset), hapus data absensi
-             ClassAttendance::where('teaching_session_id', $request->session_id)
-                            ->where('student_id', $request->student_id)
-                            ->delete();
-             $data = null;
-             $status = null;
+             ClassAttendance::where('teaching_session_id', $request->session_id)->where('student_id', $request->student_id)->delete();
+             $data = null; $status = null;
         } else {
-            // Gunakan updateOrCreate agar bisa untuk absen baru ATAU revisi
             $attendance = ClassAttendance::updateOrCreate(
-                [
-                    'teaching_session_id' => $request->session_id,
-                    'student_id' => $request->student_id
-                ],
-                [
-                    'status' => $request->status,
-                    'scanned_at' => now(), 
-                ]
+                ['teaching_session_id' => $request->session_id, 'student_id' => $request->student_id],
+                ['status' => $request->status, 'scanned_at' => now('Asia/Jakarta'),]
             );
-            $data = $attendance;
-            $status = $request->status;
+            $data = $attendance; $status = $request->status;
         }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Status siswa berhasil diperbarui.',
-            'data' => $data,
-            'new_status' => $status
-        ]);
+        return response()->json(['status' => 'success', 'message' => 'Status siswa berhasil diperbarui.', 'data' => $data, 'new_status' => $status]);
     }
 
     // --- TANDAI SISANYA ALPHA (BULK ACTION) ---
     public function bulkAlpha(Request $request)
     {
-        $request->validate([
-            'session_id' => 'required|exists:teaching_sessions,id'
-        ]);
+        $request->validate(['session_id' => 'required|exists:teaching_sessions,id']);
 
-        $session = TeachingSession::with('schedule.schoolClass')->find($request->session_id);
+        $session = TeachingSession::with('timetable.studentClass')->find($request->session_id);
         if (!$session || $session->status !== 'open') {
             return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid atau sudah ditutup.']);
         }
 
-        $classId = $session->schedule->school_class_id;
+        $classId = $session->timetable->class_id;
         $allStudents = Student::where('class_id', $classId)->pluck('id')->toArray();
-        
-        $presentIds = ClassAttendance::where('teaching_session_id', $session->id)
-                      ->pluck('student_id')->toArray();
+        $presentIds = ClassAttendance::where('teaching_session_id', $session->id)->pluck('student_id')->toArray();
 
         $unmarkedIds = array_diff($allStudents, $presentIds);
         $updatedIds = [];
 
         foreach ($unmarkedIds as $studentId) {
-            ClassAttendance::create([
-                'teaching_session_id' => $session->id,
-                'student_id' => $studentId,
-                'status' => 'alpha',
-                'scanned_at' => null
-            ]);
+            ClassAttendance::create(['teaching_session_id' => $session->id, 'student_id' => $studentId, 'status' => 'alpha', 'scanned_at' => null]);
             $updatedIds[] = $studentId;
         }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => count($updatedIds) . ' siswa berhasil ditandai Alpha.',
-            'updated_ids' => array_values($updatedIds) // Reset index array agar bersih di JS
-        ]);
+        return response()->json(['status' => 'success', 'message' => count($updatedIds) . ' siswa berhasil ditandai Alpha.', 'updated_ids' => array_values($updatedIds)]);
     }
 
     // --- TUTUP KELAS & DISIPLIN  ---
@@ -322,42 +254,29 @@ class TeachingController extends Controller
     {
         DB::beginTransaction();
         try {
-            $session = TeachingSession::with('schedule.schoolClass')->findOrFail($id);
+            $session = TeachingSession::with(['timetable.studentClass', 'timetable.subject'])->findOrFail($id);
             
-            if ($session->status == 'closed') {
-                return redirect()->route('teaching.index')->with('info', 'Kelas sudah ditutup sebelumnya.');
-            }
+            if ($session->status == 'closed') return redirect()->route('teaching.index')->with('info', 'Kelas sudah ditutup sebelumnya.');
 
-            $classId = $session->schedule->school_class_id;
+            $classId = $session->timetable->class_id;
             $allStudents = Student::where('class_id', $classId)->get();
-            $presentIds = ClassAttendance::where('teaching_session_id', $id)
-                          ->pluck('student_id')->toArray();
+            $presentIds = ClassAttendance::where('teaching_session_id', $id)->pluck('student_id')->toArray();
 
             $alphaDiscipline = DisciplineType::firstOrCreate(
                 ['name' => 'Bolos Pelajaran (Alpha)'],
-                [
-                    'type' => 'Pelanggaran', 
-                    'point_value' => 10,     
-                    'description' => 'Siswa tidak berada di kelas saat jam pelajaran.'
-                ] 
+                ['type' => 'Pelanggaran', 'point_value' => 10, 'description' => 'Siswa tidak berada di kelas saat jam pelajaran.'] 
             );
 
             $alphaCount = 0;
             foreach ($allStudents as $student) {
                 if (!in_array($student->id, $presentIds)) {
-                    
-                    ClassAttendance::create([
-                        'teaching_session_id' => $id,
-                        'student_id' => $student->id,
-                        'status' => 'alpha',
-                        'scanned_at' => null
-                    ]);
+                    ClassAttendance::create(['teaching_session_id' => $id, 'student_id' => $student->id, 'status' => 'alpha', 'scanned_at' => null]);
 
                     DisciplineRecord::create([
                         'student_id' => $student->id,
                         'discipline_type_id' => $alphaDiscipline->id,
-                        'date' => Carbon::today(),
-                        'notes' => 'Tidak mengikuti KBM: ' . $session->schedule->subject->name . ' (' . $session->topic . ')', 
+                        'date' => Carbon::today('Asia/Jakarta'),
+                        'notes' => 'Tidak mengikuti KBM: ' . $session->timetable->subject->name . ' (' . $session->topic . ')', 
                         'recorded_by_user_id' => Auth::id() 
                     ]);
 
@@ -365,13 +284,8 @@ class TeachingController extends Controller
                 }
             }
 
-            $session->update([
-                'ended_at' => Carbon::now(),
-                'status' => 'closed'
-            ]);
-
+            $session->update(['ended_at' => Carbon::now('Asia/Jakarta'), 'status' => 'closed']);
             DB::commit();
-            
             return redirect()->route('teaching.index')->with('success', "Kelas ditutup. $alphaCount siswa ditandai Alpha & mendapat poin.");
 
         } catch (\Exception $e) {

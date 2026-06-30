@@ -224,7 +224,7 @@
                     </div>
 
                     {{-- PANEL AKSES JURNAL (3 Tombol) --}}
-                    <div class="w-full space-y-2">
+                     <div class="w-full space-y-2">
                          <button @click="updateTab('ramadan_jurnal')" 
                                 class="w-full py-2 rounded-xl bg-gradient-to-r from-elevate-primary to-elevate-dark hover:from-elevate-dark hover:to-elevate-primary text-white text-[10px] font-bold shadow-md shadow-elevate-primary/20 transition-all flex items-center justify-center gap-1.5 group/btn border border-elevate-dark/50 hover:-translate-y-0.5">
                             <i class="ph-fill ph-moon-stars text-xs text-elevate-peach"></i>
@@ -245,7 +245,7 @@
                     </div>
                 </div>
 
-                {{-- LIST JADWAL (KANAN) --}}
+                {{-- LIST JADWAL (KANAN) - VERSI TIMELINE BARU --}}
                 <div class="flex-1 min-w-0 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-elevate-dark dark:text-slate-100 flex items-center gap-2">
@@ -254,49 +254,50 @@
                         </h3>
                     </div>
 
-                    <div class="flex-1 space-y-3 relative z-10 overflow-y-auto custom-scrollbar max-h-[350px] pr-1">
-                        @forelse($todaysSchedule ?? [] as $schedule)
-                            @php
-                                $now = \Carbon\Carbon::now()->format('H:i:s');
-                                $isActive = $now >= $schedule->start_time && $now <= $schedule->end_time;
-                                $isPast = $now > $schedule->end_time;
-                            @endphp
-                            <div class="flex items-center gap-3 p-3 rounded-2xl transition-all border {{ $isActive ? 'bg-elevate-soft dark:bg-elevate-dark/30 border-elevate-accent/50 dark:border-elevate-accent shadow-sm' : ($isPast ? 'bg-slate-50 dark:bg-slate-800/50 border-transparent opacity-60' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 hover:border-elevate-accent/50 dark:hover:border-elevate-accent') }}">
-                                {{-- Jam --}}
-                                <div class="w-12 text-center shrink-0">
-                                    <p class="text-[10px] font-black {{ $isActive ? 'text-elevate-primary dark:text-elevate-accent' : 'text-slate-700 dark:text-slate-300' }}">
-                                        {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
-                                    </p>
-                                    <div class="w-0.5 h-2 bg-slate-200 dark:bg-slate-600 mx-auto my-0.5"></div>
-                                    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                        {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
-                                    </p>
-                                </div>
-                                
-                                {{-- Info Mapel --}}
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="font-bold text-xs truncate {{ $isActive ? 'text-elevate-dark dark:text-elevate-accent' : 'text-slate-800 dark:text-slate-200' }}">
-                                        {{ $schedule->subject->name ?? 'Mapel Umum' }}
-                                    </h4>
-                                    <div class="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                                        <i class="ph-fill ph-user {{ $isActive ? 'text-elevate-primary' : 'text-slate-400' }}"></i>
-                                        {{ Str::limit($schedule->teacher->name ?? '-', 15) }}
+                    <div class="flex-1 relative z-10 overflow-y-auto custom-scrollbar max-h-[350px] pr-2">
+                        @if(isset($jadwalPelajaranHariIni) && $jadwalPelajaranHariIni->isNotEmpty())
+                            <div class="relative border-l-2 border-slate-100 dark:border-slate-700 ml-2 space-y-4 mt-2">
+                                @foreach($jadwalPelajaranHariIni as $jadwal)
+                                    @php
+                                        $currentTime = \Carbon\Carbon::now('Asia/Jakarta')->format('H:i:s');
+                                        $isNow = ($currentTime >= $jadwal->timeslot->start_time && $currentTime <= $jadwal->timeslot->end_time);
+                                        $isPast = ($currentTime > $jadwal->timeslot->end_time);
+                                    @endphp
+                                    
+                                    <div class="relative pl-5 group">
+                                        <!-- Timeline Dot -->
+                                        <div class="absolute -left-[11px] top-1.5 w-5 h-5 rounded-full border-4 border-white dark:border-slate-800 {{ $isNow ? 'bg-elevate-primary shadow-elevate-primary/40' : ($isPast ? 'bg-slate-300 dark:bg-slate-600' : 'bg-elevate-accent shadow-elevate-accent/40') }} shadow-sm z-10 flex items-center justify-center transition-colors">
+                                            @if($isNow)
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-primary opacity-75"></span>
+                                            @endif
+                                        </div>
+                                        
+                                        <!-- Kartu Jadwal -->
+                                        <div class="p-3.5 rounded-2xl border transition-all {{ $isNow ? 'bg-elevate-soft/50 dark:bg-elevate-dark/30 border-elevate-accent/50 shadow-md ring-1 ring-elevate-accent/20' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800' }}">
+                                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                                <span class="text-[9px] font-black {{ $isNow ? 'text-elevate-primary dark:text-elevate-accent' : 'text-slate-500 dark:text-slate-400' }} uppercase tracking-wider bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md border {{ $isNow ? 'border-elevate-accent/30' : 'border-slate-200 dark:border-slate-600' }}">
+                                                    {{ $jadwal->timeslot->name }}
+                                                </span>
+                                                <span class="text-[9px] font-mono font-bold {{ $isNow ? 'text-elevate-primary dark:text-elevate-accent' : 'text-slate-500 dark:text-slate-400' }}">
+                                                    {{ \Carbon\Carbon::parse($jadwal->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->timeslot->end_time)->format('H:i') }}
+                                                </span>
+                                            </div>
+                                            <h4 class="text-xs font-bold text-elevate-dark dark:text-slate-200 mb-1 line-clamp-1">{{ $jadwal->subject->name }}</h4>
+                                            <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 truncate">
+                                                <i class="ph-fill ph-user-circle text-slate-400 dark:text-slate-500 mr-0.5"></i> {{ $jadwal->teacher->name ?? '-' }}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-
-                                {{-- Indikator Aktif --}}
-                                @if($isActive)
-                                    <div class="w-2 h-2 rounded-full bg-elevate-accent animate-pulse shadow-[0_0_8px_rgba(86,187,241,0.6)]"></div>
-                                @endif
+                                @endforeach
                             </div>
-                        @empty
+                        @else
                             <div class="text-center py-8">
                                 <div class="w-10 h-10 bg-elevate-soft dark:bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-2 text-elevate-primary/50 dark:text-slate-500">
                                     <i class="ph-duotone ph-coffee text-xl"></i>
                                 </div>
-                                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Tidak ada KBM.</p>
+                                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">Tidak ada KBM hari ini.</p>
                             </div>
-                        @endforelse
+                        @endif
                     </div>
                     
                    <div class="mt-3 pt-3 border-t border-slate-50 dark:border-slate-700/50 text-center">

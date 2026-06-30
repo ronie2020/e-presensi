@@ -202,6 +202,24 @@ class DashboardController extends Controller
         $countOut = $studentsOut->count();
 
         // =====================================================================
+        // 8.6 JADWAL MENGAJAR GURU (TIMETABLE BARU)
+        // =====================================================================
+        $hariIni = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('dddd');
+        $jadwalMengajarHariIni = collect();
+
+        if (auth()->check() && auth()->user()->hasRole(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas'])) {
+            if (class_exists(\App\Models\Timetable::class)) {
+                $jadwalMengajarHariIni = \App\Models\Timetable::with(['timeslot', 'studentClass', 'subject'])
+                    ->where('teacher_id', auth()->id())
+                    ->where('day_of_week', $hariIni)
+                    ->get()
+                    ->sortBy(function($jadwal) {
+                        return $jadwal->timeslot->order_sequence ?? 0;
+                    });
+            }
+        }
+
+        // =====================================================================
         // 9. RENDER VIEW
         // =====================================================================
         return view('dashboard', [
@@ -224,7 +242,8 @@ class DashboardController extends Controller
             'weeklyLateData' => $weeklyLateData,       
             'weeklyAbsentData' => $weeklyAbsentData,   
             'studentsOut' => $studentsOut, 
-            'countOut' => $countOut,       
+            'countOut' => $countOut, 
+            'jadwalMengajarHariIni' => $jadwalMengajarHariIni, // <-- Variabel baru dilempar ke view     
         ]);
     }
 }

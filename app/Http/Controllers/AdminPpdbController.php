@@ -141,7 +141,10 @@ class AdminPpdbController extends Controller
             // 1. Ambil pendaftar DITERIMA yang belum ada di tabel Student
             $registrants = PpdbRegistrant::where('status', 'accepted')
                 ->whereNotIn('nisn', function($q) {
-                    $q->select('nisn')->from('students')->whereNotNull('nisn');
+                    $q->select('nisn')
+                    ->from('students')
+                    ->whereNotNull('nisn')
+                    ->whereNull('deleted_at'); // Tambahan di sini
                 })
                 ->get();
 
@@ -203,7 +206,7 @@ class AdminPpdbController extends Controller
             }
 
             // 5. FASE PENYIMPANAN KE DATA INDUK
-            $successCount = 0;
+           $successCount = 0;
             foreach ($classBuckets as $i => $bucket) {
                 $classId = $classIds[$i];
                 
@@ -216,39 +219,67 @@ class AdminPpdbController extends Controller
                         $newPhotoPath = $newFileName;
                     }
 
-                   Student::create([
-                        'student_id' => $studentReg->nisn,           
-                        'nisn' => $studentReg->nisn,                 
-                        'nis' => $studentReg->generated_nis,         
+                    // Cek apakah siswa ini sudah pernah ada di database (termasuk yang di-soft delete)
+                    $existingStudent = Student::withTrashed()->where('student_id', $studentReg->nisn)->first();
 
-                        'name' => $studentReg->full_name,
-                        'nik' => $studentReg->nik,
-                        'gender' => $studentReg->gender,
-                        'pob' => $studentReg->birth_place, 
-                        'dob' => $studentReg->birth_date, 
-                        'religion' => $studentReg->religion,
-                        'address' => $studentReg->address,
-                        'phone' => $studentReg->student_phone,
-                        
-                        'father_name' => $studentReg->father_name,
-                        'mother_name' => $studentReg->mother_name,
-                        'father_job' => $studentReg->parent_job,
-                        'father_income' => $studentReg->parent_income, 
-                        'parent_wa_number' => $studentReg->parent_phone,
-                        'parent_phone' => $studentReg->parent_phone,
-                        
-                        'school_origin' => $studentReg->school_origin,
-                        'accepted_date' => now(), 
-                        'join_date' => now(), 
-                        
-                        'status' => 'active',
-                        'class_id' => $classId, 
-                        'photo_path' => $newPhotoPath,
-                        'general_notes' => 'Masuk melalui PPDB Terpusat. Jalur: ' . ucfirst($studentReg->track),
-                        'achievements' => $studentReg->achievements ?? null,
-                        
-                        'password' => Hash::make($studentReg->nisn),
-                    ]);
+                    if ($existingStudent) {
+                        // JIKA ADA: Pulihkan secara resmi terlebih dahulu, lalu perbarui datanya
+                        $existingStudent->restore(); 
+                        $existingStudent->update([
+                            'nisn'             => $studentReg->nisn,                 
+                            'nis'              => $studentReg->generated_nis,         
+                            'name'             => $studentReg->full_name,
+                            'nik'              => $studentReg->nik,
+                            'gender'           => $studentReg->gender,
+                            'pob'              => $studentReg->birth_place, 
+                            'dob'              => $studentReg->birth_date, 
+                            'religion'         => $studentReg->religion,
+                            'address'          => $studentReg->address,
+                            'phone'            => $studentReg->student_phone,
+                            'father_name'      => $studentReg->father_name,
+                            'mother_name'      => $studentReg->mother_name,
+                            'father_job'       => $studentReg->parent_job,
+                            'father_income'    => $studentReg->parent_income, 
+                            'parent_wa_number' => $studentReg->parent_phone,
+                            'parent_phone'     => $studentReg->parent_phone,
+                            'school_origin'    => $studentReg->school_origin,
+                            'status'           => 'active',
+                            'class_id'         => $classId, 
+                            'photo_path'       => $newPhotoPath,
+                            'general_notes'    => 'Masuk melalui PPDB Terpusat (Generate Ulang). Jalur: ' . ucfirst($studentReg->track),
+                            'achievements'     => $studentReg->achievements ?? null,
+                        ]);
+                    } else {
+                        // JIKA BELUM ADA sama sekali: Buat baris data baru secara bersih
+                        Student::create([
+                            'student_id'       => $studentReg->nisn,           
+                            'nisn'             => $studentReg->nisn,                 
+                            'nis'              => $studentReg->generated_nis,         
+                            'name'             => $studentReg->full_name,
+                            'nik'              => $studentReg->nik,
+                            'gender'           => $studentReg->gender,
+                            'pob'              => $studentReg->birth_place, 
+                            'dob'              => $studentReg->birth_date, 
+                            'religion'         => $studentReg->religion,
+                            'address'          => $studentReg->address,
+                            'phone'            => $studentReg->student_phone,
+                            'father_name'      => $studentReg->father_name,
+                            'mother_name'      => $studentReg->mother_name,
+                            'father_job'       => $studentReg->parent_job,
+                            'father_income'    => $studentReg->parent_income, 
+                            'parent_wa_number' => $studentReg->parent_phone,
+                            'parent_phone'     => $studentReg->parent_phone,
+                            'school_origin'    => $studentReg->school_origin,
+                            'accepted_date'    => now(), 
+                            'join_date'        => now(), 
+                            'status'           => 'active',
+                            'class_id'         => $classId, 
+                            'photo_path'       => $newPhotoPath,
+                            'general_notes'    => 'Masuk melalui PPDB Terpusat. Jalur: ' . ucfirst($studentReg->track),
+                            'achievements'     => $studentReg->achievements ?? null,
+                            'password'         => Hash::make($studentReg->nisn),
+                        ]);
+                    }
 
                     $successCount++;
                 }
@@ -524,7 +555,9 @@ class AdminPpdbController extends Controller
         // Ambil kelas yang memiliki siswa, urutkan nama siswa sesuai abjad
         $classes = SchoolClass::with(['students' => function($q) {
             $q->orderBy('name', 'asc');
-        }])->whereHas('students')->get();
+        }])->whereHas('students')
+        ->where('name', 'like', '7%') // Tambahan di sini
+        ->get();
 
         return view('admin.ppdb.print_class_distribution', compact('classes', 'year'));
     }
@@ -534,7 +567,9 @@ class AdminPpdbController extends Controller
         // Ambil kelas yang memiliki siswa
         $classes = SchoolClass::with(['students' => function($q) {
             $q->orderBy('name', 'asc');
-        }])->whereHas('students')->get();
+        }])->whereHas('students')
+        ->where('name', 'like', '7%')
+        ->get();
 
         $year = date('Y');
         $fileName = 'pembagian-kelas-7-' . date('Y-m-d') . '.csv';

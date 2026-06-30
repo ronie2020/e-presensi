@@ -113,10 +113,11 @@
                             @endphp
 
                              <li class="relative">
+                                <!-- Class 'active' ditambahkan di baris ini -->
                                 <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" 
                                    class="group flex items-center gap-3 py-3 rounded-2xl transition-all duration-300 outline-none relative overflow-hidden
                                           {{ $isActive 
-                                             ? 'bg-gradient-to-r from-elevate-primary/50 to-transparent text-white shadow-inner' 
+                                             ? 'active bg-gradient-to-r from-elevate-primary/50 to-transparent text-white shadow-inner' 
                                              : 'text-slate-300 hover:text-white hover:bg-elevate-primary/30' 
                                           }}"
                                    :class="sidebarExpanded ? 'px-4 justify-start' : 'justify-center px-0 w-full'">
@@ -175,3 +176,29 @@
         </div>
     </div>
 </nav>
+<!-- SCRIPT MEMPERTAHANKAN POSISI SCROLL SIDEBAR (MENGGUNAKAN MEMORI BROWSER) -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const sidebar = document.querySelector('.sidebar-scroll');
+        
+        if (sidebar) {
+            // 1. Ambil posisi scroll terakhir dari memori browser saat halaman dimuat
+            const savedScrollPosition = sessionStorage.getItem('sidebarScrollPos');
+            
+            if (savedScrollPosition !== null) {
+                // Kembalikan ke posisi scroll terakhir SECARA INSTAN
+                sidebar.scrollTop = parseInt(savedScrollPosition, 10);
+            }
+            
+            // 2. Simpan posisi scroll ke memori sesaat sebelum pindah halaman (saat loading)
+            window.addEventListener('beforeunload', function() {
+                sessionStorage.setItem('sidebarScrollPos', sidebar.scrollTop);
+            });
+            
+            // 3. (Opsional/Backup) Simpan posisi setiap kali user melakukan scroll di sidebar
+            sidebar.addEventListener('scroll', function() {
+                sessionStorage.setItem('sidebarScrollPos', sidebar.scrollTop);
+            }, { passive: true });
+        }
+    });
+</script>

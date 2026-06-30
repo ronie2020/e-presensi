@@ -64,7 +64,7 @@
 
             <!-- ====== KONTEN UTAMA ====== -->
             <!-- Flex-1 memastikan konten ini mengisi sisa ruang di sebelah sidebar -->
-            <div class="flex-1 flex flex-col h-screen relative z-10 overflow-hidden transition-all duration-300">
+            <div class="flex-1 flex flex-col h-screen relative z-0 overflow-hidden transition-all duration-300">
                 
                 <!-- Header (ELEVATE GLASSMORPHISM) -->
                 <header class="bg-white/70 backdrop-blur-xl sticky top-0 z-30 border-b border-slate-200/60 px-6 py-4 flex justify-between items-center shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)]">
@@ -188,6 +188,19 @@
                 </main>
             </div>
         </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Mencari elemen menu yang sedang aktif
+                // Asumsinya, menu yang aktif memiliki class 'active' atau class spesifik lainnya
+                // Anda bisa mengganti '.active' jika class penanda menu aktif Anda berbeda (misal: '.bg-elevate-accent')
+                const activeMenu = document.querySelector('aside .active'); 
+                
+                if (activeMenu) {
+                    // Lakukan scroll otomatis ke menu yang aktif dengan animasi halus (smooth)
+                    activeMenu.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        </script>
         
         @stack('scripts')
     </body>

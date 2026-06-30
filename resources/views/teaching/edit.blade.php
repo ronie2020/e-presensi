@@ -26,8 +26,18 @@
                         <a href="{{ route('teaching.show', $session->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/60 border border-white/60 text-elevate-dark text-xs font-bold hover:bg-white transition-all mb-4 shadow-sm backdrop-blur-sm active:scale-95">
                             <i class="ph-bold ph-arrow-left"></i> Batal & Kembali
                         </a>
-                        <h1 class="text-3xl md:text-4xl font-black text-elevate-dark tracking-tight">Edit Sesi Kelas</h1>
-                        <p class="text-elevate-dark/80 font-semibold text-sm mt-2 max-w-lg leading-relaxed">Revisi jurnal mengajar dan perbaiki absensi siswa untuk sesi yang sudah ditutup.</p>
+                        {{-- MENGGUNAKAN RELASI TIMETABLE YANG BARU --}}
+                        <h1 class="text-3xl md:text-4xl font-black text-elevate-dark tracking-tight">Edit Jurnal: {{ $session->timetable->subject->name ?? 'Pelajaran' }}</h1>
+                        <div class="flex items-center gap-3 mt-3">
+                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
+                                <i class="ph-bold ph-users-three text-elevate-primary"></i> Kelas {{ $session->timetable->studentClass->name ?? '-' }}
+                            </span>
+                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
+                                <i class="ph-bold ph-clock text-elevate-primary"></i> 
+                                {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time ?? now())->format('H:i') }} - 
+                                {{ \Carbon\Carbon::parse($session->timetable->timeslot->end_time ?? now())->format('H:i') }}
+                            </span>
+                        </div>
                     </div>
                     <div class="px-5 py-3 bg-[#FFEFD6] text-[#D83B01] rounded-xl border border-[#FFD8A8] font-bold text-xs flex items-center gap-2 shadow-sm shrink-0">
                         <span class="w-2 h-2 rounded-full bg-[#D83B01] animate-pulse"></span> Mode Edit
@@ -54,19 +64,19 @@
                             
                             <div class="space-y-5">
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Topik / Materi</label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Topik / Materi Pembelajaran</label>
                                     <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" 
                                         class="w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark bg-elevate-soft transition-all py-3.5 px-4" required>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Catatan Kegiatan</label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Catatan Kegiatan Guru</label>
                                     <textarea name="activities" rows="4" 
                                         class="w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-medium bg-elevate-soft transition-all py-3.5 px-4">{{ old('activities', $session->activities) }}</textarea>
                                 </div>
                                 
                                 {{-- Upload Foto Ulang --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Update Foto</label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Perbarui Bukti Foto</label>
                                     @if($session->photo_proof)
                                         <div class="mb-4 relative group rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
                                             <img src="{{ asset('storage/' . $session->photo_proof) }}" class="h-32 w-full object-cover">
@@ -91,14 +101,14 @@
                     <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/40 flex flex-col h-full overflow-hidden border border-slate-100">
                         <div class="p-6 md:p-8 border-b border-slate-100 bg-elevate-gradient-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
-                                <h3 class="font-black text-elevate-dark text-xl">Koreksi Absensi</h3>
-                                <p class="text-sm text-elevate-dark/70 font-semibold mt-1">Ubah status kehadiran siswa melalui tombol di sebelah kanan.</p>
+                                <h3 class="font-black text-elevate-dark text-xl">Koreksi Absensi Siswa</h3>
+                                <p class="text-sm text-elevate-dark/70 font-semibold mt-1">Ubah status kehadiran siswa melalui tombol pilihan di sebelah kanan.</p>
                             </div>
                             
                             {{-- Filter Cepat --}}
                             <div class="flex gap-2 shrink-0">
                                 <span class="px-4 py-2 rounded-xl bg-[#FDE7E9] text-[#D13438] text-[10px] font-black border border-[#F4C3C9] uppercase tracking-widest shadow-sm">
-                                    Alpha: {{ collect($attendances)->where('status', 'alpha')->count() }}
+                                    Total Alpha: {{ collect($attendances)->where('status', 'alpha')->count() }}
                                 </span>
                             </div>
                         </div>
@@ -113,7 +123,14 @@
 
                                     <div class="flex items-center justify-between p-4 rounded-2xl border-2 border-slate-100 bg-white shadow-sm hover:border-elevate-accent/50 transition-colors group"
                                          id="row-{{ $student->id }}"
-                                         x-data="{ currentStatus: '{{ $status }}' }">
+                                         x-data="{ 
+                                            currentStatus: '{{ $status }}',
+                                            open: false,
+                                            get statusText() {
+                                                const map = { 'present': 'Hadir', 'sick': 'Sakit', 'permission': 'Izin', 'alpha': 'Alpha' };
+                                                return this.currentStatus ? map[this.currentStatus] : 'PILIH STATUS';
+                                            }
+                                         }">
                                         
                                         <div class="flex items-center gap-4 overflow-hidden">
                                             <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shrink-0 transition-colors shadow-sm"
@@ -138,25 +155,23 @@
                                             </div>
                                         </div>
 
-                                        {{-- Dropdown Action --}}
-                                        <div class="relative shrink-0" x-data="{ open: false }">
+                                        {{-- Dropdown Action (Sudah diterjemahkan ke UI Bahasa Indonesia) --}}
+                                        <div class="relative shrink-0">
                                             <button @click="open = !open" @click.outside="open = false" 
                                                 class="px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider border flex items-center gap-2 transition-all shadow-sm active:scale-95"
                                                 :class="{
                                                     'bg-white border-slate-200 text-slate-600 hover:bg-slate-50': true,
                                                     'bg-[#FDE7E9] border-[#F4C3C9] text-[#D13438] hover:bg-[#F4C3C9]': currentStatus === 'alpha'
                                                 }">
-                                                <span x-text="currentStatus ? currentStatus : 'PILIH'"></span>
+                                                <span x-text="statusText"></span>
                                                 <i class="ph-bold ph-caret-down text-sm"></i>
                                             </button>
 
                                             <div x-show="open" x-transition style="display: none;" class="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-xl shadow-elevate-dark/20 border border-slate-100 z-50 p-2 overflow-hidden">
-                                                <button @click="updateStatus({{ $student->id }}, 'Hadir'); currentStatus='Hadir'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#107C10] hover:bg-[#DFF6DD] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#107C10]"></span> Hadir</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'Sakit'); currentStatus='Sakit'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-elevate-primary hover:bg-elevate-soft rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-elevate-primary"></span> Sakit</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'Izin'); currentStatus='Izin'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#D83B01] hover:bg-[#FFEFD6] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#D83B01]"></span> Izin</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'Alpha'); currentStatus='Alpha'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#D13438] hover:bg-[#FDE7E9] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#D13438]"></span> Alpha</button>
-                                                <div class="border-t border-slate-100 my-1"></div>
-                                                <button @click="updateStatus({{ $student->id }}, null); currentStatus=null; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Reset</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'present'); currentStatus='present'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#107C10] hover:bg-[#DFF6DD] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#107C10]"></span> Hadir</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'sick'); currentStatus='sick'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-elevate-primary hover:bg-elevate-soft rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-elevate-primary"></span> Sakit</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'permission'); currentStatus='permission'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#D83B01] hover:bg-[#FFEFD6] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#D83B01]"></span> Izin</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'alpha'); currentStatus='alpha'; open=false" class="w-full text-left px-4 py-3 text-xs font-bold text-[#D13438] hover:bg-[#FDE7E9] rounded-lg flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#D13438]"></span> Alpha</button>
                                             </div>
                                         </div>
                                     </div>
@@ -193,12 +208,16 @@
                                 customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' },
                                 didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
                             })
-                            Toast.fire({ icon: 'success', title: 'Status diperbarui' });
+                            Toast.fire({ icon: 'success', title: 'Data kehadiran berhasil diperbarui!' });
                         }
                     } catch (e) { 
                         Swal.fire({
-                            title: 'Error', text: 'Gagal update status', icon: 'error',
-                            customClass: { popup: 'rounded-[2rem] shadow-2xl font-sans border-0' }
+                            title: 'Terjadi Kesalahan', 
+                            text: 'Gagal memperbarui status absensi siswa. Silakan periksa koneksi internet Anda.', 
+                            icon: 'error',
+                            customClass: { popup: 'rounded-[2rem] shadow-2xl font-sans border-0' },
+                            confirmButtonColor: '#e11d48',
+                            confirmButtonText: 'Tutup'
                         }); 
                     }
                 }

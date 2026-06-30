@@ -22,7 +22,7 @@ class TeachingSession extends Model
         'ended_at' => 'datetime',
     ];
 
-    // 2. --- ACCESSORS UNTUK STATISTIK KEHADIRAN ---
+    // 2. --- ACCESSORS UNTUK STATISTIK KEHADIRAN (LOGIKA LAMA DIPERTAHANKAN) ---
     
     // Menghitung Jumlah Terlambat (Memprioritaskan hasil withCount dari Controller)
     public function getJmlTelatAttribute()
@@ -48,19 +48,24 @@ class TeachingSession extends Model
     
     public function getSubjectAttribute()
     {
-        return $this->schedule ? $this->schedule->subject : null;
+        // Mendukung panggilan baru maupun panggilan lama
+        return $this->timetable ? $this->timetable->subject : ($this->schedule ? $this->schedule->subject : null);
     }
 
     public function getSchoolClassAttribute()
     {
-        return $this->schedule ? $this->schedule->schoolClass : null;
+        // Mendukung panggilan baru maupun panggilan lama
+        return $this->timetable ? $this->timetable->studentClass : ($this->schedule ? $this->schedule->studentClass : null);
     }
 
-    // Relasi ke Jadwal
+    //------------------ schedule_id (ALIAS RELASI LAMA) ------------------//
+    // Relasi ke Jadwal (Logika lama dihidupkan kembali sebagai Alias)
+    // Trik: Kita arahkan ke \App\Models\Timetable agar aplikasi tidak error mencari Schedule.php
     public function schedule()
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(\App\Models\Timetable::class, 'schedule_id');
     }
+    //------------------ schedule_id ------------------//
 
     // Relasi ke Guru
     public function teacher()
@@ -72,5 +77,11 @@ class TeachingSession extends Model
     public function attendances()
     {
         return $this->hasMany(ClassAttendance::class);
+    }
+
+    // Relasi ke Jadwal Pelajaran (Timetable Baru)
+    public function timetable()
+    {
+        return $this->belongsTo(\App\Models\Timetable::class, 'schedule_id');
     }
 }

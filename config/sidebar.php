@@ -321,7 +321,7 @@ return [
             [
                 'name' => 'E-Counseling (BK)',
                 'route' => 'admin.bk.index',
-                'active_check' => 'admin.bk.*',
+                'active_check' => ['admin.bk.index', 'admin.bk.show', 'admin.bk.create', 'admin.bk.edit'],
                 'icon' => 'ph-chat-centered-text',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Guru'] 
             ],
@@ -460,19 +460,42 @@ return [
                 'roles' => ['Admin', 'TU'] 
             ],
             [
-                'name' => 'Atur Jadwal',
-                'route' => 'schedules.index',
-                'active_check' => 'schedules.*',
-                'icon' => 'ph-clock',
-                'roles' => ['Admin', 'TU']
+                'name' => 'Slot Waktu',
+                'route' => 'timeslots.index',
+                'active_check' => 'timeslots.*',
+                'icon' => 'ph-clock-user',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
+                'name' => 'Beban Mengajar',
+                'route' => 'teaching-loads.index',
+                'active_check' => 'teaching-loads.*',
+                'icon' => 'ph-chalkboard-teacher',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
+                'name' => 'Jadwal Pelajaran',
+                'route' => 'timetable.index',
+                'active_check' => 'timetable.*',
+                'icon' => 'ph-magic-wand',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
             [
                 'name' => 'Jam Mesin Absen',
-                'route' => 'admin.attendance-config.index',
-                'active_check' => 'admin.attendance-config.*',
+                'route' => 'schedules.index',  
+                'active_check' => 'schedules.*',
                 'icon' => 'ph-timer',
                 'roles' => ['Admin', 'Kepala Sekolah'] 
             ],
+//----------------------------------------------------------------------//
+           // -- di alihkan ke timetable -- // [
+               //    'name' => 'Atur Jadwal',
+               //   'route' => 'schedules.index',
+               //  'active_check' => 'schedules.*',
+               //  'icon' => 'ph-clock',
+               // 'roles' => ['Admin', 'TU']
+           // ],   -- //   
+//----------------------------------------------------------------------//
             [
                 'name' => 'Data Kelas',
                 'route' => 'classes.index',

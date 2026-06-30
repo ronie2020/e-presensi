@@ -32,7 +32,7 @@
         /* PENGATURAN KERTAS F4 (Folio) */
         @page { 
             size: 21.5cm 33cm; 
-            margin: 0; 
+            margin: 1.5cm 2cm;
         }
         
         body {
@@ -64,17 +64,16 @@
         .garis-kop-bawah { border-bottom: 1px solid black; margin-bottom: 24px; }
         
         /* MODE PRINT */
-        @media print {
+       @media print {
             body { background: none; margin: 0; }
             .sheet { 
-                width: 21.5cm; 
+                width: 100%; 
                 margin: 0; 
-                padding: 1cm 2cm; /* Margin fisik kertas saat dicetak */
+                padding: 0; 
                 box-sizing: border-box;
                 box-shadow: none; 
                 border: none; 
-                page-break-after: always; 
-                page-break-inside: avoid;
+                page-break-after: always;                 
             }
             .sheet:last-child { page-break-after: auto; }
             .no-print { display: none !important; }
@@ -157,7 +156,7 @@
 
             <!-- JUDUL -->
             <div class="judul-surat">
-                <h2>PENGUMUMAN PEMBAGIAN KELAS 7</h2>
+                <h2>PENGUMUMAN PEMBAGIAN KELAS 7 KEGIATAN MPLS </h2>
                 <p>Tahun Pelajaran {{ $year }}/{{ $year + 1 }}</p>
             </div>
 

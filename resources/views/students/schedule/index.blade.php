@@ -1,14 +1,8 @@
 @extends('layouts.public')
 
 @section('content')
-    {{-- 
-        LOGIC PENGGUNAAN:
-        1. File ini harus berada di: resources/views/student/schedule/index.blade.php
-        2. Controller harus mengirimkan variabel $schedules.
-    --}}
     @php
         \Carbon\Carbon::setLocale('id');
-        // Logika hari ini
         $days = [
             'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 
             'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
@@ -72,8 +66,6 @@
 
             {{-- AREA JADWAL --}}
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-6 sm:p-10 min-h-[450px] relative overflow-hidden">
-                
-                {{-- Decoration --}}
                 <div class="absolute top-0 right-0 w-80 h-80 bg-blue-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-50"></div>
 
                 @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $day)
@@ -95,54 +87,96 @@
                             @endif
                         </div>
 
-                        {{-- TIMELINE JADWAL --}}
+                        {{-- TIMELINE JADWAL MENGGUNAKAN TIMESLOT BARU --}}
                         <div class="relative z-10 space-y-8">
-                            @php
-                                $daySchedules = $schedules->where('day', $day)->sortBy('start_time');
+                            @php 
+                                $daySchedules = $schedules->where('day_of_week', $day)->keyBy('timeslot_id'); 
+                                $hasAnySession = false;
                             @endphp
 
-                            @forelse($daySchedules as $sched)
-                                <div class="flex group">
-                                    {{-- Waktu --}}
-                                    <div class="flex flex-col items-center mr-6 md:mr-10">
-                                        <div class="w-20 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-xs text-center border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm">
-                                            {{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }}
-                                            <div class="w-10 h-[2px] bg-slate-300 mx-auto my-1.5 opacity-30 group-hover:bg-white"></div>
-                                            {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}
-                                        </div>
-                                        @if(!$loop->last)
-                                            <div class="w-1 h-full bg-slate-100 my-3 rounded-full group-hover:bg-blue-50 transition-colors"></div>
-                                        @endif
-                                    </div>
+                            @foreach($timeslots as $slot)
+                                @php
+                                    $slotDays = array_map('trim', explode(',', $slot->day_of_week ?? 'Semua Hari'));
+                                    $isValidDay = in_array($day, $slotDays) || $slot->day_of_week === 'Semua Hari' || ($slot->day_of_week === 'Selain Senin' && $day !== 'Senin') || ($slot->day_of_week === 'Selain Jumat' && $day !== 'Jumat');
+                                @endphp
 
-                                    {{-- Card Mata Pelajaran --}}
-                                    <div class="flex-1 pb-10">
-                                        <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 group-hover:-translate-y-1 relative overflow-hidden">
-                                            <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors"></div>
-                                            
-                                            <div class="relative z-10">
-                                                <h3 class="font-black text-xl text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
-                                                    {{ $sched->subject->name ?? 'Mata Pelajaran' }}
-                                                </h3>
-                                                
-                                                <div class="flex flex-wrap items-center gap-4 mt-4">
-                                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100">
-                                                        <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black">
-                                                            {{ substr($sched->teacher->name ?? 'G', 0, 1) }}
-                                                        </div>
-                                                        <span class="text-xs font-bold text-slate-600">{{ $sched->teacher->name ?? 'Guru Pengampu' }}</span>
+                                @if($isValidDay)
+                                    @php $hasAnySession = true; @endphp
+
+                                    @if($slot->is_break)
+                                        {{-- UI ISTIRAHAT --}}
+                                        <div class="flex group items-center">
+                                            <div class="flex flex-col items-center mr-6 md:mr-10 shrink-0">
+                                                <div class="w-20 py-2.5 rounded-2xl bg-amber-50 text-amber-600 font-black text-[10px] text-center border border-amber-200 shadow-sm">
+                                                    {{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}<br>
+                                                    <span class="text-amber-300">|</span><br>
+                                                    {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="bg-amber-50/50 p-4 sm:p-5 rounded-3xl border border-amber-200 border-dashed flex items-center gap-4 hover:bg-amber-50 transition-colors">
+                                                    <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-100 shrink-0">
+                                                        <i class="ph-fill {{ (str_contains(strtolower($slot->name), 'sholat') || str_contains(strtolower($slot->name), 'dhuha')) ? 'ph-mosque' : (str_contains(strtolower($slot->name), 'upacara') ? 'ph-flag' : 'ph-coffee') }} text-2xl"></i>
                                                     </div>
-                                                    
-                                                    <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
-                                                        <i class="ph-bold ph-door-open text-lg"></i>
-                                                        R. Kelas {{ Auth::guard('student')->user()->schoolClass->name ?? '-' }}
+                                                    <div>
+                                                        <h4 class="font-black text-amber-700 text-sm uppercase tracking-wider mb-0.5">{{ $slot->name }}</h4>
+                                                        <p class="text-[10px] font-bold text-amber-600/70">Waktunya rehat sejenak.</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            @empty
+                                    @else
+                                        {{-- UI MATA PELAJARAN --}}
+                                        @php $sched = $daySchedules->get($slot->id); @endphp
+                                        
+                                        @if($sched)
+                                            <div class="flex group">
+                                                {{-- Waktu --}}
+                                                <div class="flex flex-col items-center mr-6 md:mr-10 shrink-0">
+                                                    <div class="w-20 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-xs text-center border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm">
+                                                        {{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}
+                                                        <div class="w-10 h-[2px] bg-slate-300 mx-auto my-1.5 opacity-30 group-hover:bg-white"></div>
+                                                        {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}
+                                                    </div>
+                                                    @if(!$loop->last)
+                                                        <div class="w-1 h-full bg-slate-100 my-3 rounded-full group-hover:bg-blue-50 transition-colors"></div>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Card Mata Pelajaran --}}
+                                                <div class="flex-1 pb-6 sm:pb-8">
+                                                    <div class="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 group-hover:-translate-y-1 relative overflow-hidden">
+                                                        <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors pointer-events-none"></div>
+                                                        
+                                                        <div class="relative z-10">
+                                                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Sesi Ke-{{ $slot->order_sequence }}</div>
+                                                            <h3 class="font-black text-lg sm:text-xl text-slate-800 mb-3 group-hover:text-blue-600 transition-colors">
+                                                                {{ $sched->subject->name ?? 'Mata Pelajaran' }}
+                                                            </h3>
+                                                            
+                                                            <div class="flex flex-wrap items-center gap-3 mt-4">
+                                                                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100">
+                                                                    <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black shrink-0">
+                                                                        {{ substr($sched->teacher->name ?? 'G', 0, 1) }}
+                                                                    </div>
+                                                                    <span class="text-xs font-bold text-slate-600">{{ $sched->teacher->name ?? 'Guru Pengampu' }}</span>
+                                                                </div>
+                                                                
+                                                                <div class="flex items-center gap-1.5 text-slate-500 text-xs font-bold px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+                                                                    <i class="ph-bold ph-door-open text-base text-slate-400"></i>
+                                                                    Kelas {{ $sched->studentClass->name ?? '-' }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
+                                @endif
+                            @endforeach
+
+                            @if(!$hasAnySession)
                                 <div class="text-center py-20">
                                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 border border-dashed border-slate-200">
                                         <i class="ph-duotone ph-coffee text-5xl"></i>
@@ -150,9 +184,8 @@
                                     <h3 class="text-xl font-black text-slate-700">Tidak ada pelajaran</h3>
                                     <p class="text-slate-400 text-sm mt-2">Waktunya istirahat atau belajar mandiri!</p>
                                 </div>
-                            @endforelse
+                            @endif
                         </div>
-
                     </div>
                 @endforeach
             </div>

@@ -78,9 +78,26 @@ class User extends Authenticatable
     public function articles() {
         return $this->hasMany(\App\Models\TeacherArticle::class);
     }
-    public function educations()
+   public function educations()
     {
         return $this->hasMany(TeacherEducation::class);
     }
     
+    /**
+     * Relasi ke Beban Mengajar (Teaching Loads)
+     * Untuk mengecek guru ini punya jam mengajar di kelas mana saja
+     */
+    public function teachingLoads()
+    {
+        return $this->hasMany(TeachingLoad::class, 'teacher_id');
+    }
+
+    /**
+     * Relasi ke Jadwal Mengajar (Timetables)
+     * Untuk menarik data jadwal final milik guru ini
+     */
+    public function timetables()
+    {
+        return $this->hasMany(Timetable::class, 'teacher_id');
+    }
 }

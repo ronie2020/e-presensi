@@ -29,6 +29,7 @@ use App\Models\Book;
 use App\Models\EbookRead; 
 use App\Models\LiteracyJournal;
 use App\Models\Schedule; 
+use App\Models\Timetable;
 use App\Models\CbtExam; 
 use App\Models\CbtStudentExam; 
 use App\Models\AcademicCalendar;
@@ -134,8 +135,8 @@ class StudentPortalController extends Controller
 
         Carbon::setLocale('id');
         $student = Student::with([
-            'schoolClass.schedules.subject', 
-            'schoolClass.schedules.teacher', 
+            'schoolClass.timetables.subject', 
+            'schoolClass.timetables.teacher', 
             'alumniProfile', 
             'pointHistories',
             'graduation'
@@ -195,15 +196,17 @@ class StudentPortalController extends Controller
             });                        
         }
 
-        // B. JADWAL HARI INI
-        $todaysSchedule = collect([]);
-        if (class_exists(\App\Models\Schedule::class) && $classId) {
-            $dayName = Carbon::now('Asia/Jakarta')->isoFormat('dddd');
-            $todaysSchedule = \App\Models\Schedule::with(['subject', 'teacher'])
-                ->where('school_class_id', $classId)
-                ->where('day', $dayName)
-                ->orderBy('start_time')
-                ->get();
+         // B. JADWAL HARI INI (DIUPDATE KE TIMETABLE BARU)
+        $jadwalPelajaranHariIni = collect([]);
+        if (class_exists(\App\Models\Timetable::class) && $classId) {
+            $dayName = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('dddd');
+            $jadwalPelajaranHariIni = \App\Models\Timetable::with(['timeslot', 'subject', 'teacher'])
+                ->where('class_id', $classId)
+                ->where('day_of_week', $dayName)
+                ->get()
+                ->sortBy(function($jadwal) {
+                    return $jadwal->timeslot->order_sequence ?? 0;
+                });
         }
 
         // C. TUGAS PENDING (LMS)
@@ -302,7 +305,7 @@ class StudentPortalController extends Controller
         }
 
         // --- DATA AKADEMIK ---
-        $academic_record = null; $chartData = ['labels' => [], 'scores' => []];
+         $academic_record = null; $chartData = ['labels' => [], 'scores' => []];
         if (class_exists(GradeRecord::class)) {
              $academic_record = GradeRecord::with(['items.subject'])
                 ->where('student_id', $id)
@@ -318,19 +321,22 @@ class StudentPortalController extends Controller
             }
         }
 
-        // --- JURNAL KBM ---       
+          // --- JURNAL KBM ---       
         $teaching_journals = collect([]); 
         if (class_exists(TeachingSession::class) && $classId) {
-             $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])
-                ->whereHas('schedule', fn($q) => $q->where('school_class_id', $classId))
+             // PERBAIKAN DI SINI: Ubah 'schedule' jadi 'timetable' dan 'school_class_id' jadi 'class_id'
+             $teaching_journals = TeachingSession::with(['timetable.subject', 'timetable.teacher', 'attendances'])
+                ->whereHas('timetable', fn($q) => $q->where('class_id', $classId))
                 ->latest('date')->latest('started_at')->get();
         }
+
 
         // --- PENGADUAN & BK ---
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
+        
         $bkSessions = collect([]);
         $unreadSystemBk = 0;
         if (class_exists(BkSession::class)) {
@@ -475,10 +481,10 @@ class StudentPortalController extends Controller
             'lastVerifiedLog' => $lastVerifiedLog,
             'topRamadanStudents' => $topRamadanStudents,
             'isRamadanEnded' => $isRamadanEnded,
-            'literacy_journals' => $literacy_journals, 
+             'literacy_journals' => $literacy_journals, 
             'literacy_stats' => $literacy_stats,
             'priorityExams' => $priorityExams, 
-            'todaysSchedule' => $todaysSchedule,
+            'jadwalPelajaranHariIni' => $jadwalPelajaranHariIni, // <-- Variabel diubah
             'pendingTasks' => $pendingTasks,
             'calendarEvents' => $calendarEvents,
             'upcomingAgendas' => $upcomingAgendas

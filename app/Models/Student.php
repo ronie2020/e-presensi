@@ -130,7 +130,8 @@ class Student extends Authenticatable
         'ramadan_points',
         'join_date', 
         'general_notes',
-        'is_validated' // Kolom baru untuk verifikasi data mandiri
+        'is_validated', // Kolom baru untuk verifikasi data mandiri
+        'password'
     ];
 
     /**
@@ -356,11 +357,16 @@ class Student extends Authenticatable
      */
      public static function generateNextNis()
     {
-        $currentYearShort = date('y'); // Contoh: 26
-        $nextYearShort = sprintf('%02d', $currentYearShort + 1); // Contoh: 27
-        $prefixNis = $currentYearShort . $nextYearShort . '7'; // Hasil: 26277
+        $currentYearShort = date('y'); 
+        $nextYearShort = sprintf('%02d', $currentYearShort + 1); 
+        $prefixNis = $currentYearShort . $nextYearShort . '7'; 
 
-        $lastStudent = self::where('nis', 'like', $prefixNis . '%')->orderBy('nis', 'desc')->first();
+        // TAMBAHKAN withTrashed() DI SINI
+        $lastStudent = self::withTrashed()
+            ->where('nis', 'like', $prefixNis . '%')
+            ->orderBy('nis', 'desc')
+            ->first();
+            
         $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
         
         return ['prefix' => $prefixNis, 'sequence' => $sequence];

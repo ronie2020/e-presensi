@@ -101,8 +101,9 @@
                     @foreach($schedules as $index => $schedule)
                         @php
                             $session = $schedule->todaySession;
-                            $startJP = $schedule->clean_start_time;
-                            $endJP   = $schedule->clean_end_time;
+                            $startJP = \Carbon\Carbon::parse($schedule->timeslot->start_time)->format('H:i');
+                            $endJP   = \Carbon\Carbon::parse($schedule->timeslot->end_time)->format('H:i');
+                            $order   = $schedule->timeslot->order_sequence;
 
                             if (!$session) {
                                 $status = 'waiting'; 
@@ -125,20 +126,17 @@
                             
                             <div class="flex items-center gap-5 w-full md:w-auto z-10">
                                 <div class="flex flex-col items-center justify-center w-20 h-20 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-70">Jam Ke</span>
-                                    <span class="text-3xl font-black leading-none">{{ $startJP }}</span>
-                                    @if($startJP != $endJP)
-                                        <span class="text-xs font-bold -mt-1 opacity-70">- {{ $endJP }}</span>
-                                    @endif
+                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-70">Sesi Ke</span>
+                                    <span class="text-3xl font-black leading-none">{{ $order }}</span>
                                 </div>
                                 <div>
                                     <h4 class="font-black text-elevate-dark text-xl md:text-2xl group-hover:text-elevate-primary transition-colors">{{ $schedule->subject->name }}</h4>
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                                            <i class="ph-bold ph-users-three"></i> Kelas {{ $schedule->schoolClass->name }}
+                                            <i class="ph-bold ph-users-three"></i> Kelas {{ $schedule->studentClass->name }}
                                         </span>
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                                            <i class="ph-bold ph-clock"></i> JP {{ $startJP }} - {{ $endJP }}
+                                            <i class="ph-bold ph-clock"></i> {{ $startJP }} - {{ $endJP }}
                                         </span>
                                     </div>
                                 </div>

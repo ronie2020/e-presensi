@@ -33,10 +33,10 @@
                 <i class="ph-bold ph-user-circle text-xl"></i> Buka Profil Akademik Saya
             </a>
 
-            {{-- Tombol Lihat Jadwal Pelajaran --}}
-            <a href="{{ route('student.schedule.index') }}" class="w-full block py-4 bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+            {{-- Tombol Lihat Jadwal Pelajaran dimatikan 
+            <a href="{{ route('student.schedule.index') }}" class="w-full block py-4 bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2"> 
                 <i class="ph-bold ph-calendar-blank text-xl"></i> Lihat Jadwal Pelajaran
-            </a>
+            </a> --}}
 
             {{-- Tombol Buku Penghubung & Chat --}}
             <a href="{{ route('student.liaison.index') }}" class="w-full block py-4 bg-white border-2 border-indigo-100 hover:border-indigo-300 text-indigo-700 hover:text-indigo-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">

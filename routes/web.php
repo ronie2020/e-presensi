@@ -28,6 +28,8 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\ExtracurricularController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\TimetableController;
+use App\Http\Controllers\TeachingLoadController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\SchoolActivityController;
 use App\Http\Controllers\TeachingController;
@@ -389,6 +391,38 @@ Route::middleware('auth')->group(function () {
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
+     // =========================================================================
+    // BEBAN MENGAJAR (PRASYARAT JADWAL)
+    // =========================================================================
+    Route::get('teaching-loads/template', [\App\Http\Controllers\TeachingLoadController::class, 'template'])->name('teaching-loads.template');
+    Route::post('teaching-loads/import', [\App\Http\Controllers\TeachingLoadController::class, 'import'])->name('teaching-loads.import');
+    Route::resource('teaching-loads', \App\Http\Controllers\TeachingLoadController::class)->only(['index', 'store', 'destroy']);
+    
+    // =========================================================================
+    // SLOT WAKTU (PRASYARAT JADWAL)
+    // =========================================================================
+    Route::get('timeslots/template', [\App\Http\Controllers\TimeslotController::class, 'template'])->name('timeslots.template');
+    Route::post('timeslots/import', [\App\Http\Controllers\TimeslotController::class, 'import'])->name('timeslots.import');
+    Route::post('timeslots/reset', [\App\Http\Controllers\TimeslotController::class, 'reset'])->name('timeslots.reset');
+    // PERBAIKAN: Tambahkan 'update' di dalam array only[]
+    Route::resource('timeslots', \App\Http\Controllers\TimeslotController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    // =========================================================================
+    // TIMETABLE / GENERATE JADWAL PELAJARAN
+    // =========================================================================
+     Route::prefix('timetable')->name('timetable.')->group(function () {
+        Route::get('/', [TimetableController::class, 'index'])->name('index');
+        Route::post('/generate', [TimetableController::class, 'generate'])->name('generate');
+        Route::post('/reset', [TimetableController::class, 'reset'])->name('reset');
+        
+        // Route untuk Drag and Drop
+        Route::post('/place', [TimetableController::class, 'placeUnassigned'])->name('place');
+        Route::post('/move', [TimetableController::class, 'moveSchedule'])->name('move');
+        Route::post('/remove', [TimetableController::class, 'removeSchedule'])->name('remove');
+        
+        Route::get('/export/class/{id}', [TimetableController::class, 'exportClass'])->name('export.class');
+        Route::get('/export/teacher/{id}', [TimetableController::class, 'exportTeacher'])->name('export.teacher');
+    });
    
     // =========================================================================
     //  CBT & UJIAN (ADMIN/GURU) - REFACTORED ROUTES
