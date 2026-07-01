@@ -452,11 +452,123 @@
         </div>
         
         {{-- WIDGET JADWAL MENGAJAR GURU --}}
-        @if(Auth::user()->hasRole(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas']))
-            <div class="animate-enter no-print" style="animation-delay: 750ms">
-                @include('timetable.widget_guru')
+        <div class="mb-6 flex items-center justify-between">
+    <h3 class="text-lg font-black text-elevate-dark flex items-center gap-2">
+        <i class="ph-fill ph-calendar-check text-elevate-primary text-xl"></i> Jadwal Mengajar Hari Ini
+    </h3>
+    <a href="{{ route('teaching.index') }}" class="text-xs font-bold text-elevate-primary hover:text-elevate-dark transition-colors flex items-center gap-1">
+        Lihat Semua <i class="ph-bold ph-caret-right"></i>
+    </a>
+</div>
+
+@if(isset($groupedSchedules) && count($groupedSchedules) > 0)
+    <div class="grid grid-cols-1 gap-4">
+        @foreach($groupedSchedules as $index => $group)
+            @php
+                // Ambil jadwal pertama dan terakhir dalam blok ini
+                $firstSchedule = $group->first();
+                $lastSchedule = $group->last();
+                $totalJP = $group->count();
+                
+                // Cek status sesi melalui jam pertama
+                $session = $firstSchedule->todaySession;
+                
+                $startJP = isset($firstSchedule->timeslot->start_time) ? \Carbon\Carbon::parse($firstSchedule->timeslot->start_time)->format('H:i') : '--:--';
+                $endJP   = isset($lastSchedule->timeslot->end_time) ? \Carbon\Carbon::parse($lastSchedule->timeslot->end_time)->format('H:i') : '--:--';
+                
+                $orderFirst = $firstSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $firstSchedule->timeslot->name ?? ($index + 1));
+                $orderLast  = $lastSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $lastSchedule->timeslot->name ?? ($index + 1));
+                
+                // Format angka "22" atau "22-24"
+                $orderDisplay = $orderFirst == $orderLast ? $orderFirst : $orderFirst . '-' . $orderLast;
+
+                if (!$session) {
+                    $status = 'waiting'; 
+                    $borderClass = 'border-l-[4px] border-l-elevate-accent';
+                    $bgIcon = 'bg-elevate-soft text-elevate-primary border-slate-200';
+                    $btnClass = 'bg-elevate-dark hover:bg-elevate-primary text-white'; 
+                } elseif ($session->status == 'open') {
+                    $status = 'ongoing';
+                    $borderClass = 'border-l-[4px] border-l-[#107C10] ring-1 ring-[#107C10]/10';
+                    $bgIcon = 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]';
+                    $btnClass = 'bg-[#107C10] hover:bg-[#0c5c0c] text-white'; 
+                } else {
+                    $status = 'done';
+                    $borderClass = 'border-l-[4px] border-l-slate-300 bg-slate-50/50';
+                    $bgIcon = 'bg-white text-slate-400 border-slate-200';
+                }
+            @endphp
+
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5 {{ $borderClass }} flex flex-col md:flex-row justify-between items-center gap-4 group hover:shadow-md transition-shadow fluent-card">
+                
+                {{-- INFO KIRI --}}
+                <div class="flex items-center gap-4 w-full md:w-auto">
+                    <div class="flex flex-col items-center justify-center w-16 h-16 rounded-xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors relative">
+                        @if($totalJP > 1)
+                            <div class="absolute -top-2 -right-2 bg-elevate-peach text-elevate-peach-dark text-[9px] font-black px-2 py-0.5 rounded-full border border-white shadow-sm z-10">
+                                {{ $totalJP }} JP
+                            </div>
+                        @endif
+                        <span class="text-[8px] font-bold uppercase tracking-wider opacity-70">Sesi</span>
+                        <span class="text-xl font-black leading-none mt-0.5">{{ $orderDisplay }}</span>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-elevate-dark text-lg group-hover:text-elevate-primary transition-colors line-clamp-1">{{ $firstSchedule->subject->name ?? 'Pelajaran' }}</h4>
+                        <div class="flex flex-wrap gap-2 mt-1.5">
+                            <span class="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+                                <i class="ph-bold ph-users-three"></i> Kls {{ $firstSchedule->studentClass->name ?? $firstSchedule->schoolClass->name ?? '-' }}
+                            </span>
+                            <span class="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
+                                <i class="ph-bold ph-clock"></i> {{ $startJP }}-{{ $endJP }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- TOMBOL KANAN --}}
+                <div class="w-full md:w-auto shrink-0 mt-2 md:mt-0">
+                    @if($status == 'waiting')
+                        <form action="{{ route('teaching.start', $firstSchedule->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full md:w-auto px-5 py-2.5 {{ $btnClass }} font-bold rounded-xl shadow-sm transition transform flex items-center justify-center gap-2 active:scale-95 text-xs border border-transparent">
+                                <i class="ph-bold ph-play-circle text-base"></i> 
+                                {{ $totalJP > 1 ? "Mulai ({$totalJP} JP)" : "Mulai Mengajar" }}
+                            </button>
+                        </form>
+                    @elseif($status == 'ongoing')
+                        <div class="flex flex-col md:items-end gap-2">
+                            <div class="flex items-center justify-center md:justify-end gap-1.5 text-[#107C10] font-black text-[9px] uppercase tracking-widest bg-[#DFF6DD] px-2.5 py-1 rounded-full border border-[#B7DFB9]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#107C10] animate-pulse"></span> Sedang Berlangsung
+                            </div>
+                            <a href="{{ route('teaching.show', $session->id) }}" class="w-full md:w-auto px-5 py-2.5 {{ $btnClass }} font-bold rounded-xl shadow-sm transition transform flex items-center justify-center gap-2 active:scale-95 text-xs border border-transparent">
+                                Buka Kelas <i class="ph-bold ph-arrow-right"></i>
+                            </a>
+                        </div>
+                    @else
+                        <div class="flex items-center gap-2 justify-end w-full">
+                            <span class="px-4 py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl flex items-center gap-1.5 border border-slate-200 cursor-not-allowed w-full md:w-auto justify-center">
+                                <i class="ph-fill ph-check-circle"></i> Selesai
+                            </span>
+                            <a href="{{ route('teaching.show', $session->id) }}" class="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-elevate-primary hover:border-elevate-accent/50 hover:bg-elevate-soft transition-all shadow-sm active:scale-95 shrink-0" title="Lihat Detail">
+                                <i class="ph-bold ph-eye text-base"></i>
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
-        @endif
+        @endforeach
+    </div>
+@else
+    <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200 fluent-card">
+        <div class="w-16 h-16 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-4 text-elevate-primary border border-slate-100">
+            <i class="ph-duotone ph-coffee text-3xl"></i>
+        </div>
+        <h3 class="text-elevate-dark font-black text-base mb-1">Tidak Ada Jadwal Mengajar</h3>
+        <p class="text-slate-500 max-w-xs mx-auto text-xs font-medium">
+            Hari ini Anda tidak memiliki jadwal kelas.
+        </p>
+    </div>
+@endif
 
         {{-- TABLES SECTION --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 page-break-inside-avoid">

@@ -63,7 +63,7 @@
                         <div class="mt-6">
                             <span class="bg-white/60 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/50 shadow-sm inline-flex items-center gap-2 text-elevate-dark">
                                 <span class="bg-[#107C10] w-2.5 h-2.5 rounded-full animate-pulse"></span>
-                                {{ $schedules->count() }} Sesi Pelajaran
+                                {{ count($groupedSchedules ?? []) }} Pertemuan Kelas
                             </span>
                         </div>
                     </div>
@@ -96,14 +96,25 @@
                 </h3>
             </div>
 
-            @if($schedules->count() > 0)
+            @if(isset($groupedSchedules) && count($groupedSchedules) > 0)
                 <div class="grid grid-cols-1 gap-5">
-                    @foreach($schedules as $index => $schedule)
+                    @foreach($groupedSchedules as $index => $group)
                         @php
-                            $session = $schedule->todaySession;
-                            $startJP = \Carbon\Carbon::parse($schedule->timeslot->start_time)->format('H:i');
-                            $endJP   = \Carbon\Carbon::parse($schedule->timeslot->end_time)->format('H:i');
-                            $order   = $schedule->timeslot->order_sequence;
+                            // PERUBAHAN: Sekarang kita mengambil data dari Grup, bukan satuan
+                            $firstSchedule = $group->first();
+                            $lastSchedule = $group->last();
+                            $totalJP = $group->count();
+                            
+                            $session = $firstSchedule->todaySession;
+                            
+                            $startJP = isset($firstSchedule->timeslot->start_time) ? \Carbon\Carbon::parse($firstSchedule->timeslot->start_time)->format('H:i') : '--:--';
+                            $endJP   = isset($lastSchedule->timeslot->end_time) ? \Carbon\Carbon::parse($lastSchedule->timeslot->end_time)->format('H:i') : '--:--';
+                            
+                            $orderFirst = $firstSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $firstSchedule->timeslot->name ?? ($index + 1));
+                            $orderLast  = $lastSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $lastSchedule->timeslot->name ?? ($index + 1));
+                            
+                            // Logika Tampilan Nomor Sesi
+                            $orderDisplay = $orderFirst == $orderLast ? $orderFirst : $orderFirst . '-' . $orderLast;
 
                             if (!$session) {
                                 $status = 'waiting'; 
@@ -125,15 +136,21 @@
                         <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 {{ $borderClass }} flex flex-col md:flex-row justify-between items-center gap-6 group relative overflow-hidden animate-enter" style="animation-delay: {{ ($index + 3) * 100 }}ms">
                             
                             <div class="flex items-center gap-5 w-full md:w-auto z-10">
-                                <div class="flex flex-col items-center justify-center w-20 h-20 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-70">Sesi Ke</span>
-                                    <span class="text-3xl font-black leading-none">{{ $order }}</span>
+                                <div class="flex flex-col items-center justify-center w-24 h-24 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors relative">
+                                    {{-- Lencana Jumlah JP (Hanya muncul jika > 1) --}}
+                                    @if($totalJP > 1)
+                                        <div class="absolute -top-2 -right-2 bg-elevate-peach text-elevate-peach-dark text-[10px] font-black px-2.5 py-0.5 rounded-full border border-white shadow-sm z-20">
+                                            {{ $totalJP }} JP
+                                        </div>
+                                    @endif
+                                    <span class="text-[9px] font-bold uppercase tracking-wider opacity-70">Sesi Ke</span>
+                                    <span class="text-3xl font-black leading-none mt-1">{{ $orderDisplay }}</span>
                                 </div>
                                 <div>
-                                    <h4 class="font-black text-elevate-dark text-xl md:text-2xl group-hover:text-elevate-primary transition-colors">{{ $schedule->subject->name }}</h4>
+                                    <h4 class="font-black text-elevate-dark text-xl md:text-2xl group-hover:text-elevate-primary transition-colors">{{ $firstSchedule->subject->name ?? 'Pelajaran Terhapus' }}</h4>
                                     <div class="flex flex-wrap gap-2 mt-2">
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-                                            <i class="ph-bold ph-users-three"></i> Kelas {{ $schedule->studentClass->name }}
+                                            <i class="ph-bold ph-users-three"></i> Kelas {{ $firstSchedule->studentClass->name ?? $firstSchedule->schoolClass->name ?? 'Tidak Diketahui' }}
                                         </span>
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
                                             <i class="ph-bold ph-clock"></i> {{ $startJP }} - {{ $endJP }}
@@ -144,10 +161,11 @@
 
                             <div class="w-full md:w-auto z-10">
                                 @if($status == 'waiting')
-                                    <form action="{{ route('teaching.start', $schedule->id) }}" method="POST">
+                                    <form action="{{ route('teaching.start', $firstSchedule->id) }}" method="POST">
                                         @csrf
                                         <button type="submit" class="w-full md:w-auto px-8 py-3.5 {{ $btnClass }} font-bold rounded-2xl shadow-lg transition transform flex items-center justify-center gap-2 active:scale-95 text-sm border border-transparent">
-                                            <i class="ph-bold ph-play-circle text-xl"></i> Mulai Mengajar
+                                            <i class="ph-bold ph-play-circle text-xl"></i> 
+                                            {{ $totalJP > 1 ? "Mulai Kelas ({$totalJP} Jam)" : "Mulai Mengajar" }}
                                         </button>
                                     </form>
                                 @elseif($status == 'ongoing')

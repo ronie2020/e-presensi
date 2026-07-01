@@ -19,22 +19,48 @@ class TeachingController extends Controller
     /**
      * DASHBOARD JADWAL MENGAJAR HARI INI
      */
-    public function index()
+     public function index()
     {
         $teacherId = Auth::id();
         Carbon::setLocale('id');
         $todayName = Carbon::now('Asia/Jakarta')->translatedFormat('l'); 
 
         // MENGAMBIL DATA DARI MESIN GENERATOR (TIMETABLE)
-        $schedules = Timetable::with(['studentClass', 'subject', 'timeslot', 'todaySession'])
+        $rawSchedules = Timetable::with(['studentClass', 'subject', 'timeslot', 'todaySession'])
                     ->where('teacher_id', $teacherId)
                     ->where('day_of_week', $todayName)
                     ->get()
                     ->sortBy(function($jadwal) {
                         return $jadwal->timeslot->order_sequence ?? 0;
-                    });
+                    })->values(); 
 
-        return view('teaching.index', compact('schedules'));
+        // LOGIKA BLOK JP: 
+        $groupedSchedules = [];
+        $currentGroup = null;
+
+        foreach ($rawSchedules as $schedule) {
+            if (!$currentGroup) {
+                $currentGroup = collect([$schedule]);
+            } else {
+                $lastSchedule = $currentGroup->last();
+                
+                // Jika Kelas dan Mapel sama dengan JP sebelumnya, gabungkan!
+                if ($lastSchedule->class_id == $schedule->class_id && $lastSchedule->subject_id == $schedule->subject_id) {
+                    $currentGroup->push($schedule);
+                } else {
+                    $groupedSchedules[] = $currentGroup;
+                    $currentGroup = collect([$schedule]);
+                }
+            }
+        }
+        
+        // Masukkan grup terakhir
+        if ($currentGroup) {
+            $groupedSchedules[] = $currentGroup;
+        }
+
+        // Kirim $groupedSchedules ke view, bukan lagi $schedules satuan
+        return view('teaching.index', compact('groupedSchedules'));
     }
 
     // --- MULAI KELAS ---

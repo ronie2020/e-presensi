@@ -200,14 +200,34 @@ class StudentPortalController extends Controller
         $jadwalPelajaranHariIni = collect([]);
         if (class_exists(\App\Models\Timetable::class) && $classId) {
             $dayName = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('dddd');
-            $jadwalPelajaranHariIni = \App\Models\Timetable::with(['timeslot', 'subject', 'teacher'])
+            $rawJadwal = \App\Models\Timetable::with(['timeslot', 'subject', 'teacher'])
                 ->where('class_id', $classId)
                 ->where('day_of_week', $dayName)
                 ->get()
                 ->sortBy(function($jadwal) {
                     return $jadwal->timeslot->order_sequence ?? 0;
-                });
+                })->values();
+
+            $currentGroup = null;
+            foreach ($rawJadwal as $schedule) {
+                if (!$currentGroup) {
+                    $currentGroup = collect([$schedule]);
+                } else {
+                    $lastSchedule = $currentGroup->last();
+                    // Jika mapel dan guru sama, gabungkan
+                    if ($lastSchedule->subject_id == $schedule->subject_id && $lastSchedule->teacher_id == $schedule->teacher_id) {
+                        $currentGroup->push($schedule);
+                    } else {
+                        $jadwalPelajaranHariIni->push($currentGroup);
+                        $currentGroup = collect([$schedule]);
+                    }
+                }
+            }
+            if ($currentGroup) {
+                $jadwalPelajaranHariIni->push($currentGroup);
+            }
         }
+
 
         // C. TUGAS PENDING (LMS)
         $pendingTasks = collect([]);

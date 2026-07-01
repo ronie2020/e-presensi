@@ -205,17 +205,39 @@ class DashboardController extends Controller
         // 8.6 JADWAL MENGAJAR GURU (TIMETABLE BARU)
         // =====================================================================
         $hariIni = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('dddd');
-        $jadwalMengajarHariIni = collect();
+        $groupedSchedules = [];
 
         if (auth()->check() && auth()->user()->hasRole(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas'])) {
             if (class_exists(\App\Models\Timetable::class)) {
-                $jadwalMengajarHariIni = \App\Models\Timetable::with(['timeslot', 'studentClass', 'subject'])
+                // Tambahkan 'todaySession' agar widget bisa baca status kelas
+                $rawSchedules = \App\Models\Timetable::with(['timeslot', 'studentClass', 'subject', 'todaySession'])
                     ->where('teacher_id', auth()->id())
                     ->where('day_of_week', $hariIni)
                     ->get()
                     ->sortBy(function($jadwal) {
                         return $jadwal->timeslot->order_sequence ?? 0;
-                    });
+                    })->values(); // Reset array keys
+
+                $currentGroup = null;
+
+                foreach ($rawSchedules as $schedule) {
+                    if (!$currentGroup) {
+                        $currentGroup = collect([$schedule]);
+                    } else {
+                        $lastSchedule = $currentGroup->last();
+                        // Jika Kelas dan Mapel sama, gabungkan ke blok yang sama
+                        if ($lastSchedule->class_id == $schedule->class_id && $lastSchedule->subject_id == $schedule->subject_id) {
+                            $currentGroup->push($schedule);
+                        } else {
+                            $groupedSchedules[] = $currentGroup;
+                            $currentGroup = collect([$schedule]);
+                        }
+                    }
+                }
+                
+                if ($currentGroup) {
+                    $groupedSchedules[] = $currentGroup;
+                }
             }
         }
 
@@ -238,12 +260,12 @@ class DashboardController extends Controller
             'classRanks' => $classRanks,
             'lowestClassRanks' => $lowestClassRanks, 
             'chartLabels' => $chartLabels,
-            'weeklyPresentData' => $weeklyPresentData, 
+             'weeklyPresentData' => $weeklyPresentData, 
             'weeklyLateData' => $weeklyLateData,       
             'weeklyAbsentData' => $weeklyAbsentData,   
             'studentsOut' => $studentsOut, 
             'countOut' => $countOut, 
-            'jadwalMengajarHariIni' => $jadwalMengajarHariIni, // <-- Variabel baru dilempar ke view     
+            'groupedSchedules' => collect($groupedSchedules), // <-- Variabel baru yang digrupkan untuk widget     
         ]);
     }
 }

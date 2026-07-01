@@ -100,15 +100,37 @@
                         @endif
                     </div>
 
-                    <div class="relative space-y-0">
+                   <div class="relative space-y-0">
                         <div class="absolute left-[2.25rem] top-4 bottom-4 w-0.5 bg-slate-100"></div>
 
                         @php 
-                            $daySchedules = $schedules->where('day_of_week', $day)->keyBy('timeslot_id'); 
+                            $daySchedules = $schedules->where('day_of_week', $day)->sortBy(function($q) { return $q->timeslot->order_sequence ?? 0; })->values();
+                            
+                            // LOGIKA GROUPING KHUSUS TABEL TIMELINE
+                            $groupedMap = []; // Menyimpan grup berdasarkan slot pertama
+                            $skipSlots = [];  // Menyimpan slot lanjutan yang harus di-skip agar tidak double render
+                            $currG = null;
+                            
+                            foreach($daySchedules as $s) {
+                                if(!$currG) { 
+                                    $currG = collect([$s]); 
+                                } else {
+                                    $last = $currG->last();
+                                    if($last->subject_id == $s->subject_id && $last->teacher_id == $s->teacher_id) {
+                                        $currG->push($s);
+                                        $skipSlots[] = $s->timeslot_id;
+                                    } else {
+                                        $groupedMap[$currG->first()->timeslot_id] = $currG;
+                                        $currG = collect([$s]);
+                                    }
+                                }
+                            }
+                            if($currG) { $groupedMap[$currG->first()->timeslot_id] = $currG; }
+
                             $hasAnySession = false;
                         @endphp
 
-                        {{-- Loop berdasarkan Slot Waktu untuk memastikan urutan benar --}}
+                        {{-- Loop berdasarkan Slot Waktu --}}
                         @foreach($timeslots as $slot)
                             @php
                                 $slotDays = array_map('trim', explode(',', $slot->day_of_week ?? 'Semua Hari'));
@@ -135,17 +157,28 @@
                                         </div>
                                     </div>
                                 @else
-                                    {{-- UI MATA PELAJARAN --}}
-                                    @php $sched = $daySchedules->get($slot->id); @endphp
-                                    
-                                    @if($sched)
+                                    {{-- JIKA SLOT INI ADALAH LANJUTAN DARI BLOK SEBELUMNYA, SKIP RENDER --}}
+                                    @if(in_array($slot->id, $skipSlots))
+                                        @continue
+                                    @endif
+
+                                    {{-- UI MATA PELAJARAN (DIGABUNGKAN) --}}
+                                    @if(isset($groupedMap[$slot->id]))
                                         @php
+                                            $group = $groupedMap[$slot->id];
+                                            $firstSched = $group->first();
+                                            $lastSched = $group->last();
+                                            
+                                            $orderDisplay = $firstSched->timeslot->order_sequence == $lastSched->timeslot->order_sequence 
+                                                            ? $firstSched->timeslot->order_sequence 
+                                                            : $firstSched->timeslot->order_sequence . '-' . $lastSched->timeslot->order_sequence;
+                                            
                                             $colorThemes = [
                                                 ['bg' => 'bg-elevate-soft/50', 'border' => 'border-elevate-accent/30', 'text' => 'text-elevate-primary', 'line' => 'bg-elevate-accent', 'hover' => 'hover:border-elevate-primary/40'],
                                                 ['bg' => 'bg-elevate-peach-light/10', 'border' => 'border-elevate-peach/30', 'text' => 'text-elevate-peach-dark', 'line' => 'bg-elevate-peach', 'hover' => 'hover:border-elevate-peach/60'],
                                                 ['bg' => 'bg-emerald-50/50', 'border' => 'border-emerald-200', 'text' => 'text-emerald-600', 'line' => 'bg-emerald-400', 'hover' => 'hover:border-emerald-400']
                                             ];
-                                            $t = $colorThemes[crc32($sched->subject->name ?? 'X') % count($colorThemes)];
+                                            $t = $colorThemes[crc32($firstSched->subject->name ?? 'X') % count($colorThemes)];
                                         @endphp
 
                                         <div class="relative pl-24 py-4 group">
@@ -153,7 +186,7 @@
                                             <div class="absolute left-2 top-4 w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex flex-col items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 {{ $t['hover'] }}">
                                                 <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Sesi Ke</span>
                                                 <div class="flex items-center text-lg font-black text-elevate-dark">
-                                                    {{ $slot->order_sequence }}
+                                                    {{ $orderDisplay }}
                                                 </div>
                                             </div>
 
@@ -163,15 +196,15 @@
                                                 <div class="flex flex-col sm:flex-row justify-between sm:items-start gap-4 pl-2">
                                                     <div>
                                                         <div class="flex items-center gap-2 mb-1.5">
-                                                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{{ optional($slot)->name ?? 'Slot Waktu' }}</span>
+                                                            <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{{ $group->count() > 1 ? $group->count() . ' Jam Pelajaran' : '1 Jam Pelajaran' }}</span>
                                                         </div>
                                                         <h3 class="text-base sm:text-lg font-black text-elevate-dark mb-2 {{ "group-hover:{$t['text']}" }} transition-colors line-clamp-1">
-                                                            {{ optional($sched->subject)->name ?? 'Mata Pelajaran Tidak Diketahui' }}
+                                                            {{ optional($firstSched->subject)->name ?? 'Mata Pelajaran Tidak Diketahui' }}
                                                         </h3>
                                                         <div class="flex flex-wrap items-center gap-3">
                                                             <div class="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                                                                 <i class="ph-fill ph-user-circle text-slate-400"></i>
-                                                                <span class="text-xs font-bold text-slate-600">{{ optional($sched->teacher)->name ?? 'Guru Tidak Diketahui' }}</span>
+                                                                <span class="text-xs font-bold text-slate-600">{{ optional($firstSched->teacher)->name ?? 'Guru Tidak Diketahui' }}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -179,11 +212,7 @@
                                                     <div class="shrink-0 mt-1 sm:mt-0 text-left sm:text-right">
                                                         <div class="text-[10px] font-mono font-bold text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 inline-block">
                                                             <i class="ph-bold ph-clock"></i> 
-                                                            @if($slot)
-                                                                {{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}
-                                                            @else
-                                                                -
-                                                            @endif
+                                                            {{ \Carbon\Carbon::parse($firstSched->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($lastSched->timeslot->end_time)->format('H:i') }}
                                                         </div>
                                                     </div>
                                                 </div>

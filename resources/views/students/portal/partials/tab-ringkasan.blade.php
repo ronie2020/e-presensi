@@ -254,14 +254,22 @@
                         </h3>
                     </div>
 
-                    <div class="flex-1 relative z-10 overflow-y-auto custom-scrollbar max-h-[350px] pr-2">
+                   <div class="flex-1 relative z-10 overflow-y-auto custom-scrollbar max-h-[350px] pr-2">
                         @if(isset($jadwalPelajaranHariIni) && $jadwalPelajaranHariIni->isNotEmpty())
                             <div class="relative border-l-2 border-slate-100 dark:border-slate-700 ml-2 space-y-4 mt-2">
-                                @foreach($jadwalPelajaranHariIni as $jadwal)
+                                @foreach($jadwalPelajaranHariIni as $group)
                                     @php
+                                        // Ambil sesi pertama dan terakhir dalam grup ini
+                                        $first = $group->first();
+                                        $last = $group->last();
+                                        
                                         $currentTime = \Carbon\Carbon::now('Asia/Jakarta')->format('H:i:s');
-                                        $isNow = ($currentTime >= $jadwal->timeslot->start_time && $currentTime <= $jadwal->timeslot->end_time);
-                                        $isPast = ($currentTime > $jadwal->timeslot->end_time);
+                                        $isNow = ($currentTime >= $first->timeslot->start_time && $currentTime <= $last->timeslot->end_time);
+                                        $isPast = ($currentTime > $last->timeslot->end_time);
+                                        
+                                        $orderFirst = $first->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $first->timeslot->name ?? 0);
+                                        $orderLast  = $last->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $last->timeslot->name ?? 0);
+                                        $sessionName = $orderFirst == $orderLast ? 'Sesi ' . $orderFirst : 'Sesi ' . $orderFirst . '-' . $orderLast;
                                     @endphp
                                     
                                     <div class="relative pl-5 group">
@@ -276,15 +284,15 @@
                                         <div class="p-3.5 rounded-2xl border transition-all {{ $isNow ? 'bg-elevate-soft/50 dark:bg-elevate-dark/30 border-elevate-accent/50 shadow-md ring-1 ring-elevate-accent/20' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800' }}">
                                             <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                                                 <span class="text-[9px] font-black {{ $isNow ? 'text-elevate-primary dark:text-elevate-accent' : 'text-slate-500 dark:text-slate-400' }} uppercase tracking-wider bg-white dark:bg-slate-700 px-2 py-0.5 rounded-md border {{ $isNow ? 'border-elevate-accent/30' : 'border-slate-200 dark:border-slate-600' }}">
-                                                    {{ $jadwal->timeslot->name }}
+                                                    {{ $sessionName }}
                                                 </span>
                                                 <span class="text-[9px] font-mono font-bold {{ $isNow ? 'text-elevate-primary dark:text-elevate-accent' : 'text-slate-500 dark:text-slate-400' }}">
-                                                    {{ \Carbon\Carbon::parse($jadwal->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->timeslot->end_time)->format('H:i') }}
+                                                    {{ \Carbon\Carbon::parse($first->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($last->timeslot->end_time)->format('H:i') }}
                                                 </span>
                                             </div>
-                                            <h4 class="text-xs font-bold text-elevate-dark dark:text-slate-200 mb-1 line-clamp-1">{{ $jadwal->subject->name }}</h4>
+                                            <h4 class="text-xs font-bold text-elevate-dark dark:text-slate-200 mb-1 line-clamp-1">{{ $first->subject->name }}</h4>
                                             <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 truncate">
-                                                <i class="ph-fill ph-user-circle text-slate-400 dark:text-slate-500 mr-0.5"></i> {{ $jadwal->teacher->name ?? '-' }}
+                                                <i class="ph-fill ph-user-circle text-slate-400 dark:text-slate-500 mr-0.5"></i> {{ $first->teacher->name ?? '-' }}
                                             </div>
                                         </div>
                                     </div>
