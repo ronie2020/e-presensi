@@ -76,7 +76,7 @@ class StudentController extends Controller
             }
         });
 
-        $students = $query->orderBy('classes.name', 'asc') 
+       $students = $query->orderByRaw('ISNULL(classes.name), classes.name ASC') 
                           ->orderBy('students.name', 'asc')
                           ->paginate(10)
                           ->appends(request()->query());
