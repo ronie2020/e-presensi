@@ -73,13 +73,13 @@
 
         .bg-pattern {
             position: absolute; inset: 0; z-index: 1; opacity: 0.35; /* Dibuat lebih tipis dari 0.6 */
-            background-image: radial-gradient(#64748b 0.1px, transparent 1px); /* Titik diperkecil dari 1.5px jadi 1px */
+            background-image: radial-gradient(#64748b 1px, transparent 1px); /* Titik diperkecil dari 1.5px jadi 1px */
             background-size: 12px 12px;
         }
 
         .diagonal-stripes {
             position: absolute; inset: 0; z-index: 1; opacity: 0.025; /* Dibuat lebih tipis dari 0.05 */
-            background-image: repeating-linear-gradient(45deg, #000, #000 0.1px, transparent 0.1px, transparent 12px); /* Garis diperkecil dari 1.5px jadi 1px */
+            background-image: repeating-linear-gradient(45deg, #000, #000 1px, transparent 1px, transparent 12px); /* Garis diperkecil dari 1.5px jadi 1px */
         }
 
         .inner-frame {
@@ -106,10 +106,18 @@
         /* HEADER */
         .header-area {
             display: flex; justify-content: space-between; align-items: flex-start;
-            padding: 8px 8px 0 8px; width: 100%; z-index: 15;
+            padding: 16px 8px 0 8px; /* POIN 1: Padding atas ditambah dari 8px menjadi 16px untuk ruang lubang tali */
+            width: 100%; z-index: 15;
         }
         .logo-img { height: 22px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         .header-text { text-align: center; flex-grow: 1; padding: 0 4px; }
+
+        /* POIN 1: Indikator Panduan Lubang Tali (Samar) */
+        .punch-hole {
+            position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+            width: 14px; height: 4px; border-radius: 10px; border: 1px solid #cbd5e1;
+            background-color: transparent; z-index: 20;
+        }
 
         /* KOTAK FOTO 3x4 (Disesuaikan untuk lebar kartu 70mm) */
         .photo-container {
@@ -175,14 +183,26 @@
 </head>
 <body>
     <!-- Toolbar (No Print) -->
-    <div class="no-print w-full bg-white p-5 mb-4 flex justify-between items-center max-w-[210mm] rounded-xl shadow-sm border border-slate-200">
-        <div>
-            <h1 class="font-black text-slate-800 text-lg">Cetak ID Card MPLS</h1>
-            <p class="text-xs text-slate-500 font-medium">Desain Premium &bull; Ukuran 7x11 cm (Portrait)</p>
+    <div class="no-print w-full bg-white p-5 mb-4 flex flex-col gap-4 max-w-[210mm] rounded-xl shadow-sm border border-slate-200">
+        <div class="flex justify-between items-center w-full">
+            <div>
+                <h1 class="font-black text-slate-800 text-lg">Cetak ID Card MPLS</h1>
+                <p class="text-xs text-slate-500 font-medium">Desain Premium &bull; Ukuran 7x11 cm (Portrait)</p>
+            </div>
+            <button onclick="window.print()" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-md shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95">
+                <i class="ph-bold ph-printer text-lg"></i> Cetak Kartu
+            </button>
         </div>
-        <button onclick="window.print()" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-md shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95">
-            <i class="ph-bold ph-printer text-lg"></i> Cetak Kartu
-        </button>
+        
+        <!-- POIN 4: UI Pagination (Otomatis muncul jika dipanggil dari Controller menggunakan paginate() ) -->
+        @if(method_exists($students, 'links'))
+            <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-sm w-full">
+                <span class="text-slate-500 font-medium">Navigasi Halaman Cetak:</span>
+                <div class="pagination-wrapper">
+                    {{ $students->links('pagination::tailwind') }}
+                </div>
+            </div>
+        @endif
     </div>
 
     <!-- Peringatan Grafis Latar Belakang -->
@@ -215,6 +235,9 @@
             <!-- Pembungkus Kartu -->
             <div class="mpls-card" style="--theme-color: {{ $themeColor }};">
                 
+                <!-- POIN 1: Indikator Lubang Tali -->
+                <div class="punch-hole"></div>
+
                 <!-- Background Sekolah & Ornamen CSS -->
                 <img src="{{ asset('images/netila.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?q=80&w=800&auto=format&fit=crop'" class="school-bg-img">
                 <div class="bg-pattern"></div>
@@ -235,9 +258,9 @@
                         <img src="{{ asset('images/tut_wuri.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="logo-img">
                         <div class="header-text">
                             <!-- LOGIKA LARAVEL: Variabel Tahun Ajaran -->
-                            <h1 class="text-[12px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
-                            <h2 class="text-[10px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
-                            <p class="text-[7px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
+                            <h1 class="text-[9px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
+                            <h2 class="text-[7px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
+                            <p class="text-[5.5px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
                             <div class="w-full max-w-[70px] mx-auto h-[1.5px] bg-gradient-to-r from-transparent via-slate-400 to-transparent mt-0.5"></div>
                         </div>
                         <img src="{{ asset('images/logo.png') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="logo-img">
@@ -252,7 +275,7 @@
                     <!-- AREA TEKS DATA -->
                     <div class="info-area">
                         <!-- LOGIKA LARAVEL: Nama Siswa (Diperbesar) --> 
-                        <h3 class="text-[18px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
+                        <h3 class="text-[16px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
                             {{ \Illuminate\Support\Str::limit($student->name, 25) }}
                         </h3>
                         <div class="divider-line"></div>
@@ -266,19 +289,20 @@
                             </div>
 
                             <div class="label-text mt-1.5">Asal Sekolah</div>
-                            <!-- LOGIKA LARAVEL: Asal Sekolah --> 
-                            <div class="value-text">{{ \Illuminate\Support\Str::limit($student->school_origin, 22) }}</div>
-                        </div>
-
-                        <!-- LOGIKA LARAVEL: Generate QR Code (Dipindah ke tengah bawah data) -->
-                        <div class="qr-box z-10 mt-2">
-                            {!! QrCode::size(52)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
-                            <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
-                        </div>
+                        <!-- LOGIKA LARAVEL: Asal Sekolah --> 
+                        <div class="value-text">{{ \Illuminate\Support\Str::limit($student->school_origin, 22) }}</div>
                     </div>
 
-                    <!-- AREA BAWAH -->
-                     <div class="bottom-area">
+                    <!-- LOGIKA LARAVEL: Generate QR Code (Dipindah ke tengah bawah data) -->
+                    <div class="qr-box z-10 mt-2">
+                        <!-- POIN 3: Antisipasi NISN Kosong (Fallback logic) -->
+                        {!! QrCode::size(52)->margin(1)->color(15, 23, 42)->generate($student->nisn ?: 'TIDAK-ADA-DATA-' . $student->id) !!}
+                        <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn ?: 'BELUM ADA' }}</span>
+                    </div>
+                </div>
+
+                <!-- AREA BAWAH -->
+                <div class="bottom-area">
                         <!-- Label Bawah (Disusun vertikal dan background putih gambar dihilangkan) -->
                         <div class="flex flex-col z-10 pb-1 items-center opacity-95 mr-2">
                             <!-- Tambahan class 'mix-blend-multiply' untuk membuat background putih otomatis transparan -->

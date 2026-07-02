@@ -649,11 +649,14 @@ class AdminPpdbController extends Controller
             ->select('students.*', 'ppdb_registrants.registration_number')
             ->where('ppdb_registrants.academic_year', $year)
             ->whereHas('schoolClass', function($query) {
-                $query->where('name', 'like', '7%'); // Asumsi nama kelas dimulai dengan angka 7 (7A, 7B, dll)
+                $query->where('name', 'like', '7%');
             })
             ->orderBy('students.class_id')
             ->orderBy('students.name')
-            ->get();
+            // Ubah get() menjadi paginate(), misalnya 40 kartu (10 lembar A4) per halaman
+            ->paginate(40) 
+            // Tambahkan appends agar parameter filter tahun (?year=2024) tidak hilang saat pindah halaman
+            ->appends($request->all()); 
 
         if ($students->isEmpty()) {
             return redirect()->back()->with('error', 'Belum ada data siswa baru yang dipetakan ke kelas untuk dicetak kartu MPLS-nya.');
