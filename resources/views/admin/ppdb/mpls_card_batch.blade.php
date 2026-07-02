@@ -56,7 +56,7 @@
             width: 70mm; /* Diperbarui dari 80mm */
             height: 110mm; /* Diperbarui dari 120mm */
             background-color: #f8fafc;
-            border: 1px dashed #94a3b8; /* Garis potong panitia */
+            border: 1.5px dashed #475569; /* Garis potong diperjelas (lebih tebal dan gelap) */
             position: relative;
             overflow: hidden;
             display: flex;
@@ -67,24 +67,25 @@
         /* ================= DEKORASI BACKGROUND ================= */
         .school-bg-img {
             position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-            z-index: 0; opacity: 0.25; filter: grayscale(10%); 
+            z-index: 0; opacity: 0.12; /* Dibuat lebih tipis/transparan dari 0.25 */ 
+            filter: grayscale(10%); 
         }
 
         .bg-pattern {
-            position: absolute; inset: 0; z-index: 1; opacity: 0.6;
-            background-image: radial-gradient(#64748b 1.5px, transparent 1.5px);
+            position: absolute; inset: 0; z-index: 1; opacity: 0.35; /* Dibuat lebih tipis dari 0.6 */
+            background-image: radial-gradient(#64748b 0.1px, transparent 1px); /* Titik diperkecil dari 1.5px jadi 1px */
             background-size: 12px 12px;
         }
 
         .diagonal-stripes {
-            position: absolute; inset: 0; z-index: 1; opacity: 0.05;
-            background-image: repeating-linear-gradient(45deg, #000, #000 1.5px, transparent 1.5px, transparent 12px);
+            position: absolute; inset: 0; z-index: 1; opacity: 0.025; /* Dibuat lebih tipis dari 0.05 */
+            background-image: repeating-linear-gradient(45deg, #000, #000 0.1px, transparent 0.1px, transparent 12px); /* Garis diperkecil dari 1.5px jadi 1px */
         }
 
         .inner-frame {
             position: absolute; inset: 4px; z-index: 20;
-            border: 2px solid var(--theme-color);
-            border-radius: 6px; pointer-events: none; opacity: 0.85;
+            border: 3px solid var(--theme-color); /* Bingkai warna dipertebal dari 2px jadi 3px */
+            border-radius: 6px; pointer-events: none; opacity: 1; /* Efek transparan dihilangkan agar warna tajam */
         }
 
         /* Watermark Raksasa */
@@ -234,9 +235,9 @@
                         <img src="{{ asset('images/tut_wuri.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="logo-img">
                         <div class="header-text">
                             <!-- LOGIKA LARAVEL: Variabel Tahun Ajaran -->
-                            <h1 class="text-[9px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
-                            <h2 class="text-[7px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
-                            <p class="text-[5.5px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
+                            <h1 class="text-[12px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
+                            <h2 class="text-[10px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
+                            <p class="text-[7px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
                             <div class="w-full max-w-[70px] mx-auto h-[1.5px] bg-gradient-to-r from-transparent via-slate-400 to-transparent mt-0.5"></div>
                         </div>
                         <img src="{{ asset('images/logo.png') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="logo-img">
@@ -251,7 +252,7 @@
                     <!-- AREA TEKS DATA -->
                     <div class="info-area">
                         <!-- LOGIKA LARAVEL: Nama Siswa (Diperbesar) --> 
-                        <h3 class="text-[16px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
+                        <h3 class="text-[18px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
                             {{ \Illuminate\Support\Str::limit($student->name, 25) }}
                         </h3>
                         <div class="divider-line"></div>
@@ -271,13 +272,13 @@
 
                         <!-- LOGIKA LARAVEL: Generate QR Code (Dipindah ke tengah bawah data) -->
                         <div class="qr-box z-10 mt-2">
-                            {!! QrCode::size(70)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
+                            {!! QrCode::size(52)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
                             <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
                         </div>
                     </div>
 
                     <!-- AREA BAWAH -->
-                    <div class="bottom-area">
+                     <div class="bottom-area">
                         <!-- Label Bawah (Disusun vertikal dan background putih gambar dihilangkan) -->
                         <div class="flex flex-col z-10 pb-1 items-center opacity-95 mr-2">
                             <!-- Tambahan class 'mix-blend-multiply' untuk membuat background putih otomatis transparan -->
