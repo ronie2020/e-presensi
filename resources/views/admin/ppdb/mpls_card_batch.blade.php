@@ -115,11 +115,50 @@
             width: 22mm; height: 30mm; 
             background-color: #e2e8f0;
             border-radius: 6px;
-            margin: 6px auto 3px auto; 
+            margin: 6px auto 2px auto; 
             box-shadow: 0 0 0 2px #ffffff, 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             color: #94a3b8; font-size: 7px; font-weight: 700; text-align: center; line-height: 1.2;
             position: relative; z-index: 15;
+        }
+
+        /* AREA TEKS INFO */
+        .info-area { text-align: center; padding: 0 8px; flex-grow: 1; z-index: 15; }
+        
+        .glass-box {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            padding: 4px 6px;
+            margin-top: 4px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .label-text { font-size: 8px; font-weight: 700; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .value-text { font-size: 11px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-top: 1px; }
+        .divider-line { width: 40px; height: 2.5px; background: var(--theme-color); margin: 3px auto 3px auto; border-radius: 2px; }
+
+        /* AREA BAWAH */
+        .bottom-area {
+            position: absolute; bottom: 18px; left: 0; width: 100%;
+            padding: 0 8px; display: flex; justify-content: space-between; align-items: flex-end;
+            z-index: 15;
+        }
+        
+        .qr-box {
+            background: white; padding: 2px; border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; align-items: center;
+            border: 2px solid var(--theme-color);
+        }
+
+        /* FOOTER BAR */
+        .footer-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 6mm;
+            background-color: var(--theme-color); display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 6.5px; font-weight: 700; letter-spacing: 0.5px; z-index: 15;
         }
 
         /* AREA TEKS INFO */
@@ -248,27 +287,21 @@
 
                     <!-- AREA TEKS DATA -->
                     <div class="info-area">
-                        <!-- LOGIKA LARAVEL: Nama Siswa --> 
-                        <h3 class="text-[13px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
+                        <!-- LOGIKA LARAVEL: Nama Siswa (Diperbesar) --> 
+                        <h3 class="text-[16px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
                             {{ \Illuminate\Support\Str::limit($student->name, 25) }}
                         </h3>
                         <div class="divider-line"></div>
                         
-                        <!-- Box Transparan (Data Siswa) -->
+                        <!-- Box Transparan (Hanya Kelas & Asal Sekolah, Diperbesar) -->
                         <div class="glass-box">
-                            <div class="label-text mt-0">Nomor Peserta</div>
-                            <!-- LOGIKA LARAVEL: Registration Number --> 
-                            <div class="inline-block bg-slate-800 text-white px-2 py-0.5 rounded font-mono text-[8px] font-bold mt-0.5 shadow-sm tracking-wider">
-                                {{ $student->nisn }}
-                            </div>
-
-                            <div class="label-text">Kelas</div>
+                            <div class="label-text mt-0">Kelas</div>
                             <!-- LOGIKA LARAVEL: Relasi Nama Kelas --> 
                             <div class="value-text" style="color: var(--theme-color);">
                                 {{ $student->schoolClass ? $student->schoolClass->name : '-' }}
                             </div>
 
-                            <div class="label-text">Asal Sekolah</div>
+                            <div class="label-text mt-1.5">Asal Sekolah</div>
                             <!-- LOGIKA LARAVEL: Asal Sekolah --> 
                             <div class="value-text">{{ \Illuminate\Support\Str::limit($student->school_origin, 22) }}</div>
                         </div>
@@ -277,15 +310,15 @@
                     <!-- AREA BAWAH -->
                     <div class="bottom-area">
                         <!-- Label Kiri -->
-                        <div class="flex flex-col z-10 pb-1 items-center w-[18mm]">
-                            <i class="ph-fill ph-shield-check text-[24px] text-blue-800 drop-shadow-md mb-0.5"></i>
-                            <h4 class="text-[6px] font-black text-slate-900 uppercase tracking-wide text-center leading-tight">PESERTA<br>MPLS</h4>
+                        <div class="flex flex-col z-10 pb-1 items-start w-[20mm]">
+                            <img src="{{ asset('images/mpls.jpeg') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="logo-img">
+                            <h4 class="text-[7px] font-black text-slate-900 uppercase tracking-wide leading-tight">PESERTA<br>MPLS</h4>
                         </div>
 
-                        <!-- LOGIKA LARAVEL: Generate QR Code (Size diperkecil) -->
-                        <div class="qr-box z-10 mb-0.5" style="border: 1.5px solid var(--theme-color);">
-                            {!! QrCode::size(38)->margin(2)->color(15, 23, 42)->generate($student->nisn) !!}
-                            <span class="text-[5px] font-black mt-0.5 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
+                        <!-- LOGIKA LARAVEL: Generate QR Code (Diperbesar Signifikan untuk Absensi) -->
+                        <div class="qr-box z-10 mb-0.5">
+                            {!! QrCode::size(55)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
+                            <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
                         </div>
                     </div>
 
