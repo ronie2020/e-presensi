@@ -123,7 +123,7 @@
         }
 
         /* AREA TEKS INFO */
-        .info-area { text-align: center; padding: 0 8px; flex-grow: 1; z-index: 15; }
+        .info-area { text-align: center; padding: 0 8px; flex-grow: 1; z-index: 15; display: flex; flex-direction: column; align-items: center; }
         
         .glass-box {
             background: rgba(255, 255, 255, 0.75);
@@ -132,7 +132,9 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 6px;
             padding: 4px 6px;
-            margin-top: 4px;
+            margin-top: 2px;
+            width: 100%;
+            max-width: 60mm;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
@@ -142,8 +144,8 @@
 
         /* AREA BAWAH */
         .bottom-area {
-            position: absolute; bottom: 18px; left: 0; width: 100%;
-            padding: 0 8px; display: flex; justify-content: space-between; align-items: flex-end;
+            position: absolute; bottom: 26px; left: 0; width: 100%;
+            padding: 0 8px; display: flex; justify-content: flex-end; align-items: flex-end;
             z-index: 15;
         }
         
@@ -159,45 +161,6 @@
             position: absolute; bottom: 0; left: 0; width: 100%; height: 6mm;
             background-color: var(--theme-color); display: flex; justify-content: center; align-items: center;
             color: white; font-size: 6.5px; font-weight: 700; letter-spacing: 0.5px; z-index: 15;
-        }
-
-        /* AREA TEKS INFO */
-        .info-area { text-align: center; padding: 0 8px; flex-grow: 1; z-index: 15; }
-        
-        .glass-box {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-radius: 6px;
-            padding: 3px 5px;
-            margin-top: 3px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .label-text { font-size: 7px; font-weight: 700; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .value-text { font-size: 8px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-top: 1px; }
-        .divider-line { width: 30px; height: 2px; background: var(--theme-color); margin: 2px auto 3px auto; border-radius: 2px; }
-
-        /* AREA BAWAH */
-        .bottom-area {
-            position: absolute; bottom: 16px; left: 0; width: 100%;
-            padding: 0 8px; display: flex; justify-content: space-between; align-items: flex-end;
-            z-index: 15;
-        }
-        
-        .qr-box {
-            background: white; padding: 2px; border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; align-items: center;
-            border: 1.5px solid var(--theme-color);
-        }
-
-        /* FOOTER BAR */
-        .footer-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 5mm;
-            background-color: var(--theme-color); display: flex; justify-content: center; align-items: center;
-            color: white; font-size: 6px; font-weight: 700; letter-spacing: 0.5px; z-index: 15;
         }
 
         .print-alert { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px 15px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; max-width: 210mm; display: flex; align-items: center; gap: 10px; font-weight: 600; }
@@ -305,20 +268,21 @@
                             <!-- LOGIKA LARAVEL: Asal Sekolah --> 
                             <div class="value-text">{{ \Illuminate\Support\Str::limit($student->school_origin, 22) }}</div>
                         </div>
+
+                        <!-- LOGIKA LARAVEL: Generate QR Code (Dipindah ke tengah bawah data) -->
+                        <div class="qr-box z-10 mt-2">
+                            {!! QrCode::size(70)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
+                            <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
+                        </div>
                     </div>
 
                     <!-- AREA BAWAH -->
                     <div class="bottom-area">
-                        <!-- Label Kiri -->
-                        <div class="flex flex-col z-10 pb-1 items-start w-[20mm]">
-                            <img src="{{ asset('images/mpls.jpeg') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="logo-img">
-                            <h4 class="text-[7px] font-black text-slate-900 uppercase tracking-wide leading-tight">PESERTA<br>MPLS</h4>
-                        </div>
-
-                        <!-- LOGIKA LARAVEL: Generate QR Code (Diperbesar Signifikan untuk Absensi) -->
-                        <div class="qr-box z-10 mb-0.5">
-                            {!! QrCode::size(55)->margin(1)->color(15, 23, 42)->generate($student->nisn) !!}
-                            <span class="text-[6.5px] font-black mt-1 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
+                        <!-- Label Bawah (Disusun vertikal dan background putih gambar dihilangkan) -->
+                        <div class="flex flex-col z-10 pb-1 items-center opacity-95 mr-2">
+                            <!-- Tambahan class 'mix-blend-multiply' untuk membuat background putih otomatis transparan -->
+                            <img src="{{ asset('images/mpls.png') }}" class="h-6 w-auto object-contain mix-blend-multiply" alt="Icon" onerror="this.style.display='none';">
+                            <h4 class="text-[6.5px] font-black text-slate-900 uppercase tracking-widest leading-tight text-center mt-0.5">PESERTA<br>MPLS</h4>
                         </div>
                     </div>
 
