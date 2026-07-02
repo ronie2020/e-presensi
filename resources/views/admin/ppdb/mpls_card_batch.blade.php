@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Kartu MPLS - Premium Portrait 8x12</title>
+    <title>Cetak Kartu MPLS - Premium Portrait 7x11</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Montserrat -->
@@ -39,9 +39,9 @@
             background: white;
             margin-bottom: 20px;
             display: grid;
-            /* Ukuran Fisik: Lebar 80mm, Tinggi 120mm */
-            grid-template-columns: repeat(2, 80mm); 
-            grid-template-rows: repeat(2, 120mm);   
+            /* Ukuran Fisik BARU: Lebar 70mm, Tinggi 110mm */
+            grid-template-columns: repeat(2, 70mm); 
+            grid-template-rows: repeat(2, 110mm);   
             gap: 10mm; /* Jarak antar kartu */
             justify-content: center;
             align-content: center;
@@ -53,8 +53,8 @@
 
         /* Kartu Utama */
         .mpls-card {
-            width: 80mm;
-            height: 120mm;
+            width: 70mm; /* Diperbarui dari 80mm */
+            height: 110mm; /* Diperbarui dari 120mm */
             background-color: #f8fafc;
             border: 1px dashed #94a3b8; /* Garis potong panitia */
             position: relative;
@@ -88,16 +88,16 @@
         }
 
         /* Watermark Raksasa */
-        .watermark-left { position: absolute; left: -15px; top: 40%; font-size: 120px; color: #3b82f6; opacity: 0.04; transform: rotate(-15deg); z-index: 1; }
-        .watermark-right { position: absolute; right: -20px; top: 15%; font-size: 110px; color: #3b82f6; opacity: 0.04; transform: rotate(10deg); z-index: 1; }
+        .watermark-left { position: absolute; left: -15px; top: 40%; font-size: 100px; color: #3b82f6; opacity: 0.04; transform: rotate(-15deg); z-index: 1; }
+        .watermark-right { position: absolute; right: -20px; top: 15%; font-size: 90px; color: #3b82f6; opacity: 0.04; transform: rotate(10deg); z-index: 1; }
 
-        /* Gelombang Ornamen */
-        .wave-tl { position: absolute; top: -30px; left: -30px; width: 100px; height: 100px; background: #bfdbfe; border-radius: 50%; z-index: 2; opacity: 0.8; }
-        .wave-tr { position: absolute; top: -40px; right: -15px; width: 110px; height: 110px; background: #dbeafe; border-radius: 50%; z-index: 2; opacity: 0.6; }
-        .wave-bl { position: absolute; bottom: 20px; left: -30px; width: 100px; height: 100px; background: #93c5fd; border-radius: 50%; z-index: 2; opacity: 0.4; }
+        /* Gelombang Ornamen - Ukuran disesuaikan untuk 7x11 */
+        .wave-tl { position: absolute; top: -25px; left: -25px; width: 85px; height: 85px; background: #bfdbfe; border-radius: 50%; z-index: 2; opacity: 0.8; }
+        .wave-tr { position: absolute; top: -35px; right: -15px; width: 95px; height: 95px; background: #dbeafe; border-radius: 50%; z-index: 2; opacity: 0.6; }
+        .wave-bl { position: absolute; bottom: 20px; left: -25px; width: 85px; height: 85px; background: #93c5fd; border-radius: 50%; z-index: 2; opacity: 0.4; }
         
-        .wave-br-dark { position: absolute; bottom: 10px; right: -15px; width: 140px; height: 90px; background: var(--theme-color); border-radius: 70% 30% 0 0; z-index: 3; transform: rotate(-5deg); opacity: 0.9;}
-        .wave-br-light { position: absolute; bottom: 25px; right: 0; width: 160px; height: 100px; background: #3b82f6; border-radius: 50% 50% 0 0; z-index: 2; opacity: 0.5;}
+        .wave-br-dark { position: absolute; bottom: 10px; right: -15px; width: 120px; height: 80px; background: var(--theme-color); border-radius: 70% 30% 0 0; z-index: 3; transform: rotate(-5deg); opacity: 0.9;}
+        .wave-br-light { position: absolute; bottom: 25px; right: 0; width: 140px; height: 90px; background: #3b82f6; border-radius: 50% 50% 0 0; z-index: 2; opacity: 0.5;}
 
         /* Wrapper Konten Utama */
         .content-wrapper { z-index: 10; position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
@@ -105,25 +105,25 @@
         /* HEADER */
         .header-area {
             display: flex; justify-content: space-between; align-items: flex-start;
-            padding: 10px 10px 0 10px; width: 100%; z-index: 15;
+            padding: 8px 8px 0 8px; width: 100%; z-index: 15;
         }
-        .logo-img { height: 26px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .logo-img { height: 22px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         .header-text { text-align: center; flex-grow: 1; padding: 0 4px; }
 
-        /* KOTAK FOTO 3x4 (Disesuaikan untuk lebar kartu 80mm) */
+        /* KOTAK FOTO 3x4 (Disesuaikan untuk lebar kartu 70mm) */
         .photo-container {
-            width: 25mm; height: 34mm; 
+            width: 22mm; height: 30mm; 
             background-color: #e2e8f0;
             border-radius: 6px;
-            margin: 8px auto 4px auto; 
-            box-shadow: 0 0 0 2.5px #ffffff, 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 6px auto 3px auto; 
+            box-shadow: 0 0 0 2px #ffffff, 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #94a3b8; font-size: 8px; font-weight: 700; text-align: center; line-height: 1.2;
+            color: #94a3b8; font-size: 7px; font-weight: 700; text-align: center; line-height: 1.2;
             position: relative; z-index: 15;
         }
 
         /* AREA TEKS INFO */
-        .info-area { text-align: center; padding: 0 10px; flex-grow: 1; z-index: 15; }
+        .info-area { text-align: center; padding: 0 8px; flex-grow: 1; z-index: 15; }
         
         .glass-box {
             background: rgba(255, 255, 255, 0.75);
@@ -131,24 +131,24 @@
             -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 6px;
-            padding: 4px 6px;
+            padding: 3px 5px;
             margin-top: 3px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .label-text { font-size: 7.5px; font-weight: 700; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .value-text { font-size: 9px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-top: 1px; }
-        .divider-line { width: 35px; height: 2px; background: var(--theme-color); margin: 2px auto 3px auto; border-radius: 2px; }
+        .label-text { font-size: 7px; font-weight: 700; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .value-text { font-size: 8px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-top: 1px; }
+        .divider-line { width: 30px; height: 2px; background: var(--theme-color); margin: 2px auto 3px auto; border-radius: 2px; }
 
         /* AREA BAWAH */
         .bottom-area {
-            position: absolute; bottom: 18px; left: 0; width: 100%;
-            padding: 0 10px; display: flex; justify-content: space-between; align-items: flex-end;
+            position: absolute; bottom: 16px; left: 0; width: 100%;
+            padding: 0 8px; display: flex; justify-content: space-between; align-items: flex-end;
             z-index: 15;
         }
         
         .qr-box {
-            background: white; padding: 2.5px; border-radius: 5px;
+            background: white; padding: 2px; border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex; flex-direction: column; align-items: center;
             border: 1.5px solid var(--theme-color);
@@ -158,7 +158,7 @@
         .footer-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 5mm;
             background-color: var(--theme-color); display: flex; justify-content: center; align-items: center;
-            color: white; font-size: 6.5px; font-weight: 700; letter-spacing: 0.5px; z-index: 15;
+            color: white; font-size: 6px; font-weight: 700; letter-spacing: 0.5px; z-index: 15;
         }
 
         .print-alert { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 10px 15px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; max-width: 210mm; display: flex; align-items: center; gap: 10px; font-weight: 600; }
@@ -175,7 +175,7 @@
     <div class="no-print w-full bg-white p-5 mb-4 flex justify-between items-center max-w-[210mm] rounded-xl shadow-sm border border-slate-200">
         <div>
             <h1 class="font-black text-slate-800 text-lg">Cetak ID Card MPLS</h1>
-            <p class="text-xs text-slate-500 font-medium">Desain Premium &bull; Ukuran 8x12 cm (Portrait)</p>
+            <p class="text-xs text-slate-500 font-medium">Desain Premium &bull; Ukuran 7x11 cm (Portrait)</p>
         </div>
         <button onclick="window.print()" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-sm hover:bg-blue-700 shadow-md shadow-blue-500/30 flex items-center gap-2 transition-transform active:scale-95">
             <i class="ph-bold ph-printer text-lg"></i> Cetak Kartu
@@ -232,24 +232,24 @@
                         <img src="{{ asset('images/tut_wuri.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="logo-img">
                         <div class="header-text">
                             <!-- LOGIKA LARAVEL: Variabel Tahun Ajaran -->
-                            <h1 class="text-[10px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
-                            <h2 class="text-[8.5px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
-                            <p class="text-[6.5px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
-                            <div class="w-full max-w-[80px] mx-auto h-[1.5px] bg-gradient-to-r from-transparent via-slate-400 to-transparent mt-1"></div>
+                            <h1 class="text-[9px] font-black text-slate-900 tracking-tight leading-tight uppercase">MPLS RAMAH {{ $year ?? date('Y') }}</h1>
+                            <h2 class="text-[7px] font-black text-slate-800 uppercase mt-0.5 drop-shadow-sm">SMP NEGERI 3 LAKBOK</h2>
+                            <p class="text-[5.5px] font-bold text-slate-600 mt-0.5">Tahun Ajaran {{ $year ?? date('Y') }}/{{ ($year ?? date('Y'))+1 }}</p>
+                            <div class="w-full max-w-[70px] mx-auto h-[1.5px] bg-gradient-to-r from-transparent via-slate-400 to-transparent mt-0.5"></div>
                         </div>
                         <img src="{{ asset('images/logo.png') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="logo-img">
                     </div>
 
                     <!-- FOTO -->
                     <div class="photo-container">
-                        <i class="ph-duotone ph-image text-2xl text-slate-300 mb-0.5"></i>
+                        <i class="ph-duotone ph-image text-xl text-slate-300 mb-0.5"></i>
                         FOTO<br>3x4
                     </div>
 
                     <!-- AREA TEKS DATA -->
                     <div class="info-area">
                         <!-- LOGIKA LARAVEL: Nama Siswa --> 
-                        <h3 class="text-[15px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
+                        <h3 class="text-[13px] font-black text-slate-900 uppercase leading-tight drop-shadow-sm mt-1">
                             {{ \Illuminate\Support\Str::limit($student->name, 25) }}
                         </h3>
                         <div class="divider-line"></div>
@@ -258,7 +258,7 @@
                         <div class="glass-box">
                             <div class="label-text mt-0">Nomor Peserta</div>
                             <!-- LOGIKA LARAVEL: Registration Number --> 
-                            <div class="inline-block bg-slate-800 text-white px-2 py-0.5 rounded font-mono text-[9px] font-bold mt-0.5 shadow-sm tracking-wider">
+                            <div class="inline-block bg-slate-800 text-white px-2 py-0.5 rounded font-mono text-[8px] font-bold mt-0.5 shadow-sm tracking-wider">
                                 {{ $student->nisn }}
                             </div>
 
@@ -277,15 +277,15 @@
                     <!-- AREA BAWAH -->
                     <div class="bottom-area">
                         <!-- Label Kiri -->
-                        <div class="flex flex-col z-10 pb-1 items-center w-[20mm]">
-                            <i class="ph-fill ph-shield-check text-[28px] text-blue-800 drop-shadow-md mb-0.5"></i>
-                            <h4 class="text-[6.5px] font-black text-slate-900 uppercase tracking-wide text-center leading-tight">PESERTA<br>MPLS</h4>
+                        <div class="flex flex-col z-10 pb-1 items-center w-[18mm]">
+                            <i class="ph-fill ph-shield-check text-[24px] text-blue-800 drop-shadow-md mb-0.5"></i>
+                            <h4 class="text-[6px] font-black text-slate-900 uppercase tracking-wide text-center leading-tight">PESERTA<br>MPLS</h4>
                         </div>
 
-                        <!-- LOGIKA LARAVEL: Generate QR Code -->
+                        <!-- LOGIKA LARAVEL: Generate QR Code (Size diperkecil) -->
                         <div class="qr-box z-10 mb-0.5" style="border: 1.5px solid var(--theme-color);">
-                            {!! QrCode::size(42)->margin(2)->color(15, 23, 42)->generate($student->nisn) !!}
-                            <span class="text-[5.5px] font-black mt-0.5 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
+                            {!! QrCode::size(38)->margin(2)->color(15, 23, 42)->generate($student->nisn) !!}
+                            <span class="text-[5px] font-black mt-0.5 text-slate-700 tracking-wider">ID: {{ $student->nisn }}</span>
                         </div>
                     </div>
 
