@@ -351,13 +351,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/close/{id}', [TeachingController::class, 'close'])->name('close');
     });
 
-    // =========================================================================
+   // =========================================================================
     // Manajemen Master Data (SISWA & KELAS)
     // =========================================================================
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
     Route::get('/students/export-attendance', [StudentController::class, 'exportAttendance'])->name('students.exportAttendance'); 
     Route::get('/students/print-batch', [StudentController::class, 'printBatch'])->name('students.printBatch');
+    Route::get('/students/print-class-distribution', [StudentController::class, 'printClassDistribution'])->name('students.print_class_distribution'); // <-- ROUTE BARU CETAK PEMBAGIAN KELAS
     Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');   
     Route::resource('students', StudentController::class); 

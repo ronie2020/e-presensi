@@ -426,4 +426,36 @@ class StudentController extends Controller
 
         return Excel::download(new AttendanceExport($class->id), $fileName);
     }
+
+    /**
+     * Mencetak halaman Pembagian Kelas (Untuk Buku Induk)
+     */
+    public function printClassDistribution(Request $request)
+    {
+        $query = SchoolClass::with(['students' => function($q) {
+            // Memastikan hanya siswa aktif yang tercetak
+            $q->where(function($subQ) {
+                $subQ->where('status', '!=', 'graduated')
+                     ->orWhereNull('status');
+            })->orderBy('name', 'asc');
+        }]);
+
+        // Filter by specific class if requested via dropdown
+        if ($request->filled('class_id')) {
+            $query->where('id', $request->class_id);
+        }
+
+        $classes = $query->orderBy('name', 'asc')->get();
+
+        // Mengambil tahun berjalan berdasarkan setup kalender akademik
+        $activeYear = AcademicYear::where('is_active', true)->first();
+        if ($activeYear) {
+            // Contoh "2024/2025" -> ambil "2024"
+            $year = substr($activeYear->name, 0, 4); 
+        } else {
+            $year = date('Y');
+        }
+
+        return view('students.print_class_distribution', compact('classes', 'year'));
+    }
 }

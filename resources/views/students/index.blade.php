@@ -260,6 +260,10 @@
                                     <button type="button" id="btn-print-selected" onclick="printSelectedCards()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl hover:bg-elevate-accent/20 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-check-square-offset text-lg"></i> Cetak (<span id="print-selected-count">0</span>)
                                     </button>
+
+                                    <button type="button" onclick="printClassDistribution()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-violet-50 border border-violet-100 text-violet-700 rounded-xl hover:bg-violet-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap" title="Cetak Lembar Pembagian Kelas">
+                                        <i class="ph-bold ph-users-three text-lg"></i> Cetak Pembagian Kelas
+                                    </button>
                                     
                                     <button type="button" onclick="printBatchCards()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-elevate-dark border border-elevate-dark text-white rounded-xl hover:bg-elevate-primary transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-printer text-lg"></i> Cetak Kelas
@@ -699,6 +703,16 @@
             }
             
             window.location.href = `/students/export-attendance?class_id=${classId}`;
+        }
+
+        // FUNGSI JS CETAK PEMBAGIAN KELAS
+        function printClassDistribution() {
+            // Mengambil nilai filter kelas yang sedang dipilih
+            const classSelect = document.querySelector('select[name="filter_class_id"]');
+            const classId = classSelect ? classSelect.value : '';
+                
+            // Membuka tab baru ke route pencetakan
+            window.open(`/students/print-class-distribution?class_id=${classId}`, '_blank');
         }
         
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
