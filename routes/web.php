@@ -423,6 +423,10 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/export/class/{id}', [TimetableController::class, 'exportClass'])->name('export.class');
         Route::get('/export/teacher/{id}', [TimetableController::class, 'exportTeacher'])->name('export.teacher');
+
+        // Route untuk Import Jadwal dari luar aplikasi
+        Route::post('/import', [TimetableController::class, 'import'])->name('import');
+        Route::get('/template', [TimetableController::class, 'importTemplate'])->name('template');
     });
    
     // =========================================================================

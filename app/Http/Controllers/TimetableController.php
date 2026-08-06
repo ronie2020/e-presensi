@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ClassTimetableExport;
 use App\Exports\TeacherTimetableExport;
+use App\Exports\TimetableImportTemplateExport;
+use App\Imports\TimetableImport;
 
 class TimetableController extends Controller
 {
@@ -88,7 +90,7 @@ class TimetableController extends Controller
             return redirect()->back()->with('error', 'Gagal generate. Pastikan Slot Waktu dan Beban Mengajar sudah diisi.');
         }
 
-        Timetable::truncate();
+        Timetable::query()->delete(); 
         DB::beginTransaction();
         
         try {
@@ -277,8 +279,8 @@ class TimetableController extends Controller
      * Hapus semua jadwal (Reset)
      */
     public function reset()
-    {
-        Timetable::truncate();
+    {        
+        Timetable::query()->delete(); 
         return redirect()->back()->with('success', 'Semua jadwal berhasil dikosongkan.');
     }
 
@@ -298,6 +300,55 @@ class TimetableController extends Controller
     {
         $teacher = User::findOrFail($teacher_id);
         return Excel::download(new TeacherTimetableExport($teacher_id), 'Jadwal-Guru-'.$teacher->name.'.xlsx');
+    }
+
+    /**
+     * FITUR IMPORT: Mengunggah jadwal yang sudah disusun di luar aplikasi (Excel)
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        $overwrite = $request->boolean('overwrite');
+        $import = new TimetableImport($overwrite);
+
+        try {
+            Excel::import($import, $request->file('file'));
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membaca file: ' . $e->getMessage(),
+            ]);
+        }
+
+        if ($import->successCount === 0 && count($import->errors) > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada jadwal yang berhasil diimport. Periksa detail error di bawah.',
+                'errors' => $import->errors,
+            ]);
+        }
+
+        $message = "{$import->successCount} jadwal berhasil diimport.";
+        if (count($import->errors) > 0) {
+            $message .= ' Namun ada ' . count($import->errors) . ' baris yang dilewati.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'errors' => $import->errors,
+        ]);
+    }
+
+    /**
+     * Mengunduh template Excel kosong untuk fitur Import Jadwal
+     */
+    public function importTemplate()
+    {
+        return Excel::download(new TimetableImportTemplateExport(), 'Template-Import-Jadwal.xlsx');
     }
 
     /**

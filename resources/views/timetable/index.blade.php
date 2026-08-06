@@ -155,6 +155,31 @@
                         </form>
                     </div>
 
+                    {{-- IMPORT JADWAL DARI LUAR APLIKASI --}}
+                    <div class="bg-white p-5 sm:p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative">
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-sky-400 to-sky-600"></div>
+                        <h3 class="text-lg font-black text-elevate-dark mb-1 text-center">Import Jadwal</h3>
+                        <p class="text-[11px] text-elevate-dark/60 font-medium text-center mb-4">Unggah jadwal yang sudah disusun di luar aplikasi (format Excel).</p>
+
+                        <a href="{{ route('timetable.template') }}" class="w-full mb-4 py-2.5 px-4 bg-slate-50 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 text-xs">
+                            <i class="ph-bold ph-download-simple text-base"></i> Unduh Template Excel
+                        </a>
+
+                        <form id="form-import" onsubmit="handleImportJadwal(event)">
+                            <input type="file" name="file" id="importFileInput" accept=".xlsx,.xls" required
+                                   class="w-full text-xs font-bold text-slate-500 rounded-xl border border-slate-200 bg-slate-50 mb-3 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-elevate-soft file:text-elevate-primary file:font-bold file:text-xs">
+
+                            <label class="flex items-center gap-2 mb-4 text-xs font-bold text-elevate-dark/70 cursor-pointer">
+                                <input type="checkbox" id="importOverwrite" class="rounded border-slate-300">
+                                Timpa jadwal yang bentrok dengan data di file
+                            </label>
+
+                            <button type="submit" class="w-full py-3 px-4 bg-sky-500 text-white font-bold rounded-xl hover:bg-sky-600 transition-all shadow-lg flex items-center justify-center gap-2 text-sm">
+                                <i class="ph-bold ph-upload-simple text-lg"></i> Import Jadwal
+                            </button>
+                        </form>
+                    </div>
+
                     {{-- UNDUH JADWAL (Hanya tampil jika ada jadwal yang di set) --}}
                     @if($hasGenerated)
                     <div class="bg-white p-5 sm:p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100" x-data="{ tabExp: 'kelas' }">
@@ -601,6 +626,63 @@
             .catch(error => {
                 console.error('Error:', error);
                 Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+            });
+        }
+
+        function handleImportJadwal(event) {
+            event.preventDefault(); // Cegah reload halaman
+
+            let form = document.getElementById('form-import');
+            let fileInput = document.getElementById('importFileInput');
+            let overwrite = document.getElementById('importOverwrite').checked;
+
+            if (!fileInput.files.length) {
+                return Swal.fire({ icon: 'error', title: 'Oops...', text: 'Pilih file Excel terlebih dahulu!' });
+            }
+
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('overwrite', overwrite ? '1' : '0');
+
+            Swal.fire({
+                title: 'Mengimport jadwal...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            fetch('{{ route("timetable.import") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Susun daftar error (kalau ada) jadi list HTML sederhana
+                let errorListHtml = '';
+                if (data.errors && data.errors.length > 0) {
+                    let shown = data.errors.slice(0, 15);
+                    errorListHtml = '<div class="text-left text-xs mt-3 max-h-48 overflow-y-auto bg-rose-50 border border-rose-100 rounded-xl p-3">' +
+                        shown.map(e => `<div class="mb-1">&bull; ${e}</div>`).join('') +
+                        (data.errors.length > 15 ? `<div class="italic text-slate-400">...dan ${data.errors.length - 15} baris lainnya</div>` : '') +
+                        '</div>';
+                }
+
+                Swal.fire({
+                    icon: data.success ? 'success' : 'error',
+                    title: data.success ? 'Import Selesai' : 'Import Gagal',
+                    html: `<p class="text-sm">${data.message}</p>${errorListHtml}`,
+                    customClass: { popup: 'rounded-2xl font-sans' },
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    if (data.success) location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'Terjadi kesalahan sistem saat mengimport.', 'error');
             });
         }
 
