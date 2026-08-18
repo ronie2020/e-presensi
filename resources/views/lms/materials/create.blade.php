@@ -1,31 +1,34 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
-            {{ __('Buat Tugas Baru') }}
+            {{ __('Buat Tugas / Materi Baru') }}
         </h2>
     </x-slot>
 
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* FIX: Anti-flickering Alpine.js */
+        [x-cloak] { display: none !important; } 
     </style>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
-        {{-- Efek Latar Belakang Halus --}}
+        {{-- Efek Latar Belakang --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER ELEVATE --}}
+            {{-- HERO HEADER --}}
             <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight">Setting Penugasan</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold">Atur detail tugas, kuis, atau instruksi untuk siswa.</p>
+                        <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight">Setting Penugasan & Materi</h1>
+                        <p class="text-elevate-dark/80 text-sm font-semibold">Atur detail materi, tugas, kuis, atau instruksi untuk siswa.</p>
                     </div>
                     <a href="{{ route('lms.assignments.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
@@ -50,7 +53,7 @@
                 </div>
             @endif
 
-            {{-- INFO ALUR BELAJAR --}}
+            {{-- INFO PRO-TIP --}}
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm">
                 <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
                     <i class="ph-duotone ph-info"></i>
@@ -58,25 +61,34 @@
                 <div class="flex-1">
                     <h3 class="text-sm font-black text-blue-900 mb-1">Pro-Tip: Urutan Belajar Siswa</h3>
                     <p class="text-xs font-medium text-blue-700 leading-relaxed">
-                        Tugas yang Anda buat akan otomatis masuk ke <b>Alur Belajar Siswa (Learning Player)</b> secara berurutan. Pastikan Anda telah mengunggah <i>Materi Pembelajaran</i> terlebih dahulu jika tugas ini membutuhkan referensi bacaan sebelum dikerjakan.
+                        Tugas yang Anda buat akan otomatis masuk ke <b>Alur Belajar Siswa (Learning Player)</b> secara berurutan. Pastikan materi pendukung sudah disiapkan dengan baik.
                     </p>
                 </div>
             </div>
 
             {{-- FORM CARD --}}
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-                <form action="{{ route('lms.assignments.store') }}" method="POST" id="createAssignmentForm" 
+                
+                {{-- FIX: Ambil old() data jika terjadi error agar hasil ketik tidak hilang --}}
+                @php
+                    $oldAttachments = old('attachments', []);
+                    $oldQuestions = old('questions', []);
+                    $oldInteractiveQuestions = old('interactive_questions', []);
+                @endphp
+
+                <form action="{{ route('lms.assignments.store') }}" method="POST" enctype="multipart/form-data" id="createAssignmentForm" 
                       x-data="{ 
                           targetType: '{{ old('target_type', 'class') }}', 
                           assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
-                          questions: [],
-                          interactiveQuestions: [] 
+                          attachments: {{ json_encode($oldAttachments) }},
+                          questions: {{ json_encode($oldQuestions) }},
+                          interactiveQuestions: {{ json_encode($oldInteractiveQuestions) }} 
                       }">
                     @csrf
 
                     <div class="p-6 md:p-10 space-y-10">
                         
-                        <!-- 1. IDENTITAS TUGAS -->
+                        <!-- 1. IDENTITAS TUGAS / MATERI -->
                         <div>
                             <div class="flex items-center gap-3 mb-6">
                                 <div class="w-12 h-12 rounded-xl bg-elevate-peach-light/40 text-elevate-peach-dark flex items-center justify-center text-2xl border border-elevate-peach/30 shadow-sm"><i class="ph-bold ph-info"></i></div>
@@ -85,8 +97,8 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="col-span-2">
-                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul Tugas <span class="text-[#D13438]">*</span></label>
-                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1">
+                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul <span class="text-[#D13438]">*</span></label>
+                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1 / Materi Ekosistem">
                                 </div>
 
                                 <div>
@@ -121,32 +133,31 @@
 
                         <div class="h-px bg-slate-100"></div>
 
-                         <!-- BAGIAN 3: LAMPIRAN (DYNAMIC) -->
-                        <div class="bg-elevate-soft/30 rounded-[2rem] border border-slate-100 p-6 md:p-8">
-                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                                <div>
-                                    <label class="block text-sm font-black text-elevate-dark flex items-center gap-2">
-                                        <i class="ph-fill ph-paperclip text-elevate-primary text-xl"></i> Referensi & Lampiran
-                                    </label>
-                                    <p class="text-[11px] font-bold text-slate-400 mt-1">Upload file dokumen atau tautkan video pembelajaran.</p>
-                                </div>
-                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
-                                        class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-elevate-primary px-5 py-3 sm:py-2.5 rounded-xl font-bold hover:bg-elevate-soft hover:border-elevate-accent transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-95">
-                                    <i class="ph-bold ph-plus"></i> Tambah Baris
-                                </button>
-                            </div>
+                        <!-- 2. PILIH TIPE PENUGASAN -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-4 ml-1">Tipe Penugasan / Aktivitas <span class="text-[#D13438]">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {{-- Card 1: Upload File --}}
+                                <label class="cursor-pointer group relative">
+                                    <input type="radio" name="assignment_type" value="file_upload" x-model="assignmentType" class="peer sr-only">
+                                    <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-elevate-accent hover:bg-elevate-soft/50 transition-all peer-checked:border-elevate-primary peer-checked:bg-elevate-soft peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
+                                        <div class="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center text-3xl peer-checked:bg-elevate-primary peer-checked:border-elevate-primary peer-checked:text-white transition-colors shadow-sm">
+                                            <i class="ph-duotone ph-upload-simple"></i>
+                                        </div>
+                                        <div><span class="block font-black text-elevate-dark peer-checked:text-elevate-primary text-sm sm:text-base">Upload File / Tugas</span></div>
+                                        <div class="absolute top-4 right-4 text-elevate-primary opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                                    </div>
+                                </label>
 
-                            {{-- TAMBAHAN: INFO UX UNTUK GURU MENGARAHKAN KE VIDEO INTERAKTIF --}}
-                            <div class="mb-6 p-4 bg-[#FFEFD6] border border-[#FFD8A8] rounded-xl flex items-start gap-3 shadow-sm">
-                                <i class="ph-fill ph-lightbulb text-[#D83B01] text-xl shrink-0 mt-0.5"></i>
-                                <div>
-                                    <h4 class="text-xs font-black text-[#D83B01] uppercase tracking-wider mb-0.5">Ingin Membuat Video Interaktif?</h4>
-                                    <p class="text-xs font-bold text-[#D83B01]/80 leading-relaxed">Lampiran tipe video di sini hanya untuk ditonton biasa. Jika Anda ingin menyisipkan kuis/soal yang otomatis menjeda video, silakan buat melalui menu <b>Tugas & Latihan</b>.</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <template x-for="(att, index) in attachments" :key="att.id">
+                                {{-- Card 2: Kuis Online --}}
+                                <label class="cursor-pointer group relative">
+                                    <input type="radio" name="assignment_type" value="quiz" x-model="assignmentType" class="peer sr-only">
+                                    <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-purple-300 hover:bg-purple-50/50 transition-all peer-checked:border-purple-600 peer-checked:bg-purple-50/30 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
+                                        <div class="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center text-3xl peer-checked:bg-purple-600 peer-checked:border-purple-600 peer-checked:text-white transition-colors shadow-sm">
+                                            <i class="ph-duotone ph-list-checks"></i>
+                                        </div>
+                                        <div><span class="block font-black text-elevate-dark peer-checked:text-purple-700 text-sm sm:text-base">Kuis Pilihan Ganda</span></div>
+                                        <div class="absolute top-4 right-4 text-purple-600 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
                                     </div>
                                 </label>
 
@@ -162,7 +173,7 @@
                                     </div>
                                 </label>
 
-                                {{-- Card 4: Video Interaktif (BARU) --}}
+                                {{-- Card 4: Video Interaktif --}}
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="interactive_video" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-red-300 hover:bg-red-50/50 transition-all peer-checked:border-red-600 peer-checked:bg-red-50/50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -176,10 +187,10 @@
                             </div>
                         </div>
 
-                        <!-- 3. KONTEN DINAMIS -->
+                        <!-- 3. KONTEN DINAMIS BERDASARKAN TIPE -->
                         <div class="bg-elevate-soft/30 rounded-[2rem] p-6 md:p-8 border border-slate-100">
                             
-                            <!-- A. JIKA UPLOAD FILE -->
+                            <!-- A. UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
                                 <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal <span class="text-[#D13438]">*</span></label>
                                 <textarea name="description_file" rows="5" 
@@ -189,8 +200,8 @@
                                           placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
                             </div>
 
-                            <!-- B. JIKA LINK EKSTERNAL -->
-                            <div x-show="assignmentType === 'link'" style="display: none;">
+                            <!-- B. LINK EKSTERNAL (FIX: x-cloak ditambahkan) -->
+                            <div x-show="assignmentType === 'link'" x-cloak>
                                 <div class="mb-5">
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
@@ -210,9 +221,8 @@
                                           placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
                             </div>
 
-                            <!-- C. JIKA KUIS ONLINE -->
-                            <div x-show="assignmentType === 'quiz'" style="display: none;">
-                                <!-- Kode Kuis Lama Tetap Sama... (Dipersingkat untuk fokus pada fitur baru) -->
+                            <!-- C. KUIS ONLINE (FIX: x-cloak ditambahkan) -->
+                            <div x-show="assignmentType === 'quiz'" x-cloak>
                                 <div class="mb-8 flex flex-col md:flex-row gap-5">
                                     <div class="flex-1">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis <span class="text-[#D13438]">*</span></label>
@@ -255,8 +265,8 @@
                                 </button>
                             </div>
 
-                            <!-- D. JIKA VIDEO INTERAKTIF (BARU) -->
-                            <div x-show="assignmentType === 'interactive_video'" style="display: none;">
+                            <!-- D. VIDEO INTERAKTIF (FIX: x-cloak ditambahkan) -->
+                            <div x-show="assignmentType === 'interactive_video'" x-cloak>
                                 <div class="mb-8">
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL YouTube Video <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
@@ -275,13 +285,10 @@
                                 <div class="space-y-6 mb-6">
                                     <template x-for="(iq, index) in interactiveQuestions" :key="index">
                                         <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 hover:border-red-200 transition-all shadow-sm relative">
-                                            
-                                            {{-- Tombol Hapus Soal --}}
                                             <button type="button" @click="interactiveQuestions = interactiveQuestions.filter((_, i) => i !== index)" class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 text-slate-500 hover:bg-[#FDE7E9] hover:text-[#D13438] flex items-center justify-center transition-colors shadow-sm">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
 
-                                            {{-- Input Waktu --}}
                                             <div class="mb-5 flex flex-wrap items-end gap-3">
                                                 <div class="w-full sm:w-auto">
                                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Muncul di Menit ke</label>
@@ -296,7 +303,6 @@
 
                                             <div class="h-px bg-slate-100 w-full mb-5"></div>
 
-                                            {{-- Input Soal & Jawaban --}}
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Pertanyaan</label>
                                             <textarea :name="'interactive_questions['+index+'][text]'" x-model="iq.text" required rows="2" class="w-full rounded-2xl border-slate-200 text-base mb-4 focus:ring-red-500/30 focus:border-red-500 font-medium shadow-sm p-4 bg-slate-50 focus:bg-white transition-colors" placeholder="Tuliskan pertanyaan kuis di sini..."></textarea>
                                             
@@ -311,7 +317,6 @@
                                                     </div>
                                                 </template>
                                             </div>
-                                            <p class="text-[10px] font-bold text-slate-400 mt-3"><i class="ph-fill ph-info text-elevate-primary"></i> Klik bulatan di sebelah kiri untuk menentukan kunci jawaban benar.</p>
                                         </div>
                                     </template>
                                 </div>
@@ -324,7 +329,51 @@
 
                         </div>
 
-                        <!-- 4. TARGET PENERIMA (TETAP SAMA) -->
+                        <!-- 4. LAMPIRAN DINAMIS -->
+                        <div class="bg-elevate-soft/30 rounded-[2rem] border border-slate-100 p-6 md:p-8">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                <div>
+                                    <label class="block text-sm font-black text-elevate-dark flex items-center gap-2">
+                                        <i class="ph-fill ph-paperclip text-elevate-primary text-xl"></i> Referensi & Lampiran Tambahan
+                                    </label>
+                                    <p class="text-[11px] font-bold text-slate-400 mt-1">Upload file dokumen atau tautkan materi pendukung.</p>
+                                </div>
+                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
+                                        class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-elevate-primary px-5 py-3 sm:py-2.5 rounded-xl font-bold hover:bg-elevate-soft hover:border-elevate-accent transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-95">
+                                    <i class="ph-bold ph-plus"></i> Tambah Baris Lampiran
+                                </button>
+                            </div>
+
+                            <div class="space-y-4">
+                                <template x-for="(att, index) in attachments" :key="att.id">
+                                    <div class="flex flex-col md:flex-row items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 relative group animate-enter hover:border-elevate-accent/50 transition-colors shadow-sm">
+                                        <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-12 gap-4">
+                                            <div class="md:col-span-3">
+                                                <select :name="'attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-elevate-soft focus:ring-elevate-accent/30 focus:border-elevate-accent cursor-pointer h-12 px-4 shadow-sm text-elevate-dark focus:bg-white">
+                                                    <option value="file">Dokumen</option>
+                                                    <option value="video">Video</option>
+                                                    <option value="link">Link Eksternal</option>
+                                                </select>
+                                            </div>
+                                            <div class="md:col-span-5">
+                                                {{-- FIX: Pembatasan input file menggunakan atribut 'accept' --}}
+                                                <input x-show="att.type === 'file'" type="file" :name="'attachments['+index+'][file]'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4" class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary h-12 border border-slate-200 rounded-xl bg-white cursor-pointer hover:file:bg-elevate-primary/20 shadow-sm transition-colors">
+                                                
+                                                <input x-show="att.type !== 'file'" type="text" :name="'attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="https://...">
+                                            </div>
+                                            <div class="md:col-span-4">
+                                                <input type="text" :name="'attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="Label Dokumen (Opsional)">
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="attachments = attachments.filter(i => i.id !== att.id)" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-[#D13438] hover:bg-[#FDE7E9] border border-[#F4C3C9] transition-colors shadow-sm shrink-0" title="Hapus Baris">
+                                            <i class="ph-bold ph-trash text-lg"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- 5. TARGET PENERIMA -->
                         <div class="bg-elevate-soft/50 p-6 md:p-8 rounded-[2rem] border border-slate-100">
                             <label class="block text-xs font-black text-elevate-primary uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <i class="ph-fill ph-users-three text-lg"></i> Target Penerima <span class="text-[#D13438]">*</span>
@@ -366,6 +415,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
                     <!-- FOOTER ACTIONS -->
@@ -385,7 +435,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Script konfirmasi dan loading bawaan...
             const form = document.getElementById('createAssignmentForm');
             if(form) {
                 form.addEventListener('submit', function(e) {
@@ -394,6 +443,12 @@
                         this.reportValidity(); 
                         return; 
                     }
+
+                    // FIX: Disable tombol submit & ubah kursor untuk mencegah double submit (Kirim Ganda)
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
                     Swal.fire({
                         title: 'Sedang Menerbitkan...',
                         text: 'Mohon tunggu sebentar.',
@@ -402,7 +457,8 @@
                         didOpen: () => { Swal.showLoading(); },
                         customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl', title: 'text-xl font-black text-elevate-dark' }
                     });
-                    setTimeout(() => { this.submit(); }, 500);
+                    
+                    setTimeout(() => { this.submit(); }, 300);
                 });
             }
         });
