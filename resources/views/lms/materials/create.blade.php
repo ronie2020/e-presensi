@@ -30,7 +30,7 @@
                         <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight">Setting Penugasan & Materi</h1>
                         <p class="text-elevate-dark/80 text-sm font-semibold">Atur detail materi, tugas, kuis, atau instruksi untuk siswa.</p>
                     </div>
-                    <a href="{{ route('lms.assignments.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
+                    <a href="{{ route('lms.materials.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
                     </a>
                 </div>
@@ -76,7 +76,7 @@
                     $oldInteractiveQuestions = old('interactive_questions', []);
                 @endphp
 
-                <form action="{{ route('lms.assignments.store') }}" method="POST" enctype="multipart/form-data" id="createAssignmentForm" 
+                <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" id="createAssignmentForm" 
                       x-data="{ 
                           targetType: '{{ old('target_type', 'class') }}', 
                           assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
@@ -420,9 +420,9 @@
 
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-elevate-soft/30 px-6 py-6 md:px-10 md:py-8 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-100">
-                        <a href="{{ route('lms.assignments.index') }}" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm shadow-sm btn-cancel-confirm active:scale-95">Batal</a>
+                        <a href="{{ route('lms.materials.index') }}" class="w-full sm:w-auto px-8 py-4 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-colors text-center text-sm shadow-sm btn-cancel-confirm active:scale-95">Batal</a>
                         <button type="submit" class="w-full sm:w-auto px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all flex items-center justify-center gap-2 text-sm border border-transparent active:scale-95">
-                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i> <span>Terbitkan Tugas</span>
+                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i> <span>Terbitkan Materi</span>
                         </button>
                     </div>
                 </form>
