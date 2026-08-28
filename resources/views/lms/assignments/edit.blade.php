@@ -10,6 +10,15 @@
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 
+    {{-- CSS QUILL --}}
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #e2e8f0 !important; background-color: #f8fafc; font-family: inherit; border-top-left-radius: 1rem; border-top-right-radius: 1rem; }
+        .ql-container.ql-snow { border: none !important; font-family: inherit; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;}
+        .ql-editor { font-size: 0.875rem; line-height: 1.6; padding: 1.25rem; min-height: 150px; }
+        .ql-editor.ql-blank::before { font-style: normal; color: #94a3b8; }
+    </style>
+
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
         {{-- Efek Latar Belakang Halus --}}
@@ -141,20 +150,23 @@
                         <!-- 3. KONTEN DINAMIS (FIX DISABLED) -->
                         <div class="bg-slate-50/50 rounded-[2rem] p-6 md:p-8 border border-slate-100">
                             
-                            <!-- A. JIKA UPLOAD FILE -->
+                           <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'" x-cloak>
                                 <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal <span class="text-[#D13438]">*</span></label>
-                                <textarea name="description" rows="5" 
-                                          :required="assignmentType === 'file_upload'"
-                                          :disabled="assignmentType !== 'file_upload'"
-                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium transition-colors shadow-sm">{{ old('description', $assignment->description) }}</textarea>
+                                <input type="hidden" name="description" id="desc-edit-input" value="{{ old('description', $assignment->description) }}">
+                                <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                                    <div id="quill-edit" class="text-elevate-dark font-medium">{!! old('description', $assignment->description) !!}</div>
+                                </div>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
                             <div x-show="assignmentType === 'link'" x-cloak>
                                 <div class="mb-5">
-                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
-                                    <div class="relative group">
+                                   <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan <span class="text-[#D13438]">*</span></label>
+                                        <input type="hidden" name="description_link" id="desc-link-input" value="{{ old('description_link') }}">
+                                        <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                                            <div id="quill-link" class="text-elevate-dark font-medium">{!! old('description_link') !!}</div>
+                                        </div>
                                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-link text-lg"></i></div>
                                         <input type="url" name="link_url" value="{{ old('link_url', $assignment->link_url) }}" 
                                                :required="assignmentType === 'link'"
@@ -297,6 +309,63 @@
                 });
             }
         });
+
+        <!-- Script Quill JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi pembuat instance editor Quill
+            function initQuill(selector, placeholderText) {
+                if(document.querySelector(selector)) {
+                    return new Quill(selector, {
+                        theme: 'snow',
+                        placeholder: placeholderText,
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image'], // Tombol gambar ditambahkan
+                                ['clean']
+                            ]
+                        }
+                    });
+                }
+                return null;
+            }
+
+            // Inisialisasi Editor (Sesuaikan dengan ID yang Anda gunakan)
+            var quillFile = initQuill('#quill-file', 'Tuliskan instruksi tugas secara rinci...');
+            var quillLink = initQuill('#quill-link', 'Tuliskan instruksi tambahan di sini...');
+            var quillEdit = initQuill('#quill-edit', 'Edit instruksi tugas...');
+
+            // Tangkap event submit pada form
+            var formCreate = document.getElementById('createAssignmentForm');
+            var formEdit = document.getElementById('editAssignmentForm');
+
+            function syncQuillData(quillInstance, inputId) {
+                if(quillInstance && document.getElementById(inputId)) {
+                    var html = quillInstance.root.innerHTML;
+                    document.getElementById(inputId).value = html === '<p><br></p>' ? '' : html;
+                }
+            }
+
+            if(formCreate) {
+                formCreate.addEventListener('submit', function() {
+                    // Sync data berdasarkan tipe tugas yang dipilih
+                    var type = document.querySelector('input[name="assignment_type"]:checked').value;
+                    if(type === 'file_upload') syncQuillData(quillFile, 'desc-file-input');
+                    if(type === 'link') syncQuillData(quillLink, 'desc-link-input');
+                });
+            }
+
+            if(formEdit) {
+                formEdit.addEventListener('submit', function() {
+                     syncQuillData(quillEdit, 'desc-edit-input');
+                });
+            }
+        });
+    </script>
+
     </script>
     @endpush
 </x-app-layout>

@@ -10,6 +10,14 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
+    {{-- CSS QUILL --}}
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        /* Menyesuaikan gaya Quill agar senada dengan tema Elevate Anda */
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #e2e8f0 !important; background-color: #f8fafc; font-family: inherit; }
+        .ql-container.ql-snow { border: none !important; font-family: inherit; }
+        .ql-editor { font-size: 0.95rem; line-height: 1.7; padding: 1.25rem; }
+    </style>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
@@ -109,30 +117,40 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Kelas <span class="text-[#D13438]">*</span></label>
+                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Pokok Bahasan / Bab <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
-                                        <select name="class_id" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer focus:bg-white transition-colors shadow-sm">
-                                            @foreach($classes as $class)
-                                                <option value="{{ $class->id }}" {{ old('class_id', $material->class_id) == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                                        {{-- Catatan: Idealnya ini juga dibuat dinamis via API seperti halaman create, 
+                                             namun karena ini Edit form sederhana, kita render saja list bab dari mapel terpilih. --}}
+                                        @php
+                                            $topics = \App\Models\Topic::where('subject_id', $material->subject_id)->get();
+                                        @endphp
+                                        <select name="topic_id" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer focus:bg-white transition-colors shadow-sm">
+                                            @foreach($topics as $topic)
+                                                <option value="{{ $topic->id }}" {{ old('topic_id', $material->topic_id) == $topic->id ? 'selected' : '' }}>{{ $topic->title }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down text-lg"></i></div>
                                     </div>
-                                    <p class="text-[10px] text-slate-500 mt-2 flex items-center gap-1 font-bold"><i class="ph-bold ph-info text-elevate-primary"></i> *Jika ini materi jenjang, pengeditan ini hanya mengubah untuk kelas ini saja.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="h-px bg-slate-100"></div>
 
-                        <!-- BAGIAN 2: DESKRIPSI -->
+                       <!-- BAGIAN 2: DESKRIPSI -->
                         <div>
                             <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">
-                                Pengantar & Resume Materi
+                                Pengantar & Penjelasan Singkat
                             </label>
-                            <div class="relative">
-                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm p-5 text-elevate-dark leading-relaxed font-medium transition-colors focus:bg-white">{{ old('resume', $material->resume) }}</textarea>
-                                <div class="absolute bottom-4 right-4 text-slate-300 pointer-events-none"><i class="ph-bold ph-text-aa text-xl"></i></div>
+                            
+                            {{-- Input tersembunyi untuk menyimpan data HTML ke backend --}}
+                            <input type="hidden" name="resume" id="resume-input" value="{{ old('resume', $material->resume) }}">
+                            
+                            {{-- Wadah Editor Quill --}}
+                            <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                                <div id="quill-editor" class="h-64 sm:h-80 text-elevate-dark font-medium text-base">
+                                    {!! old('resume', $material->resume) !!}
+                                </div>
                             </div>
                         </div>
 
@@ -140,26 +158,27 @@
 
                         <!-- BAGIAN 3: LAMPIRAN (EXISTING & NEW) -->
                         <div class="bg-elevate-soft/30 rounded-[2rem] border border-slate-100 p-6 md:p-8">
-                            <label class="block text-sm font-black text-elevate-dark flex items-center gap-2 mb-5">
-                                <i class="ph-fill ph-paperclip text-elevate-primary text-xl"></i> Kelola Lampiran
-                            </label>
+                            <div class="flex items-center gap-2 mb-6">
+                                <i class="ph-fill ph-paperclip text-elevate-primary text-xl"></i>
+                                <h3 class="text-lg font-black text-elevate-dark">Kelola Lampiran</h3>
+                            </div>
 
                             <!-- Lampiran Lama -->
                             @if($material->attachments->count() > 0)
                                 <div class="space-y-4 mb-8">
                                     <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Lampiran Tersimpan:</p>
                                     @foreach($material->attachments as $att)
-                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl shadow-sm gap-4">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl shadow-sm gap-4 transition-all hover:border-elevate-primary/30">
                                             <div class="flex items-center gap-4 overflow-hidden">
-                                                <div class="w-12 h-12 rounded-xl bg-elevate-soft flex items-center justify-center text-elevate-primary shrink-0">
-                                                    <i class="ph-bold {{ $att->file_type == 'file' ? 'ph-file-pdf text-xl' : 'ph-link text-xl' }}"></i>
+                                                <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 {{ $att->file_type == 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : ($att->file_type == 'video' ? 'bg-elevate-peach/20 text-elevate-peach' : 'bg-elevate-soft text-elevate-primary') }}">
+                                                    <i class="ph-bold text-xl {{ $att->file_type == 'file' ? 'ph-file-pdf' : ($att->file_type == 'video' ? 'ph-youtube-logo' : 'ph-link') }}"></i>
                                                 </div>
                                                 <div class="truncate">
-                                                    <p class="text-sm font-black text-elevate-dark truncate leading-tight">{{ $att->file_name }}</p>
-                                                    <a href="{{ $att->file_type == 'file' ? asset('storage/'.$att->file_path) : $att->file_path }}" target="_blank" class="text-[10px] text-elevate-primary hover:underline font-bold uppercase tracking-wider mt-1 inline-block">Lihat File</a>
+                                                    <p class="text-sm font-black text-elevate-dark truncate leading-tight">{{ $att->file_name ?? 'File Lampiran' }}</p>
+                                                    <a href="{{ $att->file_type == 'file' ? asset('storage/'.$att->file_path) : $att->file_path }}" target="_blank" class="text-[10px] text-elevate-primary hover:underline font-bold uppercase tracking-wider mt-1 inline-flex items-center gap-1"><i class="ph-bold ph-arrow-up-right"></i> Lihat {{ $att->file_type == 'file' ? 'File' : 'Link' }}</a>
                                                 </div>
                                             </div>
-                                            <label class="flex items-center gap-2.5 cursor-pointer bg-white px-4 py-2 rounded-xl border border-slate-200 hover:bg-[#FDE7E9] hover:border-[#F4C3C9] transition-colors group shrink-0 shadow-sm w-full sm:w-auto justify-center">
+                                            <label class="flex items-center gap-2.5 cursor-pointer bg-white px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-[#FDE7E9] hover:border-[#F4C3C9] transition-colors group shrink-0 shadow-sm w-full sm:w-auto justify-center">
                                                 <input type="checkbox" name="delete_attachments[]" value="{{ $att->id }}" class="rounded text-[#D13438] focus:ring-[#D13438] border-slate-300 w-4 h-4 cursor-pointer">
                                                 <span class="text-xs font-bold text-slate-500 group-hover:text-[#D13438] transition-colors">Hapus</span>
                                             </label>
@@ -172,10 +191,13 @@
 
                             <!-- Lampiran Baru -->
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
-                                <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Tambah Lampiran Baru:</p>
+                                <div>
+                                    <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Tambah Lampiran Baru:</p>
+                                    <p class="text-[11px] font-bold text-slate-400 mt-1">Upload PDF/Word baru atau tautkan YouTube.</p>
+                                </div>
                                 <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
                                         class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-elevate-primary px-5 py-3 sm:py-2.5 rounded-xl font-bold hover:bg-elevate-soft hover:border-elevate-accent transition-colors shadow-sm flex items-center justify-center gap-2 active:scale-95">
-                                    <i class="ph-bold ph-plus"></i> Tambah Baris
+                                    <i class="ph-bold ph-plus"></i> Tambah Baris Baru
                                 </button>
                             </div>
 
@@ -183,23 +205,27 @@
                                 <template x-for="(att, index) in attachments" :key="att.id">
                                     <div class="flex flex-col md:flex-row items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 relative group animate-enter hover:border-elevate-accent/50 transition-colors shadow-sm">
                                         <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-12 gap-4">
+                                            
                                             <div class="md:col-span-3">
                                                 <div class="relative group/sel">
                                                     <select :name="'new_attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-elevate-soft focus:ring-elevate-accent/30 focus:border-elevate-accent cursor-pointer h-12 px-4 appearance-none shadow-sm text-elevate-dark focus:bg-white transition-colors">
-                                                        <option value="file">📄 Dokumen</option>
-                                                        <option value="video">📺 Video</option>
-                                                        <option value="link">🔗 Link</option>
+                                                        <option value="file">Dokumen / File</option>
+                                                        <option value="video">Video YouTube</option>
+                                                        <option value="link">Link Web Eksternal</option>
                                                     </select>
                                                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400 group-focus-within/sel:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down"></i></div>
                                                 </div>
                                             </div>
+                                            
                                             <div class="md:col-span-5">
-                                                <input x-show="att.type === 'file'" type="file" :name="'new_attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary h-12 border border-slate-200 rounded-xl bg-white cursor-pointer hover:file:bg-elevate-primary/20 shadow-sm transition-colors">
-                                                <input x-show="att.type !== 'file'" type="text" :name="'new_attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="https://...">
+                                                <input x-show="att.type === 'file'" type="file" :name="'new_attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary h-12 border border-slate-200 rounded-xl bg-white cursor-pointer hover:file:bg-elevate-primary/20 shadow-sm transition-colors" :required="att.type === 'file'" :disabled="att.type !== 'file'">
+                                                <input x-show="att.type !== 'file'" type="url" :name="'new_attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="https://..." :required="att.type !== 'file'">
                                             </div>
+                                            
                                             <div class="md:col-span-4">
-                                                <input type="text" :name="'new_attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="Label (Opsional)">
+                                                <input type="text" :name="'new_attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-xl border-slate-200 h-12 placeholder:text-slate-400 focus:ring-elevate-accent/30 focus:border-elevate-accent text-elevate-dark px-4 shadow-sm bg-elevate-soft focus:bg-white transition-colors" placeholder="Beri Label (Opsional)">
                                             </div>
+                                            
                                         </div>
                                         <button type="button" @click="attachments = attachments.filter(i => i.id !== att.id)" class="absolute top-3 right-3 md:static md:mt-1 w-10 h-10 flex items-center justify-center rounded-xl bg-white text-[#D13438] hover:bg-[#FDE7E9] border border-[#F4C3C9] transition-colors shadow-sm" title="Hapus Baris">
                                             <i class="ph-bold ph-trash text-lg"></i>
@@ -277,6 +303,42 @@
                     });
                     setTimeout(() => { this.submit(); }, 300);
                 });
+            }
+        });
+    </script>
+
+    <!-- Script Quill JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Inisialisasi Editor Quill
+            if (document.getElementById('quill-editor')) {
+                var quill = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    placeholder: 'Ketik materi, penjelasan, atau sisipkan gambar di sini...',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link', 'image', 'video'],
+                            ['clean'] // Tombol hapus format
+                        ]
+                    }
+                });
+
+                // 2. Sinkronisasi isi editor ke dalam input tersembunyi sebelum form dikirim
+                var form = document.getElementById('createForm') || document.getElementById('updateForm');
+                if(form) {
+                    form.addEventListener('submit', function() {
+                        var htmlContent = quill.root.innerHTML;
+                        // Jika kosong, jangan kirim tag <p><br></p> kosong
+                        if (htmlContent === '<p><br></p>') {
+                            htmlContent = '';
+                        }
+                        document.getElementById('resume-input').value = htmlContent;
+                    });
+                }
             }
         });
     </script>

@@ -1,5 +1,5 @@
 <x-student-learning-layout>
-    <style>
+   <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         [x-cloak] { display: none !important; }
@@ -13,6 +13,19 @@
         /* Animasi Muncul */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: fadeInUp 0.5s ease-out forwards; }
+
+        /* ======== TAMBAHAN CSS UNTUK RICH TEXT QUILL ======== */
+        .prose p { margin-bottom: 1em; line-height: 1.7; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose li { margin-bottom: 0.5em; }
+        .prose h1, .prose h2, .prose h3 { font-weight: 900; margin-top: 1.5em; margin-bottom: 0.5em; color: #1e293b; line-height: 1.3; }
+        .prose h1 { font-size: 1.875rem; }
+        .prose h2 { font-size: 1.5rem; }
+        .prose a { color: #0d52a1; text-decoration: underline; font-weight: bold; }
+        .prose strong { font-weight: 800; color: #0f172a; }
+        .prose em { font-style: italic; }
+        .prose img { max-width: 100%; height: auto; border-radius: 0.75rem; margin: 1.5em 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -99,7 +112,7 @@
                                                 <span>
                                                     <i x-show="item.type === 'video'" class="ph-fill ph-play-circle text-lg"></i>
                                                     <i x-show="item.type === 'file' || item.type === 'pdf'" class="ph-fill ph-file-pdf text-lg"></i>
-                                                    <i x-show="item.type === 'text'" class="ph-fill ph-text-t text-lg"></i>
+                                                    <i x-show="item.type === 'text' || item.type === 'material'" class="ph-fill ph-text-t text-lg"></i>
                                                     <i x-show="item.type === 'link'" class="ph-fill ph-link text-lg"></i>
                                                     <template x-if="item.type === 'assignment'">
                                                         <i :class="item.assignment_type === 'interactive_video' ? 'ph-fill ph-youtube-logo text-lg' : 'ph-fill ph-clipboard-text text-lg'"></i>
@@ -129,16 +142,55 @@
                     <div class="w-full max-w-5xl relative min-h-full z-10" x-show="activeItem" x-cloak>
                         <div x-show="!isTransitioning" x-transition.opacity.duration.300ms class="pb-24">
 
-                            {{-- 1. RENDER TEKS PENGANTAR --}}
-                            <template x-if="activeItem.type === 'text'">
+                            {{-- 1. RENDER TEKS PENGANTAR & LAMPIRAN MULTIPLE --}}
+                            <template x-if="activeItem.type === 'text' || activeItem.type === 'material'">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-6 md:p-10">
-                                    <h2 class="text-xl md:text-2xl font-black text-elevate-dark mb-6 leading-tight" x-text="activeItem.group_title"></h2>
-                                    <div class="prose max-w-none text-elevate-dark/80 bg-elevate-soft/30 p-6 md:p-8 rounded-2xl border border-elevate-soft" x-html="activeItem.content"></div>
+                                    <h2 class="text-xl md:text-2xl font-black text-elevate-dark mb-6 leading-tight" x-text="activeItem.title || activeItem.group_title"></h2>
+                                    
+                                    {{-- Render Deskripsi Pengantar --}}
+                                    <template x-if="activeItem.content && activeItem.content.trim() !== '' && !activeItem.content.includes('Tidak ada konten pembelajaran')">
+                                        <div class="prose max-w-none text-elevate-dark/80 bg-elevate-soft/30 p-6 md:p-8 rounded-2xl border border-elevate-soft mb-8" x-html="activeItem.content"></div>
+                                    </template>
+                                    
+                                    {{-- Render File Lampiran dari Backend --}}
+                                    <template x-if="activeItem.attachments && activeItem.attachments.length > 0">
+                                        <div class="pt-2">
+                                            <h4 class="font-black text-elevate-dark text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                <i class="ph-fill ph-paperclip text-lg text-elevate-accent"></i> Lampiran File / Video
+                                            </h4>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <template x-for="att in activeItem.attachments" :key="att.id">
+                                                    <a :href="att.file_url || (att.file_type === 'file' ? '/storage/' + att.file_path : att.file_path)" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl border border-elevate-soft bg-white hover:border-elevate-accent hover:shadow-lg hover:shadow-elevate-primary/5 transition-all group/file relative overflow-hidden">
+                                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-300"
+                                                             :class="att.file_type === 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : (att.file_type === 'video' ? 'bg-elevate-peach/20 text-elevate-peach' : 'bg-elevate-soft text-elevate-primary')">
+                                                            <i class="ph-duotone text-2xl" :class="att.file_type === 'file' ? 'ph-file-pdf' : (att.file_type === 'video' ? 'ph-youtube-logo' : 'ph-link')"></i>
+                                                        </div>
+                                                        <div class="flex-1 min-w-0 z-10">
+                                                            <p class="text-sm font-bold text-elevate-dark truncate group-hover/file:text-elevate-primary transition-colors" x-text="att.file_name || 'Lampiran'"></p>
+                                                            <p class="text-[10px] text-elevate-dark/40 uppercase font-black tracking-wider mt-1 flex items-center gap-1">
+                                                                <span x-text="att.file_type === 'file' ? 'Dokumen File' : (att.file_type === 'video' ? 'Video Youtube' : 'Tautan Web')"></span> 
+                                                                <i class="ph-bold ph-arrow-up-right text-xs"></i>
+                                                            </p>
+                                                        </div>
+                                                    </a>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- Fallback Render (Jika Data Backend Pakai Format File Tunggal) --}}
+                                    <template x-if="(!activeItem.attachments || activeItem.attachments.length === 0) && activeItem.file_url">
+                                        <div class="mt-8 pt-6 border-t border-elevate-soft">
+                                            <a :href="activeItem.file_url" target="_blank" class="inline-flex items-center gap-2 px-6 py-3.5 bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-xl text-sm font-bold shadow-sm transition-all active:scale-95">
+                                                <i class="ph-bold ph-download-simple text-lg"></i> Buka Lampiran Materi
+                                            </a>
+                                        </div>
+                                    </template>
                                 </div>
                             </template>
 
                             {{-- 2. RENDER VIDEO YOUTUBE BIASA --}}
-                            <template x-if="activeItem.type === 'video'">
+                            <template x-if="activeItem.type === 'video' && (!activeItem.attachments || activeItem.attachments.length === 0)">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <h2 class="text-lg md:text-xl font-black text-elevate-dark mb-4 ml-1 md:ml-2 leading-tight" x-text="activeItem.title"></h2>
                                     <div class="w-full aspect-video rounded-xl overflow-hidden bg-elevate-dark shadow-inner border border-elevate-dark embed-container">
@@ -149,7 +201,7 @@
                             </template>
 
                             {{-- 3. RENDER PDF / DOKUMEN --}}
-                            <template x-if="activeItem.type === 'file'">
+                            <template x-if="activeItem.type === 'file' && (!activeItem.attachments || activeItem.attachments.length === 0)">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 ml-1 md:ml-2">
                                         <h2 class="text-lg md:text-xl font-black text-elevate-dark leading-tight" x-text="activeItem.title"></h2>
@@ -165,7 +217,7 @@
                             </template>
 
                             {{-- 4. RENDER TAUTAN LINK LUAR (EMBEDDED) --}}
-                            <template x-if="activeItem.type === 'link'">
+                            <template x-if="activeItem.type === 'link' && (!activeItem.attachments || activeItem.attachments.length === 0)">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 ml-1 md:ml-2">
                                         <div class="flex-1">
@@ -224,14 +276,18 @@
                                             <div>
                                                 {{-- OPSI 1: KUIS ONLINE --}}
                                                 <template x-if="activeItem.assignment_type === 'quiz'">
-                                                    <a :href="'/students/learning/assignment/' + activeItem.db_id + '/quiz'" class="block w-full py-4 bg-elevate-primary text-white text-center font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors active:scale-95">
+                                                    <a :href="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/quiz'" class="block w-full py-4 bg-elevate-primary text-white text-center font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors active:scale-95">
                                                         <i class="ph-bold ph-play-circle mr-2"></i> Buka Halaman Kuis (<span x-text="activeItem.duration"></span> Menit)
                                                     </a>
                                                 </template>
 
                                                 {{-- OPSI 2: TUGAS UPLOAD & LINK --}}
                                                 <template x-if="activeItem.assignment_type === 'file_upload' || activeItem.assignment_type === 'link'">
-                                                    <form x-data="{ submitting: false }" @submit="submitting = true" :action="'/students/learning/assignment/' + activeItem.db_id + '/submit'" method="POST" enctype="multipart/form-data" class="space-y-5 p-5 md:p-6 border-2 border-dashed border-elevate-primary/30 rounded-2xl bg-elevate-soft/30">
+                                                    <form x-data="{ submitting: false }" 
+                                                          @submit="if($event.target.checkValidity()) { submitting = true; } else { $event.preventDefault(); }" 
+                                                          :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" 
+                                                          method="POST" enctype="multipart/form-data" 
+                                                          class="space-y-5 p-5 md:p-6 border-2 border-dashed border-elevate-primary/30 rounded-2xl bg-elevate-soft/30">
                                                         @csrf
                                                         <input type="hidden" name="submission_type" :value="activeItem.assignment_type === 'link' ? 'link' : 'file'">
                                                         <template x-if="activeItem.assignment_type === 'link'">
@@ -309,7 +365,7 @@
 
                                                         {{-- Form Submit Otomatis Tampil Setelah Semua Soal Terjawab --}}
                                                         <template x-if="interactiveQuestionsState.length > 0 && interactiveQuestionsState.every(q => q.is_solved)">
-                                                            <form :action="'/students/learning/assignment/' + activeItem.db_id + '/submit'" method="POST" class="animate-enter space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
+                                                            <form :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" method="POST" class="animate-enter space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
                                                                 @csrf
                                                                 <input type="hidden" name="submission_type" value="interactive_video">
                                                                 <div class="bg-[#DFF6DD] text-[#107C10] p-5 rounded-2xl border border-[#B7DFB9] flex flex-col sm:flex-row items-center gap-4 shadow-sm text-center sm:text-left">
@@ -367,6 +423,19 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // MENANGKAP ERROR VALIDASI LARAVEL SAAT PENGUMPULAN TUGAS (File kebesaran, ekstensi salah, dll)
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mengirim Tugas!',
+                    html: '<ul class="text-left text-sm font-medium space-y-1 text-slate-700">@foreach($errors->all() as $err) <li>• {{ $err }}</li> @endforeach</ul>',
+                    confirmButtonColor: '#0d52a1', // Warna Elevate Primary
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+            @endif
+        });
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('learningPlayer', () => ({
                 sidebarOpen: false,

@@ -119,6 +119,13 @@ return [
             ],
         ],
         'E-Learning (LMS)' => [
+             [
+                'name' => 'Pokok Bahasan (Bab)',
+                'route' => 'lms.topics.index',
+                'active_check' => 'lms.topics.*',
+                'icon' => 'ph-list-dashes',
+                'roles' => ['Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas']
+            ],
             [
                 'name' => 'Materi Pelajaran',
                 'route' => 'lms.materials.index',

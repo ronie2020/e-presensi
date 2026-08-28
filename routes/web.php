@@ -260,7 +260,7 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
        
         // Route AJAX untuk auto-save / menandai materi selesai dibaca
         Route::post('/mark-material', [\App\Http\Controllers\StudentLearningController::class, 'markMaterialComplete'])->name('mark-material');
-        Route::post('/log-time', [StudentLmsController::class, 'logTime'])->name('log-time'); // <--- TAMBAHAN ROUTE LOG WAKTU
+        Route::post('/log-time', [\App\Http\Controllers\StudentLmsController::class, 'logTime'])->name('log-time');
     });
 
     // B. UJIAN SISWA (CBT)    
@@ -317,6 +317,17 @@ Route::middleware('auth')->group(function () {
 
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {
+
+        // --- ROUTE UNTUK MENGAMBIL DAFTAR BAB (API) ---
+        Route::get('/api/subjects/{subject_id}/topics', function ($subject_id) {
+            return \App\Models\Topic::where('subject_id', $subject_id)
+                ->orderBy('order_number', 'asc')
+                ->get(['id', 'title']);
+        })->name('api.topics');   
+        
+        // ---> route topics <---
+        Route::resource('topics', \App\Http\Controllers\LmsTopicController::class)->only(['index', 'store', 'destroy']);
+
         Route::get('/preview-player/{subject}/{class}', [\App\Http\Controllers\LmsMaterialController::class, 'previewPlayer'])->name('preview.player');
 
         Route::resource('materials', LmsMaterialController::class);

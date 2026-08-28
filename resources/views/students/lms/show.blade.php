@@ -346,13 +346,13 @@
                                                         {{-- INPUT FILE --}}
                                                         <div x-show="submissionType === 'file'">
                                                             <label class="block text-xs font-bold text-elevate-dark/60 uppercase mb-2 ml-1">File Jawaban (PDF/JPG)</label>
-                                                            <input type="file" name="file" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
+                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
                                                         </div>
 
                                                         {{-- INPUT LINK --}}
                                                         <div x-show="submissionType === 'link'" style="display: none;">
                                                             <label class="block text-xs font-bold text-elevate-dark/60 uppercase mb-2 ml-1">Link Tugas (G-Drive / Youtube / Blog)</label>
-                                                            <input type="url" name="link_url" placeholder="https://..." class="block w-full p-4 text-sm font-medium border border-elevate-soft rounded-2xl focus:border-elevate-primary focus:ring-elevate-primary/30 shadow-sm bg-elevate-soft/30 focus:bg-white text-elevate-dark">
+                                                            <input type="url" name="link_url" :required="submissionType === 'link'" :disabled="submissionType !== 'link'" placeholder="https://..." class="block w-full p-4 text-sm font-medium border border-elevate-soft rounded-2xl focus:border-elevate-primary focus:ring-elevate-primary/30 shadow-sm bg-elevate-soft/30 focus:bg-white text-elevate-dark">
                                                             <p class="text-[10px] text-elevate-dark/40 mt-2 ml-1 flex items-center gap-1"><i class="ph-fill ph-info"></i> Pastikan link dapat diakses publik (Anyone with the link).</p>
                                                         </div>
 
@@ -422,10 +422,10 @@
 
                                                     <div class="space-y-4">
                                                         <div x-show="submissionType === 'file'">
-                                                            <input type="file" name="file" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-primary hover:file:text-white border border-elevate-soft bg-white">
+                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-primary hover:file:text-white border border-elevate-soft bg-white">
                                                         </div>
                                                         <div x-show="submissionType === 'link'" style="display: none;">
-                                                            <input type="url" name="link_url" placeholder="Update Link Tugas..." class="block w-full p-3 text-sm border border-elevate-soft bg-elevate-soft/30 focus:bg-white rounded-xl text-elevate-dark">
+                                                            <input type="url" name="link_url" :required="submissionType === 'link'" :disabled="submissionType !== 'link'" placeholder="Update Link Tugas..." class="block w-full p-3 text-sm border border-elevate-soft bg-elevate-soft/30 focus:bg-white rounded-xl text-elevate-dark">
                                                         </div>
                                                         <textarea name="student_note" rows="2" class="w-full rounded-xl border-elevate-soft bg-elevate-soft/30 focus:bg-white text-sm p-3 placeholder:text-elevate-dark/40 text-elevate-dark" placeholder="Update catatan...">{{ $mySubmission->student_note }}</textarea>
                                                         <button type="submit" class="w-full py-3 bg-elevate-primary text-white font-bold rounded-xl text-sm hover:bg-elevate-dark">Simpan Perubahan</button>

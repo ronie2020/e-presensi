@@ -77,6 +77,7 @@ class LmsAssignmentController extends Controller
     {
         // Tetapkan deskripsi berdasarkan tipe tugas
         $description = null;
+        $description = null;
         if ($request->assignment_type == 'file_upload') {
             $description = $request->description_file;
         } elseif ($request->assignment_type == 'quiz') {
@@ -84,7 +85,6 @@ class LmsAssignmentController extends Controller
         } elseif ($request->assignment_type == 'link') {
             $description = $request->description_link;
         } elseif ($request->assignment_type == 'interactive_video') {
-            // Berikan deskripsi default untuk video interaktif jika tidak ada di UI
             $description = "Tugas Video Interaktif. Silakan tonton video ini dengan saksama dan jawab pertanyaan yang muncul secara otomatis di tengah video.";
         }
 
@@ -93,12 +93,13 @@ class LmsAssignmentController extends Controller
         // Validasi diperbarui untuk mendukung 'interactive_video'
         $request->validate([
             'title' => 'required|string|max:255',
-            'subject_id' => 'required|exists:' . Subject::class . ',id',
+            'subject_id' => 'required|exists:subjects,id',
+            'topic_id' => 'required|exists:topics,id', // <--- WAJIB ADA BAB
             'deadline' => 'required',
             'description' => 'required|string',
             'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video',
             'target_type' => 'required|in:grade,class',
-            'class_id' => 'required_if:target_type,class|nullable|exists:' . SchoolClass::class . ',id',
+            'class_id' => 'required_if:target_type,class|nullable|exists:classes,id',
             'link_url' => 'nullable|required_if:assignment_type,link|url',
             'youtube_url' => 'nullable|required_if:assignment_type,interactive_video|url',
             'duration_minutes' => 'nullable|required_if:assignment_type,quiz|integer|min:1',
@@ -110,15 +111,15 @@ class LmsAssignmentController extends Controller
         $now = now(); 
 
         try {
-            $deadline = Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
+            $deadline = \Carbon\Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
 
-            DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now) {
                 
                 $targetClassIds = [];
                 if ($request->target_type == 'class') {
                     $targetClassIds[] = $request->class_id;
                 } elseif ($request->target_type == 'grade') {
-                    $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
+                    $classes = \App\Models\SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                     foreach ($classes as $c) {
                         $targetClassIds[] = $c->id;
                     }
@@ -130,7 +131,6 @@ class LmsAssignmentController extends Controller
 
                 foreach ($targetClassIds as $classId) {
                     
-                    // Simpan youtube_url ke dalam kolom link_url
                     $finalLinkUrl = null;
                     if ($request->assignment_type == 'link') {
                         $finalLinkUrl = $request->link_url;
@@ -138,9 +138,10 @@ class LmsAssignmentController extends Controller
                         $finalLinkUrl = $request->youtube_url;
                     }
 
-                    $assignment = LmsAssignment::create([
+                    $assignment = \App\Models\LmsAssignment::create([
                         'teacher_id' => $teacherId,
                         'subject_id' => $request->subject_id,
+                        'topic_id' => $request->topic_id, // <--- SIMPAN KE DATABASE
                         'class_id' => $classId,
                         'title' => $request->title,
                         'description' => $description,
@@ -153,10 +154,11 @@ class LmsAssignmentController extends Controller
                         'updated_at' => $now,
                     ]);
 
+                    // ... (Logika simpan pertanyaan Kuis & Video Interaktif tetap sama)
                     // PROSES PENYIMPANAN SOAL KUIS BIASA
                     if ($request->assignment_type == 'quiz' && $request->has('questions')) {
                         foreach ($request->questions as $q) {
-                            LmsQuizQuestion::create([
+                            \App\Models\LmsQuizQuestion::create([
                                 'assignment_id' => $assignment->id,
                                 'question_text' => $q['text'] ?? '',
                                 'question_type' => $q['type'] ?? 'multiple_choice',
@@ -167,23 +169,20 @@ class LmsAssignmentController extends Controller
                         }
                     }
 
-                    // PROSES PENYIMPANAN SOAL VIDEO INTERAKTIF (BARU)
+                    // PROSES PENYIMPANAN SOAL VIDEO INTERAKTIF
                     if ($request->assignment_type == 'interactive_video' && $request->has('interactive_questions')) {
                         foreach ($request->interactive_questions as $iq) {
-                            // Konversi ke total detik (misal: 1 Menit 30 Detik = 90 Detik)
                             $totalSeconds = ((int)($iq['minute'] ?? 0) * 60) + (int)($iq['second'] ?? 0);
-                            
-                            // Trik: Simpan data waktu di dalam JSON options agar tidak perlu ubah database!
                             $options = $iq['options'] ?? [];
                             $options['time_trigger'] = $totalSeconds;
 
-                            LmsQuizQuestion::create([
+                            \App\Models\LmsQuizQuestion::create([
                                 'assignment_id' => $assignment->id,
                                 'question_text' => $iq['text'] ?? '',
-                                'question_type' => 'multiple_choice', // Selalu pilihan ganda untuk interaktif
+                                'question_type' => 'multiple_choice', 
                                 'options' => $options, 
                                 'correct_answer' => $iq['correct'] ?? null,
-                                'points' => 10, // Default nilai setiap titik soal
+                                'points' => 10,
                             ]);
                         }
                     }
@@ -229,6 +228,7 @@ class LmsAssignmentController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
+            'topic_id' => 'required|exists:topics,id',
             'deadline' => 'required',
             'description' => 'required|string',
             'link_url' => 'nullable|url',

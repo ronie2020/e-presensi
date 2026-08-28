@@ -27,4 +27,8 @@ class LmsMaterial extends Model
     public function attachments() {
         return $this->hasMany(LmsMaterialAttachment::class, 'material_id');
     }
+
+    public function topic() {
+    return $this->belongsTo(Topic::class);
+    }
 }

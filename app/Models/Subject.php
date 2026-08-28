@@ -17,4 +17,9 @@ class Subject extends Model
         'group',
         'order',
     ];
+
+    public function topics() {
+    return $this->hasMany(Topic::class)->orderBy('order_number', 'asc');
+}
+
 }

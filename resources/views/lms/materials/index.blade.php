@@ -195,10 +195,10 @@
                                     </div>
                                 </div>
 
-                                {{-- Deskripsi Singkat --}}
+                               {{-- Deskripsi Singkat --}}
                                 <div class="relative z-10 bg-elevate-soft/30 rounded-xl p-4 border border-slate-100 mb-6 flex-grow">
                                     <p class="text-sm text-slate-500 line-clamp-3 leading-relaxed font-medium italic">
-                                        "{{ $material->resume ?? $material->description ?? 'Tidak ada deskripsi tambahan.' }}"
+                                        "{{ strip_tags($material->resume ?? $material->description ?? 'Tidak ada deskripsi tambahan.') }}"
                                     </p>
                                 </div>
 

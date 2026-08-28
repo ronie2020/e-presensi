@@ -10,6 +10,15 @@
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 
+    {{-- CSS QUILL --}}
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid #e2e8f0 !important; background-color: #f8fafc; font-family: inherit; border-top-left-radius: 1rem; border-top-right-radius: 1rem; }
+        .ql-container.ql-snow { border: none !important; font-family: inherit; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;}
+        .ql-editor { font-size: 0.875rem; line-height: 1.6; padding: 1.25rem; min-height: 150px; }
+        .ql-editor.ql-blank::before { font-style: normal; color: #94a3b8; }
+    </style>
+
     <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
         
         {{-- Efek Latar Belakang Halus --}}
@@ -50,15 +59,15 @@
                 </div>
             @endif
 
-            {{-- INFO ALUR BELAJAR --}}
+            {{-- INFO ALUR BELAJAR (Diperbarui untuk Basis Modul) --}}
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm">
                 <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl shrink-0 flex items-center justify-center text-2xl">
-                    <i class="ph-duotone ph-info"></i>
+                    <i class="ph-duotone ph-book-open"></i>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-sm font-black text-blue-900 mb-1">Pro-Tip: Urutan Belajar Siswa</h3>
+                    <h3 class="text-sm font-black text-blue-900 mb-1">Struktur Bab Pembelajaran</h3>
                     <p class="text-xs font-medium text-blue-700 leading-relaxed">
-                        Tugas yang Anda buat akan otomatis masuk ke <b>Alur Belajar Siswa (Learning Player)</b> secara berurutan. Pastikan Anda telah mengunggah <i>Materi Pembelajaran</i> terlebih dahulu jika tugas ini membutuhkan referensi bacaan sebelum dikerjakan.
+                        Tugas ini akan diletakkan di dalam <b>Bab/Pokok Bahasan</b> yang Anda pilih. Siswa hanya akan melihat tugas ini ketika mereka sedang mempelajari Bab tersebut di Learning Player.
                     </p>
                 </div>
             </div>
@@ -70,8 +79,31 @@
                           targetType: '{{ old('target_type', 'class') }}', 
                           assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
                           questions: [],
-                          interactiveQuestions: [] 
-                      }">
+                          interactiveQuestions: [],
+                          selectedSubject: '{{ old('subject_id') }}',
+                          topics: [],
+                          selectedTopic: '{{ old('topic_id') }}',
+                          
+                          fetchTopics() {
+                              if(!this.selectedSubject) {
+                                  this.topics = [];
+                                  this.selectedTopic = '';
+                                  return;
+                              }
+                              // Mengambil data Bab berdasarkan mapel
+                              fetch('/lms/api/subjects/' + this.selectedSubject + '/topics')
+                                  .then(response => response.json())
+                                  .then(data => {
+                                      this.topics = data;
+                                      // Cek jika topic lama masih ada di list
+                                      if(!this.topics.find(t => t.id == this.selectedTopic)) {
+                                          this.selectedTopic = '';
+                                      }
+                                  })
+                                  .catch(error => console.error('Error fetching topics:', error));
+                          }
+                      }"
+                      x-init="if(selectedSubject) fetchTopics()">
                     @csrf
 
                     <div class="p-6 md:p-10 space-y-10">
@@ -89,17 +121,37 @@
                                     <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-black text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 placeholder:font-bold placeholder:text-slate-400 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1">
                                 </div>
 
+                                <!-- MAPEL -->
                                 <div>
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Mata Pelajaran <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
-                                        <select name="subject_id" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors cursor-pointer shadow-sm">
+                                        <select name="subject_id" x-model="selectedSubject" @change="fetchTopics()" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors cursor-pointer shadow-sm">
                                             <option value="">-- Pilih Mapel --</option>
                                             @foreach($subjects as $subject)
-                                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                                                <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
                                     </div>
+                                </div>
+
+                                <!-- POKOK BAHASAN (BAB) -->
+                                <div>
+                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1 flex items-center gap-1.5">
+                                        Pokok Bahasan / Bab <span class="text-[#D13438]">*</span>
+                                        <span x-show="selectedSubject && topics.length === 0" class="text-xs normal-case text-orange-500"><i class="ph-fill ph-warning-circle"></i> Belum ada bab</span>
+                                    </label>
+                                    <div class="relative group">
+                                        <select name="topic_id" x-model="selectedTopic" :disabled="topics.length === 0" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <option value="">-- Pilih Bab Terlebih Dahulu --</option>
+                                            <template x-for="topic in topics" :key="topic.id">
+                                                <option :value="topic.id" x-text="topic.title"></option>
+                                            </template>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
+                                    </div>
+                                    <!-- Jika belum memilih mapel, berikan hint -->
+                                    <p class="text-[10px] font-bold text-slate-400 mt-2 ml-1" x-show="!selectedSubject">Silakan pilih Mata Pelajaran terlebih dahulu.</p>
                                 </div>
 
                                 <div>
@@ -107,7 +159,7 @@
                                     <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors shadow-sm">
                                 </div>
 
-                                <div class="col-span-2">
+                                <div class="col-span-2 md:col-span-1 flex items-center mt-4">
                                     <label class="inline-flex items-center cursor-pointer group">
                                         <div class="relative">
                                             <input type="checkbox" name="allow_late_submission" class="sr-only peer" {{ old('allow_late_submission') ? 'checked' : '' }}>
@@ -162,7 +214,7 @@
                                     </div>
                                 </label>
 
-                                {{-- Card 4: Video Interaktif (BARU) --}}
+                                {{-- Card 4: Video Interaktif --}}
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="interactive_video" x-model="assignmentType" class="peer sr-only">
                                     <div class="p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-red-300 hover:bg-red-50/50 transition-all peer-checked:border-red-600 peer-checked:bg-red-50/50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
@@ -178,21 +230,24 @@
 
                         <!-- 3. KONTEN DINAMIS -->
                         <div class="bg-elevate-soft/30 rounded-[2rem] p-6 md:p-8 border border-slate-100">
-                            
-                            <!-- A. JIKA UPLOAD FILE -->
+                                                    
+                           <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
                                 <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi / Soal <span class="text-[#D13438]">*</span></label>
-                                <textarea name="description_file" rows="5" 
-                                          :required="assignmentType === 'file_upload'" 
-                                          :disabled="assignmentType !== 'file_upload'"
-                                          class="w-full rounded-2xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent p-5 text-elevate-dark font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors shadow-sm" 
-                                          placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
+                                <input type="hidden" name="description_file" id="desc-file-input" value="{{ old('description_file') }}">
+                                <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                                    <div id="quill-file" class="text-elevate-dark font-medium">{!! old('description_file') !!}</div>
+                                </div>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
                             <div x-show="assignmentType === 'link'" style="display: none;">
                                 <div class="mb-5">
-                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL Link Tugas <span class="text-[#D13438]">*</span></label>
+                                    <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Tambahan <span class="text-[#D13438]">*</span></label>
+                                        <input type="hidden" name="description_link" id="desc-link-input" value="{{ old('description_link') }}">
+                                        <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                                            <div id="quill-link" class="text-elevate-dark font-medium">{!! old('description_link') !!}</div>
+                                        </div>
                                     <div class="relative group">
                                         <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary"><i class="ph-bold ph-link text-lg"></i></div>
                                         <input type="url" name="link_url" value="{{ old('link_url') }}" 
@@ -212,7 +267,6 @@
 
                             <!-- C. JIKA KUIS ONLINE -->
                             <div x-show="assignmentType === 'quiz'" style="display: none;">
-                                <!-- Kode Kuis Lama Tetap Sama... (Dipersingkat untuk fokus pada fitur baru) -->
                                 <div class="mb-8 flex flex-col md:flex-row gap-5">
                                     <div class="flex-1">
                                         <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Instruksi Kuis <span class="text-[#D13438]">*</span></label>
@@ -255,7 +309,7 @@
                                 </button>
                             </div>
 
-                            <!-- D. JIKA VIDEO INTERAKTIF (BARU) -->
+                            <!-- D. JIKA VIDEO INTERAKTIF -->
                             <div x-show="assignmentType === 'interactive_video'" style="display: none;">
                                 <div class="mb-8">
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">URL YouTube Video <span class="text-[#D13438]">*</span></label>
@@ -276,12 +330,10 @@
                                     <template x-for="(iq, index) in interactiveQuestions" :key="index">
                                         <div class="bg-white p-6 rounded-[2rem] border-2 border-slate-100 hover:border-red-200 transition-all shadow-sm relative">
                                             
-                                            {{-- Tombol Hapus Soal --}}
                                             <button type="button" @click="interactiveQuestions = interactiveQuestions.filter((_, i) => i !== index)" class="absolute top-5 right-5 w-10 h-10 rounded-xl bg-slate-100 text-slate-500 hover:bg-[#FDE7E9] hover:text-[#D13438] flex items-center justify-center transition-colors shadow-sm">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
 
-                                            {{-- Input Waktu --}}
                                             <div class="mb-5 flex flex-wrap items-end gap-3">
                                                 <div class="w-full sm:w-auto">
                                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Muncul di Menit ke</label>
@@ -296,7 +348,6 @@
 
                                             <div class="h-px bg-slate-100 w-full mb-5"></div>
 
-                                            {{-- Input Soal & Jawaban --}}
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Pertanyaan</label>
                                             <textarea :name="'interactive_questions['+index+'][text]'" x-model="iq.text" required rows="2" class="w-full rounded-2xl border-slate-200 text-base mb-4 focus:ring-red-500/30 focus:border-red-500 font-medium shadow-sm p-4 bg-slate-50 focus:bg-white transition-colors" placeholder="Tuliskan pertanyaan kuis di sini..."></textarea>
                                             
@@ -324,7 +375,7 @@
 
                         </div>
 
-                        <!-- 4. TARGET PENERIMA (TETAP SAMA) -->
+                        <!-- 4. TARGET PENERIMA -->
                         <div class="bg-elevate-soft/50 p-6 md:p-8 rounded-[2rem] border border-slate-100">
                             <label class="block text-xs font-black text-elevate-primary uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <i class="ph-fill ph-users-three text-lg"></i> Target Penerima <span class="text-[#D13438]">*</span>
@@ -385,7 +436,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Script konfirmasi dan loading bawaan...
             const form = document.getElementById('createAssignmentForm');
             if(form) {
                 form.addEventListener('submit', function(e) {
@@ -406,6 +456,63 @@
                 });
             }
         });
+
+<!-- Script Quill JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi pembuat instance editor Quill
+            function initQuill(selector, placeholderText) {
+                if(document.querySelector(selector)) {
+                    return new Quill(selector, {
+                        theme: 'snow',
+                        placeholder: placeholderText,
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['link', 'image'], // Tombol gambar ditambahkan
+                                ['clean']
+                            ]
+                        }
+                    });
+                }
+                return null;
+            }
+
+            // Inisialisasi Editor (Sesuaikan dengan ID yang Anda gunakan)
+            var quillFile = initQuill('#quill-file', 'Tuliskan instruksi tugas secara rinci...');
+            var quillLink = initQuill('#quill-link', 'Tuliskan instruksi tambahan di sini...');
+            var quillEdit = initQuill('#quill-edit', 'Edit instruksi tugas...');
+
+            // Tangkap event submit pada form
+            var formCreate = document.getElementById('createAssignmentForm');
+            var formEdit = document.getElementById('editAssignmentForm');
+
+            function syncQuillData(quillInstance, inputId) {
+                if(quillInstance && document.getElementById(inputId)) {
+                    var html = quillInstance.root.innerHTML;
+                    document.getElementById(inputId).value = html === '<p><br></p>' ? '' : html;
+                }
+            }
+
+            if(formCreate) {
+                formCreate.addEventListener('submit', function() {
+                    // Sync data berdasarkan tipe tugas yang dipilih
+                    var type = document.querySelector('input[name="assignment_type"]:checked').value;
+                    if(type === 'file_upload') syncQuillData(quillFile, 'desc-file-input');
+                    if(type === 'link') syncQuillData(quillLink, 'desc-link-input');
+                });
+            }
+
+            if(formEdit) {
+                formEdit.addEventListener('submit', function() {
+                     syncQuillData(quillEdit, 'desc-edit-input');
+                });
+            }
+        });
+    </script>
+    
     </script>
     @endpush
 </x-app-layout>

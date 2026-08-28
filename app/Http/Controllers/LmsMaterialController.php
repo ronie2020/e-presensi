@@ -13,19 +13,14 @@ use Illuminate\Support\Facades\DB;
 
 class LmsMaterialController extends Controller
 {
-    /**
-     * Menampilkan daftar materi dengan grouping (agar tidak duplikat per kelas)
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
         
-        // 1. LOGIKA GROUPING: Ambil 1 ID per judul+mapel+waktu (untuk representasi di UI)
         $subQuery = LmsMaterial::selectRaw('MIN(id) as id')
             ->where('teacher_id', $user->id)
             ->groupBy('title', 'subject_id', 'created_at');
 
-         // --- LOGIKA SEARCH & FILTER ---
         if ($request->filled('search')) {
             $subQuery->where('title', 'like', '%' . $request->search . '%');
         }
@@ -36,17 +31,13 @@ class LmsMaterialController extends Controller
 
         $subQuery->groupBy('title', 'subject_id', 'created_at');
 
-       // 2. Ambil Data Lengkap berdasarkan ID tersebut
         $materials = LmsMaterial::whereIn('id', $subQuery)
-            ->with(['subject', 'schoolClass', 'attachments']) // Load attachments
+            ->with(['subject', 'schoolClass', 'attachments']) 
             ->latest()
             ->paginate(10)
-            ->withQueryString(); // PENTING: Agar filter tidak hilang saat pindah halaman
+            ->withQueryString(); 
 
-
-        // 3. Inject Info Tambahan (Bulk Info)
         foreach ($materials as $material) {
-            // Hitung ada berapa kelas yang menerima materi ini (siblings)
             $siblingsQuery = LmsMaterial::where('teacher_id', $user->id)
                 ->where('title', $material->title)
                 ->where('created_at', $material->created_at);
@@ -56,7 +47,6 @@ class LmsMaterialController extends Controller
             $material->is_bulk = $siblingsCount > 1;
             $material->total_classes = $siblingsCount;
 
-            // Tebak jenjang kelas (misal "7A" -> "7")
             if ($material->is_bulk && $material->schoolClass) {
                 preg_match('/\d+/', $material->schoolClass->name, $matches);
                 $material->target_grade = $matches[0] ?? ''; 
@@ -76,56 +66,54 @@ class LmsMaterialController extends Controller
         return view('lms.materials.create', compact('subjects', 'classes'));
     }
 
-    /**
-     * Menyimpan materi baru (Bisa Bulk ke banyak kelas sekaligus)
-     */
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
+            'topic_id' => 'required|exists:topics,id',
             'resume' => 'nullable|string', 
             'target_type' => 'required|in:class,grade',
             'class_id' => 'nullable|exists:classes,id', 
             'target_grade' => 'required_if:target_type,grade',
-            // Validasi Attachments
-            'attachments' => 'nullable|array',
-            'attachments.*.file' => 'nullable|file|max:20480', // Max 20MB
-            'attachments.*.link' => 'nullable|url',
-            'attachments.*.type' => 'required|in:file,video,link',
+            'new_attachments' => 'nullable|array',
+            'new_attachments.*.file' => 'nullable|file|max:20480', 
+            'new_attachments.*.link' => 'nullable|url',
+            'new_attachments.*.type' => 'required_with:new_attachments|in:file,video,link',
         ]);
 
         $teacherId = Auth::id();
         $now = now(); 
 
         DB::transaction(function () use ($request, $teacherId, $now) {
-            // 1. Tentukan Target Kelas
             $targetClassIds = [];
             
             if ($request->target_type == 'class') {
                 if ($request->class_id) $targetClassIds[] = $request->class_id;
             } elseif ($request->target_type == 'grade') {
-                // Ambil semua kelas yang namanya mengandung angka jenjang (misal "7")
                 $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                 foreach ($classes as $c) $targetClassIds[] = $c->id;
             }
 
             if (empty($targetClassIds)) return; 
 
-            // 2. Proses Upload File (Dilakukan sekali, path dipakai berulang)
             $processedAttachments = [];
-            if ($request->has('attachments')) {
-                foreach ($request->attachments as $index => $item) {
+            if ($request->has('new_attachments')) {
+                foreach ($request->new_attachments as $index => $item) {
                     $path = null;
-                    $name = $item['name'] ?? 'Lampiran';
-                    $type = $item['type'];
+                    // Pastikan 'name' tidak null jika kosong dari frontend
+                    $name = !empty($item['name']) ? $item['name'] : 'Lampiran';
+                    $type = $item['type'] ?? 'file';
 
                     if ($type == 'file' && isset($item['file'])) {
                         $file = $item['file'];
-                        // Simpan ke storage public agar bisa diakses via asset()
                         $path = $file->store('lms-materials', 'public');
-                        $name = $file->getClientOriginalName();
+                        // Gunakan nama file asli jika 'name' dari input kosong/default
+                        if ($name == 'Lampiran') {
+                            $name = $file->getClientOriginalName();
+                        }
                     } elseif (($type == 'link' || $type == 'video') && isset($item['link'])) {
+                        // Pastikan key 'link' dibaca
                         $path = $item['link'];
                     }
 
@@ -138,8 +126,6 @@ class LmsMaterialController extends Controller
                     }
                 }
             }
-
-            // 3. Loop Create Material & Attachments untuk setiap kelas
             foreach ($targetClassIds as $classId) {
                 $material = LmsMaterial::create([
                     'teacher_id' => $teacherId,
@@ -147,12 +133,11 @@ class LmsMaterialController extends Controller
                     'class_id' => $classId,
                     'title' => $request->title,
                     'resume' => $request->resume,           
-                    'type' => 'document', // Default legacy type
+                    'type' => 'document', 
                     'created_at' => $now, 
                     'updated_at' => $now,
                 ]);
 
-                // Hubungkan Attachment
                 foreach ($processedAttachments as $att) {
                     LmsMaterialAttachment::create([
                         'material_id' => $material->id,
@@ -175,7 +160,6 @@ class LmsMaterialController extends Controller
             abort(403);
         }
 
-        // Cek apakah materi ini bagian dari bulk upload
         $siblingsCount = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
@@ -189,9 +173,6 @@ class LmsMaterialController extends Controller
         return view('lms.materials.edit', compact('material', 'subjects', 'classes', 'isBulk'));
     }
 
-    /**
-     * Update Materi (Termasuk update bulk siblings & attachments)
-     */
     public function update(Request $request, $id)
     {
         $material = LmsMaterial::findOrFail($id);
@@ -205,11 +186,11 @@ class LmsMaterialController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'resume' => 'nullable|string',
             'new_attachments' => 'nullable|array',
+            'topic_id' => 'required|exists:topics,id',
         ]);
 
         DB::transaction(function () use ($request, $material) {
             
-            // Cari semua materi kembaran (siblings) untuk diupdate sekaligus
             $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
                 ->where('title', $material->title)
                 ->where('created_at', $material->created_at)
@@ -221,21 +202,19 @@ class LmsMaterialController extends Controller
                 $targetMaterial->update([
                     'title' => $request->title,
                     'subject_id' => $request->subject_id,
+                    'topic_id' => $request->topic_id,
                     'resume' => $request->resume,
                 ]);
 
-                // A. Hapus Attachment yang dipilih
                 if ($request->has('delete_attachments')) {
                     foreach ($request->delete_attachments as $attId) {
                         $attToDelete = LmsMaterialAttachment::find($attId);
                         if ($attToDelete) {
-                            // Cari attachment serupa di sibling lain agar terhapus juga
                             $relatedAttachments = LmsMaterialAttachment::whereIn('material_id', $siblings->pluck('id'))
                                 ->where('file_path', $attToDelete->file_path)
                                 ->get();
 
                             foreach($relatedAttachments as $relAtt) {
-                                // Hapus file fisik jika tipe file & ada di storage
                                 if ($relAtt->file_type == 'file' && Storage::disk('public')->exists($relAtt->file_path)) {
                                     Storage::disk('public')->delete($relAtt->file_path); 
                                 }
@@ -246,17 +225,18 @@ class LmsMaterialController extends Controller
                 }
             }
 
-            // B. Tambah Attachment Baru (ke semua siblings)
             if ($request->has('new_attachments')) {
                 foreach ($request->new_attachments as $item) {
                     $path = null;
-                    $name = $item['name'] ?? 'Lampiran';
-                    $type = $item['type'];
+                    $name = !empty($item['name']) ? $item['name'] : 'Lampiran';
+                    $type = $item['type'] ?? 'file';
 
                     if ($type == 'file' && isset($item['file'])) {
                         $file = $item['file'];
                         $path = $file->store('lms-materials', 'public');
-                        $name = $file->getClientOriginalName();
+                        if ($name == 'Lampiran') {
+                            $name = $file->getClientOriginalName();
+                        }
                     } elseif (($type == 'link' || $type == 'video') && isset($item['link'])) {
                         $path = $item['link'];
                     }
@@ -285,14 +265,12 @@ class LmsMaterialController extends Controller
 
         if ($user->role !== 'admin' && $material->teacher_id !== $user->id) abort(403);
         
-        // Hapus semua kembaran (siblings)
         $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
             ->get();
 
         foreach ($siblings as $target) {
-            // Hapus file fisik attachment
             foreach($target->attachments as $att) {
                 if($att->file_type == 'file' && Storage::disk('public')->exists($att->file_path)) {
                     Storage::disk('public')->delete($att->file_path);
@@ -304,10 +282,7 @@ class LmsMaterialController extends Controller
         return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil dihapus.');
     }
 
-    /**
-     * Download Helper (Opsional, jika tombol download spesifik dibutuhkan)
-     */
-     public function download($id)
+    public function download($id)
     {
         $material = LmsMaterial::with('attachments')->findOrFail($id);
         $attachment = $material->attachments->where('file_type', 'file')->first();
@@ -319,10 +294,6 @@ class LmsMaterialController extends Controller
         return back()->with('error', 'File tidak ditemukan.');
     }
   
-
-    /**
-     * TAMBAHAN: Melihat Riwayat & Durasi Baca Siswa
-     */
     public function readers($id)
     {
         $user = Auth::user();
@@ -332,76 +303,65 @@ class LmsMaterialController extends Controller
             abort(403);
         }
 
-        // 1. Cari semua materi kembaran (siblings) jika ini adalah bulk upload
         $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
             ->pluck('id');
 
-        // 2. Ambil data log pembaca dari semua materi kembaran
         $logs = \App\Models\LmsMaterialLog::with('student.schoolClass')
             ->whereIn('material_id', $siblings)
             ->get()
             ->sortBy(function($log) {
-                // PERBAIKAN: Gunakan null-safe operator (?->) dan null coalescing (??)
-                // Jika schoolClass null, anggap namanya string kosong agar tidak error
                 $className = $log->student?->schoolClass?->name ?? '';
                 $studentName = $log->student?->name ?? '';
-                
-                // Urutkan berdasarkan kelas lalu nama siswa
                 return $className . '-' . $studentName;
             });
 
         return view('lms.materials.readers', compact('material', 'logs'));
     }
 
-  /**
-     * TAMPILAN PREVIEW UNTUK GURU
-     */
     public function previewPlayer($subjectId, $classId)
     {
         $subject = \App\Models\Subject::findOrFail($subjectId);
         
-        // 1. Ambil Semua Materi & Tugas, lalu gabungkan dan urutkan sesuai waktu pembuatan
-        $materials = \App\Models\LmsMaterial::with('attachments')
+        $materials = \App\Models\LmsMaterial::with(['attachments', 'topic'])
             ->where('subject_id', $subjectId)
             ->where('class_id', $classId)
             ->get();
 
-        $assignments = \App\Models\LmsAssignment::where('subject_id', $subjectId)
+        $assignments = \App\Models\LmsAssignment::with(['questions', 'topic'])
+            ->where('subject_id', $subjectId)
             ->where('class_id', $classId)
             ->get();
             
-        $combined = $materials->concat($assignments)->sortBy('created_at')->values();
+        $combined = $materials->concat($assignments)->sortBy(function($item) {
+            $topicOrder = $item->topic ? $item->topic->order_number : 999;
+            return sprintf('%05d-%s', $topicOrder, $item->created_at->timestamp);
+        })->values();
 
         $syllabus = [];
 
         foreach ($combined as $item) {
-    // JIKA TIPE MATERI
-    if ($item instanceof \App\Models\LmsMaterial) {
-        
-        // Hapus 'clone' karena title adalah string
-        $groupTitle = $item->title ?? 'Materi Tanpa Judul'; 
+            $groupTitle = $item->topic ? 'BAB ' . $item->topic->order_number . ': ' . $item->topic->title : 'Materi Umum / Tanpa Bab';
 
-        // A. Item ke-1: Pengantar Materi
-        if (!empty($item->resume)) {
-            $syllabus[] = [
-                'id' => 'm_' . $item->id . '_intro',
-                'db_id' => $item->id,
-                'group_title' => $groupTitle,
-                'title' => 'Pengantar Materi',
-                'type' => 'text',
-                'content' => $item->resume,
-                'completed' => true,
-                'locked' => false,
-            ];
-        }
+            if ($item instanceof \App\Models\LmsMaterial) {
+                
+                if (!empty($item->resume)) {
+                    $syllabus[] = [
+                        'id' => 'm_' . $item->id . '_intro',
+                        'db_id' => $item->id,
+                        'group_title' => $groupTitle,
+                        'title' => $item->title,
+                        'type' => 'text',
+                        'content' => $item->resume,
+                        'completed' => true,
+                        'locked' => false,
+                    ];
+                }
 
-                // B. Item ke-2 dst: Lampiran (Video, PDF, Link)
                 foreach ($item->attachments as $att) {
                     $type = 'file';
                     
-                    // Format URL Lampiran
                     $cleanPath = str_replace(['public\\', 'public/'], '', $att->file_path);
                     $attachmentUrl = str_starts_with($cleanPath, 'http') ? $cleanPath : asset('storage/' . $cleanPath);
 
@@ -425,35 +385,34 @@ class LmsMaterialController extends Controller
                     ];
                 }
 
-                // C. Fallback: Jika materi kosong (tanpa teks dan tanpa file)
                 if (empty($item->resume) && $item->attachments->isEmpty()) {
                     $syllabus[] = [
                         'id' => 'm_' . $item->id . '_empty',
                         'db_id' => $item->id,
                         'group_title' => $groupTitle,
-                        'title' => 'Materi Kosong',
+                        'title' => $item->title,
                         'type' => 'text',
-                        'content' => 'Tidak ada konten.',
+                        'content' => 'Materi ini belum memiliki konten.',
                         'completed' => true,
                         'locked' => false,
                     ];
                 }
             } 
-            // JIKA TIPE TUGAS / KUIS
             else {
                 $syllabus[] = [
                     'id' => 'a_' . $item->id,
                     'db_id' => $item->id,
-                    'group_title' => 'Tugas: ' . $item->title,
-                    'title' => 'Kerjakan Latihan',
+                    'group_title' => $groupTitle,
+                    'title' => 'Tugas: ' . $item->title,
                     'type' => 'assignment', 
                     'assignment_type' => $item->assignment_type,
                     'content' => $item->description,
                     'duration' => $item->duration_minutes,
                     'link_url' => $item->link_url,
                     'grade' => null,
-                    'completed' => false,
+                    'completed' => true,
                     'locked' => false,
+                    'questions' => clone $item->questions,
                 ];
             }
         }

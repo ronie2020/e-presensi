@@ -40,4 +40,9 @@ class LmsAssignment extends Model
     public function isSubmittedBy($studentId) {
         return $this->submissions()->where('student_id', $studentId)->exists();
     }
+
+    public function topic() {
+    return $this->belongsTo(Topic::class);
+    }
+    
 }

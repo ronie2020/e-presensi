@@ -236,12 +236,12 @@
 
                                                 <div x-show="submissionType === 'file'">
                                                     <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">File Jawaban</label>
-                                                    <input type="file" name="file" :required="submissionType === 'file'" class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-accent/20 border border-slate-200 rounded-xl">
+                                                    <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-accent/20 border border-slate-200 rounded-xl">
                                                 </div>
 
                                                 <div x-show="submissionType === 'link'" style="display: none;">
                                                     <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">URL Link</label>
-                                                    <input type="url" name="link_url" :required="submissionType === 'link'" placeholder="https://..." value="{{ $mySubmission->link_url ?? '' }}" class="block w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:ring-elevate-accent focus:border-elevate-accent text-elevate-dark font-medium">
+                                                    <input type="url" name="link_url" :required="submissionType === 'link'" :disabled="submissionType !== 'link'" placeholder="https://..." value="{{ $mySubmission->link_url ?? '' }}" class="block w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:ring-elevate-accent focus:border-elevate-accent text-elevate-dark font-medium">
                                                 </div>
 
                                                 <div>
