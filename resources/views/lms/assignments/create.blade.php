@@ -456,8 +456,9 @@
                 });
             }
         });
+    </script>
 
-<!-- Script Quill JS -->
+    <!-- Script Quill JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -511,8 +512,6 @@
                 });
             }
         });
-    </script>
-    
     </script>
     @endpush
 </x-app-layout>
