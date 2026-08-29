@@ -249,6 +249,7 @@ class LmsAssignmentController extends Controller
                     $target->update([
                         'title' => $request->title,
                         'subject_id' => $request->subject_id,
+                        'topic_id' => $request->topic_id,   // ← tambahkan baris ini
                         'deadline' => $deadline,
                         'description' => $request->description,
                         'link_url' => $request->link_url, 

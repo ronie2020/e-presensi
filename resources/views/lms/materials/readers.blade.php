@@ -65,7 +65,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 {{-- PERBAIKAN: Handle jika data siswa terhapus/null --}}
                                                 <div class="font-bold text-gray-900">{{ $log->student->name ?? 'Siswa (Telah Lulus/Dihapus)' }}</div>
-                                                <div class="text-xs text-gray-500">NIS: {{ $log->student->nis ?? '-' }}</div>
+                                                <div class="text-xs text-gray-500">NIS: {{ $log->student->student_id ?? '-' }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
                                                 {{-- PERBAIKAN: Tampilkan Badge Alumni jika tidak punya kelas --}}
