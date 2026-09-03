@@ -406,9 +406,11 @@ Route::middleware('auth')->group(function () {
      // ROUTE: Jam Pembelajaran (Bel)
     Route::post('/schedules/learning', [ScheduleController::class, 'storeLearning'])->name('schedules.learning.store');
     Route::delete('/schedules/learning/{id}', [ScheduleController::class, 'destroyLearning'])->name('schedules.learning.destroy');
+    
+    Route::post('/schedules/learning/settings', [ScheduleController::class, 'updateSettings'])->name('schedules.learning.settings');
+    Route::put('/schedules/learning/{id}', [ScheduleController::class, 'updateLearning'])->name('schedules.learning.update');
 
-
-     // =========================================================================
+    // =========================================================================
     // BEBAN MENGAJAR (PRASYARAT JADWAL)
     // =========================================================================
     Route::get('teaching-loads/template', [\App\Http\Controllers\TeachingLoadController::class, 'template'])->name('teaching-loads.template');
