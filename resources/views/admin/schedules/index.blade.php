@@ -1,7 +1,7 @@
 <x-app-layout>
     {{-- 
         X-DATA CONTEXT:
-        Hanya menyisakan tab jam sekolah karena fitur mapel sudah dipindah ke Timetable.
+        Menambahkan state untuk tab navigasi antara Jam Sekolah (Absen) dan Jam Pembelajaran (Bel)
     --}}
     <div x-data="{ activeTab: 'jam_sekolah' }" class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
         
@@ -22,17 +22,17 @@
                             <i class="ph-fill ph-timer"></i> Konfigurasi Sistem
                         </div>
                         <h1 class="text-3xl md:text-5xl font-black tracking-tight mb-4 flex items-center gap-4 text-elevate-dark">
-                            Pengaturan Jam Absen
+                            Pengaturan Waktu
                         </h1>
                         <p class="text-elevate-dark/80 text-sm font-semibold leading-relaxed">
-                            Atur batas waktu <i>Scan RFID</i> untuk kedatangan dan kepulangan siswa (Reguler), serta tentukan jadwal hari libur (Khusus).
+                            Atur batas waktu <i>Scan RFID</i> untuk kedatangan/kepulangan, serta tentukan jam bel otomatis untuk jam pelajaran.
                         </p>
                     </div>
 
-                    {{-- Quick Stats (Opsional) --}}
+                    {{-- Quick Stats --}}
                     <div class="flex gap-4 w-full md:w-auto">
                         <div class="bg-white/60 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/80 flex-1 md:flex-none text-center shadow-sm">
-                            <span class="block text-2xl font-black text-elevate-dark mb-1">{{ count($specialSchedules) }}</span>
+                            <span class="block text-2xl font-black text-elevate-dark mb-1">{{ count($specialSchedules ?? []) }}</span>
                             <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-primary">Libur Khusus</span>
                         </div>
                     </div>
@@ -60,15 +60,20 @@
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 <div class="absolute top-0 right-0 w-96 h-96 bg-elevate-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-                {{-- TABS NAVIGATION (Hanya 1 tab aktif sekarang) --}}
+                {{-- TABS NAVIGATION --}}
                 <div class="flex border-b border-slate-100 px-6 sm:px-8 relative z-10 bg-slate-50/50">
-                    <button class="px-6 py-5 font-black text-sm uppercase tracking-wider transition-all border-b-2 border-elevate-primary text-elevate-primary flex items-center gap-2 bg-white/50 backdrop-blur-sm">
+                    <button @click="activeTab = 'jam_sekolah'" :class="{ 'border-elevate-primary text-elevate-primary bg-white/50': activeTab === 'jam_sekolah', 'border-transparent text-slate-500 hover:text-elevate-primary': activeTab !== 'jam_sekolah' }" class="px-6 py-5 font-black text-sm uppercase tracking-wider transition-all border-b-2 flex items-center gap-2 backdrop-blur-sm focus:outline-none">
                         <i class="ph-bold ph-timer text-lg"></i>
-                        Atur Jam & Libur
+                        Jam Absen & Libur
+                    </button>
+                    <button @click="activeTab = 'jam_pembelajaran'" :class="{ 'border-elevate-primary text-elevate-primary bg-white/50': activeTab === 'jam_pembelajaran', 'border-transparent text-slate-500 hover:text-elevate-primary': activeTab !== 'jam_pembelajaran' }" class="px-6 py-5 font-black text-sm uppercase tracking-wider transition-all border-b-2 flex items-center gap-2 backdrop-blur-sm focus:outline-none">
+                        <i class="ph-bold ph-bell-ringing text-lg"></i>
+                        Jadwal Bel & Pelajaran
                     </button>
                 </div>
 
-                <div class="p-6 sm:p-10 relative z-10">
+                {{-- TAB 1: JAM SEKOLAH & LIBUR --}}
+                <div x-show="activeTab === 'jam_sekolah'" x-cloak class="p-6 sm:p-10 relative z-10 animate-enter">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                         
                         {{-- LEFT COLUMN: JAM REGULER --}}
@@ -79,7 +84,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-xl font-black text-elevate-dark">Jam Reguler</h3>
-                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Batas waktu absensi harian (Senin - Jumat)</p>
+                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Batas waktu absensi harian</p>
                                 </div>
                             </div>
                             
@@ -94,7 +99,6 @@
                                         </h4>
                                         <input type="hidden" name="day_type[]" value="Biasa">
                                         
-                                        {{-- SOLUSI: Menggunakan grid-cols-1 (Vertikal) agar input waktu selalu luas --}}
                                         <div class="grid grid-cols-1 gap-4">
                                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Scan Datang</label>
@@ -229,7 +233,7 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-50">
-                                            @forelse($specialSchedules as $ss)
+                                            @forelse($specialSchedules ?? [] as $ss)
                                             <tr class="hover:bg-slate-50/50 transition-colors">
                                                 <td class="px-5 py-3 font-bold text-slate-700 whitespace-nowrap">
                                                     {{ \Carbon\Carbon::parse($ss->date)->locale('id')->translatedFormat('d M Y') }}
@@ -263,9 +267,100 @@
                                 </div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
+
+                {{-- TAB 2: JAM PEMBELAJARAN (BEL) --}}
+                <div x-show="activeTab === 'jam_pembelajaran'" x-cloak class="p-6 sm:p-10 relative z-10 animate-enter">
+                    <div class="max-w-3xl mx-auto space-y-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-200 shadow-sm">
+                                <i class="ph-duotone ph-speaker-hifi text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-elevate-dark">Jadwal Bel & Pelajaran</h3>
+                                <p class="text-xs font-semibold text-slate-500 mt-0.5">Atur waktu dan upload audio untuk memicu notifikasi otomatis di layar Kiosk/Scanner.</p>
+                            </div>
+                        </div>
+                        
+                        {{-- Form Input Bel (DITAMBAHKAN ENCTYPE UNTUK UPLOAD FILE) --}}
+                        <form action="{{ route('schedules.learning.store') }}" method="POST" enctype="multipart/form-data" class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200 shadow-sm">
+                            @csrf
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-start md:items-end gap-4">
+                                    <div class="w-full md:flex-1">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Nama Kegiatan</label>
+                                        <input type="text" name="activity_name" placeholder="Cth: Jam ke-1" required class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-elevate-accent py-2.5">
+                                    </div>
+                                    <div class="w-full md:w-32 shrink-0">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Waktu</label>
+                                        <input type="time" name="trigger_time" required class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-elevate-accent py-2.5">
+                                    </div>
+                                    <div class="w-full md:w-1/3 shrink-0">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">File Audio (Opsional)</label>
+                                        <input type="file" name="audio_file" accept=".mp3,.wav" class="w-full text-xs font-bold rounded-lg border border-slate-200 focus:ring-elevate-accent p-2 bg-slate-50 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark">
+                                    </div>
+                                    <button type="submit" class="w-full md:w-auto bg-elevate-primary hover:bg-elevate-dark text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 flex justify-center items-center gap-2 h-[42px] shrink-0">
+                                        <i class="ph-bold ph-plus"></i> Tambah
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-slate-400 font-semibold ml-2">*Biarkan file audio kosong jika ingin menggunakan suara bel standar.</p>
+                            </div>
+                        </form>
+
+                        {{-- Tabel Daftar Bel --}}
+                        <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm mt-6">
+                            <div class="overflow-x-auto overflow-y-auto max-h-[400px] custom-scrollbar">
+                                <table class="w-full text-left text-sm relative">
+                                    <thead class="bg-slate-50/90 backdrop-blur-sm text-xs font-bold text-elevate-primary uppercase border-b border-slate-100 sticky top-0 z-10">
+                                        <tr>
+                                            <th class="px-5 py-3">Waktu</th>
+                                            <th class="px-5 py-3">Nama Kegiatan</th>
+                                            <th class="px-5 py-3">Suara Bel</th>
+                                            <th class="px-5 py-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-50">
+                                        @forelse($learningSchedules ?? [] as $ls)
+                                        <tr class="hover:bg-slate-50/50 transition-colors">
+                                            <td class="px-5 py-3 font-bold text-slate-700 whitespace-nowrap">
+                                                <i class="ph-fill ph-clock text-elevate-primary mr-1"></i>
+                                                {{ \Carbon\Carbon::parse($ls->trigger_time)->format('H:i') }}
+                                            </td>
+                                            <td class="px-5 py-3 text-xs font-semibold text-slate-600">
+                                                {{ $ls->activity_name }}
+                                            </td>
+                                            <td class="px-5 py-3">
+                                                @if(isset($ls->audio_file) && $ls->audio_file)
+                                                    <audio controls class="h-8 w-40 rounded-full">
+                                                        <source src="{{ asset('storage/' . $ls->audio_file) }}" type="audio/mpeg">
+                                                    </audio>
+                                                @else
+                                                    <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md border border-slate-200">Default Sound</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-5 py-3 text-center">
+                                                <form id="delete-bel-{{ $ls->id }}" action="{{ route('schedules.learning.destroy', $ls->id) }}" method="POST">
+                                                    @csrf @method('DELETE')
+                                                    <button type="button" onclick="confirmDelete('delete-bel-{{ $ls->id }}', 'Yakin ingin menghapus jadwal bel ini?')" class="w-7 h-7 inline-flex items-center justify-center rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all">
+                                                        <i class="ph-bold ph-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="3" class="px-5 py-8 text-center text-slate-400 font-bold text-sm bg-slate-50/50">Belum ada jadwal bel pembelajaran yang diatur.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
 
         </div>

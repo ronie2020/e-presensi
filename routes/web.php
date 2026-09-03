@@ -403,6 +403,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
+     // ROUTE: Jam Pembelajaran (Bel)
+    Route::post('/schedules/learning', [ScheduleController::class, 'storeLearning'])->name('schedules.learning.store');
+    Route::delete('/schedules/learning/{id}', [ScheduleController::class, 'destroyLearning'])->name('schedules.learning.destroy');
+
+
      // =========================================================================
     // BEBAN MENGAJAR (PRASYARAT JADWAL)
     // =========================================================================

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB; 
 use App\Jobs\SendWaScanNotificationJob; 
 use App\Services\AttendanceService;
 use App\Models\Extracurricular;
@@ -16,7 +17,11 @@ class KioskController extends Controller
     {
         $extracurriculars = Extracurricular::all(); 
         
-        return view('kiosk.index', compact('extracurriculars'));
+        // --- TAMBAHAN: Tarik data jadwal bel dari database ---
+        $learningSchedules = DB::table('learning_schedules')->orderBy('trigger_time', 'asc')->get();
+        
+        // Kirimkan variabel $learningSchedules ke halaman view (Kiosk)
+        return view('kiosk.index', compact('extracurriculars', 'learningSchedules'));
     }
 
     /**
@@ -24,7 +29,7 @@ class KioskController extends Controller
      */
     public function processKioskScan(Request $request, AttendanceService $attendanceService)
     {
-        $request->validate([
+       $request->validate([
             'student_id' => 'required|string', 
             'type'       => 'nullable|string', 
             'extra_id'   => 'nullable',

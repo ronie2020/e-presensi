@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ScheduleRegular; 
 use App\Models\ScheduleSpecial; 
 use Carbon\Carbon; 
+use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends Controller
 {
@@ -18,9 +19,14 @@ class ScheduleController extends Controller
         $regularSchedules = ScheduleRegular::all()->keyBy('day_name');
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
+         //  data jam pembelajaran (bel)
+        $learningSchedules = DB::table('learning_schedules')->orderBy('trigger_time', 'asc')->get();
+
+
         return view('admin.schedules.index', [
             'regularSchedules' => $regularSchedules,
             'specialSchedules' => $specialSchedules,
+            'learningSchedules' => $learningSchedules,
         ]);
     }
 
@@ -85,5 +91,48 @@ class ScheduleController extends Controller
             return back()->with('success', 'Jadwal Khusus berhasil dihapus.');
         }
         return back()->with('error', 'Data tidak ditemukan.');
+    }
+
+     // ==========================================
+    // JAM PEMBELAJARAN (BEL)
+    // ==========================================
+
+    public function storeLearning(Request $request)
+    {
+        $request->validate([
+            'activity_name' => 'required|string|max:255',
+            'trigger_time' => 'required',
+            'audio_file' => 'nullable|mimes:mp3,wav|max:5120', // Maksimal 5MB, format mp3/wav
+        ]);
+
+        $audioPath = null;
+        if ($request->hasFile('audio_file')) {
+            // Simpan file ke folder storage/app/public/bells
+            $audioPath = $request->file('audio_file')->store('bells', 'public');
+        }
+
+        \Illuminate\Support\Facades\DB::table('learning_schedules')->insert([
+            'activity_name' => $request->activity_name,
+            'trigger_time' => $request->trigger_time,
+            'audio_file' => $audioPath,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Jadwal bel berhasil ditambahkan!');
+    }
+
+    public function destroyLearning($id)
+    {
+        // Ambil data untuk menghapus file audio fisik jika ada
+        $schedule = \Illuminate\Support\Facades\DB::table('learning_schedules')->where('id', $id)->first();
+        
+        if ($schedule && $schedule->audio_file) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($schedule->audio_file);
+        }
+
+        \Illuminate\Support\Facades\DB::table('learning_schedules')->where('id', $id)->delete();
+
+        return redirect()->back()->with('success', 'Jadwal bel berhasil dihapus!');
     }
 }

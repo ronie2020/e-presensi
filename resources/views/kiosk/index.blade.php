@@ -8,6 +8,10 @@
     // Data Ekstrakurikuler untuk Modal/Dropdown
     $extracurriculars = isset($extracurriculars) ? $extracurriculars : [];
     $extraJson = json_encode($extracurriculars);
+
+    // --- TAMBAHAN: Data Jadwal Bel Otomatis ---
+    $learningSchedules = isset($learningSchedules) ? $learningSchedules : [];
+    $bellJson = json_encode($learningSchedules);
 @endphp
 
 <!-- LAYER START KIOSK -->
@@ -22,30 +26,24 @@
     <p class="text-blue-400 font-bold uppercase tracking-widest text-sm bg-blue-500/10 px-6 py-2 rounded-full border border-blue-500/30">Ketuk Untuk Memulai</p>
 </div>
 
-<!-- CONTAINER UTAMA - DIKUNCI H-SCREEN AGAR TIDAK MELAR -->
+<!-- CONTAINER UTAMA -->
 <div class="h-screen w-full bg-slate-900 relative overflow-hidden font-sans text-slate-800 selection:bg-blue-500 selection:text-white flex flex-col" x-data="kioskData()" @open-ekskul-modal.window="openExtraModal()">
     
     <!-- Background Texture & Image -->
     <div class="absolute inset-0 z-0 pointer-events-none">
-        <!-- Latar Belakang Gambar Sekolah -->
         <div class="absolute inset-0 bg-[url('{{ asset('images/netila.jpg') }}')] bg-cover bg-center bg-no-repeat"></div>
-        
-        <!-- Overlay Gelap & Efek Blur untuk visibilitas Kiosk -->
         <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"></div>
-
         <div class="absolute -top-[10%] -left-[5%] w-[60%] h-[50%] bg-blue-500/20 rounded-br-full blur-[100px] mix-blend-screen"></div>
         <div class="absolute top-[20%] right-[-10%] w-[50%] h-[80%] bg-cyan-400/10 rounded-tl-[100px] blur-[100px] mix-blend-screen"></div>
     </div>
 
-    <!-- MAIN WRAPPER: DIKUNCI flex-1 min-h-0 -->
-    <!-- Penyesuaian gap dan padding agar lebih lega -->
+    <!-- MAIN WRAPPER -->
     <div class="max-w-[1400px] w-full mx-auto flex flex-col lg:flex-row flex-1 min-h-0 p-4 md:p-8 gap-8 relative z-10">
         
-        <!-- BAGIAN KIRI: KONTROL & SCANNER (min-h-0 agar flexbox anak bisa mengecil) -->
+        <!-- BAGIAN KIRI: KONTROL & SCANNER -->
         <div class="flex-1 flex flex-col w-full relative min-h-0 gap-6">
             
             <!-- Header (Logo & Sekolah) -->
-            <!-- Menggunakan white/80 dan backdrop-blur-xl agar terlihat tembus pandang elegan -->
             <div class="flex items-center gap-5 bg-white/80 backdrop-blur-xl p-4 rounded-[2rem] border border-white/50 shadow-xl shadow-slate-900/10 shrink-0">
                 <div class="p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <x-application-logo class="w-10 h-10 md:w-12 md:h-12 text-slate-800 fill-current" />
@@ -64,7 +62,6 @@
             <!-- PANEL SCANNER UTAMA -->
             <div class="w-full bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2.5rem] p-6 shadow-2xl shadow-slate-900/10 relative flex-1 flex flex-col min-h-0">
                 
-                <!-- Status & Active Mode Indicator -->
                 <div class="flex justify-between items-center mb-5 px-2 shrink-0">
                     <div id="active-mode-badge" class="px-5 py-2 rounded-xl bg-slate-800 text-slate-100 font-bold tracking-wider uppercase text-xs shadow-md flex items-center gap-2 transition-all">
                         <i class="ph-fill ph-sun-dim text-lg text-blue-400"></i> <span>ABSEN MASUK</span>
@@ -76,9 +73,7 @@
                 <div id="status-box" class="w-full flex-1 min-h-0 flex flex-col relative transition-all duration-500 group">
                     <div class="absolute inset-0 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-300 flex overflow-hidden">
                         
-                        <!-- State: Standby -->
                         <div id="state-standby" class="w-full h-full flex flex-col items-center justify-center p-6 relative z-10 transition-all duration-300">
-                            <!-- Warna Ikon Diperbaiki: text-blue-500 agar tidak ghaib -->
                             <div class="w-20 h-20 bg-white rounded-[1.5rem] shadow-sm border border-slate-200 flex items-center justify-center mb-4 relative group-hover:scale-105 transition-transform">
                                 <i class="ph-duotone ph-barcode text-5xl text-blue-500 relative z-10"></i>
                             </div>
@@ -87,15 +82,13 @@
                             <p id="ekskul-name-display" class="hidden text-rose-600 mt-4 font-bold text-xs bg-rose-50 border border-rose-200 px-5 py-2 rounded-full uppercase tracking-wider shadow-sm"></p>
                         </div>
 
-                        <!-- State: Result -->
                         <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full rounded-[2rem] flex-col items-center justify-center overflow-hidden p-6 transition-all duration-300 bg-white/95 backdrop-blur-md">
                             <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- MODE SELECTOR (Tombol Grid di Bawah - Dirampingkan) -->
-                <!-- py-2.5 atau py-3 agar tidak terlalu gemuk -->
+                <!-- MODE SELECTOR -->
                 <div class="mt-5 w-full relative z-20 shrink-0">
                     <div class="grid grid-cols-3 lg:grid-cols-6 gap-2">
                         @foreach([
@@ -119,10 +112,9 @@
         </div>
 
         <!-- BAGIAN KANAN: JAM & LOG -->
-        <div class="w-full lg:w-[400px] flex flex-col relative z-20 shrink-0 min-h-0 h-full gap-6">
+    <div class="w-full lg:w-[400px] flex flex-col relative z-20 shrink-0 min-h-0 h-full gap-6">
             
             <!-- Digital Clock -->
-            <!-- Dibuat sedikit lebih slim -->
             <div class="w-full bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem] p-5 shadow-2xl shadow-blue-900/20 flex flex-col justify-center items-center relative overflow-hidden shrink-0 border border-blue-400/30">
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
                 <span id="kiosk-clock" class="text-5xl lg:text-6xl font-black text-white font-mono tracking-tighter drop-shadow-md relative z-10">00:00:00</span>
@@ -148,7 +140,6 @@
                 <div class="flex-1 overflow-y-auto custom-scrollbar relative pr-2">
                     <ul id="scan-log-list" class="space-y-3 pb-4">
                         <li id="empty-log" class="flex flex-col items-center justify-center py-20 opacity-80 h-full">
-                            <!-- Warna ikon diperbaiki: text-slate-400 agar terlihat -->
                             <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center mb-3 text-slate-400 border border-slate-200 shadow-sm">
                                 <i class="ph-duotone ph-list-magnifying-glass text-3xl"></i>
                             </div>
@@ -162,6 +153,9 @@
 
     <!-- Hidden Input Trap untuk Scanner -->
     <input type="text" id="scan-input" class="absolute opacity-0 -top-[9999px]" autocomplete="off" autofocus>
+
+    <!-- ELEMEN AUDIO BEL SEKOLAH -->
+    <audio id="school-bell" src="{{ asset('sounds/school-bell.mp3') }}" preload="auto"></audio>
 
     <!-- Modal Ekskul AlpineJS -->
     <div x-show="showExtraModal" x-transition class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" x-cloak>
@@ -255,6 +249,9 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const SCHEDULE_DATA = {!! $scheduleJson !!};
+        const BELL_SCHEDULES = {!! $bellJson !!}; // Data bel dari backend
+        const bellAudio = document.getElementById('school-bell');
+        let playedBells = {}; // Mencegah bunyi spam berulang di menit yang sama
         
         let currentScanMode = 'Masuk';
         let manualOverride = false;
@@ -377,7 +374,41 @@
         function updateTime() {
             const now = new Date();
             clockEl.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
-            if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) window.location.reload();
+            
+            // Format jam dan menit saat ini (HH:MM)
+            const currentTimeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            // --- LOGIKA BEL OTOMATIS ---
+            if (BELL_SCHEDULES && BELL_SCHEDULES.length > 0) {
+                BELL_SCHEDULES.forEach(bell => {
+                    const bellTime = bell.trigger_time.substring(0, 5); 
+                    
+                    if (bellTime === currentTimeStr && !playedBells[bellTime]) {
+                        playedBells[bellTime] = true; 
+                        
+                        // Cek apakah guru mengupload audio custom
+                        if (bell.audio_file) {
+                            bellAudio.src = '/storage/' + bell.audio_file;
+                        } else {
+                            bellAudio.src = '{{ asset("sounds/school-bell.mp3") }}'; // Kembali ke default
+                        }
+
+                        bellAudio.currentTime = 0;
+                        bellAudio.play().catch(e => console.log("Gagal memutar bel:", e));
+                        
+                        // Pengumuman suara otomatis setelah bel berbunyi (Jeda 5 detik)
+                        setTimeout(() => {
+                            speakSapaan(`Perhatian. Waktunya ${bell.activity_name}.`);
+                        }, 5000); 
+                    }
+                });
+            }
+
+            // Reset reload jam 00:00 (Pergantian hari, reset juga riwayat bel)
+            if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
+                playedBells = {};
+                window.location.reload();
+            }
         }
         setInterval(updateTime, 1000);
         setInterval(autoSelectMode, 30000); 
@@ -588,58 +619,6 @@
                     <p class="text-[10px] md:text-xs font-bold ${textClass} px-5 py-2 bg-white/60 backdrop-blur-sm rounded-full shadow-sm border border-white/50 uppercase tracking-widest">${message}</p>
                 </div>
             `;
-        }
-    });
-
-    document.addEventListener("DOMContentLoaded", function() {
-        setInterval(attemptSyncOfflineQueue, 5000);
-
-        window.sendScanToServer = async function(qrData, scanType = 'Harian', extraId = null) {
-            const scanPayload = {
-                student_id: qrData, type: scanType, extra_id: extraId,
-                time: new Date().toISOString(), _token: csrfToken
-            };
-
-            try {
-                let response = await fetch('/kiosk/process', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify(scanPayload)
-                });
-
-                if (!response.ok) {
-                    if(response.status >= 500) throw new Error("Server Error");
-                    let data = await response.json(); showErrorUI(data.message); return;
-                }
-                showSuccessUI(await response.json()); 
-            } catch (error) {
-                console.warn("Jaringan Terputus! Beralih ke Mode Offline...");
-                saveToOfflineQueue(scanPayload);
-                showSuccessUI({ message: "TERSAVE OFFLINE: Menunggu Sinyal...", student_name: "Antrean " + qrData, note: "Sedang Sinkronisasi..." });
-            }
-        }
-
-        function saveToOfflineQueue(payload) {
-            let queue = JSON.parse(localStorage.getItem('kiosk_offline_queue')) || [];
-            queue.push(payload); localStorage.setItem('kiosk_offline_queue', JSON.stringify(queue));
-        }
-
-        async function attemptSyncOfflineQueue() {
-            if (!navigator.onLine) return; 
-            let queue = JSON.parse(localStorage.getItem('kiosk_offline_queue')) || [];
-            if (queue.length === 0) return; 
-
-            try {
-                let response = await fetch('/kiosk/sync-batch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ scans: queue })
-                });
-
-                if (response.ok) {
-                    console.log(`Berhasil sinkronisasi ${queue.length} antrean offline!`);
-                    localStorage.removeItem('kiosk_offline_queue'); 
-                }
-            } catch (error) {}
         }
     });
 </script>
