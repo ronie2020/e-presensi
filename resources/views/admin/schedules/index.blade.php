@@ -3,7 +3,9 @@
         X-DATA CONTEXT:
         Menambahkan state untuk tab navigasi antara Jam Sekolah (Absen) dan Jam Pembelajaran (Bel)
     --}}
-    <div x-data="{ activeTab: 'jam_sekolah' }" class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
+  <div x-data="{ activeTab: localStorage.getItem('scheduleActiveTab') || 'jam_sekolah' }" 
+         x-init="$watch('activeTab', value => localStorage.setItem('scheduleActiveTab', value))"
+         class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
         
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
@@ -339,13 +341,16 @@
                             @csrf
                             <div class="grid grid-cols-1 gap-4">
                                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-start md:items-end gap-3">
-                                    <div class="w-full md:w-40 shrink-0">
-                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Hari</label>
-                                        <select name="day_type" required class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-elevate-accent py-2.5">
-                                            <option value="Senin">Senin</option>
-                                            <option value="Selasa-Kamis" selected>Selasa - Kamis</option>
-                                            <option value="Jumat">Jumat</option>
-                                        </select>
+                                    <div class="w-full md:w-auto shrink-0">
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Hari <span class="normal-case text-slate-400 font-semibold">(bisa lebih dari 1)</span></label>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach(['Senin' => 'Sen', 'Selasa' => 'Sel', 'Rabu' => 'Rab', 'Kamis' => 'Kam', 'Jumat' => 'Jum'] as $dayValue => $dayLabel)
+                                            <label class="cursor-pointer select-none">
+                                                <input type="checkbox" name="days[]" value="{{ $dayValue }}" class="peer sr-only" {{ in_array($dayValue, old('days', [])) ? 'checked' : '' }}>
+                                                <span class="inline-flex items-center justify-center w-11 h-[42px] rounded-lg border border-slate-200 text-[11px] font-bold text-slate-500 bg-white peer-checked:bg-elevate-primary peer-checked:text-white peer-checked:border-elevate-primary transition-all">{{ $dayLabel }}</span>
+                                            </label>
+                                            @endforeach
+                                        </div>
                                     </div>
                                     <div class="w-full md:flex-1">
                                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Nama Kegiatan</label>
@@ -363,11 +368,63 @@
                                         <i class="ph-bold ph-plus"></i> Tambah
                                     </button>
                                 </div>
-                                <p class="text-[10px] text-slate-400 font-semibold ml-2">*Pilih hari penerapan bel. Kosongkan audio untuk suara standar.</p>
+                                <p class="text-[10px] text-slate-400 font-semibold ml-2">*Centang satu atau beberapa hari untuk jam yang sama. Kosongkan audio untuk suara standar.</p>
                             </div>
                         </form>
 
+                        {{-- Salin Jadwal Antar Hari --}}
+                        <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm mt-4">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-500 flex items-center justify-center border border-indigo-200 shrink-0">
+                                    <i class="ph-duotone ph-copy text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-black text-sm text-elevate-dark">Salin Jadwal Antar Hari</h4>
+                                    <p class="text-[11px] font-semibold text-slate-500 mt-0.5">Duplikat semua jam bel dari 1 hari ke hari lain, tidak perlu input ulang satu-satu.</p>
+                                </div>
+                            </div>
+                            <form action="{{ route('schedules.learning.copy') }}" method="POST"
+                                  onsubmit="return confirm('Jadwal bel yang SUDAH ADA di hari tujuan akan DIHAPUS dan diganti dengan salinan dari hari sumber. Lanjutkan?');"
+                                  class="flex flex-col md:flex-row items-start md:items-end gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                @csrf
+                                <div class="w-full md:w-40 shrink-0">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Salin Dari</label>
+                                    <select name="source_day" required class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-elevate-accent py-2.5">
+                                        <option value="Senin">Senin</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
+                                        <option value="Jumat">Jumat</option>
+                                    </select>
+                                </div>
+                                <div class="w-full md:flex-1">
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Ke Hari <span class="normal-case text-slate-400 font-semibold">(bisa lebih dari 1)</span></label>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach(['Senin' => 'Sen', 'Selasa' => 'Sel', 'Rabu' => 'Rab', 'Kamis' => 'Kam', 'Jumat' => 'Jum'] as $dayValue => $dayLabel)
+                                        <label class="cursor-pointer select-none">
+                                            <input type="checkbox" name="target_days[]" value="{{ $dayValue }}" class="peer sr-only">
+                                            <span class="inline-flex items-center justify-center w-11 h-[42px] rounded-lg border border-slate-200 text-[11px] font-bold text-slate-500 bg-white peer-checked:bg-indigo-500 peer-checked:text-white peer-checked:border-indigo-500 transition-all">{{ $dayLabel }}</span>
+                                        </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full md:w-auto bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 flex justify-center items-center gap-2 h-[42px] shrink-0">
+                                    <i class="ph-bold ph-copy"></i> Salin
+                                </button>
+                            </form>
+                            <p class="text-[10px] text-slate-400 font-semibold ml-2 mt-2">*Jadwal lama di hari tujuan akan ditimpa total, bukan digabung.</p>
+                        </div>
+
                         {{-- Tabel Daftar Bel (Dikelompokkan Visual) --}}
+                        @php
+                            $dayBadgeStyles = [
+                                'Senin'  => ['bg' => 'bg-amber-50',   'text' => 'text-amber-600',   'border' => 'border-amber-200',   'icon' => 'ph-flag'],
+                                'Selasa' => ['bg' => 'bg-blue-50',    'text' => 'text-blue-600',    'border' => 'border-blue-200',    'icon' => 'ph-calendar-blank'],
+                                'Rabu'   => ['bg' => 'bg-blue-50',    'text' => 'text-blue-600',    'border' => 'border-blue-200',    'icon' => 'ph-calendar-blank'],
+                                'Kamis'  => ['bg' => 'bg-blue-50',    'text' => 'text-blue-600',    'border' => 'border-blue-200',    'icon' => 'ph-calendar-blank'],
+                                'Jumat'  => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'border' => 'border-emerald-200', 'icon' => 'ph-mosque'],
+                            ];
+                        @endphp
                         <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm mt-6">
                             <div class="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar">
                                 <table class="w-full text-left text-sm relative">
@@ -384,13 +441,8 @@
                                         @forelse($learningSchedules ?? [] as $ls)
                                         <tr class="hover:bg-slate-50/50 transition-colors group">
                                             <td class="px-5 py-3">
-                                                @if(isset($ls->day_type) && $ls->day_type == 'Senin')
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 border border-amber-200 text-[10px] font-black uppercase tracking-wider"><i class="ph-fill ph-flag"></i> Senin</span>
-                                                @elseif(isset($ls->day_type) && $ls->day_type == 'Jumat')
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-black uppercase tracking-wider"><i class="ph-fill ph-mosque"></i> Jumat</span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-elevate-soft text-elevate-primary border border-elevate-accent/30 text-[10px] font-black uppercase tracking-wider"><i class="ph-fill ph-calendar-blank"></i> Sel-Kam</span>
-                                                @endif
+                                                @php $style = $dayBadgeStyles[$ls->day_type ?? ''] ?? ['bg' => 'bg-slate-50', 'text' => 'text-slate-500', 'border' => 'border-slate-200', 'icon' => 'ph-calendar-blank']; @endphp
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md {{ $style['bg'] }} {{ $style['text'] }} border {{ $style['border'] }} text-[10px] font-black uppercase tracking-wider"><i class="ph-fill {{ $style['icon'] }}"></i> {{ $ls->day_type ?? '-' }}</span>
                                             </td>
                                             <td class="px-5 py-3 font-bold text-slate-700 whitespace-nowrap">
                                                 <i class="ph-fill ph-clock text-elevate-primary mr-1 opacity-50 group-hover:opacity-100 transition-opacity"></i>
@@ -439,7 +491,7 @@
         <div x-data="{
                 showModal: false,
                 editId: '',
-                editDay: 'Selasa-Kamis',
+                editDay: 'Senin',
                 editName: '',
                 editTime: '',
                 formAction: ''
@@ -447,7 +499,7 @@
             @open-edit-bel-modal.window="
                 showModal = true;
                 editId = $event.detail.id;
-                editDay = $event.detail.day_type ?? 'Selasa-Kamis';
+                editDay = $event.detail.day_type ?? 'Senin';
                 editName = $event.detail.activity_name;
                 editTime = $event.detail.trigger_time.substring(0, 5);
                 formAction = '{{ url('schedules/learning') }}/' + editId;
@@ -478,9 +530,12 @@
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Hari</label>
                                     <select name="day_type" x-model="editDay" required class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-elevate-accent py-2.5 bg-slate-50">
                                         <option value="Senin">Senin</option>
-                                        <option value="Selasa-Kamis">Selasa - Kamis</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
                                         <option value="Jumat">Jumat</option>
                                     </select>
+                                    <p class="text-[10px] text-slate-400 font-semibold ml-1 mt-1">*Edit hanya berlaku untuk 1 entri/hari ini. Kalau mau ubah beberapa hari sekaligus, hapus lalu tambah ulang lewat form di atas.</p>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 ml-1">Nama Kegiatan</label>

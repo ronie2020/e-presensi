@@ -10,18 +10,46 @@ use Illuminate\Support\Facades\DB;
 use App\Jobs\SendWaScanNotificationJob; 
 use App\Services\AttendanceService;
 use App\Models\Extracurricular;
+use App\Models\ScheduleSpecial;
 
 class KioskController extends Controller
 {
    public function showKiosk()
     {
         $extracurriculars = Extracurricular::all(); 
+
+        // Tentukan nama hari ini (Senin s/d Minggu) sesuai timezone aplikasi
+        $dayNames = [0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'];
+        $today = Carbon::now(config('app.timezone', 'Asia/Jakarta'));
+        $todayName = $dayNames[$today->dayOfWeek];
+
+        // Cek apakah hari ini ditandai sebagai hari libur di Jadwal Khusus
+        $todaySpecial = ScheduleSpecial::whereDate('date', $today->toDateString())->first();
+        $isHoliday = (bool) ($todaySpecial->is_holiday ?? false);
+        $holidayReason = $todaySpecial->description ?? null;
+
+        // --- Tarik data jadwal bel dari database, HANYA untuk hari ini & kalau bukan hari libur ---
+        $learningSchedules = collect();
+        if (!$isHoliday) {
+            $learningSchedules = DB::table('learning_schedules')
+                ->where('day_type', $todayName)
+                ->orderBy('trigger_time', 'asc')
+                ->get();
+        }
         
-        // --- TAMBAHAN: Tarik data jadwal bel dari database ---
-        $learningSchedules = DB::table('learning_schedules')->orderBy('trigger_time', 'asc')->get();
-        
-        // Kirimkan variabel $learningSchedules ke halaman view (Kiosk)
-        return view('kiosk.index', compact('extracurriculars', 'learningSchedules'));
+        // Kirimkan variabel ke halaman view (Kiosk)
+        return view('kiosk.index', compact('extracurriculars', 'learningSchedules', 'isHoliday', 'holidayReason'));
+    }
+
+    /**
+     * Endpoint ringan: kembalikan waktu server saat ini agar kiosk bisa sinkronisasi jam
+     * (menghindari jam kiosk yang drift/salah setting karena hanya mengandalkan jam device).
+     */
+    public function serverTime()
+    {
+        return response()->json([
+            'time' => Carbon::now(config('app.timezone', 'Asia/Jakarta'))->toIso8601String(),
+        ]);
     }
 
     /**

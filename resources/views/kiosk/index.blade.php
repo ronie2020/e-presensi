@@ -15,6 +15,10 @@
 
     // MENGAMBIL STATUS MASTER BEL DARI CACHE (Aktif/Mati)
     $isBellActive = \Illuminate\Support\Facades\Cache::get('is_bell_active', true);
+
+    // Status hari libur (dikirim dari KioskController)
+    $isHoliday = isset($isHoliday) ? $isHoliday : false;
+    $holidayReason = isset($holidayReason) ? $holidayReason : null;
 @endphp
 
 <!-- LAYER START KIOSK -->
@@ -306,6 +310,27 @@
         const SCHEDULE_DATA = {!! $scheduleJson !!};
         const BELL_SCHEDULES = {!! $bellJson !!};
         const IS_BELL_ACTIVE = {{ $isBellActive ? 'true' : 'false' }};
+        const IS_HOLIDAY = {{ $isHoliday ? 'true' : 'false' }};
+        const HOLIDAY_REASON = {!! json_encode($holidayReason) !!};
+
+        // --- Sinkronisasi jam ke server, biar tidak ikut jam device yang bisa drift/salah ---
+        let serverTimeOffset = 0; // selisih (ms): waktu server - waktu device
+        async function syncServerTime() {
+            try {
+                const t0 = Date.now();
+                const res = await fetch('{{ route('kiosk.server-time') }}', { cache: 'no-store' });
+                const data = await res.json();
+                const t1 = Date.now();
+                const serverTime = new Date(data.time).getTime();
+                const roundTrip = t1 - t0;
+                serverTimeOffset = (serverTime + roundTrip / 2) - t1;
+            } catch (e) {
+                console.warn('Gagal sinkron jam server, pakai jam device.', e);
+            }
+        }
+        function getServerNow() {
+            return new Date(Date.now() + serverTimeOffset);
+        }
         
         const bellAudio = document.getElementById('school-bell');
         let playedBells = {}; 
@@ -444,6 +469,13 @@
         function updateLearningPeriodInfo(nowMinutes) {
             if (!currentPeriodEl || !nextPeriodEl) return;
 
+            if (IS_HOLIDAY) {
+                currentPeriodEl.textContent = 'Hari Libur';
+                nextPeriodEl.textContent = HOLIDAY_REASON || 'Tidak ada jadwal hari ini';
+                nextCountdownEl.textContent = '-';
+                return;
+            }
+
             if (!BELL_SCHEDULES || BELL_SCHEDULES.length === 0) {
                 currentPeriodEl.textContent = 'Jadwal Kosong';
                 nextPeriodEl.textContent = '-';
@@ -482,7 +514,7 @@
         }
 
         function updateTime() {
-            const now = new Date();
+            const now = getServerNow();
             clockEl.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
             
             // Format Tanggal
@@ -531,9 +563,12 @@
             }
         }
         
+        syncServerTime().then(() => {
+            updateTime();
+        });
         setInterval(updateTime, 1000);
+        setInterval(syncServerTime, 5 * 60 * 1000); // resync tiap 5 menit biar jam ga drift
         setInterval(autoSelectMode, 30000); 
-        updateTime();
         autoSelectMode();
 
         setInterval(() => {

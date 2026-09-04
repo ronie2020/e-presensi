@@ -15,6 +15,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\GuestBookController; 
 use App\Http\Controllers\KioskController;
 use App\Http\Controllers\AdminPpdbController;
+use App\Http\Controllers\DisplayController;
 
 // Akademik & Siswa
 use App\Http\Controllers\StudentController;
@@ -120,6 +121,8 @@ Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.
 Route::get('/guru/{id}', [LandingPageController::class, 'teacherDetail'])->name('teachers.show');
 Route::get('/guru/{id}/cv', [LandingPageController::class, 'downloadCv'])->name('teachers.cv');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
+Route::get('/display/jadwal', [DisplayController::class, 'index'])->name('display.schedules.show');
+Route::get('/api/display/jadwal', [DisplayController::class, 'getData'])->name('api.display.schedules');
 
 // --- ROUTE PPDB PUBLIK ---
 Route::prefix('ppdb')->name('ppdb.')->group(function () {    
@@ -403,10 +406,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
-     // ROUTE: Jam Pembelajaran (Bel)
+    // ROUTE: Jam Pembelajaran (Bel)
     Route::post('/schedules/learning', [ScheduleController::class, 'storeLearning'])->name('schedules.learning.store');
-    Route::delete('/schedules/learning/{id}', [ScheduleController::class, 'destroyLearning'])->name('schedules.learning.destroy');
     
+    Route::post('/schedules/learning/copy', [ScheduleController::class, 'copyLearningDay'])->name('schedules.learning.copy');
+    Route::get('/kiosk/server-time', [KioskController::class, 'serverTime'])->name('kiosk.server-time');
+
+    Route::delete('/schedules/learning/{id}', [ScheduleController::class, 'destroyLearning'])->name('schedules.learning.destroy');
     Route::post('/schedules/learning/settings', [ScheduleController::class, 'updateSettings'])->name('schedules.learning.settings');
     Route::put('/schedules/learning/{id}', [ScheduleController::class, 'updateLearning'])->name('schedules.learning.update');
 
