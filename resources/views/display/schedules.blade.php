@@ -63,15 +63,20 @@
 </head>
 <body class="bg-slate-50 text-elevate-dark font-sans antialiased h-screen overflow-hidden flex flex-col selection:bg-elevate-soft">
 
-    <div x-data="scheduleDisplay()" x-init="initDisplay()" x-cloak class="w-full h-full flex flex-col p-6 lg:p-10 max-w-screen-2xl mx-auto relative overflow-hidden">
-        <!-- Pesan Izin Audio (Muncul jika diblokir browser) -->
-        <div x-show="audioBlocked" x-cloak 
-             class="absolute top-8 left-1/2 transform -translate-x-1/2 z-50 bg-rose-500 text-white px-6 py-3 rounded-full shadow-lg font-bold flex items-center gap-3 cursor-pointer hover:scale-105 transition-transform" 
-             @click="initAudio()">
-            <i class="ph-bold ph-speaker-slash text-xl animate-pulse"></i>
-            Suara diblokir browser. Klik di sini untuk mengizinkan bel berbunyi.
+    <!-- LAYER START DISPLAY -->
+    <div id="start-overlay" class="fixed inset-0 z-[100] bg-slate-900 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-500" onclick="startDisplay()">
+        <div class="relative mb-8 group">
+            <div class="absolute inset-0 bg-elevate-primary/30 blur-[50px] rounded-full animate-pulse"></div>
+            <div class="w-32 h-32 bg-white/10 backdrop-blur-md rounded-full border border-elevate-primary/50 flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(13,82,161,0.3)] group-hover:scale-105 transition-transform">
+                <i class="ph-bold ph-monitor-play text-6xl text-elevate-accent drop-shadow-[0_0_10px_rgba(86,187,241,0.8)]"></i>
+            </div>
         </div>
+        <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-4 uppercase drop-shadow-lg">DISPLAY JADWAL SEKOLAH</h1>
+        <p class="text-elevate-accent font-bold uppercase tracking-widest text-xs bg-elevate-primary/30 px-6 py-2.5 rounded-full border border-elevate-primary/30 backdrop-blur-sm animate-pulse">Ketuk Layar Untuk Memulai</p>
+    </div>
 
+    <div x-data="scheduleDisplay()" x-init="initDisplay()" x-cloak class="w-full h-full flex flex-col p-6 lg:p-10 max-w-screen-2xl mx-auto relative overflow-hidden">
+       
         <!-- Efek Latar Belakang Halus -->
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-40 pointer-events-none -z-10 blur-3xl"></div>
 
@@ -374,6 +379,25 @@
                         }
                     }
                 }
+            }
+        }
+
+        function startDisplay() {
+            // 1. Hilangkan Overlay
+            const overlay = document.getElementById('start-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 500);
+
+            // 2. Minta Fullscreen Otomatis (Cocok untuk TV)
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            }
+
+            // 3. Pancing Audio Browser agar mendapat izin Autoplay
+            const audioEl = document.querySelector('audio');
+            if(audioEl) {
+                audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                audioEl.play().catch(e => console.log("Abaikan ini", e));
             }
         }
     </script>
