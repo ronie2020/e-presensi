@@ -329,7 +329,7 @@ Route::middleware('auth')->group(function () {
         })->name('api.topics');   
         
         // ---> route topics <---
-        Route::resource('topics', \App\Http\Controllers\LmsTopicController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('topics', \App\Http\Controllers\LmsTopicController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
 
         Route::get('/preview-player/{subject}/{class}', [\App\Http\Controllers\LmsMaterialController::class, 'previewPlayer'])->name('preview.player');
 

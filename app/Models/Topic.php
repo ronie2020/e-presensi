@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\LmsMaterial;
+use App\Models\LmsAssignment;
 
 class Topic extends Model
 {
@@ -13,10 +15,10 @@ class Topic extends Model
     }
 
     public function materials() {
-        return $this->hasMany(Material::class)->orderBy('order_in_topic', 'asc');
+        return $this->hasMany(LmsMaterial::class)->orderBy('order_in_topic', 'asc');
     }
 
     public function assignments() {
-        return $this->hasMany(Assignment::class)->orderBy('order_in_topic', 'asc');
+        return $this->hasMany(LmsAssignment::class)->orderBy('order_in_topic', 'asc');
     }
 }

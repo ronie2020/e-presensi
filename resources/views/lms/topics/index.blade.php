@@ -144,8 +144,15 @@
                                             </div>
                                         </div>
                                         
+                                        {{-- ACTION BUTTONS --}}
                                         <div class="flex items-center gap-2">
-                                            <form action="{{ route('lms.topics.destroy', $topic->id) }}" method="POST" onsubmit="return confirm('Hapus Bab ini?')">
+                                            <!-- Tombol Edit -->
+                                            <a href="{{ route('lms.topics.edit', $topic->id) }}" class="w-8 h-8 bg-white border border-[#B8D8FA] text-[#005FB8] rounded-lg hover:bg-[#E6F2FF] flex items-center justify-center transition-colors shadow-sm" title="Edit Bab">
+                                                <i class="ph-bold ph-pencil-simple"></i>
+                                            </a>
+                                            
+                                            <!-- Tombol Hapus dengan SweetAlert2 -->
+                                            <form action="{{ route('lms.topics.destroy', $topic->id) }}" method="POST" class="form-delete">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="w-8 h-8 bg-white border border-[#F4C3C9] text-[#D13438] rounded-lg hover:bg-[#FDE7E9] flex items-center justify-center transition-colors shadow-sm" title="Hapus Bab">
                                                     <i class="ph-bold ph-trash"></i>
@@ -174,6 +181,7 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Notifikasi Session
         @if(session('success'))
             Swal.fire({
                 icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}",
@@ -184,6 +192,33 @@
         @if(session('error'))
             Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}" });
         @endif
+
+        // Konfirmasi Hapus SweetAlert2
+        document.querySelectorAll('.form-delete').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); 
+                
+                Swal.fire({
+                    title: 'Hapus Bab ini?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#D13438',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        popup: 'rounded-[2rem] border border-slate-100 shadow-xl',
+                        confirmButton: 'rounded-xl font-bold px-5 py-2.5',
+                        cancelButton: 'rounded-xl font-bold px-5 py-2.5'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit(); 
+                    }
+                });
+            });
+        });
     </script>
     @endpush
 </x-app-layout>

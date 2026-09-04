@@ -61,4 +61,27 @@ class LmsTopicController extends Controller
 
         return back()->with('success', 'Bab berhasil dihapus!');
     }
+
+    public function edit($id)
+    {
+        $topic = \App\Models\Topic::findOrFail($id);
+        $subjects = \App\Models\Subject::orderBy('name')->get();
+        return view('lms.topics.edit', compact('topic', 'subjects'));
+    }
+
+    public function update(\Illuminate\Http\Request $request, $id)
+    {
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'title' => 'required|string|max:255',
+            'order_number' => 'required|integer|min:1',
+            'description' => 'nullable|string',
+        ]);
+
+        $topic = \App\Models\Topic::findOrFail($id);
+        $topic->update($request->all());
+
+        return redirect()->route('lms.topics.index')->with('success', 'Bab berhasil diperbarui!');
+    }
+    
 }
