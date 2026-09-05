@@ -11,24 +11,20 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-<!-- Open Graph / SEO -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url('/') }}">
-<meta property="og:title" content="SMP Negeri 3 Lakbok - Berjaya, Jujur, Berkarakter">
-<meta property="og:description" content="Platform digital resmi SMPN 3 Lakbok. Informasi akademik, PPDB, dan prestasi siswa terkini.">
-<meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
-
-<!-- Twitter -->
+<!-- Twitter Card (tag og:* sudah ada di <head> welcome.blade.php — tidak diulang di sini agar tidak dobel/tabrakan saat link dibagikan) -->
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="{{ url('/') }}">
+<meta property="twitter:url" content="{{ url()->current() }}">
 <meta property="twitter:title" content="SMP Negeri 3 Lakbok">
 <meta property="twitter:description" content="Platform digital resmi SMPN 3 Lakbok.">
 <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
 
 <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    
-    /* Custom Scrollbar Diselaraskan Ke Tema Elevate */
+
+    /* Scrollbar untuk Firefox (properti ::-webkit-scrollbar di bawah tidak berlaku di Firefox) */
+    * { scrollbar-width: thin; scrollbar-color: #56bbf1 #f8fafc; }
+
+    /* Custom Scrollbar Diselaraskan Ke Tema Elevate (Chrome/Safari/Edge) */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
     /* Menggunakan elevate-accent (#56bbf1) */

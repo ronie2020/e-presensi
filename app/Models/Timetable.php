@@ -66,4 +66,9 @@ class Timetable extends Model
     {
         return $this->hasOne(TeachingSession::class, 'schedule_id')->whereDate('date', \Carbon\Carbon::today('Asia/Jakarta'));
     }
+
+    public function teachingLoad()
+    {
+        return $this->belongsTo(TeachingLoad::class, 'teaching_load_id');
+    }
 }

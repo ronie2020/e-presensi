@@ -421,7 +421,8 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::get('teaching-loads/template', [\App\Http\Controllers\TeachingLoadController::class, 'template'])->name('teaching-loads.template');
     Route::post('teaching-loads/import', [\App\Http\Controllers\TeachingLoadController::class, 'import'])->name('teaching-loads.import');
-    Route::resource('teaching-loads', \App\Http\Controllers\TeachingLoadController::class)->only(['index', 'store', 'destroy']);
+    Route::delete('teaching-loads/mass-destroy', [\App\Http\Controllers\TeachingLoadController::class, 'massDestroy'])->name('teaching-loads.mass-destroy');
+    Route::resource('teaching-loads', \App\Http\Controllers\TeachingLoadController::class)->only(['index', 'store', 'update', 'destroy']);
     
     // =========================================================================
     // SLOT WAKTU (PRASYARAT JADWAL)
@@ -451,6 +452,20 @@ Route::middleware('auth')->group(function () {
         // Route untuk Import Jadwal dari luar aplikasi
         Route::post('/import', [TimetableController::class, 'import'])->name('import');
         Route::get('/template', [TimetableController::class, 'importTemplate'])->name('template');
+    });
+
+        // =========================================================================
+        // INPUT JADWAL MANDIRI GURU
+        // =========================================================================
+        Route::prefix('teacher/timetable')->name('teacher.timetable.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\TimetableController::class, 'mySchedule'])->name('index');
+            Route::post('/save-ajax', [\App\Http\Controllers\TimetableController::class, 'saveMyScheduleAjax'])->name('save_ajax');
+    });
+
+        // INPUT JADWAL MANDIRI (VERSI ADMIN)
+        Route::prefix('admin/timetable-manual')->name('admin.timetable_manual.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\TimetableController::class, 'adminPerTeacher'])->name('index');
+            Route::post('/save-ajax', [\App\Http\Controllers\TimetableController::class, 'adminSavePerTeacherAjax'])->name('save_ajax');
     });
    
     // =========================================================================

@@ -57,13 +57,14 @@ class ScheduleController extends Controller
                 if (isset($request->start_in[$index])) {   
                     ScheduleRegular::updateOrCreate(
                         ['day_name' => $dayType], 
-                        [                             
-                            'start_in'  => $request->start_in[$index],
-                            'end_in'    => $request->end_in[$index],
-                            'start_out' => $request->start_out[$index],
-                            'end_out'   => $request->end_out[$index],
-                        ]
-                    );
+                            [   
+                                'day_type'  => $dayType, // Tambahkan baris ini
+                                'start_in'  => $request->start_in[$index],
+                                'end_in'    => $request->end_in[$index],
+                                'start_out' => $request->start_out[$index],
+                                'end_out'   => $request->end_out[$index],
+                            ]
+                        );
                 }
             }
         }

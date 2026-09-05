@@ -164,6 +164,13 @@ return [
                 'roles' => ['Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas']
             ],
             [
+                'name' => 'Susun Jadwal Saya',
+                'route' => 'teacher.timetable.index',
+                'active_check' => 'teacher.timetable.*',
+                'icon' => 'ph-calendar-plus',
+                'roles' => ['Guru', 'Guru Mata Pelajaran', 'Wali Kelas'] 
+            ],
+            [
                 'name' => 'Riwayat Mengajar',
                 'route' => 'teaching.history',
                 'active_check' => 'teaching.history',
@@ -485,6 +492,13 @@ return [
                 'route' => 'timetable.index',
                 'active_check' => 'timetable.*',
                 'icon' => 'ph-magic-wand',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
+                'name' => 'Input Jadwal Manual',
+                'route' => 'admin.timetable_manual.index',
+                'active_check' => 'admin.timetable_manual.*',
+                'icon' => 'ph-keyboard',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
             [

@@ -1,5 +1,5 @@
 <!-- ANNOUNCEMENTS (Bottom) & FOOTER SECTION -->
-<div class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white pt-24 pb-12 relative overflow-hidden transition-colors duration-300">
+<div id="kontak" class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white pt-24 pb-12 relative overflow-hidden transition-colors duration-300">
            
      <!-- Aksen garis elevate di atas footer -->
     <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-elevate-accent to-transparent"></div>
@@ -128,7 +128,7 @@
         <!-- COPYRIGHT -->
         <div class="text-center pt-8 border-t border-slate-200 dark:border-slate-800/80">
             <p class="text-slate-500 text-sm">
-                &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri.. All rights reserved.
+                &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri... All rights reserved.
             </p>
         </div>
     </div>

@@ -472,4 +472,184 @@ class TimetableController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Sisa jam pelajaran berhasil ditempatkan!']);
     }
+
+   /**
+     * Menampilkan Halaman Input Jadwal Mandiri Guru
+     */
+    public function mySchedule()
+    {
+        $teacherId = auth()->id();
+        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; // Sesuaikan hari
+        
+        $timeslots = \App\Models\Timeslot::orderBy('start_time')->get();
+        
+        $teachingLoads = \App\Models\TeachingLoad::with(['subject', 'studentClass'])
+            ->where('teacher_id', $teacherId)
+            ->get();
+
+        // PERBAIKAN: Ambil jadwal menggunakan 'teacher_id' secara langsung
+        $myTimetables = \App\Models\Timetable::where('teacher_id', $teacherId)
+            ->get()
+            ->keyBy(function($item) {
+                return $item->day_of_week . '-' . $item->timeslot_id;
+            });
+
+        return view('teacher.timetable', compact('days', 'timeslots', 'teachingLoads', 'myTimetables'));
+    }
+
+    /**
+     * Memproses Auto-Save saat guru memilih Mapel di Dropdown
+     */
+    public function saveMyScheduleAjax(Request $request)
+    {
+        $request->validate([
+            'day' => 'required|string',
+            'timeslot_id' => 'required|exists:timeslots,id',
+            'teaching_load_id' => 'nullable' 
+        ]);
+
+        $teacherId = auth()->id();
+        $day = $request->day;
+        $timeslotId = $request->timeslot_id;
+        $loadId = $request->teaching_load_id;
+
+        // PERBAIKAN: Cek jadwal guru ini di database menggunakan 'teacher_id'
+        $existing = \App\Models\Timetable::where('day_of_week', $day)
+            ->where('timeslot_id', $timeslotId)
+            ->where('teacher_id', $teacherId)
+            ->first();
+
+        if (empty($loadId)) {
+            if ($existing) {
+                $existing->delete();
+            }
+            return response()->json(['success' => true, 'message' => 'Jadwal dikosongkan.']);
+        }
+
+        $targetLoad = \App\Models\TeachingLoad::find($loadId);
+
+        // PERBAIKAN: Validasi bentrok menggunakan 'class_id' langsung
+        $classConflict = \App\Models\Timetable::where('day_of_week', $day)
+            ->where('timeslot_id', $timeslotId)
+            ->where('class_id', $targetLoad->class_id)
+            ->where('teacher_id', '!=', $teacherId) 
+            ->first();
+
+        if ($classConflict) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Kelas ' . $targetLoad->studentClass->name . ' sudah diisi oleh guru lain pada jam ini!'
+            ], 422);
+        }
+
+        // PERBAIKAN: Simpan data langsung ke kolom class_id, subject_id, dan teacher_id
+        if ($existing) {
+            $existing->update([
+                'class_id' => $targetLoad->class_id,
+                'subject_id' => $targetLoad->subject_id,
+            ]);
+        } else {
+            \App\Models\Timetable::create([
+                'day_of_week' => $day,
+                'timeslot_id' => $timeslotId,
+                'class_id' => $targetLoad->class_id,
+                'subject_id' => $targetLoad->subject_id,
+                'teacher_id' => $teacherId,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Jadwal tersimpan.']);
+    }
+
+    /**
+     * Menampilkan Halaman Input Jadwal per Guru (Versi Admin)
+     */
+    public function adminPerTeacher(Request $request)
+    {
+        // Ambil daftar semua guru untuk dropdown pilihan di atas tabel
+        $teachers = \App\Models\User::role(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas'])->orderBy('name')->get();
+        $selectedTeacherId = $request->teacher_id;
+
+        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; 
+        $timeslots = \App\Models\Timeslot::orderBy('start_time')->get();
+
+        $teachingLoads = collect();
+        $myTimetables = collect();
+
+        // Jika admin sudah memilih guru, muat data bebannya
+        if ($selectedTeacherId) {
+            $teachingLoads = \App\Models\TeachingLoad::with(['subject', 'studentClass'])
+                ->where('teacher_id', $selectedTeacherId)
+                ->get();
+
+            $myTimetables = \App\Models\Timetable::where('teacher_id', $selectedTeacherId)
+                ->get()
+                ->keyBy(function($item) {
+                    return $item->day_of_week . '-' . $item->timeslot_id;
+                });
+        }
+
+        return view('timetable.admin_per_teacher', compact('teachers', 'selectedTeacherId', 'days', 'timeslots', 'teachingLoads', 'myTimetables'));
+    }
+
+    /**
+     * Memproses Auto-Save Jadwal (Versi Admin)
+     */
+    public function adminSavePerTeacherAjax(Request $request)
+    {
+        $request->validate([
+            'teacher_id' => 'required|exists:users,id',
+            'day' => 'required|string',
+            'timeslot_id' => 'required|exists:timeslots,id',
+            'teaching_load_id' => 'nullable' 
+        ]);
+
+        $teacherId = $request->teacher_id;
+        $day = $request->day;
+        $timeslotId = $request->timeslot_id;
+        $loadId = $request->teaching_load_id;
+
+        $existing = \App\Models\Timetable::where('day_of_week', $day)
+            ->where('timeslot_id', $timeslotId)
+            ->where('teacher_id', $teacherId)
+            ->first();
+
+        if (empty($loadId)) {
+            if ($existing) $existing->delete();
+            return response()->json(['success' => true, 'message' => 'Jadwal dikosongkan.']);
+        }
+
+        $targetLoad = \App\Models\TeachingLoad::find($loadId);
+
+        $classConflict = \App\Models\Timetable::where('day_of_week', $day)
+            ->where('timeslot_id', $timeslotId)
+            ->where('class_id', $targetLoad->class_id)
+            ->where('teacher_id', '!=', $teacherId) 
+            ->first();
+
+        if ($classConflict) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Kelas ' . $targetLoad->studentClass->name . ' sudah diisi oleh guru lain pada jam ini!'
+            ], 422);
+        }
+
+        if ($existing) {
+            $existing->update([
+                'class_id' => $targetLoad->class_id,
+                'subject_id' => $targetLoad->subject_id,
+            ]);
+        } else {
+            \App\Models\Timetable::create([
+                'day_of_week' => $day,
+                'timeslot_id' => $timeslotId,
+                'class_id' => $targetLoad->class_id,
+                'subject_id' => $targetLoad->subject_id,
+                'teacher_id' => $teacherId,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Jadwal tersimpan.']);
+    }
+    
 }

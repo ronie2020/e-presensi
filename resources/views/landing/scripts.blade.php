@@ -26,6 +26,10 @@
                 chartData.datasets.forEach((ds, index) => { 
                     if(index === 0) ds.backgroundColor = elevateAccent; 
                     if(index === 1) ds.backgroundColor = elevatePrimary; 
+                    // FIX: borderRadius & maxBarThickness adalah properti per-dataset di Chart.js,
+                    // bukan top-level "options" — sebelumnya diletakkan di options sehingga tidak pernah berpengaruh
+                    ds.borderRadius = 6;
+                    ds.maxBarThickness = 24;
                 });
             }
 
@@ -38,9 +42,6 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    borderRadius: 6,
-                    // PERBAIKAN 1: Gunakan maxBarThickness agar ukuran bar bisa fleksibel mengecil di HP
-                    maxBarThickness: 24, 
                     plugins: { 
                         legend: { 
                             position: 'bottom',

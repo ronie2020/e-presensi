@@ -109,4 +109,52 @@ class TeachingLoadController extends Controller
             return redirect()->back()->with('error', 'Gagal meng-import data. Pastikan format kolom sesuai dengan template. Detail Error: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Memproses Update Data Beban Mengajar (Edit)
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'teacher_id' => 'required|exists:users,id',
+            'subject_id' => 'required|exists:subjects,id',
+            'class_id' => 'required|exists:classes,id',
+            'hours_per_week' => 'required|integer|min:1|max:40',
+        ]);
+
+        $load = TeachingLoad::findOrFail($id);
+
+        // Cek duplikasi agar tidak bentrok (tapi abaikan ID miliknya sendiri)
+        $exists = TeachingLoad::where('teacher_id', $request->teacher_id)
+            ->where('subject_id', $request->subject_id)
+            ->where('class_id', $request->class_id)
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($exists) {
+            return redirect()->back()->with('error', 'Gagal update! Beban mengajar untuk Guru, Mapel, dan Kelas ini sudah ada.');
+        }
+
+        $load->update($request->all());
+
+        return redirect()->back()->with('success', 'Data beban mengajar berhasil diperbarui.');
+    }
+
+    /**
+     * Memproses Hapus Massal Data Beban Mengajar (Hanya Admin)
+     */
+    public function massDestroy(Request $request)
+    {
+        // Validasi array ids
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:teaching_loads,id'
+        ]);
+
+        // Eksekusi hapus massal
+        TeachingLoad::whereIn('id', $request->ids)->delete();
+
+        return redirect()->back()->with('success', count($request->ids) . ' beban mengajar berhasil dihapus secara massal.');
+    }
+    
 }

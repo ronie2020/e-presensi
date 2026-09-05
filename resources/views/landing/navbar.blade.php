@@ -2,6 +2,7 @@
 <nav x-data="{
         searchOpen: false,
         mobileMenuOpen: false,
+        scrolled: window.scrollY > 20,
         isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
         toggleTheme() {
             this.isDark = !this.isDark;
@@ -16,6 +17,9 @@
     }"
     x-init="
         if(isDark) document.documentElement.classList.add('dark');
+        window.addEventListener('scroll', () => {
+            scrolled = window.scrollY > 20;
+        }, { passive: true });
         $watch('searchOpen', value => {
             if(value) { 
                 setTimeout(() => $refs.searchInput.focus(), 100); 
@@ -52,12 +56,15 @@
 
             <!-- Desktop Menu -->
             <div class="hidden lg:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md px-2 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/50 shadow-inner">
-                <!-- State Aktif (Beranda) -->
-                <a href="#" class="px-5 py-2 rounded-full text-xs font-bold bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm transition-all">Beranda</a>
-                <!-- Link Normal -->
-                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Profil</a>
-                <a href="#akademik" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Akademik</a>                        
-                <a href="#galeri" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Galeri</a>               
+                <!-- Aktif/tidaknya sekarang mengikuti activeSection (scrollspy) dari welcome.blade.php, bukan statis -->
+                <a href="#home" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Beranda</a>
+                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Profil</a>
+                <a href="#akademik" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Akademik</a>
+                <!-- FIX: sebelumnya href="#galeri" (id ini tidak ada di halaman); disamakan dgn scrollspy & menu mobile yg sama2 pakai #kegiatan -->
+                <a href="#kegiatan" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Galeri</a>
+                <!-- FIX: Prestasi & Kontak ada di menu mobile tapi hilang di desktop -->
+                <a href="#prestasi" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'prestasi' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Prestasi</a>
+                <a href="#kontak" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kontak' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Kontak</a>
             </div>                    
 
             <!-- Right Actions (Desktop) -->
@@ -111,7 +118,7 @@
                 <button @click="toggleTheme()" class="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800/80 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 backdrop-blur-sm focus:outline-none">
                     <i class="ph-bold text-lg" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
                 </button>
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="w-9 h-9 rounded-xl bg-elevate-dark text-white flex items-center justify-center shadow-md focus:outline-none ml-1">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" :aria-expanded="mobileMenuOpen.toString()" aria-label="Buka menu navigasi" class="w-9 h-9 rounded-xl bg-elevate-dark text-white flex items-center justify-center shadow-md focus:outline-none ml-1">
                     <i class="ph-bold text-xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                 </button>
             </div>
