@@ -31,7 +31,7 @@
 
                 {{-- Badge Tambahan Identitas Lingkungan/Sekolah --}}
                 <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-3xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-50 text-[10px] sm:text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm cursor-default hover:bg-emerald-500/30 transition-colors">
-                    <i class="ph-bold ph-leaf"></i> Sekolah Adiwiyata
+                    <i class="ph-bold ph-leaf"></i> SIMADU Netila
                 </div>
             </div>
 
