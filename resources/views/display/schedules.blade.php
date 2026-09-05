@@ -82,45 +82,58 @@
         <p class="text-elevate-dark font-bold uppercase tracking-widest text-xs bg-elevate-accent px-8 py-3.5 rounded-full shadow-[0_0_20px_rgba(86,187,241,0.5)] animate-pulse hover:scale-105 transition-transform cursor-pointer">Ketuk Layar Untuk Memulai</p>
     </div>
 
-    <div x-data="scheduleDisplay()" x-init="initDisplay()" x-cloak class="w-full h-full flex flex-col p-6 lg:p-10 max-w-screen-2xl mx-auto relative overflow-hidden">
+    <div x-data="scheduleDisplay()" x-init="initDisplay()" x-cloak class="w-full h-full flex flex-col p-4 lg:p-10 max-w-screen-2xl mx-auto relative overflow-hidden">
        
         <!-- Efek Latar Belakang Halus -->
         <div class="absolute top-0 left-0 w-full h-[500px] bg-elevate-gradient-main opacity-30 pointer-events-none -z-10 blur-3xl transition-opacity duration-1000"></div>
 
         <!-- HERO / HEADER -->
-        <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-6 lg:p-8 mb-6 border border-white/80 shadow-2xl shadow-elevate-accent/15 overflow-hidden shrink-0 animate-enter">
+        <div class="relative rounded-[2rem] lg:rounded-[2.5rem] bg-elevate-gradient-main p-5 lg:p-8 mb-6 border border-white/80 shadow-2xl shadow-elevate-accent/15 overflow-hidden shrink-0 animate-enter">
             <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/60 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                <div class="flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-2xl bg-elevate-dark flex items-center justify-center shadow-xl shadow-elevate-dark/40 shrink-0">
-                        <i class="ph-fill ph-bell-ringing text-3xl text-white"></i>
+                <!-- Identitas Header -->
+                <div class="flex items-center gap-4 lg:gap-5 w-full lg:w-auto">
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-elevate-dark flex items-center justify-center shadow-xl shadow-elevate-dark/40 shrink-0">
+                        <i class="ph-fill ph-bell-ringing text-2xl lg:text-3xl text-white"></i>
                     </div>
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-black uppercase tracking-widest mb-1.5 shadow-sm backdrop-blur-md">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 border border-elevate-accent/30 text-elevate-primary text-[9px] lg:text-[10px] font-black uppercase tracking-widest mb-1.5 shadow-sm backdrop-blur-md">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Layar Informasi Sekolah
                         </div>
-                        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-elevate-dark">Jadwal Pembelajaran</h1>
+                        <h1 class="text-xl lg:text-3xl font-black tracking-tight text-elevate-dark">Jadwal Pembelajaran</h1>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-5 w-full lg:w-auto justify-between lg:justify-end">
-                    <div class="text-right">
-                        <div class="text-5xl lg:text-6xl font-black text-elevate-dark font-mono tracking-tighter drop-shadow-sm" x-text="currentTimeFormatted">00:00:00</div>
-                        <div class="text-xs lg:text-sm font-bold text-elevate-primary mt-1 opacity-80" x-text="currentDateFormatted">Memuat Tanggal...</div>
+                <!-- Jam, Tanggal & Tombol Aksi -->
+                <div class="flex items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
+                    <div class="text-left lg:text-right mr-auto lg:mr-0">
+                        <div class="text-4xl sm:text-5xl lg:text-6xl font-black text-elevate-dark font-mono tracking-tighter drop-shadow-sm leading-none" x-text="currentTimeFormatted">00:00:00</div>
+                        <div class="text-[10px] sm:text-xs lg:text-sm font-bold text-elevate-primary mt-1 lg:mt-2 opacity-80" x-text="currentDateFormatted">Memuat Tanggal...</div>
                     </div>
 
-                    <a href="{{ route('schedules.index') }}"
-                       class="inline-flex items-center gap-2 bg-gradient-to-r from-elevate-peach-dark to-elevate-peach hover:to-elevate-peach-light text-white font-bold text-sm px-6 py-4 rounded-2xl shadow-lg shadow-elevate-peach-dark/30 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 shrink-0 group border border-white/20">
-                        <i class="ph-bold ph-pencil-simple text-xl group-hover:rotate-12 transition-transform"></i>
-                        <span class="hidden sm:inline">Edit Jadwal</span>
-                    </a>
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <!-- Tombol Edit -->
+                        <a href="{{ route('schedules.index') }}"
+                           class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-elevate-peach-dark to-elevate-peach hover:to-elevate-peach-light text-white font-bold text-sm p-3.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl shadow-lg shadow-elevate-peach-dark/30 hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 group border border-white/20" title="Edit Jadwal">
+                            <i class="ph-bold ph-pencil-simple text-lg sm:text-xl group-hover:rotate-12 transition-transform"></i>
+                            <span class="hidden sm:inline">Edit</span>
+                        </a>
+                        
+                        <!-- Tombol Keluar -->
+                        <button onclick="exitDisplay()"
+                           class="inline-flex items-center justify-center gap-2 bg-white/60 hover:bg-rose-500 text-elevate-dark hover:text-white backdrop-blur-md border border-white/80 hover:border-rose-500 font-bold text-sm p-3.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg hover:shadow-rose-500/30 hover:-translate-y-0.5 transition-all active:scale-95 group" title="Keluar Display">
+                            <i class="ph-bold ph-sign-out text-lg sm:text-xl group-hover:-translate-x-1 transition-transform"></i>
+                            <span class="hidden sm:inline">Keluar</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Konten Utama -->
-        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
+        <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0 pb-4 lg:pb-0">
 
             <!-- Panel Kiri: Status Saat Ini -->
             <div class="lg:col-span-5 flex flex-col animate-enter" style="animation-delay: 100ms">
@@ -169,7 +182,7 @@
             </div>
 
             <!-- Panel Kanan: Daftar Jadwal Lengkap -->
-            <div class="lg:col-span-7 bg-white/90 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white rounded-[2.5rem] p-6 lg:p-8 flex flex-col h-full relative overflow-hidden animate-enter" style="animation-delay: 200ms">
+            <div class="lg:col-span-7 bg-white/90 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white rounded-[2.5rem] p-6 lg:p-8 flex flex-col h-[50vh] lg:h-full relative overflow-hidden animate-enter" style="animation-delay: 200ms">
                 <div class="absolute top-0 right-0 w-80 h-80 bg-elevate-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
                 <div class="flex justify-between items-center mb-6 pb-5 border-b border-slate-100 relative z-10">
@@ -238,7 +251,7 @@
         <audio x-ref="bellAudio"></audio>
     </div>
 
-    <!-- LOGIKA ALPINE.JS (TETAP SAMA 100%) -->
+    <!-- LOGIKA JAVASCRIPT & ALPINE.JS -->
     <script>
         function scheduleDisplay() {
             return {
@@ -281,6 +294,7 @@
                 },
 
                 fetchSchedules() {
+                    // API Call
                     fetch('{{ route('api.display.schedules') }}')
                         .then(res => {
                             if (!res.ok) throw new Error('API Error');
@@ -393,6 +407,7 @@
             }
         }
 
+        // Fungsi Memulai Layar (Masuk Fullscreen)
         function startDisplay() {
             const overlay = document.getElementById('start-overlay');
             overlay.style.opacity = '0';
@@ -406,6 +421,25 @@
             if(audioEl) {
                 audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
                 audioEl.play().catch(e => console.log("Abaikan ini", e));
+            }
+        }
+
+        // Fungsi Keluar Layar (Keluar Fullscreen dan Kembali)
+        function exitDisplay() {
+            if (document.fullscreenElement) {
+                // Keluar dari mode fullscreen terlebih dahulu
+                document.exitFullscreen().then(() => {
+                    // Beri sedikit delay agar transisi fullscreen selesai sebelum pindah halaman
+                    setTimeout(() => {
+                        window.history.back(); // Kembali ke halaman sebelumnya
+                    }, 200);
+                }).catch(err => {
+                    console.error("Gagal keluar dari fullscreen:", err);
+                    window.history.back(); 
+                });
+            } else {
+                // Jika tidak dalam mode fullscreen, langsung kembali
+                window.history.back();
             }
         }
     </script>

@@ -290,6 +290,45 @@ class LandingPageController extends Controller
              // TAMBAHAN: Ambil 1 Pengumuman Terbaru untuk dijadikan Pop-up
         $popupAnnouncement = \App\Models\Announcement::latest()->first();
 
+        // --- 11. DATA JADWAL PELAJARAN (TIMETABLE) ---
+        $publicSchedules = Cache::remember('landing_public_schedules', 3600, function() {
+            if (class_exists(\App\Models\Timetable::class)) {
+                $schedules = \App\Models\Timetable::with(['timeslot', 'teacher', 'subject', 'studentClass'])->get();
+
+                $formatted = [
+                    'Senin' => [], 'Selasa' => [], 'Rabu' => [], 'Kamis' => [], 'Jumat' => []
+                ];
+
+                foreach ($schedules as $sched) {
+                    $day = ucfirst(strtolower($sched->day_of_week)); 
+                    if (!isset($formatted[$day])) continue; 
+                    
+                    $time = $sched->timeslot ? substr($sched->timeslot->start_time, 0, 5) . ' - ' . substr($sched->timeslot->end_time, 0, 5) : '00:00 - 00:00';
+                    $subject = $sched->subject ? $sched->subject->name : 'Mata Pelajaran';
+                    $teacher = $sched->teacher ? $sched->teacher->name : 'Guru';
+                    $className = $sched->studentClass ? $sched->studentClass->name : 'Kelas';
+                    
+                    $formatted[$day][] = [
+                        'time' => $time,
+                        'subject' => $subject,
+                        'teacher' => $teacher,
+                        'class' => $className,
+                        'type' => 'pelajaran'
+                    ];
+                }
+                
+                // Urutkan jadwal setiap harinya berdasarkan waktu
+                foreach ($formatted as $day => &$items) {
+                    usort($items, function($a, $b) {
+                        return strcmp($a['time'], $b['time']);
+                    });
+                }
+                
+                return $formatted;
+            }
+            return [];
+        });
+
          return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
@@ -299,7 +338,8 @@ class LandingPageController extends Controller
             'visitorCount',
             'publicExams',
             'latestVideoActivity',
-            'popupAnnouncement' 
+            'popupAnnouncement',
+            'publicSchedules'
         ));
     }
 

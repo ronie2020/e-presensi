@@ -116,7 +116,7 @@
     <!-- fill="currentColor" dan text-slate-50 memastikan warna wave sama dengan background PPDB -->
     <div class="absolute bottom-0 left-0 w-full leading-[0] z-20 pointer-events-none translate-y-[1px]">
         <svg class="block w-full h-[60px] md:h-[120px] text-slate-50 dark:text-slate-950 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
-            <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128V320H0Z"></path>
+           <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128V320H0Z"></path>
         </svg>
     </div>
 </section>

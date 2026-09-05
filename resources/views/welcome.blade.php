@@ -205,6 +205,7 @@
     @include('landing.teachers')
     @include('landing.exams')
     @include('landing.activities')
+    @include('landing.schedule')
     @include('landing.articles')
     @include('landing.achievements')
     @include('landing.extracurricular')
