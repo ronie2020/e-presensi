@@ -21,40 +21,21 @@ class TeachingLoadController extends Controller
         $classes = SchoolClass::orderBy('name')->get();
         $subjects = Subject::orderBy('name')->get();
 
-        // Ambil keyword pencarian dari URL (?search=...)
-        $search = $request->input('search');
-
         // Query dasar beban mengajar (belum dieksekusi)
         $query = TeachingLoad::with(['teacher', 'subject', 'studentClass'])
             ->orderBy('class_id');
 
-        // Filter pencarian: cocok di nama guru, nama mapel, ATAU nama kelas
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('teacher', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('subject', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('studentClass', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        // Hitung total dari data hasil filter (sebelum dipaginate),
-        // supaya kartu statistik "Guru Di-plot" & "Total JP" tetap akurat
-        // sesuai hasil pencarian yang sedang ditampilkan.
+        // Hitung total dari SELURUH data dulu (sebelum dipaginate),
+        // supaya kartu statistik "Guru Di-plot" & "Total JP" tetap akurat,
+        // bukan cuma dihitung dari data di halaman yang sedang tampil.
         $totalTeachers = (clone $query)->distinct('teacher_id')->count('teacher_id');
         $totalHours = (clone $query)->sum('hours_per_week');
 
-        // Ambil data beban mengajar, dipaginate 15 per halaman
-        // withQueryString() supaya keyword pencarian ikut terbawa saat pindah halaman
+        // Ambil data beban mengajar yang sudah tersimpan, dipaginate 15 per halaman
         $teachingLoads = $query->paginate(15)->withQueryString();
 
         return view('teaching-loads.index', compact(
-            'teachers', 'classes', 'subjects', 'teachingLoads', 'totalTeachers', 'totalHours', 'search'
+            'teachers', 'classes', 'subjects', 'teachingLoads', 'totalTeachers', 'totalHours'
         ));
     }
 

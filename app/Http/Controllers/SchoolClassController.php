@@ -18,10 +18,9 @@ class SchoolClassController extends Controller
             ->orderBy('name', 'asc')
             ->get();
         
-        // PERBAIKAN: Gunakan LIKE agar support Multi-Role (JSON Array)
-        // Mencari user yang memiliki kata "Wali Kelas" di dalam daftar role-nya
-        // Contoh: Data ["Guru", "Wali Kelas"] akan tetap ditemukan.
-        $teachers = User::where('role', 'LIKE', '%Wali Kelas%')
+        // PERBAIKAN SPATIE: Gunakan scope role() bawaan dari Spatie HasRoles
+        // Ini akan otomatis mencari user di tabel model_has_roles milik Spatie
+        $teachers = User::role('Wali Kelas')
                         ->orderBy('name', 'asc')
                         ->get();
 
@@ -75,11 +74,10 @@ class SchoolClassController extends Controller
      */
     public function edit($id)
     {
-        // Gunakan findOrFail
         $class = SchoolClass::findOrFail($id);
         
-        // PERBAIKAN: Gunakan LIKE juga di sini
-        $teachers = User::where('role', 'LIKE', '%Wali Kelas%')
+        // PERBAIKAN SPATIE: Gunakan scope role() di sini juga
+        $teachers = User::role('Wali Kelas')
                         ->orderBy('name', 'asc')
                         ->get();
 
