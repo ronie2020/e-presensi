@@ -110,160 +110,108 @@
                 </div>
             </div>
 
-            {{-- 9 Statistik Cepat (Grid sudah diperbaiki dengan grid-cols-5 di layar lebar untuk menampung dengan rapi) --}}
+            {{-- 9 Statistik Cepat (memakai komponen <x-stat-card>, lihat resources/views/components/stat-card.blade.php) --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
-                <!-- Kartu Total Siswa -->
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-200 transition-colors">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-fill ph-users-three"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Siswa</p>
-                        <p class="text-xl font-black text-slate-800">{{ $stats['total_students'] ?? 32 }}</p>
-                    </div>
-                </div>
-                
-                <!-- Kartu Poin Karakter -->
-                <div onclick="openDrilldownModal('merits')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-emerald-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl group-hover:bg-emerald-100 transition-colors"><i class="ph-fill ph-star"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">Poin Karakter</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-emerald-600">+{{ $stats['total_merits'] ?? 0 }}</p>
-                            @if(isset($trends['merits']))
-                                @php $isUp = $trends['merits'] >= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isUp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isUp ? 'Naik' : 'Turun' }} dari periode sebelumnya">
-                                    <i class="ph-bold {{ $isUp ? 'ph-arrow-up-right' : 'ph-arrow-down-right' }} mr-0.5"></i> {{ abs($trends['merits']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Kartu Literasi -->
-                <div onclick="openDrilldownModal('literacy')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-purple-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-purple-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl group-hover:bg-purple-100 transition-colors"><i class="ph-fill ph-books"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-purple-600 transition-colors">Literasi</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-purple-600">{{ $stats['total_literacy'] ?? 0 }}</p>
-                            @if(isset($trends['literacy']))
-                                @php $isUp = $trends['literacy'] >= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isUp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isUp ? 'Naik' : 'Turun' }} dari periode sebelumnya">
-                                    <i class="ph-bold {{ $isUp ? 'ph-arrow-up-right' : 'ph-arrow-down-right' }} mr-0.5"></i> {{ abs($trends['literacy']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                <x-stat-card
+                    theme="blue"
+                    icon="users-three"
+                    label="Total Siswa"
+                    :value="$stats['total_students'] ?? 0"
+                    :clickable="false"
+                />
 
-                <!-- Kartu Jurnal Habit -->
-                <div onclick="openDrilldownModal('habits')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-teal-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-teal-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl group-hover:bg-teal-100 transition-colors"><i class="ph-fill ph-list-checks"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-teal-600 transition-colors">Jurnal Habit</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-teal-600">{{ $stats['total_habits'] ?? 0 }}</p>
-                            @if(isset($trends['habits']))
-                                @php $isUp = $trends['habits'] >= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isUp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isUp ? 'Naik' : 'Turun' }} dari periode sebelumnya">
-                                    <i class="ph-bold {{ $isUp ? 'ph-arrow-up-right' : 'ph-arrow-down-right' }} mr-0.5"></i> {{ abs($trends['habits']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Kartu Pelanggaran -->
-                <div onclick="openDrilldownModal('violations')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-rose-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-rose-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl group-hover:bg-rose-100 transition-colors"><i class="ph-fill ph-warning-circle"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-rose-600 transition-colors">Pelanggaran</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-rose-600">-{{ $stats['total_violations'] ?? 0 }}</p>
-                            @if(isset($trends['violations']))
-                                @php $isGood = $trends['violations'] <= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Lebih Disiplin)' : 'Meningkat (Banyak Pelanggaran)' }}">
-                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['violations']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Kartu Sakit -->
-                <div onclick="openDrilldownModal('sakit')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-blue-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl group-hover:bg-blue-100 transition-colors"><i class="ph-fill ph-thermometer"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-blue-600 transition-colors">Sakit</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-blue-600">{{ $stats['sakit_count'] ?? 0 }}</p>
-                            @if(isset($trends['sakit']))
-                                @php $isGood = $trends['sakit'] <= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Makin Sehat)' : 'Meningkat (Banyak Sakit)' }}">
-                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['sakit']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Kartu Izin -->
-                <div onclick="openDrilldownModal('izin')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-indigo-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-indigo-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl group-hover:bg-indigo-100 transition-colors"><i class="ph-fill ph-envelope-open"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-indigo-600 transition-colors">Izin</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-indigo-600">{{ $stats['izin_count'] ?? 0 }}</p>
-                            @if(isset($trends['izin']))
-                                @php $isGood = $trends['izin'] <= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun' : 'Meningkat' }}">
-                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['izin']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                <x-stat-card
+                    theme="emerald"
+                    icon="star"
+                    label="Poin Karakter"
+                    prefix="+"
+                    :value="$stats['total_merits'] ?? 0"
+                    :trend="$trends['merits'] ?? null"
+                    trend-good-direction="up"
+                    type="merits"
+                />
 
-                <!-- Kartu Total Alpa -->
-                <div onclick="openDrilldownModal('alpa')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-amber-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl group-hover:bg-amber-100 transition-colors"><i class="ph-fill ph-calendar-x"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-amber-600 transition-colors">Total Alpa</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-amber-600">{{ $stats['alfa_count'] ?? 0 }}</p>
-                            @if(isset($trends['alfa']))
-                                @php $isGood = $trends['alfa'] <= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Meningkatnya Kehadiran)' : 'Meningkat (Banyak Alpa)' }}">
-                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['alfa']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                <x-stat-card
+                    theme="purple"
+                    icon="books"
+                    label="Literasi"
+                    :value="$stats['total_literacy'] ?? 0"
+                    :trend="$trends['literacy'] ?? null"
+                    trend-good-direction="up"
+                    type="literacy"
+                />
 
-                <!-- Kartu Terlambat -->
-                <div onclick="openDrilldownModal('late')" class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2 hover:border-cyan-400 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 group relative">
-                    <div class="absolute -top-3 right-0 bg-cyan-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Klik detail</div>
-                    <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl group-hover:bg-cyan-100 transition-colors"><i class="ph-fill ph-clock"></i></div>
-                    <div class="flex flex-col items-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-cyan-600 transition-colors">Terlambat</p>
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-xl font-black text-cyan-600">{{ $stats['late_count'] ?? 0 }}</p>
-                            @if(isset($trends['late']))
-                                @php $isGood = $trends['late'] <= 0; @endphp
-                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center border {{ $isGood ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}" title="{{ $isGood ? 'Menurun (Makin Disiplin)' : 'Meningkat (Banyak Terlambat)' }}">
-                                    <i class="ph-bold {{ $isGood ? 'ph-arrow-down-right' : 'ph-arrow-up-right' }} mr-0.5"></i> {{ abs($trends['late']) }}%
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                <x-stat-card
+                    theme="teal"
+                    icon="list-checks"
+                    label="Jurnal Habit"
+                    :value="$stats['total_habits'] ?? 0"
+                    :trend="$trends['habits'] ?? null"
+                    trend-good-direction="up"
+                    type="habits"
+                />
+
+                <x-stat-card
+                    theme="rose"
+                    icon="warning-circle"
+                    label="Pelanggaran"
+                    prefix="-"
+                    :value="$stats['total_violations'] ?? 0"
+                    :trend="$trends['violations'] ?? null"
+                    trend-good-direction="down"
+                    trend-good-label="Menurun (Lebih Disiplin)"
+                    trend-bad-label="Meningkat (Banyak Pelanggaran)"
+                    type="violations"
+                />
+
+                <x-stat-card
+                    theme="blue"
+                    icon="thermometer"
+                    label="Sakit"
+                    :value="$stats['sakit_count'] ?? 0"
+                    :trend="$trends['sakit'] ?? null"
+                    trend-good-direction="down"
+                    trend-good-label="Menurun (Makin Sehat)"
+                    trend-bad-label="Meningkat (Banyak Sakit)"
+                    type="sakit"
+                />
+
+                <x-stat-card
+                    theme="indigo"
+                    icon="envelope-open"
+                    label="Izin"
+                    :value="$stats['izin_count'] ?? 0"
+                    :trend="$trends['izin'] ?? null"
+                    trend-good-direction="down"
+                    trend-good-label="Menurun"
+                    trend-bad-label="Meningkat"
+                    type="izin"
+                />
+
+                <x-stat-card
+                    theme="amber"
+                    icon="calendar-x"
+                    label="Total Alpa"
+                    :value="$stats['alfa_count'] ?? 0"
+                    :trend="$trends['alfa'] ?? null"
+                    trend-good-direction="down"
+                    trend-good-label="Menurun (Meningkatnya Kehadiran)"
+                    trend-bad-label="Meningkat (Banyak Alpa)"
+                    type="alpa"
+                />
+
+                <x-stat-card
+                    theme="cyan"
+                    icon="clock"
+                    label="Terlambat"
+                    :value="$stats['late_count'] ?? 0"
+                    :trend="$trends['late'] ?? null"
+                    trend-good-direction="down"
+                    trend-good-label="Menurun (Makin Disiplin)"
+                    trend-bad-label="Meningkat (Banyak Terlambat)"
+                    type="late"
+                />
 
             </div>
 

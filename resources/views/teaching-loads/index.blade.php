@@ -188,25 +188,6 @@
                         </div>
                         @endif
                     </div>
-
-                    {{-- Form Pencarian --}}
-                    <form action="{{ route('teaching-loads.index') }}" method="GET" class="mb-5">
-                        <div class="relative">
-                            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="text"
-                                name="search"
-                                value="{{ $search ?? '' }}"
-                                placeholder="Cari nama guru, mata pelajaran, atau kelas..."
-                                class="w-full pl-11 pr-10 py-3 rounded-xl border-slate-200 bg-slate-50 text-xs lg:text-sm font-bold focus:ring-elevate-accent outline-none"
-                            >
-                            @if(!empty($search))
-                            <a href="{{ route('teaching-loads.index') }}" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500" title="Hapus pencarian">
-                                <i class="ph-bold ph-x-circle text-lg"></i>
-                            </a>
-                            @endif
-                        </div>
-                    </form>
                     
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
@@ -269,11 +250,7 @@
                                 <tr>
                                     <td colspan="{{ (auth()->check() && auth()->user()->hasRole('Admin')) ? '6' : '5' }}" class="px-5 py-10 text-center">
                                         <i class="ph-duotone ph-folder-open text-4xl text-slate-300 mb-2"></i>
-                                        @if(!empty($search))
-                                        <p class="text-sm font-bold text-slate-400">Tidak ditemukan hasil untuk "{{ $search }}".</p>
-                                        @else
                                         <p class="text-sm font-bold text-slate-400">Belum ada beban mengajar yang diinput.</p>
-                                        @endif
                                     </td>
                                 </tr>
                                 @endforelse
