@@ -460,6 +460,10 @@ Route::middleware('auth')->group(function () {
         Route::prefix('teacher/timetable')->name('teacher.timetable.')->group(function () {
             Route::get('/', [\App\Http\Controllers\TimetableController::class, 'mySchedule'])->name('index');
             Route::post('/save-ajax', [\App\Http\Controllers\TimetableController::class, 'saveMyScheduleAjax'])->name('save_ajax');
+            
+            // TAMBAHAN: Route Export Excel & PDF
+            Route::get('/export-excel', [\App\Http\Controllers\TimetableController::class, 'exportMyScheduleExcel'])->name('export_excel');
+            Route::get('/export-pdf', [\App\Http\Controllers\TimetableController::class, 'exportMySchedulePdf'])->name('export_pdf');
     });
 
         // INPUT JADWAL MANDIRI (VERSI ADMIN)

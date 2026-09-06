@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ClassTimetableExport;
 use App\Exports\TeacherTimetableExport;
 use App\Exports\TimetableImportTemplateExport;
@@ -650,6 +651,42 @@ class TimetableController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Jadwal tersimpan.']);
+    }
+
+    /**
+     * Export Jadwal Mandiri Guru ke Excel
+     */
+    public function exportMyScheduleExcel()
+    {
+        $teacherId = auth()->id();
+        $teacher = User::findOrFail($teacherId);
+        
+        // Memanfaatkan class Export yang sudah Anda miliki
+        return Excel::download(new TeacherTimetableExport($teacherId), 'Jadwal-Mengajar-'.$teacher->name.'.xlsx');
+    }
+
+    /**
+     * Cetak Jadwal Mandiri Guru ke PDF
+     */
+    public function exportMySchedulePdf()
+    {
+        $teacherId = auth()->id();
+        $teacher = User::findOrFail($teacherId);
+        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        $timeslots = \App\Models\Timeslot::orderBy('start_time')->get();
+        
+        $myTimetables = \App\Models\Timetable::with(['studentClass', 'subject'])
+            ->where('teacher_id', $teacherId)
+            ->get()
+            ->keyBy(function($item) {
+                return $item->day_of_week . '-' . $item->timeslot_id;
+            });
+
+        // Load view khusus PDF dan atur kertas menjadi Landscape
+        $pdf = Pdf::loadView('teacher.timetable_pdf', compact('teacher', 'days', 'timeslots', 'myTimetables'))
+                  ->setPaper('a4', 'landscape');
+
+        return $pdf->download('Jadwal-Mengajar-'.$teacher->name.'.pdf');
     }
     
 }

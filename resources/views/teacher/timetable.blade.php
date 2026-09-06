@@ -1,15 +1,27 @@
 <x-app-layout>
-    <div class="py-6 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
+     <div class="py-6 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark">
-                    <i class="ph-fill ph-calendar-plus text-elevate-primary"></i> Susun Jadwal Mandiri
-                </h1>
-                <p class="text-elevate-dark/80 text-sm font-semibold max-w-2xl">
-                    Pilih mata pelajaran dan kelas pada setiap jam sesuai dengan jadwal yang telah Anda terima. Perubahan akan disimpan secara otomatis dan tersinkronisasi dengan admin.
-                </p>
+            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark">
+                        <i class="ph-fill ph-calendar-plus text-elevate-primary"></i> Susun Jadwal Mandiri
+                    </h1>
+                    <p class="text-elevate-dark/80 text-sm font-semibold max-w-2xl">
+                        Pilih mata pelajaran dan kelas pada setiap jam sesuai dengan jadwal yang telah Anda terima. Perubahan akan disimpan secara otomatis dan tersinkronisasi dengan admin.
+                    </p>
+                </div>
+                
+                {{-- TOMBOL EXPORT BARU --}}
+                <div class="flex items-center gap-3 shrink-0 w-full md:w-auto mt-4 md:mt-0">
+                    <a href="{{ route('teacher.timetable.export_pdf') }}" class="flex-1 md:flex-none px-5 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 group active:scale-95 text-sm border border-rose-600/20">
+                        <i class="ph-bold ph-file-pdf text-lg group-hover:scale-110 transition-transform"></i> PDF
+                    </a>
+                    <a href="{{ route('teacher.timetable.export_excel') }}" class="flex-1 md:flex-none px-5 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 group active:scale-95 text-sm border border-emerald-600/20">
+                        <i class="ph-bold ph-file-xls text-lg group-hover:scale-110 transition-transform"></i> Excel
+                    </a>
+                </div>
             </div>
         </div>
 

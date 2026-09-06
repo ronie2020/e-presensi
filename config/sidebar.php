@@ -422,10 +422,10 @@ return [
                 'icon' => 'ph-user-focus', 
                 'roles' => ['Admin', 'TU'] 
             ],
-            [
+             [
                 'name' => 'Data Buku',
-                'route' => 'library.books.index',
-                'active_check' => 'library.books.*',
+                'route' => 'library.books.index',                
+                'active_check' => ['library.books.index', 'library.books.edit', 'library.books.show'],
                 'icon' => 'ph-book-bookmark',
                 'roles' => ['Admin', 'TU']
             ],
