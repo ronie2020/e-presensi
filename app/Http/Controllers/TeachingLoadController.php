@@ -12,7 +12,7 @@ use App\Imports\TeachingLoadImport;
 
 class TeachingLoadController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Ambil data Guru (Spatie Permission)
         $teachers = User::role(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas'])->orderBy('name')->get();
@@ -20,13 +20,23 @@ class TeachingLoadController extends Controller
         // Ambil data Kelas & Mapel
         $classes = SchoolClass::orderBy('name')->get();
         $subjects = Subject::orderBy('name')->get();
-        
-        // Ambil data beban mengajar yang sudah tersimpan
-        $teachingLoads = TeachingLoad::with(['teacher', 'subject', 'studentClass'])
-            ->orderBy('class_id')
-            ->get();
 
-        return view('teaching-loads.index', compact('teachers', 'classes', 'subjects', 'teachingLoads'));
+        // Query dasar beban mengajar (belum dieksekusi)
+        $query = TeachingLoad::with(['teacher', 'subject', 'studentClass'])
+            ->orderBy('class_id');
+
+        // Hitung total dari SELURUH data dulu (sebelum dipaginate),
+        // supaya kartu statistik "Guru Di-plot" & "Total JP" tetap akurat,
+        // bukan cuma dihitung dari data di halaman yang sedang tampil.
+        $totalTeachers = (clone $query)->distinct('teacher_id')->count('teacher_id');
+        $totalHours = (clone $query)->sum('hours_per_week');
+
+        // Ambil data beban mengajar yang sudah tersimpan, dipaginate 15 per halaman
+        $teachingLoads = $query->paginate(15)->withQueryString();
+
+        return view('teaching-loads.index', compact(
+            'teachers', 'classes', 'subjects', 'teachingLoads', 'totalTeachers', 'totalHours'
+        ));
     }
 
     public function store(Request $request)

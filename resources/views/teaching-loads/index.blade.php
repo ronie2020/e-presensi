@@ -29,7 +29,7 @@
                                 <span class="text-[9px] font-bold uppercase tracking-wider">Guru Di-plot</span>
                             </div>
                             <span class="block text-2xl font-black text-elevate-dark tracking-tight">
-                                {{ $teachingLoads->unique('teacher_id')->count() }}
+                                {{ $totalTeachers ?? $teachingLoads->unique('teacher_id')->count() }}
                             </span>
                         </div>
                         <div class="bg-white/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/80 flex-1 md:flex-none text-center md:text-left shadow-sm">
@@ -38,7 +38,7 @@
                                 <span class="text-[9px] font-bold uppercase tracking-wider">Total JP</span>
                             </div>
                             <span class="block text-2xl font-black text-elevate-dark tracking-tight">
-                                {{ $teachingLoads->sum('hours_per_week') }} <span class="text-xs font-bold text-elevate-dark/50">Jam</span>
+                                {{ $totalHours ?? $teachingLoads->sum('hours_per_week') }} <span class="text-xs font-bold text-elevate-dark/50">Jam</span>
                             </span>
                         </div>
                     </div>
@@ -257,6 +257,13 @@
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Pagination --}}
+                    @if($teachingLoads instanceof \Illuminate\Contracts\Pagination\Paginator && $teachingLoads->hasPages())
+                    <div class="mt-6 pt-5 border-t border-slate-100">
+                        {{ $teachingLoads->links() }}
+                    </div>
+                    @endif
 
                     {{-- MODAL EDIT (Hanya dirender jika Admin) --}}
                     @if(auth()->check() && auth()->user()->hasRole('Admin'))
