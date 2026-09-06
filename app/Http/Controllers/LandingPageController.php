@@ -291,13 +291,19 @@ class LandingPageController extends Controller
         $popupAnnouncement = \App\Models\Announcement::latest()->first();
 
         // --- 11. DATA JADWAL PELAJARAN (TIMETABLE) ---
-        $publicSchedules = Cache::remember('landing_public_schedules', 3600, function() {
+        // CATATAN PERBAIKAN: dengan 18 kelas x 41 JP/minggu, jadwal per hari bisa
+        // berisi ratusan baris jika ditampilkan sekaligus. Maka jadwal dikelompokkan
+        // per HARI *dan* per KELAS, lalu halaman publik hanya menampilkan jadwal
+        // 1 kelas terpilih pada 1 hari terpilih (bukan seluruh 18 kelas sekaligus).
+        // Key cache diganti versinya (_v2) karena struktur datanya berubah.
+        $scheduleCache = Cache::remember('landing_public_schedules_v2', 3600, function() {
             if (class_exists(\App\Models\Timetable::class)) {
                 $schedules = \App\Models\Timetable::with(['timeslot', 'teacher', 'subject', 'studentClass'])->get();
 
                 $formatted = [
                     'Senin' => [], 'Selasa' => [], 'Rabu' => [], 'Kamis' => [], 'Jumat' => []
                 ];
+                $classNames = [];
 
                 foreach ($schedules as $sched) {
                     $day = ucfirst(strtolower($sched->day_of_week)); 
@@ -307,8 +313,15 @@ class LandingPageController extends Controller
                     $subject = $sched->subject ? $sched->subject->name : 'Mata Pelajaran';
                     $teacher = $sched->teacher ? $sched->teacher->name : 'Guru';
                     $className = $sched->studentClass ? $sched->studentClass->name : 'Kelas';
-                    
-                    $formatted[$day][] = [
+
+                    $classNames[$className] = true;
+
+                    // Dikelompokkan: [hari][nama_kelas] = array item jadwal
+                    if (!isset($formatted[$day][$className])) {
+                        $formatted[$day][$className] = [];
+                    }
+
+                    $formatted[$day][$className][] = [
                         'time' => $time,
                         'subject' => $subject,
                         'teacher' => $teacher,
@@ -317,17 +330,28 @@ class LandingPageController extends Controller
                     ];
                 }
                 
-                // Urutkan jadwal setiap harinya berdasarkan waktu
-                foreach ($formatted as $day => &$items) {
-                    usort($items, function($a, $b) {
-                        return strcmp($a['time'], $b['time']);
-                    });
+                // Urutkan jadwal tiap kelas, tiap harinya berdasarkan waktu
+                foreach ($formatted as $day => &$classes) {
+                    foreach ($classes as $cls => &$items) {
+                        usort($items, function($a, $b) {
+                            return strcmp($a['time'], $b['time']);
+                        });
+                    }
                 }
+
+                // Daftar nama kelas terurut, untuk isi dropdown filter kelas
+                $classList = collect(array_keys($classNames))
+                    ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+                    ->values()
+                    ->all();
                 
-                return $formatted;
+                return ['data' => $formatted, 'classes' => $classList];
             }
-            return [];
+            return ['data' => [], 'classes' => []];
         });
+
+        $publicSchedules = $scheduleCache['data'];
+        $scheduleClasses = $scheduleCache['classes'];
 
          return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
@@ -339,7 +363,8 @@ class LandingPageController extends Controller
             'publicExams',
             'latestVideoActivity',
             'popupAnnouncement',
-            'publicSchedules'
+            'publicSchedules',
+            'scheduleClasses'
         ));
     }
 

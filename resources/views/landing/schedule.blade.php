@@ -2,8 +2,15 @@
 <section id="jadwal" class="py-20 bg-slate-50 dark:bg-slate-900 relative overflow-hidden" 
     x-data="{ 
         activeTab: 'Senin',
+        selectedClass: '{{ $scheduleClasses[0] ?? '' }}',
         days: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
-        schedules: {{ Js::from($publicSchedules ?? []) }}
+        classes: {{ Js::from($scheduleClasses ?? []) }},
+        schedules: {{ Js::from($publicSchedules ?? []) }},
+        get currentItems() {
+            return (this.schedules[this.activeTab] && this.schedules[this.activeTab][this.selectedClass])
+                ? this.schedules[this.activeTab][this.selectedClass]
+                : [];
+        }
     }"
     x-init="
         const today = new Date().getDay();
@@ -30,19 +37,34 @@
             </p>
         </div>
 
-        <!-- Tab Navigasi -->
-        <div class="flex flex-wrap justify-center gap-2 mb-8" x-data="{ shown: false }" x-intersect="shown = true">
-            <template x-for="day in days" :key="day">
-                <button 
-                    @click="activeTab = day" 
-                    class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none"
-                    :class="activeTab === day 
-                        ? 'bg-elevate-primary text-white shadow-lg shadow-elevate-primary/30 ring-1 ring-elevate-primary' 
-                        : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-elevate-dark dark:hover:text-slate-200 ring-1 ring-slate-200 dark:ring-slate-700 shadow-sm'"
+        <!-- Tab Navigasi Hari + Filter Kelas -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8" x-data="{ shown: false }" x-intersect="shown = true">
+            <div class="flex flex-wrap justify-center gap-2">
+                <template x-for="day in days" :key="day">
+                    <button 
+                        @click="activeTab = day" 
+                        class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none"
+                        :class="activeTab === day 
+                            ? 'bg-elevate-primary text-white shadow-lg shadow-elevate-primary/30 ring-1 ring-elevate-primary' 
+                            : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-elevate-dark dark:hover:text-slate-200 ring-1 ring-slate-200 dark:ring-slate-700 shadow-sm'"
+                    >
+                        <span x-text="day"></span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- Pemilih Kelas: wajib supaya tidak menampilkan 18 kelas x 41 JP sekaligus -->
+            <div class="relative" x-show="classes.length > 0">
+                <select 
+                    x-model="selectedClass"
+                    class="appearance-none pl-4 pr-10 py-2.5 rounded-xl font-bold text-sm bg-white dark:bg-slate-800 text-elevate-dark dark:text-slate-200 ring-1 ring-slate-200 dark:ring-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-elevate-primary cursor-pointer"
                 >
-                    <span x-text="day"></span>
-                </button>
-            </template>
+                    <template x-for="cls in classes" :key="cls">
+                        <option :value="cls" x-text="'Kelas ' + cls"></option>
+                    </template>
+                </select>
+                <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-sm"></i>
+            </div>
         </div>
 
         <!-- Konten Jadwal -->
@@ -51,13 +73,15 @@
                 <h3 class="text-xl font-black text-elevate-dark dark:text-slate-100 flex items-center gap-2">
                     <i class="ph-fill ph-calendar-blank text-elevate-primary"></i> 
                     Hari <span x-text="activeTab" class="text-elevate-primary"></span>
+                    <span class="text-slate-300 dark:text-slate-600 font-medium" x-show="selectedClass">&middot;</span>
+                    <span class="text-slate-400 dark:text-slate-500 text-base" x-show="selectedClass" x-text="'Kelas ' + selectedClass"></span>
                 </h3>
-                <span class="text-sm font-bold text-slate-400" x-text="schedules[activeTab] ? schedules[activeTab].length + ' Kegiatan' : 'Libur'"></span>
+                <span class="text-sm font-bold text-slate-400" x-text="currentItems.length ? currentItems.length + ' Kegiatan' : 'Libur'"></span>
             </div>
 
             <!-- List Jadwal -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <template x-for="(item, index) in schedules[activeTab]" :key="index">
+                <template x-for="(item, index) in currentItems" :key="index">
                     <div 
                         class="p-4 rounded-2xl border transition-all duration-300 hover:shadow-lg group flex items-start gap-4"
                         :class="item.type === 'kegiatan' ? 'bg-elevate-accent/5 border-elevate-accent/20 hover:border-elevate-accent/40 dark:bg-elevate-accent/10 dark:border-elevate-accent/30' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-elevate-primary/30 dark:hover:border-elevate-primary/50'"
@@ -93,7 +117,7 @@
                 </template>
                 
                 <!-- State Kosong -->
-                <div x-show="!schedules[activeTab] || schedules[activeTab].length === 0" class="col-span-1 md:col-span-2 py-12 text-center flex flex-col items-center justify-center" style="display: none;">
+                <div x-show="!currentItems.length" class="col-span-1 md:col-span-2 py-12 text-center flex flex-col items-center justify-center" style="display: none;">
                     <div class="w-20 h-20 rounded-full bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center mb-4">
                         <i class="ph-fill ph-coffee text-4xl text-slate-300 dark:text-slate-500"></i>
                     </div>
