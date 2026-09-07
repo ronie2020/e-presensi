@@ -36,6 +36,14 @@ class Timetable extends Model
     }
 
     /**
+     * Alias untuk relasi kelas (digunakan di beberapa controller)
+     */
+    public function schoolClass()
+    {
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
      * Relasi ke Guru
      */
     public function teacher()

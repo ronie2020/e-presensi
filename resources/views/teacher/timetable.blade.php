@@ -33,7 +33,7 @@
                     <i class="ph-duotone ph-spinner animate-spin text-lg"></i> Menyimpan...
                 </div>
 
-                <table class="w-full text-left text-sm min-w-[900px] mt-4">
+                <table class="timetable-table w-full text-left text-sm min-w-[900px] mt-4">
                     <thead>
                         <tr>
                             <th class="p-4 bg-slate-100 text-elevate-dark font-black border border-slate-200 text-center w-28 text-xs uppercase rounded-tl-xl">Waktu</th>
