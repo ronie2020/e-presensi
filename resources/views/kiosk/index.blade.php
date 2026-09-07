@@ -221,7 +221,7 @@
             
             <div class="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2 relative z-10">
                 @forelse($extracurriculars as $ex)
-                    <button type="button" @click="selectExtra('{{ $ex->id }}', '{{ $ex->name }}')" class="p-4 bg-slate-800/80 hover:bg-rose-500/10 border border-slate-700 hover:border-rose-500/50 rounded-xl text-left transition-all duration-300 group shadow-sm hover:shadow-[0_0_20px_rgba(225,29,72,0.15)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                    <button type="button" data-ex-id="{{ $ex->id }}" data-ex-name="{{ $ex->name }}" @click="selectExtra($event.currentTarget.dataset.exId, $event.currentTarget.dataset.exName)" class="p-4 bg-slate-800/80 hover:bg-rose-500/10 border border-slate-700 hover:border-rose-500/50 rounded-xl text-left transition-all duration-300 group shadow-sm hover:shadow-[0_0_20px_rgba(225,29,72,0.15)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                         <span class="font-bold text-slate-300 group-hover:text-rose-400 text-xs block transition-colors">{{ $ex->name }}</span>
                     </button>
                 @empty
@@ -261,6 +261,18 @@
     function exitKiosk() {
         if (document.exitFullscreen) document.exitFullscreen();
         window.location.href = "{{ route('landing') }}"; 
+    }
+
+    // Escape data dinamis (nama siswa, pesan) sebelum disisipkan lewat innerHTML,
+    // untuk jaga-jaga kalau data dari server mengandung karakter HTML.
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     function speakSapaan(message) {
@@ -586,10 +598,13 @@
                 borderColor = 'border-emerald-500/40'; badgeBg = 'bg-emerald-500/20'; badgeText = 'text-emerald-400'; iconName = 'ph-check-circle'; message = 'Tepat Waktu';
             }
 
+            const safeName = escapeHtml(name);
+            const safeMessage = escapeHtml(message);
+
             let avatarContent = `<span class="text-xl font-black text-slate-500">${initial}</span>`;
             if (photoPath) {
                 let fullUrl = photoPath.startsWith('http') ? photoPath : `/storage/${photoPath}`;
-                avatarContent = `<img src="${fullUrl}" alt="${name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.outerHTML='<span class=\\'text-xl font-black text-slate-500\\'>${initial}</span>';">`;
+                avatarContent = `<img src="${escapeHtml(fullUrl)}" alt="${safeName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.outerHTML='<span class=\\'text-xl font-black text-slate-500\\'>${initial}</span>';">`;
             }
 
             li.className = `flex p-3 rounded-2xl border ${borderColor} bg-slate-800/80 shadow-md animate-fade-in-left transition-all justify-between items-center backdrop-blur-md`;
@@ -599,10 +614,10 @@
                         ${avatarContent}
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <p class="text-white font-bold truncate text-sm leading-tight">${name}</p>
+                        <p class="text-white font-bold truncate text-sm leading-tight">${safeName}</p>
                         <div class="flex items-center mt-1.5">
                             <span class="text-[9px] font-black ${badgeBg} ${badgeText} px-2.5 py-1 rounded-md border border-current flex items-center gap-1.5 uppercase tracking-wider shadow-sm">
-                                ${message} <i class="ph-fill ${iconName}"></i>
+                                ${safeMessage} <i class="ph-fill ${iconName}"></i>
                             </span>
                         </div>
                     </div>
@@ -766,8 +781,8 @@
                             <i class="ph-fill ${iconClass} text-7xl ${textClass} drop-shadow-md"></i>
                         </div>
                     </div>
-                    <h2 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-5 w-full truncate px-4 drop-shadow-xl tracking-tight">${name || 'Siswa'}</h2>
-                    <p class="text-xs md:text-sm font-black ${textClass} px-8 py-3 bg-slate-950/70 rounded-full border-2 border-current uppercase tracking-widest shadow-inner">${message}</p>
+                    <h2 class="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-5 w-full truncate px-4 drop-shadow-xl tracking-tight">${escapeHtml(name || 'Siswa')}</h2>
+                    <p class="text-xs md:text-sm font-black ${textClass} px-8 py-3 bg-slate-950/70 rounded-full border-2 border-current uppercase tracking-widest shadow-inner">${escapeHtml(message)}</p>
                 </div>
             `;
         }

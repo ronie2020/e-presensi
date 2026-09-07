@@ -249,6 +249,17 @@
 
         <!-- Audio Element untuk Bel -->
         <audio x-ref="bellAudio"></audio>
+
+        <!-- Banner: muncul kalau browser memblokir autoplay audio bel -->
+        <div x-show="audioBlocked" x-transition
+             class="fixed bottom-6 right-6 z-[110] flex items-center gap-3 bg-rose-600 text-white px-5 py-4 rounded-2xl shadow-2xl shadow-rose-900/40 cursor-pointer hover:bg-rose-500 transition-colors animate-pulse"
+             @click="initAudio()" title="Ketuk untuk mengaktifkan suara bel">
+            <i class="ph-bold ph-speaker-x text-2xl shrink-0"></i>
+            <div class="text-xs sm:text-sm font-bold leading-snug">
+                Suara bel diblokir browser.<br>
+                <span class="underline">Ketuk di sini untuk mengaktifkan</span>
+            </div>
+        </div>
     </div>
 
     <!-- LOGIKA JAVASCRIPT & ALPINE.JS -->
@@ -285,11 +296,22 @@
                     return `${h}:${m}:${s}`;
                 },
 
+                // Kunci unik per-hari + per-menit, supaya bel yang jamnya sama
+                // tetap bisa bunyi lagi keesokan harinya (lihat catatan bug di bawah).
+                getDateKey() {
+                    let d = this.currentTime;
+                    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+                },
+
                 initAudio() {
-                    this.audioBlocked = false;
                     if(this.$refs.bellAudio) {
                         this.$refs.bellAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-                        this.$refs.bellAudio.play().catch(e => console.log("Abaikan", e));
+                        this.$refs.bellAudio.play().then(() => {
+                            this.audioBlocked = false;
+                        }).catch(e => {
+                            console.log("Unlock audio gagal, coba lagi nanti", e);
+                            this.audioBlocked = true;
+                        });
                     }
                 },
 
@@ -385,8 +407,10 @@
                     let currentSchedule = this.schedules.find(s => this.formatTime(s.trigger_time) === currentMinute);
 
                     if (currentSchedule && currentSchedule.audio_file) {
-                        if (this.lastPlayedTime !== currentMinute) {
-                            this.lastPlayedTime = currentMinute; 
+                        let playKey = `${this.getDateKey()}_${currentMinute}`;
+
+                        if (this.lastPlayedTime !== playKey) {
+                            this.lastPlayedTime = playKey; 
                             
                             if (this.$refs.bellAudio) {
                                 this.$refs.bellAudio.src = '/storage/' + currentSchedule.audio_file;
