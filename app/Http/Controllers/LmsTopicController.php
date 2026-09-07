@@ -5,12 +5,23 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Topic;
 use App\Models\Subject;
+use Illuminate\Support\Facades\Auth;
 
 class LmsTopicController extends Controller
 {
+    private function authorizeAccess(): void
+    {
+        abort_unless(
+            Auth::check() && Auth::user()->hasRole(['Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas']),
+            403
+        );
+    }
+
     // Menampilkan halaman kelola Bab
     public function index(Request $request)
     {
+        $this->authorizeAccess();
+
         $subjects = Subject::orderBy('name', 'asc')->get();
         
         $query = Topic::with('subject');
@@ -32,6 +43,8 @@ class LmsTopicController extends Controller
     // Menyimpan Bab Baru
     public function store(Request $request)
     {
+        $this->authorizeAccess();
+
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'title' => 'required|string|max:255',
@@ -50,6 +63,8 @@ class LmsTopicController extends Controller
     // Menghapus Bab
     public function destroy($id)
     {
+        $this->authorizeAccess();
+
         $topic = Topic::findOrFail($id);
         
         // Pastikan tidak ada materi/tugas yang masih terkait sebelum dihapus (Opsional, karena di migration kita set nullOnDelete)
@@ -64,6 +79,8 @@ class LmsTopicController extends Controller
 
     public function edit($id)
     {
+        $this->authorizeAccess();
+
         $topic = \App\Models\Topic::findOrFail($id);
         $subjects = \App\Models\Subject::orderBy('name')->get();
         return view('lms.topics.edit', compact('topic', 'subjects'));
@@ -71,6 +88,8 @@ class LmsTopicController extends Controller
 
     public function update(\Illuminate\Http\Request $request, $id)
     {
+        $this->authorizeAccess();
+
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'title' => 'required|string|max:255',
