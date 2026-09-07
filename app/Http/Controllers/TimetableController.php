@@ -9,6 +9,7 @@ use App\Models\Timetable;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\ClassTimetableExport;
@@ -18,6 +19,13 @@ use App\Imports\TimetableImport;
 
 class TimetableController extends Controller
 {
+    private const PUBLIC_SCHEDULE_CACHE_KEY = 'landing_public_schedules_v2';
+
+    private function clearPublicScheduleCache(): void
+    {
+        Cache::forget(self::PUBLIC_SCHEDULE_CACHE_KEY);
+    }
+
     /**
      * Menampilkan halaman utama (Wizard) Timetable
      */
@@ -224,6 +232,7 @@ class TimetableController extends Controller
             }
 
             DB::commit();
+            $this->clearPublicScheduleCache();
 
             if (count($unassignedLoads) > 0) {
                 return redirect()->route('timetable.index')->with('warning', 'Jadwal terbuat, tapi ada ' . count($unassignedLoads) . ' jam pelajaran yang tidak kebagian tempat akibat jadwal mentok 100%. Detail: ' . implode(', ', array_slice($unassignedLoads, 0, 3)) . (count($unassignedLoads) > 3 ? '...' : ''));
@@ -282,6 +291,7 @@ class TimetableController extends Controller
     public function reset()
     {        
         Timetable::query()->delete(); 
+        $this->clearPublicScheduleCache();
         return redirect()->back()->with('success', 'Semua jadwal berhasil dikosongkan.');
     }
 
@@ -335,6 +345,10 @@ class TimetableController extends Controller
         $message = "{$import->successCount} jadwal berhasil diimport.";
         if (count($import->errors) > 0) {
             $message .= ' Namun ada ' . count($import->errors) . ' baris yang dilewati.';
+        }
+
+        if ($import->successCount > 0) {
+            $this->clearPublicScheduleCache();
         }
 
         return response()->json([
@@ -408,6 +422,7 @@ class TimetableController extends Controller
             'timeslot_id' => $request->target_timeslot_id
         ]);
 
+        $this->clearPublicScheduleCache();
         return response()->json(['success' => true, 'message' => 'Jadwal berhasil dipindah.']);
     }
 
@@ -471,6 +486,7 @@ class TimetableController extends Controller
             'status' => 'published',
         ]);
 
+        $this->clearPublicScheduleCache();
         return response()->json(['success' => true, 'message' => 'Sisa jam pelajaran berhasil ditempatkan!']);
     }
 
@@ -523,6 +539,7 @@ class TimetableController extends Controller
         if (empty($loadId)) {
             if ($existing) {
                 $existing->delete();
+                $this->clearPublicScheduleCache();
             }
             return response()->json(['success' => true, 'message' => 'Jadwal dikosongkan.']);
         }
@@ -559,6 +576,7 @@ class TimetableController extends Controller
             ]);
         }
 
+        $this->clearPublicScheduleCache();
         return response()->json(['success' => true, 'message' => 'Jadwal tersimpan.']);
     }
 
@@ -616,7 +634,10 @@ class TimetableController extends Controller
             ->first();
 
         if (empty($loadId)) {
-            if ($existing) $existing->delete();
+            if ($existing) {
+                $existing->delete();
+                $this->clearPublicScheduleCache();
+            }
             return response()->json(['success' => true, 'message' => 'Jadwal dikosongkan.']);
         }
 
@@ -650,6 +671,7 @@ class TimetableController extends Controller
             ]);
         }
 
+        $this->clearPublicScheduleCache();
         return response()->json(['success' => true, 'message' => 'Jadwal tersimpan.']);
     }
 
