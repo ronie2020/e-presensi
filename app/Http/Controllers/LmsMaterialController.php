@@ -130,6 +130,7 @@ class LmsMaterialController extends Controller
                 $material = LmsMaterial::create([
                     'teacher_id' => $teacherId,
                     'subject_id' => $request->subject_id,
+                    'topic_id' => $request->topic_id,
                     'class_id' => $classId,
                     'title' => $request->title,
                     'resume' => $request->resume,           
