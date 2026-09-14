@@ -85,13 +85,10 @@
                         </a> 
                     </div>
                     
-                    <!-- PERBAIKAN: Tombol Portal & Login Staff di Desktop -->
+                    <!-- Tombol Masuk Terpadu (Guru & Siswa) -->
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('login') }}" class="px-4 py-2.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1.5">
-                            <i class="ph-bold ph-lock-key"></i> Akses Guru
-                        </a>
-                        <a href="{{ route('portal.index') }}" class="px-5 py-2.5 rounded-full bg-elevate-dark dark:bg-elevate-primary text-white text-xs font-black hover:bg-elevate-primary dark:hover:bg-elevate-accent dark:hover:text-elevate-dark transition-all shadow-lg shadow-elevate-dark/20 flex items-center gap-1.5">
-                            <i class="ph-bold ph-sign-in"></i> Portal Siswa
+                        <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-elevate-dark dark:bg-elevate-primary text-white text-xs font-black hover:bg-elevate-primary dark:hover:bg-elevate-accent dark:hover:text-elevate-dark transition-all shadow-lg shadow-elevate-dark/20 flex items-center gap-1.5">
+                            <i class="ph-bold ph-sign-in"></i> Masuk / Login
                         </a>
                     </div>
                 @endif
@@ -150,18 +147,17 @@
             <div class="w-16 h-1 rounded-full bg-slate-200 dark:bg-slate-800 my-4"></div>
 
             <div class="flex flex-col gap-4 w-full mt-2">
-                <a href="{{ route('portal.index') }}" class="text-lg font-black text-elevate-accent text-center mb-2">Pusat Portal Siswa</a>
-                
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/30">Dashboard Siswa</a>
+                    <a href="{{ route('students.learning.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-layout text-elevate-accent"></i> Dashboard Siswa
+                    </a>
                 @else
-                    <a href="{{ route('portal.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-sign-in text-elevate-accent"></i> Portal Siswa
+                    {{-- 1 Tombol Login Terpadu (Siswa & Guru) --}}
+                    <a href="{{ route('login') }}" class="block w-full py-4 rounded-2xl bg-elevate-dark text-white font-black shadow-xl shadow-elevate-dark/30 flex items-center justify-center gap-2 text-base">
+                        <i class="ph-bold ph-sign-in text-elevate-accent text-lg"></i> Masuk / Login
                     </a>
-                    <a href="{{ route('login') }}" class="block w-full py-3.5 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold flex items-center justify-center gap-2 mt-2">
-                        <i class="ph-bold ph-lock-key text-elevate-primary"></i> Login Staff / Guru
-                    </a>
-                    <a href="{{ route('library.catalogue') }}" class="block w-full py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold flex items-center justify-center gap-2 mt-2">
+                    <p class="text-xs text-center text-slate-400 dark:text-slate-500 font-medium -mt-1">Untuk Siswa, Guru, dan Admin</p>
+                    <a href="{{ route('library.catalogue') }}" class="block w-full py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold flex items-center justify-center gap-2">
                         <i class="ph-bold ph-books"></i> Katalog Perpustakaan
                     </a>
                 @endif

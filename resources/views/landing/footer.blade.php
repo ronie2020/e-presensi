@@ -103,7 +103,7 @@
                     <li><a href="#profil" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
                     <li><a href="#guru" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tenaga Pendidik</a></li>
                     <li><a href="#kegiatan" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Galeri Kegiatan</a></li>
-                    <li><a href="{{ route('login') }}" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Login Staff</a></li>
+                    <li><a href="{{ route('login') }}" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Masuk / Login</a></li>
                 </ul>
             </div>
             <div>

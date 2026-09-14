@@ -14,7 +14,7 @@ class StudentAuthController extends Controller
      */
     public function showLoginForm()
     {
-        return view('students.portal.index');
+        return view('auth.login-unified', ['activeTab' => 'siswa']);
     }
 
     /**
@@ -57,9 +57,10 @@ class StudentAuthController extends Controller
             return redirect()->route('students.learning.index')->with('success', 'Selamat datang di Ruang Belajar.');
         }
 
-        // 5. DEFAULT REDIRECT: Ke Student Hub / Dashboard Utama
-        // Ini yang kita ubah agar masuk ke tampilan dashboard baru
-        return redirect()->route('student.habits.dashboard')->with('success', 'Selamat datang di Dashboard Siswa.');
+        // 5. DEFAULT REDIRECT: Langsung ke Portal Siswa tab Ringkasan
+        return redirect()
+            ->route('portal.show', $student->id)
+            ->with('success', 'Selamat datang, ' . $student->name . '!');
     }
 
     /**
