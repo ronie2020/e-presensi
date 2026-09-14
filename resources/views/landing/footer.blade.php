@@ -98,11 +98,12 @@
                 </div>
             </div>
             <div>
-                <h4 class="text-slate-800 dark:text-white font-bold mb-6 text-lg">Menu Utama</h4>
+                <h4 class="text-slate-800 dark:text-white font-bold mb-6 text-lg">Menu & Layanan</h4>
                 <ul class="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+                    <li><a href="{{ route('student.login.learning') }}" class="hover:text-blue-500 transition-colors flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300"><i class="ph-bold ph-books text-blue-500 text-sm"></i> Ruang Belajar (LMS)</a></li>
+                    <li><a href="{{ route('student.login.cbt') }}" class="hover:text-rose-500 transition-colors flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300"><i class="ph-bold ph-monitor-play text-rose-500 text-sm"></i> Ujian CBT Online</a></li>
+                    <li><a href="{{ route('portal.index') }}" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Portal Siswa</a></li>
                     <li><a href="#profil" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
-                    <li><a href="#guru" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tenaga Pendidik</a></li>
-                    <li><a href="#kegiatan" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Galeri Kegiatan</a></li>
                     <li><a href="{{ route('login') }}" class="hover:text-elevate-primary dark:hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Masuk / Login</a></li>
                 </ul>
             </div>

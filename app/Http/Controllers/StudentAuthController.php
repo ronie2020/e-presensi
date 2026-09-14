@@ -18,6 +18,22 @@ class StudentAuthController extends Controller
     }
 
     /**
+     * Tampilkan form login khusus Pembelajaran Digital (LMS / Materi)
+     */
+    public function showLearningLoginForm()
+    {
+        return view('auth.login-learning');
+    }
+
+    /**
+     * Tampilkan form login khusus Ujian Berbasis Komputer (CBT)
+     */
+    public function showCbtLoginForm()
+    {
+        return view('auth.login-cbt');
+    }
+
+    /**
      * Proses Login Siswa
      */
     public function login(Request $request)

@@ -285,13 +285,21 @@
                                 <p class="text-sm font-semibold text-slate-400">Masukkan NISN / NIS kamu.</p>
                             </div>
 
-                            <!-- Error Siswa -->
+                            <!-- Error Siswa (NISN tidak ditemukan) -->
                             @if (session('error'))
                                 <div class="mb-4 bg-rose-50 text-rose-600 px-4 py-3 rounded-xl text-sm font-medium border border-rose-100 flex items-center gap-2">
                                     <i class="ph-bold ph-warning-circle text-lg"></i>
                                     {{ session('error') }}
                                 </div>
                             @endif
+
+                            <!-- Error Throttle (terlalu banyak percobaan) -->
+                            @error('throttle')
+                                <div class="mb-4 bg-amber-50 text-amber-700 px-4 py-3 rounded-xl text-sm font-medium border border-amber-200 flex items-start gap-2">
+                                    <i class="ph-bold ph-clock-countdown text-lg shrink-0 mt-0.5"></i>
+                                    <span>Terlalu banyak percobaan. Silakan tunggu sebentar sebelum mencoba lagi.</span>
+                                </div>
+                            @enderror
 
                             <form method="POST" action="{{ route('student.login.post') }}" class="space-y-5"
                                   x-data="{ isLoggingIn: false }" @submit="isLoggingIn = true">
@@ -324,7 +332,7 @@
                                         class="group relative flex w-full justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 py-3.5 px-4 text-sm font-bold text-white transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden transform shadow-md shadow-blue-600/20">
 
                                     <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2">
-                                        Masuk sebagai Siswa <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                        Masuk Portal Siswa <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                                     </span>
                                     <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2" style="display:none;">
                                         <i class="ph-bold ph-spinner animate-spin text-lg"></i> Mencari data...
@@ -332,6 +340,30 @@
                                     <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
                                 </button>
                             </form>
+
+                            <!-- PINTASAN LANGSUNG LAYANAN KHUSUS SISWA -->
+                            <div class="mt-6 pt-5 border-t border-slate-100">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 text-center">
+                                    Atau Masuk Langsung ke Layanan Khusus
+                                </p>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <a href="{{ route('student.login.learning') }}" class="p-3 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-100 transition-all flex flex-col items-center text-center group">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center mb-1.5 shadow-sm group-hover:scale-110 transition-transform">
+                                            <i class="ph-bold ph-books text-base"></i>
+                                        </div>
+                                        <span class="text-xs font-black text-blue-900 leading-tight">Ruang Belajar</span>
+                                        <span class="text-[10px] text-blue-600 font-semibold mt-0.5">E-Learning & Tugas</span>
+                                    </a>
+
+                                    <a href="{{ route('student.login.cbt') }}" class="p-3 rounded-xl bg-rose-50/70 hover:bg-rose-100/70 border border-rose-100 transition-all flex flex-col items-center text-center group">
+                                        <div class="w-8 h-8 rounded-lg bg-rose-600 text-white flex items-center justify-center mb-1.5 shadow-sm group-hover:scale-110 transition-transform">
+                                            <i class="ph-bold ph-monitor-play text-base"></i>
+                                        </div>
+                                        <span class="text-xs font-black text-rose-900 leading-tight">Ruang Ujian</span>
+                                        <span class="text-[10px] text-rose-600 font-semibold mt-0.5">Ujian CBT Online</span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                     </div>{{-- END: Form Box --}}

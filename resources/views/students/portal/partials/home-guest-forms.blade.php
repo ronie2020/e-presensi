@@ -34,7 +34,12 @@
             <svg x-show="isLoading" x-cloak class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
     </div>
-    <p class="text-xs text-blue-400/80 mt-3 px-4 text-center font-medium">Masuk untuk mengakses materi pelajaran dan tugas.</p>
+    <p class="text-xs text-blue-500/90 mt-3 px-4 text-center font-medium flex flex-wrap items-center justify-center gap-1.5">
+        <span>Masuk untuk mengakses materi pelajaran dan tugas.</span>
+        <a href="{{ route('student.login.learning') }}" class="underline font-bold hover:text-blue-700 inline-flex items-center gap-0.5">
+            Buka Halaman Khusus <i class="ph-bold ph-arrow-up-right text-[10px]"></i>
+        </a>
+    </p>
 </form>
 
 <!-- 3. FORM LOGIN CBT (Merah) -->
@@ -54,5 +59,10 @@
             <svg x-show="isLoading" x-cloak class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
     </div>
-    <p class="text-xs text-rose-400/80 mt-3 px-4 text-center font-bold"><i class="ph-fill ph-warning-circle"></i> Pastikan Anda berada di ruangan ujian yang benar.</p>
+    <p class="text-xs text-rose-500/90 mt-3 px-4 text-center font-bold flex flex-wrap items-center justify-center gap-1.5">
+        <span><i class="ph-fill ph-warning-circle"></i> Pastikan berada di ruangan ujian.</span>
+        <a href="{{ route('student.login.cbt') }}" class="underline font-bold hover:text-rose-700 inline-flex items-center gap-0.5">
+            Buka Halaman Khusus <i class="ph-bold ph-arrow-up-right text-[10px]"></i>
+        </a>
+    </p>
 </form>

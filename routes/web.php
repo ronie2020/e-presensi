@@ -166,8 +166,21 @@ Route::middleware('guest:student')->group(function() {
         return view('auth.seb_login');
     })->name('seb.login');
     Route::get('/student/login', [StudentAuthController::class, 'showLoginForm'])->name('student.login');
-    Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.post');
+    
+    // Halaman Khusus Login Pembelajaran Digital (LMS / Materi Pelajaran)
+    Route::get('/student/login/learning', [StudentAuthController::class, 'showLearningLoginForm'])->name('student.login.learning');
+    Route::get('/belajar/login', [StudentAuthController::class, 'showLearningLoginForm']);
+
+    // Halaman Khusus Login Ujian Berbasis Komputer (CBT)
+    Route::get('/student/login/cbt', [StudentAuthController::class, 'showCbtLoginForm'])->name('student.login.cbt');
+    Route::get('/cbt/login', [StudentAuthController::class, 'showCbtLoginForm']);
 });
+
+// POST login siswa: throttle 10 percobaan per menit (anti brute-force NISN)
+Route::post('/student/login', [StudentAuthController::class, 'login'])
+    ->middleware('throttle:10,1')
+    ->name('student.login.post');
+
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 
 // =========================================================================

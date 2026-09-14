@@ -59,7 +59,7 @@
                 <!-- Aktif/tidaknya sekarang mengikuti activeSection (scrollspy) dari welcome.blade.php, bukan statis -->
                 <a href="#home" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Beranda</a>
                 <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Profil</a>
-                <a href="#akademik" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Akademik</a>
+                <a href="#layanan" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Layanan</a>
                 <!-- FIX: sebelumnya href="#galeri" (id ini tidak ada di halaman); disamakan dgn scrollspy & menu mobile yg sama2 pakai #kegiatan -->
                 <a href="#kegiatan" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Galeri</a>
                 <!-- FIX: Prestasi & Kontak ada di menu mobile tapi hilang di desktop -->
@@ -146,18 +146,27 @@
             
             <div class="w-16 h-1 rounded-full bg-slate-200 dark:bg-slate-800 my-4"></div>
 
-            <div class="flex flex-col gap-4 w-full mt-2">
+            <div class="flex flex-col gap-3 w-full mt-2">
                 @if(Auth::guard('student')->check())
                     <a href="{{ route('students.learning.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-layout text-elevate-accent"></i> Dashboard Siswa
                     </a>
                 @else
+                    {{-- Pintasan Khusus Siswa: Belajar & CBT --}}
+                    <div class="grid grid-cols-2 gap-2 mb-1">
+                        <a href="{{ route('student.login.learning') }}" class="py-3 px-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20">
+                            <i class="ph-bold ph-books text-base"></i> Ruang Belajar
+                        </a>
+                        <a href="{{ route('student.login.cbt') }}" class="py-3 px-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/20">
+                            <i class="ph-bold ph-monitor-play text-base"></i> Ujian CBT
+                        </a>
+                    </div>
+
                     {{-- 1 Tombol Login Terpadu (Siswa & Guru) --}}
-                    <a href="{{ route('login') }}" class="block w-full py-4 rounded-2xl bg-elevate-dark text-white font-black shadow-xl shadow-elevate-dark/30 flex items-center justify-center gap-2 text-base">
-                        <i class="ph-bold ph-sign-in text-elevate-accent text-lg"></i> Masuk / Login
+                    <a href="{{ route('login') }}" class="block w-full py-3.5 rounded-2xl bg-elevate-dark text-white font-black shadow-xl shadow-elevate-dark/30 flex items-center justify-center gap-2 text-sm">
+                        <i class="ph-bold ph-sign-in text-elevate-accent text-lg"></i> Masuk / Login Portal
                     </a>
-                    <p class="text-xs text-center text-slate-400 dark:text-slate-500 font-medium -mt-1">Untuk Siswa, Guru, dan Admin</p>
-                    <a href="{{ route('library.catalogue') }}" class="block w-full py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold flex items-center justify-center gap-2">
+                    <a href="{{ route('library.catalogue') }}" class="block w-full py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-2">
                         <i class="ph-bold ph-books"></i> Katalog Perpustakaan
                     </a>
                 @endif
@@ -188,7 +197,6 @@
              @click.stop>
 
             <!-- Area Input Pencarian -->
-            <!-- Form dummy: Nantinya Anda bisa mengarahkan action form ini ke Controller pencarian -->
             <form action="#" method="GET" class="flex items-center px-6 py-4 border-b border-slate-100 dark:border-slate-800">
                 <i class="ph-bold ph-magnifying-glass text-2xl text-elevate-primary dark:text-elevate-accent"></i>
                 <input x-ref="searchInput" type="text" name="q" class="w-full bg-transparent border-0 focus:ring-0 text-elevate-dark dark:text-white px-4 text-xl font-bold placeholder-slate-400 dark:placeholder-slate-500 outline-none" placeholder="Cari guru, e-book, atau informasi...">
@@ -197,11 +205,20 @@
 
             <!-- Area Pintasan (Quick Links) -->
             <div class="p-6 bg-slate-50 dark:bg-slate-800/30">
-                <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Pencarian Populer & Cepat</h4>
+                <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Pencarian Populer & Akses Cepat</h4>
                 <div class="flex flex-wrap gap-2.5">
-                    <a href="{{ route('ppdb.create') }}" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">🎓 Pendaftaran PPDB</a>
-                    <a href="{{ route('library.catalogue') }}" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">📚 Katalog E-Book</a>
-                    <a href="#guru" @click="searchOpen = false" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">👨‍🏫 Direktori Guru</a>
+                    <a href="{{ route('student.login.learning') }}" class="px-3.5 py-2 bg-blue-50 dark:bg-blue-950/40 rounded-xl text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:border-blue-400 transition shadow-sm flex items-center gap-1.5">
+                        <i class="ph-bold ph-books"></i> Ruang Belajar (LMS)
+                    </a>
+                    <a href="{{ route('student.login.cbt') }}" class="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/40 rounded-xl text-xs font-bold text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:border-rose-400 transition shadow-sm flex items-center gap-1.5">
+                        <i class="ph-bold ph-monitor-play"></i> Ujian Online (CBT)
+                    </a>
+                    <a href="{{ route('portal.index') }}" class="px-3.5 py-2 bg-white dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent transition shadow-sm flex items-center gap-1.5">
+                        <i class="ph-bold ph-identification-card"></i> Portal Siswa
+                    </a>
+                    <a href="{{ route('ppdb.create') }}" class="px-3.5 py-2 bg-white dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent transition shadow-sm flex items-center gap-1.5">
+                        <i class="ph-bold ph-student"></i> PPDB Online
+                    </a>
                 </div>
             </div>
         </div>
