@@ -198,6 +198,56 @@
                 </a>
             </div>
 
+            <!-- ACTIVE EXAM SCHEDULE WIDGET -->
+            <div class="mt-8 glass-card rounded-[2rem] p-6 sm:p-7 shadow-xl">
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                        <i class="ph-fill ph-calendar-check text-xl text-amber-500"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-slate-800 font-bold text-base">Jadwal Ujian Aktif</h2>
+                        <p class="text-xs text-slate-500 font-medium">{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}</p>
+                    </div>
+                </div>
+
+                @if(isset($activeExams) && $activeExams->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($activeExams as $exam)
+                            <div class="p-4 rounded-2xl bg-white/50 border border-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="ph-bold ph-file-text text-rose-500"></i>
+                                        {{ $exam->name }}
+                                    </h3>
+                                    <div class="flex items-center gap-3 mt-1 text-[11px] text-slate-500 font-medium">
+                                        <span class="flex items-center gap-1">
+                                            <i class="ph-bold ph-clock"></i>
+                                            {{ \Carbon\Carbon::parse($exam->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($exam->end_time)->format('H:i') }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="ph-bold ph-users"></i>
+                                            {{ $exam->event ? $exam->event->name : 'Semua Peserta' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="shrink-0">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        Berlangsung
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-6 px-4 bg-white/40 rounded-2xl border border-white border-dashed">
+                        <i class="ph-duotone ph-coffee text-4xl text-slate-400 mb-2"></i>
+                        <h3 class="text-sm font-bold text-slate-700">Tidak ada jadwal hari ini</h3>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Silakan istirahat atau pelajari materi selanjutnya.</p>
+                    </div>
+                @endif
+            </div>
+
         </div>
     </main>
 

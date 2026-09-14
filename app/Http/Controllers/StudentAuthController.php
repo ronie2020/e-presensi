@@ -30,7 +30,14 @@ class StudentAuthController extends Controller
      */
     public function showCbtLoginForm()
     {
-        return view('auth.login-cbt');
+        // Ambil jadwal ujian CBT yang aktif dan pada hari ini
+        $activeExams = \App\Models\CbtExam::where('is_active', 1)
+            ->whereDate('start_time', '<=', now()->toDateString())
+            ->whereDate('end_time', '>=', now()->toDateString())
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        return view('auth.login-cbt', compact('activeExams'));
     }
 
     /**
