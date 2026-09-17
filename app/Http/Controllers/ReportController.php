@@ -657,7 +657,7 @@ class ReportController extends Controller
             $endDate = \Carbon\Carbon::now()->endOfMonth()->toDateString();
         }
 
-        $query = \App\Models\TeachingSession::with(['teacher', 'schedule.schoolClass', 'schedule.subject'])
+        $query = \App\Models\TeachingSession::with(['teacher', 'schedule.schoolClass', 'schedule.subject', 'timetable.studentClass', 'timetable.subject'])
             ->withCount([
                 'attendances as hadir_count' => function ($q) { $q->whereIn('status', ['present', 'Hadir']); },
                 'attendances as late_count' => function ($q) { $q->whereIn('status', ['late', 'Terlambat']); },
@@ -681,7 +681,7 @@ class ReportController extends Controller
             $query->where(function($q) use ($teacherId) {
                 // 1. Cek langsung di tabel jurnal (teaching_sessions)
                 $q->where('teacher_id', $teacherId)
-                  // 2. ATAU cek berdasarkan guru yang terdaftar di jadwal asli (schedules)
+                  // 2. ATAU cek berdasarkan guru yang terdaftar di jadwal asli (timetables)
                   ->orWhereHas('schedule', function($q2) use ($teacherId) {
                       $q2->where('teacher_id', $teacherId);
                   });
@@ -690,7 +690,7 @@ class ReportController extends Controller
               
         if ($classId) {
             $query->whereHas('schedule', function($q) use ($classId) {
-                $q->where('school_class_id', $classId);
+                $q->where('class_id', $classId);
             });
         }
         
