@@ -32,6 +32,11 @@
                             <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
                                 <i class="ph-bold ph-users-three text-elevate-primary"></i> Kelas {{ $session->timetable->studentClass->name ?? '-' }}
                             </span>
+                            @if(isset($session->timetable->timeslot->name))
+                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
+                                <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ $session->timetable->timeslot->name }}
+                            </span>
+                            @endif
                             <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
                                 <i class="ph-bold ph-clock text-elevate-primary"></i> 
                                 {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time ?? now())->format('H:i') }} - 

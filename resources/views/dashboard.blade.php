@@ -452,11 +452,9 @@
                         $startJP = isset($firstSchedule->timeslot->start_time) ? \Carbon\Carbon::parse($firstSchedule->timeslot->start_time)->format('H:i') : '--:--';
                         $endJP   = isset($lastSchedule->timeslot->end_time) ? \Carbon\Carbon::parse($lastSchedule->timeslot->end_time)->format('H:i') : '--:--';
                         
-                        $orderFirst = $firstSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $firstSchedule->timeslot->name ?? ($index + 1));
-                        $orderLast  = $lastSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $lastSchedule->timeslot->name ?? ($index + 1));
-                        
-                        // Format angka "22" atau "22-24"
-                        $orderDisplay = $orderFirst == $orderLast ? $orderFirst : $orderFirst . '-' . $orderLast;
+                        $firstSlotName = $firstSchedule->timeslot->name ?? ('Sesi ' . ($firstSchedule->timeslot->order_sequence ?? ($index + 1)));
+                        $lastSlotName  = $lastSchedule->timeslot->name ?? ('Sesi ' . ($lastSchedule->timeslot->order_sequence ?? ($index + 1)));
+                        $sessionDisplay = $firstSlotName === $lastSlotName ? $firstSlotName : $firstSlotName . ' - ' . $lastSlotName;
 
                         if (!$session) {
                             $status = 'waiting'; 
@@ -479,14 +477,14 @@
                         
                         {{-- INFO KIRI --}}
                         <div class="flex items-center gap-4 w-full lg:w-auto">
-                            <div class="flex flex-col items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-[1.25rem] {{ $bgIcon }} shrink-0 shadow-inner border transition-colors relative">
+                            <div class="flex flex-col items-center justify-center min-w-[4.5rem] md:min-w-[5.5rem] px-2 py-2 min-h-[4rem] md:min-h-[5rem] rounded-[1.25rem] {{ $bgIcon }} shrink-0 shadow-inner border transition-colors relative text-center">
                                 @if($totalJP > 1)
                                     <div class="absolute -top-2 -right-2 bg-elevate-peach text-white text-[10px] font-black px-2.5 py-0.5 rounded-full border-2 border-white shadow-sm z-10">
                                         {{ $totalJP }} JP
                                     </div>
                                 @endif
                                 <span class="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-80">Sesi</span>
-                                <span class="text-xl md:text-2xl font-black leading-none mt-1">{{ $orderDisplay }}</span>
+                                <span class="{{ strlen($sessionDisplay) > 7 ? 'text-xs md:text-sm' : 'text-xl md:text-2xl' }} font-black leading-tight mt-1">{{ $sessionDisplay }}</span>
                             </div>
                             <div>
                                 <h4 class="font-black text-elevate-dark text-lg md:text-xl group-hover:text-elevate-primary transition-colors line-clamp-1 mb-2">{{ $firstSchedule->subject->name ?? 'Pelajaran' }}</h4>

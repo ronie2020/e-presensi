@@ -116,6 +116,11 @@
                                         <!-- Ganti $history->schoolClass menjadi: -->
                                         <i class="ph-bold ph-users-three"></i> Kelas {{ $history->timetable->studentClass->name ?? '-' }}
                                     </span>
+                                    @if(isset($history->timetable->timeslot->name))
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-elevate-peach-light text-elevate-dark border border-slate-200">
+                                        <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ $history->timetable->timeslot->name }}
+                                    </span>
+                                    @endif
                                 </div>                                
                                 <h3 class="text-xl sm:text-2xl font-black text-elevate-dark leading-tight mb-2 group-hover:text-elevate-primary transition-colors">
                                     {{ $history->topic ?? 'Tidak Ada Topik' }}

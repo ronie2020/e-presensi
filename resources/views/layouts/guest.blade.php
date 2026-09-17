@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Login - {{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
+        <title>Login - {{ config('app.name', 'SIMADU Lakbok') }}</title>
         
         <!-- PWA META TAGS -->
         <link rel="manifest" href="{{ asset('manifest-guru.json') }}">
@@ -117,7 +117,7 @@
                         <img src="{{ asset('images/logo.png') }}" alt="Logo Sekolah" class="w-full h-full object-contain">
                     </div>
                     <h1 class="font-black text-3xl text-white tracking-tight drop-shadow-md">SIMADU LAKBOK</h1>
-                    <p class="text-[11px] text-elevate-accent font-black uppercase tracking-widest mt-2 drop-shadow-md bg-white/10 w-fit mx-auto px-4 py-1.5 rounded-full border border-white/10">Portal Guru & Admin</p>
+                    <p class="text-[11px] text-elevate-accent font-black uppercase tracking-widest mt-2 drop-shadow-md bg-white/10 w-fit mx-auto px-4 py-1.5 rounded-full border border-white/10">Portal Guru, Staff & Siswa</p>
                 </div>
 
                 <!-- Login Box -->
@@ -132,7 +132,7 @@
                         <!-- Header Form -->
                         <div class="mb-8 relative z-10 text-center md:text-left">
                             <h3 class="text-2xl lg:text-3xl font-black text-elevate-dark mb-2">Masuk ke Akun</h3>
-                            <p class="text-sm font-semibold text-slate-500">Masukkan kredensial Anda untuk melanjutkan.</p>
+                            <p class="text-sm font-semibold text-slate-500">Pilih peran Anda dan masukkan informasi login.</p>
                         </div>
 
                         <!-- SLOT UNTUK FORM (Input Email & Password) -->

@@ -169,9 +169,9 @@
                                             $firstSched = $group->first();
                                             $lastSched = $group->last();
                                             
-                                            $orderDisplay = $firstSched->timeslot->order_sequence == $lastSched->timeslot->order_sequence 
-                                                            ? $firstSched->timeslot->order_sequence 
-                                                            : $firstSched->timeslot->order_sequence . '-' . $lastSched->timeslot->order_sequence;
+                                            $firstSlotName = $firstSched->timeslot->name ?? ('Sesi ' . ($firstSched->timeslot->order_sequence ?? ''));
+                                            $lastSlotName  = $lastSched->timeslot->name ?? ('Sesi ' . ($lastSched->timeslot->order_sequence ?? ''));
+                                            $sessionDisplay = $firstSlotName === $lastSlotName ? $firstSlotName : $firstSlotName . ' - ' . $lastSlotName;
                                             
                                             $colorThemes = [
                                                 ['bg' => 'bg-elevate-soft/50', 'border' => 'border-elevate-accent/30', 'text' => 'text-elevate-primary', 'line' => 'bg-elevate-accent', 'hover' => 'hover:border-elevate-primary/40'],
@@ -183,10 +183,10 @@
 
                                         <div class="relative pl-24 py-4 group">
                                             <!-- Box Urutan Sesi (Kiri) -->
-                                            <div class="absolute left-2 top-4 w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex flex-col items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 {{ $t['hover'] }}">
-                                                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Sesi Ke</span>
-                                                <div class="flex items-center text-lg font-black text-elevate-dark">
-                                                    {{ $orderDisplay }}
+                                            <div class="absolute left-2 top-4 w-16 h-16 rounded-2xl bg-white border-2 border-slate-100 shadow-sm flex flex-col items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300 {{ $t['hover'] }} px-1 text-center">
+                                                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tight">Sesi</span>
+                                                <div class="flex items-center justify-center {{ strlen($sessionDisplay) > 7 ? 'text-[10px] leading-tight' : 'text-base' }} font-black text-elevate-dark">
+                                                    {{ $sessionDisplay }}
                                                 </div>
                                             </div>
 

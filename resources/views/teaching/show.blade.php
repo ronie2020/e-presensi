@@ -82,9 +82,13 @@
                                 <!-- Ganti $session->schoolClass menjadi: -->
                                 {{ $session->timetable->studentClass->name ?? 'Kelas' }}
                             </span>
+                            @if(isset($session->timetable->timeslot->name))
+                                <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
+                                    <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ $session->timetable->timeslot->name }}
+                                </span>
+                            @endif
                             <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                <!-- Ganti $session->started_at menjadi mengambil dari slot waktu -->
-                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time)->format('H:i') }}
+                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($session->timetable->timeslot->end_time)->format('H:i') }}
                             </span>
 
                             @if(!$isOpen)

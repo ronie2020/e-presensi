@@ -399,7 +399,7 @@
                             <table class="w-full text-center text-xs border-collapse border-2 border-black">
                                 <thead>
                                     <tr>
-                                        <th class="border border-black p-2 font-bold w-12">Jam<br>Ke</th>
+                                        <th class="border border-black p-2 font-bold w-16">Sesi /<br>Jam Ke</th>
                                         <th class="border border-black p-2 font-bold w-32">Alokasi<br>Waktu</th>
                                         @foreach($days as $day)
                                             <th class="border border-black p-2 font-bold">{{ $day }}<br><br>KELAS</th>
@@ -407,7 +407,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $jamKe = 1; @endphp
                                     @foreach($timeslots as $slot)
                                     <tr>
                                         @php
@@ -423,7 +422,7 @@
                                                 {{ $slot->name }}
                                             </td>
                                         @else
-                                            <td class="border border-black p-2 font-bold">{{ $jamKe++ }}</td>
+                                            <td class="border border-black p-2 font-bold">{{ $slot->name }}</td>
                                             <td class="border border-black p-2 font-bold">{{ $timeStr }}</td>
                                             
                                             @foreach($days as $day)

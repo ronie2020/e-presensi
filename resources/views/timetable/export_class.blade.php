@@ -31,7 +31,7 @@
         
         <!-- HEADER TABEL -->
         <tr>
-            <th rowspan="2" style="font-weight: bold; border: 1px solid #000000; text-align: center; vertical-align: middle; background-color: #e5e7eb; width: 50px;">Jam Ke</th>
+            <th rowspan="2" style="font-weight: bold; border: 1px solid #000000; text-align: center; vertical-align: middle; background-color: #e5e7eb; width: 60px;">Sesi / Jam</th>
             <th rowspan="2" style="font-weight: bold; border: 1px solid #000000; text-align: center; vertical-align: middle; background-color: #e5e7eb; width: 120px;">Alokasi Waktu</th>
             @foreach($days as $day)
                 <th colspan="2" style="font-weight: bold; border: 1px solid #000000; text-align: center; background-color: #e5e7eb;">{{ strtoupper($day) }}</th>
@@ -45,7 +45,6 @@
         </tr>
     </thead>
     <tbody>
-        @php $jamKe = 1; @endphp
         @foreach($timeslots as $slot)
             @php
                 $timeStr = \Carbon\Carbon::parse($slot->start_time)->format('H.i') . '-' . \Carbon\Carbon::parse($slot->end_time)->format('H.i');
@@ -61,7 +60,7 @@
                     </td>
                 @else
                     <!-- BARIS PELAJARAN -->
-                    <td style="border: 1px solid #000000; text-align: center;">{{ $jamKe++ }}</td>
+                    <td style="border: 1px solid #000000; text-align: center; font-weight: bold;">{{ $slot->name }}</td>
                     <td style="border: 1px solid #000000; text-align: center;">{{ $timeStr }}</td>
                     
                     @foreach($days as $day)

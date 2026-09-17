@@ -110,11 +110,9 @@
                             $startJP = isset($firstSchedule->timeslot->start_time) ? \Carbon\Carbon::parse($firstSchedule->timeslot->start_time)->format('H:i') : '--:--';
                             $endJP   = isset($lastSchedule->timeslot->end_time) ? \Carbon\Carbon::parse($lastSchedule->timeslot->end_time)->format('H:i') : '--:--';
                             
-                            $orderFirst = $firstSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $firstSchedule->timeslot->name ?? ($index + 1));
-                            $orderLast  = $lastSchedule->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $lastSchedule->timeslot->name ?? ($index + 1));
-                            
-                            // Logika Tampilan Nomor Sesi
-                            $orderDisplay = $orderFirst == $orderLast ? $orderFirst : $orderFirst . '-' . $orderLast;
+                            $firstSlotName = $firstSchedule->timeslot->name ?? ('Sesi ' . ($firstSchedule->timeslot->order_sequence ?? ($index + 1)));
+                            $lastSlotName  = $lastSchedule->timeslot->name ?? ('Sesi ' . ($lastSchedule->timeslot->order_sequence ?? ($index + 1)));
+                            $sessionDisplay = $firstSlotName === $lastSlotName ? $firstSlotName : $firstSlotName . ' - ' . $lastSlotName;
 
                             if (!$session) {
                                 $status = 'waiting'; 
@@ -136,15 +134,15 @@
                         <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 {{ $borderClass }} flex flex-col md:flex-row justify-between items-center gap-6 group relative overflow-hidden animate-enter" style="animation-delay: {{ ($index + 3) * 100 }}ms">
                             
                             <div class="flex items-center gap-5 w-full md:w-auto z-10">
-                                <div class="flex flex-col items-center justify-center w-24 h-24 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors relative">
+                                <div class="flex flex-col items-center justify-center min-w-[6rem] px-2 py-2 h-24 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors relative text-center">
                                     {{-- Lencana Jumlah JP (Hanya muncul jika > 1) --}}
                                     @if($totalJP > 1)
                                         <div class="absolute -top-2 -right-2 bg-elevate-peach text-elevate-peach-dark text-[10px] font-black px-2.5 py-0.5 rounded-full border border-white shadow-sm z-20">
                                             {{ $totalJP }} JP
                                         </div>
                                     @endif
-                                    <span class="text-[9px] font-bold uppercase tracking-wider opacity-70">Sesi Ke</span>
-                                    <span class="text-3xl font-black leading-none mt-1">{{ $orderDisplay }}</span>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider opacity-70">Sesi</span>
+                                    <span class="{{ strlen($sessionDisplay) > 7 ? 'text-xs md:text-sm' : 'text-2xl md:text-3xl' }} font-black leading-tight mt-1">{{ $sessionDisplay }}</span>
                                 </div>
                                 <div>
                                     <h4 class="font-black text-elevate-dark text-xl md:text-2xl group-hover:text-elevate-primary transition-colors">{{ $firstSchedule->subject->name ?? 'Pelajaran Terhapus' }}</h4>

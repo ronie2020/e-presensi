@@ -267,9 +267,9 @@
                                         $isNow = ($currentTime >= $first->timeslot->start_time && $currentTime <= $last->timeslot->end_time);
                                         $isPast = ($currentTime > $last->timeslot->end_time);
                                         
-                                        $orderFirst = $first->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $first->timeslot->name ?? 0);
-                                        $orderLast  = $last->timeslot->order_sequence ?? preg_replace('/[^0-9]/', '', $last->timeslot->name ?? 0);
-                                        $sessionName = $orderFirst == $orderLast ? 'Sesi ' . $orderFirst : 'Sesi ' . $orderFirst . '-' . $orderLast;
+                                        $firstSlotName = $first->timeslot->name ?? ('Sesi ' . ($first->timeslot->order_sequence ?? 0));
+                                        $lastSlotName  = $last->timeslot->name ?? ('Sesi ' . ($last->timeslot->order_sequence ?? 0));
+                                        $sessionName   = $firstSlotName === $lastSlotName ? $firstSlotName : $firstSlotName . ' - ' . $lastSlotName;
                                     @endphp
                                     
                                     <div class="relative pl-5 group">

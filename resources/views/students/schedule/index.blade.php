@@ -149,7 +149,7 @@
                                                         <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors pointer-events-none"></div>
                                                         
                                                         <div class="relative z-10">
-                                                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Sesi Ke-{{ $slot->order_sequence }}</div>
+                                                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{{ $slot->name }}</div>
                                                             <h3 class="font-black text-lg sm:text-xl text-slate-800 mb-3 group-hover:text-blue-600 transition-colors">
                                                                 {{ $sched->subject->name ?? 'Mata Pelajaran' }}
                                                             </h3>
