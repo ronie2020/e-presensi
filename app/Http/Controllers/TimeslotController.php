@@ -114,11 +114,27 @@ class TimeslotController extends Controller
         ]);
 
         try {
-            Excel::import(new TimeslotImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Data slot waktu dari Excel berhasil diproses!');
+            $import = new TimeslotImport();
+            Excel::import($import, $request->file('file'));
+
+            if ($import->successCount === 0 && count($import->errors) > 0) {
+                return redirect()->back()->with('error', 'Tidak ada data slot waktu yang berhasil di-import: ' . implode('; ', array_slice($import->errors, 0, 3)));
+            }
+
+            $msg = "{$import->successCount} data slot waktu berhasil di-import/diperbarui!";
+            if (count($import->errors) > 0) {
+                return redirect()->back()->with('warning', $msg . ' Namun ada beberapa baris dilewati: ' . implode('; ', array_slice($import->errors, 0, 3)));
+            }
+
+            return redirect()->back()->with('success', $msg);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal meng-import data. Detail Error: ' . $e->getMessage());
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(new \App\Exports\TimeslotExport(), 'Data_Slot_Waktu_' . date('Ymd_His') . '.xlsx');
     }
 
     public function reset()

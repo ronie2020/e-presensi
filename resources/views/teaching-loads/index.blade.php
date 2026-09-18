@@ -128,9 +128,12 @@
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
                         <h3 class="text-lg font-black text-elevate-dark mb-2">Import via Excel</h3>
                         <p class="text-xs font-medium text-slate-500 mb-5">Upload file template CSV/Excel untuk plotting massal.</p>
-                        <div class="mb-5">
-                            <a href="{{ route('teaching-loads.template') }}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl transition-colors w-full justify-center">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+                            <a href="{{ route('teaching-loads.template') }}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-2.5 rounded-xl transition-colors w-full justify-center shadow-sm">
                                 <i class="ph-bold ph-download-simple"></i> Download Template
+                            </a>
+                            <a href="{{ route('teaching-loads.export') }}" class="inline-flex items-center gap-2 text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-2.5 rounded-xl transition-colors w-full justify-center shadow-sm">
+                                <i class="ph-bold ph-file-arrow-down"></i> Export Data (.xlsx)
                             </a>
                         </div>
                         <form action="{{ route('teaching-loads.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4" x-data="{ fileName: '' }">
@@ -172,21 +175,27 @@
                             <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Daftar Beban Mengajar
                         </h3>
 
-                        {{-- Tombol Hapus Massal (Hanya Tampil Jika Ada yang Dipilih & Hanya Admin) --}}
-                       @if(auth()->check() && auth()->user()->hasRole('Admin'))
-                        <div x-show="selectedIds.length > 0" x-transition class="flex items-center">
-                            <form id="mass-delete-form" action="{{ route('teaching-loads.mass-destroy') }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <template x-for="id in selectedIds" :key="id">
-                                    <input type="hidden" name="ids[]" x-bind:value="id">
-                                </template>
-                                <button type="button" onclick="confirmMassDelete()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-rose-500/20 transition-all flex items-center gap-2">
-                                    <i class="ph-bold ph-trash"></i> Hapus <span x-text="selectedIds.length"></span> Data
-                                </button>
-                            </form>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('teaching-loads.export') }}" class="px-4 py-2 bg-sky-50 hover:bg-sky-500 text-sky-600 hover:text-white border border-sky-200 hover:border-sky-500 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
+                                <i class="ph-bold ph-file-arrow-down"></i> Export Excel
+                            </a>
+
+                            {{-- Tombol Hapus Massal (Hanya Tampil Jika Ada yang Dipilih & Hanya Admin) --}}
+                            @if(auth()->check() && auth()->user()->hasRole('Admin'))
+                            <div x-show="selectedIds.length > 0" x-transition class="flex items-center">
+                                <form id="mass-delete-form" action="{{ route('teaching-loads.mass-destroy') }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <template x-for="id in selectedIds" :key="id">
+                                        <input type="hidden" name="ids[]" x-bind:value="id">
+                                    </template>
+                                    <button type="button" onclick="confirmMassDelete()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md shadow-rose-500/20 transition-all flex items-center gap-2">
+                                        <i class="ph-bold ph-trash"></i> Hapus <span x-text="selectedIds.length"></span> Data
+                                    </button>
+                                </form>
+                            </div>
+                            @endif
                         </div>
-                        @endif
                     </div>
                     
                     <div class="overflow-x-auto">

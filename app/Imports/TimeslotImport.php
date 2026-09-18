@@ -3,50 +3,70 @@
 namespace App\Imports;
 
 use App\Models\Timeslot;
-use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class TimeslotImport implements ToCollection, WithHeadingRow
 {
+    public int $successCount = 0;
+    public array $errors = [];
+
     /**
      * Memproses setiap baris dari file Excel
      */
     public function collection(Collection $rows)
     {
-        foreach ($rows as $row) {
-            // Validasi: Pastikan baris ini tidak kosong
-            if (!isset($row['nama_sesi']) || !isset($row['jam_mulai']) || !isset($row['jam_selesai'])) {
+        foreach ($rows as $index => $row) {
+            $lineNumber = $index + 2; // header baris 1, data baris 2 dst
+
+            // Validasi: Pastikan baris ini memiliki nama sesi
+            if (!isset($row['nama_sesi']) || trim(strval($row['nama_sesi'])) === '') {
                 continue; 
+            }
+
+            if (!isset($row['jam_mulai']) || !isset($row['jam_selesai'])) {
+                $this->errors[] = "Baris {$lineNumber}: Kolom Jam Mulai atau Jam Selesai kosong.";
+                continue;
             }
 
             // --- KONVERSI WAKTU EXCEL KE PHP ---
             $startTime = $this->transformTime($row['jam_mulai']);
             $endTime = $this->transformTime($row['jam_selesai']);
 
-            // --- KONVERSI FORMAT HARI ---
+            if ($startTime === '00:00' && $endTime === '00:00' && !is_numeric($row['jam_mulai'])) {
+                $this->errors[] = "Baris {$lineNumber}: Format waktu '{$row['jam_mulai']}' tidak valid.";
+                continue;
+            }
+
+            // --- KONVERSI FORMAT HARI (AMANKAN DARI BUG LOWERCASE) ---
             $rawHari = isset($row['hari']) ? trim($row['hari']) : 'Semua Hari';
-            // Bersihkan spasi berlebih dari koma (misal: "Selasa, Rabu" -> "Selasa", "Rabu")
-            $dayParts = array_map('trim', explode(',', $rawHari));
-            // Kapitalisasi huruf pertama
-            $cleanDays = array_map(function($d) { return ucfirst(strtolower($d)); }, $dayParts);
-            $dayOfWeek = implode(',', $cleanDays);
-            if (empty($dayOfWeek)) { $dayOfWeek = 'Semua Hari'; }
+            if (empty($rawHari) || strcasecmp($rawHari, 'Semua Hari') === 0) {
+                $dayOfWeek = 'Semua Hari';
+            } elseif (strcasecmp($rawHari, 'Selain Senin') === 0) {
+                $dayOfWeek = 'Selain Senin';
+            } elseif (strcasecmp($rawHari, 'Selain Jumat') === 0) {
+                $dayOfWeek = 'Selain Jumat';
+            } else {
+                $dayParts = array_map('trim', explode(',', $rawHari));
+                $cleanDays = array_map(function($d) { return ucfirst(strtolower($d)); }, $dayParts);
+                $dayOfWeek = implode(',', $cleanDays);
+                if (empty($dayOfWeek)) { $dayOfWeek = 'Semua Hari'; }
+            }
 
             // --- PENENTUAN ISTIRAHAT ---
-            $isBreakText = strtolower(trim($row['istirahat'] ?? 'tidak'));
+            $isBreakText = strtolower(trim(strval($row['istirahat'] ?? 'tidak')));
             $isBreak = in_array($isBreakText, ['ya', '1', 'true', 'yes', 'y']);
 
             // --- URUTAN ---
-            $orderSequence = isset($row['urutan']) ? (int) $row['urutan'] : 99;
+            $orderSequence = isset($row['urutan']) && is_numeric($row['urutan']) ? (int) $row['urutan'] : ($this->successCount + 1);
 
-            // PERBAIKAN FATAL: Gunakan KOMBINASI 'name' dan 'day_of_week' 
-            // agar jadwal yang namanya sama tapi harinya beda tidak saling menimpa!
+            // Simpan / update ke database
             Timeslot::updateOrCreate(
                 [
-                    'name' => trim($row['nama_sesi']),
+                    'name' => trim(strval($row['nama_sesi'])),
                     'day_of_week' => $dayOfWeek,
                 ],
                 [
@@ -56,19 +76,20 @@ class TimeslotImport implements ToCollection, WithHeadingRow
                     'order_sequence' => $orderSequence
                 ]
             );
+
+            $this->successCount++;
         }
     }
 
     /**
-     * Mesin Penerjemah Waktu Super Cerdas (Tahan Error Tanda Baca & Bug Excel)
+     * Mesin Penerjemah Waktu Cerdas (Tahan Format Excel, Desimal, Serial Date & String)
      */
     private function transformTime($value)
     {
-        // 1. Pastikan nilainya berupa string yang bersih
         $value = trim(strval($value));
         if (empty($value)) return '00:00';
 
-        // 2. Deteksi Teks Waktu Normal (Misal: "07:00", "07.30")
+        // 1. Deteksi Teks Waktu Normal (Misal: "07:00", "07.30")
         if (str_contains($value, ':') || preg_match('/^\d{1,2}\.\d{2}$/', $value)) {
             $value = str_replace('.', ':', $value);
             $timestamp = strtotime($value);
@@ -77,39 +98,43 @@ class TimeslotImport implements ToCollection, WithHeadingRow
             }
         }
 
-        // 3. Penanganan Bug Excel (Saat Excel mengubah teks menjadi angka)
+        // 2. Penanganan Format Angka Bawaan Excel
         if (is_numeric($value)) {
             $floatVal = (float) $value;
 
-            // Kasus A: Format Waktu Bawaan Excel (Fractions/Desimal di bawah 1)
-            // Misal: 0.29166667 (yang artinya 07:00)
+            // Kasus A: Format Waktu Murni Excel (Desimal di bawah 1, misal 0.29166667 = 07:00)
             if ($floatVal > 0 && $floatVal < 1) {
                 $hours = floor($floatVal * 24);
                 $mins = round((($floatVal * 24) - $hours) * 60);
-                if ($mins == 60) { $hours += 1; $mins = 0; }
+                if ($mins >= 60) { $hours += 1; $mins = 0; }
                 return sprintf('%02d:%02d', $hours, $mins);
             }
 
-            // Kasus B: User mengetik "07.40" namun dibaca komputer sebagai angka desimal murni "7.4"
-            // Atau user mengetik "07.00" dan dibaca komputer sebagai angka bulat "7"
-            if ($floatVal >= 1 || $floatVal == 0) {
-                // Kita paksakan angka tersebut menjadi format 2 desimal (7.4 -> 7.40)
+            // Kasus B: Excel DateTime Serial Number (> 1000, misal tanggal + jam)
+            if ($floatVal > 1000) {
+                try {
+                    return ExcelDate::excelToDateTimeObject($floatVal)->format('H:i');
+                } catch (\Throwable $e) {
+                    // fallback
+                }
+            }
+
+            // Kasus C: User mengetik "07.40" terbaca "7.4", atau "07.00" terbaca "7"
+            if ($floatVal >= 0 && $floatVal <= 24) {
                 $formatted = number_format($floatVal, 2, '.', '');
                 $parts = explode('.', $formatted);
-                
                 $hours = str_pad($parts[0], 2, '0', STR_PAD_LEFT);
                 $mins = str_pad($parts[1], 2, '0', STR_PAD_RIGHT);
-                
                 if ($hours >= 0 && $hours <= 23 && $mins >= 0 && $mins <= 59) {
                     return "$hours:$mins";
                 }
             }
         }
 
-        // 4. Fallback Terakhir
+        // 3. Fallback Terakhir dengan Carbon
         try {
             return Carbon::parse($value)->format('H:i');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return '00:00'; 
         }
     }

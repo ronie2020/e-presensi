@@ -433,6 +433,7 @@ Route::middleware('auth')->group(function () {
     // BEBAN MENGAJAR (PRASYARAT JADWAL)
     // =========================================================================
     Route::get('teaching-loads/template', [\App\Http\Controllers\TeachingLoadController::class, 'template'])->name('teaching-loads.template');
+    Route::get('teaching-loads/export', [\App\Http\Controllers\TeachingLoadController::class, 'export'])->name('teaching-loads.export');
     Route::post('teaching-loads/import', [\App\Http\Controllers\TeachingLoadController::class, 'import'])->name('teaching-loads.import');
     Route::delete('teaching-loads/mass-destroy', [\App\Http\Controllers\TeachingLoadController::class, 'massDestroy'])->name('teaching-loads.mass-destroy');
     Route::resource('teaching-loads', \App\Http\Controllers\TeachingLoadController::class)->only(['index', 'store', 'update', 'destroy']);
@@ -441,6 +442,7 @@ Route::middleware('auth')->group(function () {
     // SLOT WAKTU (PRASYARAT JADWAL)
     // =========================================================================
     Route::get('timeslots/template', [\App\Http\Controllers\TimeslotController::class, 'template'])->name('timeslots.template');
+    Route::get('timeslots/export', [\App\Http\Controllers\TimeslotController::class, 'export'])->name('timeslots.export');
     Route::post('timeslots/import', [\App\Http\Controllers\TimeslotController::class, 'import'])->name('timeslots.import');
     Route::post('timeslots/reset', [\App\Http\Controllers\TimeslotController::class, 'reset'])->name('timeslots.reset');
     // PERBAIKAN: Tambahkan 'update' di dalam array only[]

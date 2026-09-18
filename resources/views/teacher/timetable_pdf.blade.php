@@ -101,9 +101,9 @@
                     @foreach($days as $day)
                         @php
                             $isValidDay = str_contains($slot->day_of_week ?? '', $day) 
-                                || $slot->day_of_week === 'Semua Hari' 
-                                || ($slot->day_of_week === 'Selain Senin' && $day !== 'Senin') 
-                                || ($slot->day_of_week === 'Selain Jumat' && $day !== 'Jumat');
+                                || strcasecmp($slot->day_of_week ?? '', 'Semua Hari') === 0 
+                                || (strcasecmp($slot->day_of_week ?? '', 'Selain Senin') === 0 && $day !== 'Senin') 
+                                || (strcasecmp($slot->day_of_week ?? '', 'Selain Jumat') === 0 && $day !== 'Jumat');
                                 
                             $key = $day . '-' . $slot->id;
                             $schedule = $myTimetables[$key] ?? null;

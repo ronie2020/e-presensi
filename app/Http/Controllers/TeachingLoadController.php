@@ -113,11 +113,30 @@ class TeachingLoadController extends Controller
         ]);
 
         try {
-            Excel::import(new TeachingLoadImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Data beban mengajar dari Excel berhasil diproses!');
+            $import = new TeachingLoadImport();
+            Excel::import($import, $request->file('file'));
+
+            if ($import->successCount === 0 && count($import->errors) > 0) {
+                return redirect()->back()->with('error', 'Tidak ada beban mengajar yang berhasil di-import: ' . implode('; ', array_slice($import->errors, 0, 3)));
+            }
+
+            $msg = "{$import->successCount} beban mengajar berhasil di-import/diperbarui!";
+            if (count($import->errors) > 0) {
+                return redirect()->back()->with('warning', $msg . ' Namun ada beberapa baris dilewati: ' . implode('; ', array_slice($import->errors, 0, 3)));
+            }
+
+            return redirect()->back()->with('success', $msg);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal meng-import data. Pastikan format kolom sesuai dengan template. Detail Error: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Ekspor seluruh data beban mengajar ke Excel (.xlsx)
+     */
+    public function export()
+    {
+        return Excel::download(new \App\Exports\TeachingLoadExport(), 'Data_Beban_Mengajar_' . date('Ymd_His') . '.xlsx');
     }
 
     /**

@@ -5,7 +5,9 @@
         foreach($timeslots as $slot) {
             if(isset($timetables[$day][$slot->id])) {
                 $guru = $timetables[$day][$slot->id]->teacher;
-                $guruList[$guru->id] = $guru->name;
+                if ($guru) {
+                    $guruList[$guru->id] = $guru->name;
+                }
             }
         }
     }
@@ -66,7 +68,7 @@
                     @foreach($days as $day)
                         @php
                             $slotDays = array_map('trim', explode(',', $slot->day_of_week));
-                            $isValidDay = in_array($day, $slotDays) || $slot->day_of_week === 'Semua Hari' || ($slot->day_of_week === 'Selain Senin' && $day !== 'Senin') || ($slot->day_of_week === 'Selain Jumat' && $day !== 'Jumat');
+                            $isValidDay = in_array($day, $slotDays) || strcasecmp($slot->day_of_week, 'Semua Hari') === 0 || (strcasecmp($slot->day_of_week, 'Selain Senin') === 0 && $day !== 'Senin') || (strcasecmp($slot->day_of_week, 'Selain Jumat') === 0 && $day !== 'Jumat');
                             $cellData = $timetables[$day][$slot->id] ?? null;
                         @endphp
 
@@ -75,8 +77,8 @@
                             <td style="border: 1px solid #000000; background-color: #f3f4f6;"></td>
                         @else
                             @if($cellData)
-                                <td style="border: 1px solid #000000; text-align: center; background-color: #fef08a;">{{ $cellData->teacher->id }}</td>
-                                <td style="border: 1px solid #000000; text-align: center; background-color: #fef08a;">{{ $cellData->subject->name }}</td>
+                                <td style="border: 1px solid #000000; text-align: center; background-color: #fef08a;">{{ $cellData->teacher?->id ?? '-' }}</td>
+                                <td style="border: 1px solid #000000; text-align: center; background-color: #fef08a;">{{ $cellData->subject?->name ?? '-' }}</td>
                             @else
                                 <td style="border: 1px solid #000000;"></td>
                                 <td style="border: 1px solid #000000;"></td>
@@ -94,21 +96,28 @@
             
             <!-- Membagi daftar guru menjadi 3 kolom agar rapi di Excel -->
             @php
-                $chunks = array_chunk($guruList, ceil(count($guruList) / 3), true);
+                $chunkSize = max(1, (int) ceil(count($guruList) / 3));
+                $chunks = !empty($guruList) ? array_chunk($guruList, $chunkSize, true) : [];
             @endphp
             
-            @foreach($chunks as $chunk)
-                <td colspan="3" style="vertical-align: top; border: 1px solid #000000;">
-                    @foreach($chunk as $id => $name)
-                        {{ $id }} - {{ $name }}<br>
-                    @endforeach
+            @if(empty($chunks))
+                <td colspan="9" style="vertical-align: top; border: 1px solid #000000; color: #6b7280; font-style: italic;">
+                    (Belum ada guru yang dijadwalkan di kelas ini)
                 </td>
-            @endforeach
-            
-            <!-- Jika kolom sisa kurang dari 3, isi dengan colspan kosong -->
-            @for($i = count($chunks); $i < 3; $i++)
-                <td colspan="3" style="border: 1px solid #000000;"></td>
-            @endfor
+            @else
+                @foreach($chunks as $chunk)
+                    <td colspan="3" style="vertical-align: top; border: 1px solid #000000;">
+                        @foreach($chunk as $id => $name)
+                            {{ $id }} - {{ $name }}<br>
+                        @endforeach
+                    </td>
+                @endforeach
+                
+                <!-- Jika kolom sisa kurang dari 3, isi dengan colspan kosong -->
+                @for($i = count($chunks); $i < 3; $i++)
+                    <td colspan="3" style="border: 1px solid #000000;"></td>
+                @endfor
+            @endif
             
             <!-- Sisa colspan penyeimbang -->
             <td colspan="1"></td>

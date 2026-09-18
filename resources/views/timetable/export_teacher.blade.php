@@ -4,7 +4,7 @@
     foreach($days as $d) {
         foreach($timeslots as $s) {
             if(isset($timetables[$d][$s->id])) {
-                $subjectName = $timetables[$d][$s->id]->subject->name;
+                $subjectName = $timetables[$d][$s->id]->subject?->name ?? "Belum Ada Jadwal";
                 break 2;
             }
         }
@@ -71,7 +71,7 @@
                     @foreach($days as $day)
                         @php
                             $slotDays = array_map('trim', explode(',', $slot->day_of_week));
-                            $isValidDay = in_array($day, $slotDays) || $slot->day_of_week === 'Semua Hari' || ($slot->day_of_week === 'Selain Senin' && $day !== 'Senin') || ($slot->day_of_week === 'Selain Jumat' && $day !== 'Jumat');
+                            $isValidDay = in_array($day, $slotDays) || strcasecmp($slot->day_of_week, 'Semua Hari') === 0 || (strcasecmp($slot->day_of_week, 'Selain Senin') === 0 && $day !== 'Senin') || (strcasecmp($slot->day_of_week, 'Selain Jumat') === 0 && $day !== 'Jumat');
                             $cellData = $timetables[$day][$slot->id] ?? null;
                         @endphp
 
@@ -79,7 +79,7 @@
                             <td style="border: 2px solid #000000; background-color: #f3f4f6;"></td>
                         @else
                             @if($cellData)
-                                <td style="border: 2px solid #000000; text-align: center; font-weight: bold;">{{ $cellData->studentClass->name }}</td>
+                                <td style="border: 2px solid #000000; text-align: center; font-weight: bold;">{{ $cellData->studentClass?->name ?? '-' }}</td>
                             @else
                                 <td style="border: 2px solid #000000; text-align: center;">-</td>
                             @endif

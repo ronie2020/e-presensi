@@ -154,9 +154,12 @@
                         <h3 class="text-lg font-black text-elevate-dark mb-2">Import via Excel</h3>
                         <p class="text-xs font-medium text-slate-500 mb-5">Upload file template CSV/Excel untuk mem-plot puluhan jam sesi sekaligus.</p>
 
-                        <div class="mb-5">
-                            <a href="{{ route('timeslots.template') }}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2 rounded-xl transition-colors w-full justify-center shadow-sm">
-                                <i class="ph-bold ph-download-simple"></i> Download Template .CSV
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
+                            <a href="{{ route('timeslots.template') }}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-2.5 rounded-xl transition-colors w-full justify-center shadow-sm">
+                                <i class="ph-bold ph-download-simple"></i> Download Template
+                            </a>
+                            <a href="{{ route('timeslots.export') }}" class="inline-flex items-center gap-2 text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-3 py-2.5 rounded-xl transition-colors w-full justify-center shadow-sm">
+                                <i class="ph-bold ph-file-arrow-down"></i> Export Data (.xlsx)
                             </a>
                         </div>
                         
@@ -189,15 +192,19 @@
                             <i class="ph-fill ph-list-dashes text-elevate-primary"></i> Daftar Urutan Waktu
                         </h3>
                         
-                        {{-- PERBAIKAN: Ubah count() menjadi total() --}}
-                        @if($timeslots->total() > 0)
-                        <form action="{{ route('timeslots.reset') }}" method="POST" id="form-reset-timeslots">
-                            @csrf
-                            <button type="button" onclick="confirmResetTimeslots()" class="px-4 py-2 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 hover:border-rose-500 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
-                                <i class="ph-bold ph-trash"></i> Kosongkan Semua
-                            </button>
-                        </form>
-                        @endif
+                        <div class="flex items-center gap-2">
+                            @if($timeslots->total() > 0)
+                            <a href="{{ route('timeslots.export') }}" class="px-4 py-2 bg-sky-50 hover:bg-sky-500 text-sky-600 hover:text-white border border-sky-200 hover:border-sky-500 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
+                                <i class="ph-bold ph-file-arrow-down"></i> Export Excel
+                            </a>
+                            <form action="{{ route('timeslots.reset') }}" method="POST" id="form-reset-timeslots">
+                                @csrf
+                                <button type="button" onclick="confirmResetTimeslots()" class="px-4 py-2 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 hover:border-rose-500 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
+                                    <i class="ph-bold ph-trash"></i> Kosongkan Semua
+                                </button>
+                            </form>
+                            @endif
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto flex-1">
