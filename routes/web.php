@@ -120,6 +120,7 @@ Route::get('/artikel', [LandingPageController::class, 'articles'])->name('articl
 Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::get('/guru/{id}', [LandingPageController::class, 'teacherDetail'])->name('teachers.show');
 Route::get('/guru/{id}/cv', [LandingPageController::class, 'downloadCv'])->name('teachers.cv');
+Route::get('/guru/{id}/vcard', [LandingPageController::class, 'downloadVcard'])->name('teachers.vcard');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 Route::get('/display/jadwal', [DisplayController::class, 'index'])->name('display.schedules.show');
 Route::get('/api/display/jadwal', [DisplayController::class, 'getData'])->name('api.display.schedules');
@@ -687,6 +688,23 @@ Route::middleware('auth')->group(function () {
         
         // API TAMBAHAN UNTUK SCANNER KERANJANG PADA PEMINJAMAN INDIVIDU
         Route::get('/tools/api/book-by-code', [LibraryCirculationController::class, 'getBookByCode'])->name('tools.bookByCode');
+
+        // ─── FITUR 4: PERPANJANGAN PEMINJAMAN ───────────────────────────────
+        Route::post('/circulation/extend', [LibraryCirculationController::class, 'extendBorrowing'])->name('circulation.extend');
+
+        // ─── FITUR 2: PROFIL ANGGOTA / RIWAYAT PER SISWA ────────────────────
+        Route::get('/members/search', [\App\Http\Controllers\LibraryMemberController::class, 'search'])->name('members.search');
+        Route::get('/members/{student}', [\App\Http\Controllers\LibraryMemberController::class, 'show'])->name('members.show');
+
+        // ─── FITUR 3: MANAJEMEN DENDA ────────────────────────────────────────
+        Route::get('/fines', [\App\Http\Controllers\LibraryFineController::class, 'index'])->name('fines.index');
+        Route::post('/fines/{borrowing}/pay', [\App\Http\Controllers\LibraryFineController::class, 'markPaid'])->name('fines.pay');
+        Route::post('/fines/{borrowing}/unpay', [\App\Http\Controllers\LibraryFineController::class, 'markUnpaid'])->name('fines.unpay');
+
+        // ─── FITUR 5: RESERVASI BUKU ─────────────────────────────────────────
+        Route::get('/reservations', [\App\Http\Controllers\LibraryReservationController::class, 'index'])->name('reservations.index');
+        Route::post('/reservations', [\App\Http\Controllers\LibraryReservationController::class, 'store'])->name('reservations.store');
+        Route::post('/reservations/{reservation}/cancel', [\App\Http\Controllers\LibraryReservationController::class, 'cancel'])->name('reservations.cancel');
     });
         
         // ROUTE ADMIN LITERASI (MONITORING)      

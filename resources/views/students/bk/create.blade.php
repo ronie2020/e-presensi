@@ -1,5 +1,35 @@
 @extends('layouts.public')
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            min-height: 52px;
+        }
+        .select2-container--focus .select2-selection--multiple {
+            background-color: #ffffff !important;
+            border-color: #3b82f6 !important;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 4px 8px;
+            color: #1e40af;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #ef4444;
+            margin-right: 6px;
+        }
+    </style>
+@endpush
+
 @section('content')
 <div class="w-full max-w-4xl mx-auto pb-20 px-4 sm:px-6 pt-6 md:pt-10 font-sans text-slate-800">
     
@@ -87,11 +117,27 @@
                     @enderror
                 </div>
 
-                <!-- 3. Metode Konseling -->
+                <!-- 2. Teman Kelompok (Opsional) -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
-                        Metode Konseling <span class="text-rose-500">*</span>
+                    <label for="friends" class="block text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+                        Konseling Kelompok (Opsional)
                     </label>
+                    <div class="relative">
+                        <select name="friends[]" id="friends" multiple class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white shadow-sm p-3 text-slate-700 transition-all select2-hidden-accessible" style="width: 100%;">
+                            @foreach($classmates as $mate)
+                                <option value="{{ $mate->id }}" {{ (is_array(old('friends')) && in_array($mate->id, old('friends'))) ? 'selected' : '' }}>{{ $mate->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 font-medium">Pilih teman sekelas jika kamu ingin melakukan konseling kelompok (bersama-sama).</p>
+                    @error('friends') 
+                        <p class="text-rose-500 text-xs mt-2 font-bold flex items-center gap-1">
+                            <i class="ph-bold ph-warning"></i> {{ $message }}
+                        </p> 
+                    @enderror
+                </div>
+
+
                     <div class="flex flex-col md:flex-row gap-4">
                         <!-- Pilihan Offline -->
                         <label class="flex-1 relative cursor-pointer group">
@@ -154,3 +200,17 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#friends').select2({
+            placeholder: "Pilih teman...",
+            allowClear: true,
+            width: 'resolve'
+        });
+    });
+</script>
+@endpush

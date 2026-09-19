@@ -59,10 +59,10 @@
             <tbody>
                 @php $totalDenda = 0; @endphp
                 @forelse($data as $index => $loan)
-                    @php $totalDenda += $loan->fine; @endphp
+                    @php $totalDenda += $loan->fine_amount; @endphp
                     <tr>
                         <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($loan->borrow_date)->format('d/m/Y') }}</td>
                         <td>{{ $loan->student->name ?? '-' }}</td>
                         <td>{{ $loan->book->title ?? '-' }}</td>
                         <td style="text-align: center;">
@@ -73,8 +73,8 @@
                             @endif
                         </td>
                         <td style="text-align: right;">
-                            @if($loan->fine > 0)
-                                Rp {{ number_format($loan->fine, 0, ',', '.') }}
+                            @if($loan->fine_amount > 0)
+                                Rp {{ number_format($loan->fine_amount, 0, ',', '.') }}
                             @else
                                 -
                             @endif
@@ -91,7 +91,7 @@
             <tfoot>
                 <tr>
                     <th colspan="5" style="text-align: right; text-transform: uppercase;">Total Denda Terkumpul:</th>
-                    <th style="text-align: right; font-weight: bold;">Rp {{ number_format($totalDenda, 0, ',', '.') }}</th>
+                    <th style="text-align: right; font-weight: bold; color: #dc2626;">Rp {{ number_format($totalDenda, 0, ',', '.') }}</th>
                 </tr>
             </tfoot>
             @endif
@@ -116,7 +116,7 @@
                         <td>{{ $book->book_code }}</td>
                         <td>{{ $book->title }}</td>
                         <td>{{ $book->author }}</td>
-                        <td style="text-align: center;">{{ $book->loans_count }}x</td>
+                        <td style="text-align: center;">{{ $book->borrowings_count }}x</td>
                     </tr>
                 @empty
                     <tr>

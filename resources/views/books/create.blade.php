@@ -81,16 +81,22 @@
                                 {{-- Kategori Buku --}}
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kategori / DDC <span class="text-rose-500">*</span></label>
-                                    <div class="relative">
-                                        <select name="category_id" required class="w-full pl-4 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer appearance-none">
-                                            <option value="">-- Pilih Kategori --</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                    {{ $category->code }} - {{ $category->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-1">
+                                            <select id="category_id" name="category_id" required class="w-full pl-4 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer appearance-none">
+                                                <option value="">-- Pilih Kategori --</option>
+                                                @foreach($categories as $category)
+                                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                        {{ $category->code }} - {{ $category->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                        </div>
+                                        {{-- Tombol Tambah Kategori Baru (AJAX) --}}
+                                        <button type="button" onclick="addNewCategory()" class="shrink-0 w-12 bg-white text-elevate-primary font-black rounded-2xl hover:bg-elevate-primary hover:text-white transition-all border border-slate-200 hover:border-elevate-primary shadow-sm" title="Tambah Kategori Baru">
+                                            <i class="ph-bold ph-plus text-lg"></i>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -246,6 +252,30 @@
         </div>
     </div>
 
+    {{-- MODAL TAMBAH KATEGORI BARU --}}
+    <div id="addCategoryModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+        <div class="absolute inset-0 bg-elevate-dark/70 backdrop-blur-sm" onclick="document.getElementById('addCategoryModal').classList.add('hidden')"></div>
+        <div class="bg-white rounded-[2.5rem] shadow-2xl p-8 w-full max-w-sm relative z-10 border border-slate-100">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-elevate-soft rounded-xl flex items-center justify-center text-elevate-primary">
+                    <i class="ph-bold ph-tag text-xl"></i>
+                </div>
+                <h3 class="font-black text-elevate-dark text-lg">Kategori Baru</h3>
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Nama Kategori</label>
+                <input type="text" id="newCategoryName" placeholder="Misal: Sains, Fiksi, Sejarah..."
+                    class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
+            </div>
+            <div class="flex gap-3">
+                <button type="button" onclick="document.getElementById('addCategoryModal').classList.add('hidden')" class="flex-1 py-3.5 bg-slate-100 text-elevate-dark/60 font-bold rounded-2xl hover:bg-slate-200 hover:text-elevate-dark transition-colors">Batal</button>
+                <button type="button" onclick="saveCategoryAjax()" id="btnSaveCategory" class="flex-1 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-floppy-disk"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- SCRIPT JAVASCRIPT --}}
     <script>
         // --- LOGIKA PREVIEW GAMBAR COVER ---
@@ -292,6 +322,68 @@
                 });
             } else {
                 document.getElementById('scannerModal').classList.add('hidden');
+            }
+        }
+
+        // --- LOGIKA TAMBAH KATEGORI BARU (AJAX) ---
+        function addNewCategory() {
+            document.getElementById('newCategoryName').value = '';
+            document.getElementById('addCategoryModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('newCategoryName').focus(), 200);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('newCategoryName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); saveCategoryAjax(); }
+            });
+        });
+
+        async function saveCategoryAjax() {
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) {
+                document.getElementById('newCategoryName').focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveCategory');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
+
+            try {
+                const response = await fetch("{{ route('library.books.categories.ajax') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ name: name })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Tambahkan option baru ke dropdown dan langsung pilih
+                    const select = document.getElementById('category_id');
+                    const newOption = new Option(data.name, data.id, true, true);
+                    select.add(newOption);
+                    select.value = data.id;
+
+                    document.getElementById('addCategoryModal').classList.add('hidden');
+
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'success',
+                        title: `Kategori "${data.name}" berhasil ditambahkan!`,
+                        showConfirmButton: false, timer: 2500,
+                        customClass: { popup: 'rounded-2xl' }
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan.', confirmButtonColor: '#2c3f61', customClass: { popup: 'rounded-[2rem]' } });
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Error Koneksi', text: 'Tidak dapat menghubungi server.', confirmButtonColor: '#2c3f61', customClass: { popup: 'rounded-[2rem]' } });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Simpan';
             }
         }
     </script>

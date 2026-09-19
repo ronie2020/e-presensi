@@ -147,8 +147,44 @@ class BkTeacherController extends Controller
         // =========================================================
         $classes = \App\Models\SchoolClass::orderBy('name')->get();
 
-        // Tambahkan $classes ke dalam fungsi compact()
-        return view('admin.bk.index', compact('sessions', 'stats', 'classes'));
+        // =========================================================
+        // FITUR BARU 4: CHART & CALENDAR DATA
+        // =========================================================
+        
+        // 4a. Chart Data: Topik Paling Sering
+        $chartCategoryData = \App\Models\BkSession::join('bk_categories', 'bk_sessions.bk_category_id', '=', 'bk_categories.id')
+            ->selectRaw('bk_categories.name, count(*) as total')
+            ->groupBy('bk_categories.name')
+            ->pluck('total', 'name')->toArray();
+
+        // 4b. Chart Data: Kelas Sering Konseling
+        $chartClassData = \App\Models\BkSession::join('students', 'bk_sessions.student_id', '=', 'students.id')
+            ->join('classes', 'students.class_id', '=', 'classes.id')
+            ->selectRaw('classes.name, count(*) as total')
+            ->groupBy('classes.name')
+            ->orderByDesc('total')->limit(5)
+            ->pluck('total', 'name')->toArray();
+
+        // 4c. Calendar Events (Hanya yang disetujui & ada jadwal)
+        $calendarEvents = \App\Models\BkSession::with(['student', 'category'])
+            ->whereIn('status', ['approved', 'ongoing', 'finished'])
+            ->whereNotNull('scheduled_at')
+            ->get()->map(function($session) {
+                $color = '#3b82f6'; // default blue
+                if ($session->status == 'ongoing') $color = '#8b5cf6'; // purple
+                if ($session->status == 'finished') $color = '#10b981'; // green
+
+                return [
+                    'id' => $session->id,
+                    'title' => $session->student->name . ' - ' . $session->category->name,
+                    'start' => $session->scheduled_at->format('Y-m-d\TH:i:s'),
+                    'url' => route('admin.bk.show', $session->id),
+                    'color' => $color
+                ];
+            })->toJson();
+
+        // Tambahkan ke compact()
+        return view('admin.bk.index', compact('sessions', 'stats', 'classes', 'chartCategoryData', 'chartClassData', 'calendarEvents'));
     }
 
     /**

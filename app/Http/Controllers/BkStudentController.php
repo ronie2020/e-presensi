@@ -28,7 +28,12 @@ class BkStudentController extends Controller
     public function create()
     {
         $categories = BkCategory::all();       
-        return view('students.bk.create', compact('categories'));
+        // Ambil semua siswa di kelas yang sama untuk teman kelompok
+        $studentClassId = Auth::guard('student')->user()->class_id;
+        $classmates = \App\Models\Student::where('class_id', $studentClassId)
+                        ->where('id', '!=', Auth::guard('student')->id())
+                        ->orderBy('name')->get();
+        return view('students.bk.create', compact('categories', 'classmates'));
     }
 
     // Proses Simpan Pengajuan
@@ -38,15 +43,22 @@ class BkStudentController extends Controller
             'bk_category_id' => 'required|exists:bk_categories,id',
             'initial_message' => 'required|string|min:10',
             'method' => 'required|in:offline,online',
+            'friends' => 'nullable|array',
+            'friends.*' => 'exists:students,id',
         ]);
 
-        BkSession::create([
+        $session = BkSession::create([
             'student_id' => Auth::guard('student')->id(),
             'bk_category_id' => $request->bk_category_id,
             'initial_message' => $request->initial_message,
             'method' => $request->method,
             'status' => 'pending', 
         ]);
+        
+        // Simpan teman kelompok jika ada
+        if ($request->has('friends') && !empty($request->friends)) {
+            $session->groupMembers()->attach($request->friends);
+        }
        
         return redirect()->route('student.bk.index')
             ->with('success', 'Pengajuan konseling berhasil dikirim. Menunggu respon Guru BK.');

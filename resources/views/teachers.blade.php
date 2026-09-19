@@ -32,13 +32,13 @@
           modalOpen: false, 
           teacher: {},
           linkCopied: false,
-          isSearching: false, // <-- IDE PENGEMBANGAN 4: State untuk Skeleton Loading
+          isSearching: false, 
           
           openModal(data) {
               this.teacher = data;
               this.modalOpen = true;
               this.linkCopied = false;
-              document.body.style.overflow = 'hidden'; // Kunci scroll body saat modal terbuka
+              document.body.style.overflow = 'hidden'; 
           },
           closeModal() {
               this.modalOpen = false;
@@ -51,12 +51,10 @@
               if(number.startsWith('0')) number = '62' + number.substr(1);
               return 'https://wa.me/' + number;
           },
-          // Format Pintar Sosial Media
           formatSocialUrl(platform, value) {
               if (!value) return '';
               value = value.trim();
               if (value.startsWith('http')) return value;
-              // Hilangkan karakter @ jika user cuma ketik username
               if (value.startsWith('@')) value = value.substring(1);
               
               if (platform === 'ig') return 'https://instagram.com/' + value;
@@ -64,7 +62,6 @@
               if (platform === 'tiktok') return 'https://tiktok.com/@' + value;
               return value;
           },
-          // Fungsi Salin Tautan (Copy to Clipboard)
            copyProfileLink() {
               if(!this.teacher.profile_url) return;
               
@@ -77,6 +74,28 @@
               
               this.linkCopied = true;
               setTimeout(() => { this.linkCopied = false; }, 3000);
+          },
+
+          // FITUR AJAX PENCARIAN REAL-TIME
+          searchQuery: '{{ request('q') }}',
+          searchCategory: '{{ request('kategori') }}',
+          
+          performSearch() {
+              this.isSearching = true;
+              const url = new URL('{{ route('teachers.index') }}');
+              url.searchParams.set('q', this.searchQuery);
+              url.searchParams.set('kategori', this.searchCategory);
+              
+              // Update URL browser tanpa reload
+              window.history.pushState({}, '', url);
+
+              fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                  .then(res => res.text())
+                  .then(html => {
+                      document.getElementById('teacher-grid-container').innerHTML = html;
+                      this.isSearching = false;
+                  })
+                  .catch(err => { console.error('Error fetching data', err); this.isSearching = false; });
           }
       }">
 
@@ -104,8 +123,8 @@
                     Profil profesional guru dan staf pengajar SMP Negeri 3 Lakbok.
                 </p>
 
-                <!-- FORM PENCARIAN & FILTER -->
-                <form action="{{ route('teachers.index') }}" method="GET" class="max-w-2xl mx-auto relative group" @submit="isSearching = true">
+                <!-- FORM PENCARIAN & FILTER (DENGAN AJAX) -->
+                <form @submit.prevent="performSearch" class="max-w-2xl mx-auto relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-elevate-accent to-elevate-primary rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     
                     <div class="relative flex flex-col sm:flex-row bg-white/95 backdrop-blur-xl rounded-[2rem] sm:rounded-full shadow-2xl transition-transform focus-within:scale-[1.02] border border-white/60">
@@ -115,10 +134,10 @@
                             <div class="absolute left-6 top-1/2 -translate-y-1/2 text-elevate-dark/50">
                                 <i class="ph-bold ph-funnel text-xl"></i>
                             </div>
-                            <select name="kategori" class="w-full pl-14 pr-10 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold text-elevate-dark cursor-pointer appearance-none rounded-t-[2rem] sm:rounded-l-full sm:rounded-tr-none">
+                            <select x-model="searchCategory" @change="performSearch" class="w-full pl-14 pr-10 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold text-elevate-dark cursor-pointer appearance-none rounded-t-[2rem] sm:rounded-l-full sm:rounded-tr-none">
                                 <option value="">Semua Peran</option>
-                                <option value="guru" {{ request('kategori') == 'guru' ? 'selected' : '' }}>Guru / Pendidik</option>
-                                <option value="staf" {{ request('kategori') == 'staf' ? 'selected' : '' }}>Staf Tata Usaha</option>
+                                <option value="guru">Guru / Pendidik</option>
+                                <option value="staf">Staf Tata Usaha</option>
                             </select>
                             <div class="absolute right-4 top-1/2 -translate-y-1/2 text-elevate-dark/50 pointer-events-none">
                                 <i class="ph-bold ph-caret-down text-lg"></i>
@@ -127,13 +146,12 @@
                         
                         <!-- Input Pencarian -->
                         <div class="relative w-full sm:w-3/5">
-                            <input type="text" name="q" value="{{ request('q') }}" placeholder="Ketik nama atau mapel..." class="w-full pl-6 pr-24 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold placeholder-elevate-dark/40 text-elevate-dark rounded-b-[2rem] sm:rounded-r-full sm:rounded-bl-none">
+                            <!-- Real-time saat mengetik bisa dengan @input.debounce.500ms="performSearch" -->
+                            <input x-model="searchQuery" @input.debounce.500ms="performSearch" type="text" placeholder="Ketik nama atau mapel..." class="w-full pl-6 pr-24 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold placeholder-elevate-dark/40 text-elevate-dark rounded-b-[2rem] sm:rounded-r-full sm:rounded-bl-none">
                             
                             <!-- Tombol Reset & Submit -->
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                                @if(request('q') || request('kategori'))
-                                    <a href="{{ route('teachers.index') }}" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors" title="Reset Filter"><i class="ph-bold ph-x"></i></a>
-                                @endif
+                                <a x-show="searchQuery || searchCategory" @click.prevent="searchQuery=''; searchCategory=''; performSearch()" href="#" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600 transition-colors" title="Reset Filter"><i class="ph-bold ph-x"></i></a>
                                 <button type="submit" class="w-10 h-10 flex items-center justify-center bg-elevate-primary rounded-full text-white hover:bg-elevate-dark transition shadow-lg shadow-elevate-primary/30 hover:scale-110 active:scale-95">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                                 </button>
@@ -147,7 +165,33 @@
         <!-- MAIN CONTENT -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
             
-            <!-- IDE PENGEMBANGAN 4: SKELETON LOADING -->
+            {{-- FITUR TEACHER SPOTLIGHT --}}
+            @if(isset($spotlightTeacher) && !request('q') && !request('kategori'))
+                <div x-show="!isSearching" class="mb-16 bg-white rounded-[2.5rem] p-6 sm:p-10 border border-slate-100 shadow-xl shadow-elevate-primary/5 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-elevate-peach/20 to-transparent rounded-bl-full pointer-events-none"></div>
+                    
+                    <div class="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-elevate-soft shrink-0 overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500">
+                        <img src="{{ asset('storage/' . $spotlightTeacher->photo_path) }}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="flex-1 text-center md:text-left relative z-10">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-accent/10 text-elevate-primary text-[10px] font-black uppercase tracking-widest mb-3 border border-elevate-accent/20">
+                            <i class="ph-fill ph-star text-amber-500"></i> Teacher Spotlight
+                        </div>
+                        <h2 class="text-2xl md:text-4xl font-black text-elevate-dark mb-2">{{ $spotlightTeacher->name }}</h2>
+                        <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">{{ $spotlightTeacher->position ?: 'Guru Berprestasi' }}</p>
+                        <p class="text-slate-600 mb-6 max-w-2xl text-sm md:text-base leading-relaxed line-clamp-2">"{{ $spotlightTeacher->bio ?: 'Berdedikasi dalam mendidik dan membimbing siswa mencapai potensi terbaik mereka.' }}"</p>
+                        
+                        <div class="flex items-center justify-center md:justify-start gap-4">
+                            <a href="{{ route('teachers.show', $spotlightTeacher->id) }}" class="px-6 py-2.5 bg-elevate-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-elevate-primary/30 hover:bg-elevate-dark transition-all">
+                                Lihat Profil Lengkap
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- EFEK SKELETON LOADING -->
             <div x-show="isSearching" x-cloak class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 @for($i = 1; $i <= 8; $i++)
                     <div class="bg-elevate-surface rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 flex flex-col h-full relative animate-pulse">
@@ -165,83 +209,11 @@
                 @endfor
             </div>
 
-            <!-- KONTEN ASLI (Akan disembunyikan saat sedang loading/submit form) -->
-            <div x-show="!isSearching" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                @forelse($teachers as $index => $teacher)
-                    @php
-                        // Logika untuk mendecode Role yang berbentuk JSON string ["Guru", "Admin"]
-                        $displayRole = $teacher->position;
-                        if (empty($displayRole)) {
-                            $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
-                            $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
-                        }
-                    @endphp
-                    <div @click="openModal({
-                            name: '{{ addslashes($teacher->name) }}',
-                            nip: '{{ $teacher->nip ?? '-' }}',
-                            pangkat: '{{ $teacher->pangkat ?? '-' }}',
-                            position: '{{ addslashes($displayRole) }}',
-                            bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
-                            keahlian: '{{ addslashes($teacher->keahlian ?? '') }}',
-                            hobi: '{{ addslashes($teacher->hobi ?? '') }}',
-                            phone: '{{ $teacher->phone }}',
-                            instagram: '{{ $teacher->instagram }}',
-                            tiktok: '{{ $teacher->tiktok }}',
-                            facebook: '{{ $teacher->facebook }}',
-                            photo_url: '{{ $teacher->photo_path ? asset('storage/' . $teacher->photo_path) : '' }}',
-                            profile_url: '{{ route('teachers.show', $teacher->id) }}',
-                            cv_url: '{{ route('teachers.cv', $teacher->id) }}'
-                         })"
-                         class="animate-enter group bg-elevate-surface rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/30 hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col h-full relative cursor-pointer"
-                         style="animation-delay: {{ ($index % 4) * 100 }}ms">
-                        
-                        <!-- Foto Guru -->
-                        <div class="aspect-[4/5] sm:aspect-square bg-elevate-soft relative overflow-hidden">
-                            @if($teacher->photo_path)
-                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <div class="hidden w-full h-full flex-col items-center justify-center bg-elevate-soft text-elevate-primary">
-                                    <span class="text-4xl font-bold opacity-30">{{ substr($teacher->name, 0, 2) }}</span>
-                                </div>
-                            @else
-                                <div class="w-full h-full flex flex-col items-center justify-center bg-elevate-soft text-elevate-primary">
-                                    <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500">{{ substr($teacher->name, 0, 1) }}</span>
-                                </div>
-                            @endif
-                            
-                            <!-- Overlay Text (Call to Action) -->
-                            <div class="absolute inset-0 bg-elevate-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                                <span class="bg-white/95 backdrop-blur text-elevate-primary text-xs font-bold px-4 py-2 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">Lihat Profil Lengkap</span>
-                            </div>
-                        </div>
-
-                        <!-- Info Singkat -->
-                        <div class="p-5 text-center flex-1 flex flex-col relative bg-elevate-surface">
-                            <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
-                                <span class="inline-block px-4 py-1.5 bg-elevate-dark text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="{{ $displayRole }}">
-                                    {{ $displayRole }}
-                                </span>
-                            </div>
-                            <div class="mt-4 mb-2">
-                                <h3 class="text-base sm:text-lg font-bold text-elevate-dark leading-tight group-hover:text-elevate-primary transition-colors line-clamp-1">{{ $teacher->name }}</h3>
-                                @if($teacher->nip)
-                                    <p class="text-[10px] sm:text-xs text-elevate-dark/50 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded border border-slate-100">{{ $teacher->nip }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                 @empty
-                    <div class="col-span-2 lg:col-span-4 py-24 text-center animate-enter bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                        <div class="inline-flex bg-elevate-soft p-6 rounded-full mb-6 text-elevate-primary ring-8 ring-elevate-soft/50"><i class="ph-duotone ph-magnifying-glass text-5xl"></i></div>
-                        <h3 class="text-xl font-bold text-elevate-dark mb-2">Data Tidak Ditemukan</h3>
-                        <p class="text-elevate-dark/60 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci atau filter tersebut.</p>
-                        @if(request('q') || request('kategori'))
-                            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-elevate-primary text-white text-sm font-bold rounded-full hover:bg-elevate-dark transition shadow-lg shadow-elevate-primary/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian & Filter</a>
-                        @endif
-                    </div>
-                @endforelse
+            <!-- KONTEN AJAX AKAN DIRENDER DI SINI -->
+            <div x-show="!isSearching" id="teacher-grid-container" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                @include('landing.partials.teacher-grid', ['teachers' => $teachers])
             </div>
             
-            <div x-show="!isSearching" class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
         </div>
 
         <!-- MODAL DETAIL GURU (POPUP) -->
@@ -400,14 +372,29 @@
                                         <span x-text="linkCopied ? 'Disalin!' : 'Bagikan'"></span>
                                     </button>
                                 </div>
-
-                                <a :href="teacher.cv_url" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-elevate-soft/50 hover:bg-elevate-soft hover:text-elevate-primary text-elevate-dark font-bold rounded-full transition-all">
-                                    <i class="ph-bold ph-download-simple text-lg"></i> Unduh CV (PDF)
-                                </a>
                             </div>
 
                         </div>
                     </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="p-6 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-center sm:justify-end gap-3 rounded-b-[2rem]">
+                    <button @click="closeModal()" type="button" class="px-5 py-2.5 rounded-xl font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-100 transition-colors order-last sm:order-first text-sm">
+                        Tutup
+                    </button>
+                    
+                    <a :href="teacher.vcard_url" x-show="teacher.vcard_url" class="px-5 py-2.5 rounded-xl font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all text-sm flex items-center gap-2 shadow-sm">
+                        <i class="ph-bold ph-address-book"></i> Simpan Kontak
+                    </a>
+
+                    <a :href="teacher.cv_url" x-show="teacher.cv_url" target="_blank" class="px-5 py-2.5 rounded-xl font-bold text-elevate-primary bg-elevate-soft border border-elevate-accent/30 hover:bg-elevate-primary hover:text-white transition-all text-sm flex items-center gap-2 shadow-sm">
+                        <i class="ph-bold ph-download-simple"></i> Unduh CV
+                    </a>
+
+                    <a :href="teacher.profile_url" class="px-6 py-2.5 rounded-xl font-bold text-white bg-elevate-dark hover:bg-elevate-primary transition-all text-sm flex items-center gap-2 shadow-lg shadow-elevate-dark/20">
+                        <i class="ph-bold ph-user-circle"></i> Lihat Profil <span class="hidden sm:inline">Lengkap</span>
+                    </a>
                 </div>
             </div>
         </div>

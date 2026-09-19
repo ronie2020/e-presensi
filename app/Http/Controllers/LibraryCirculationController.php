@@ -95,28 +95,47 @@ class LibraryCirculationController extends Controller
 
     /**
      * API: Cari Buku berdasarkan Barcode/Kode
+     * Mendukung dua format:
+     * 1. Kode fisik eksemplar (BookCopy): misal "BK001-01", "BK001-02"
+     * 2. Kode induk buku (Book): misal "BK001", "ISBN-xxx"
      */
     public function searchBook(Request $request)
     {
         try {
             $query = $request->get('q');
             
-            // Mencari di tabel Book (Induk)
+            // Langkah 1: Cari dulu di tabel book_copies (kode stiker fisik)
+            $copy = \App\Models\BookCopy::with('book')->where('copy_code', $query)->first();
+
+            if ($copy) {
+                $book = $copy->book;
+                if (!$book) {
+                    return response()->json(['success' => false, 'message' => 'Data buku induk dari eksemplar ini tidak ditemukan.']);
+                }
+                return response()->json([
+                    'success'      => true,
+                    'book'         => $book,
+                    'is_available' => $book->stock > 0
+                ]);
+            }
+            
+            // Langkah 2: Fallback - cari di tabel books (kode induk buku)
             $book = Book::where('book_code', $query)->first();
 
             if (!$book) {
-                return response()->json(['success' => false, 'message' => 'Buku tidak ditemukan.']);
+                return response()->json(['success' => false, 'message' => 'Buku tidak ditemukan. Pastikan barcode terbaca dengan benar.']);
             }
 
             return response()->json([
-                'success' => true,
-                'book' => $book,
+                'success'      => true,
+                'book'         => $book,
                 'is_available' => $book->stock > 0
             ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error Buku: ' . $e->getMessage()]);
         }
     }
+
 
     /**
      * PROSES PEMINJAMAN REGULER (Maksimal 3 Buku, 1 Minggu)
@@ -244,12 +263,15 @@ class LibraryCirculationController extends Controller
             }
 
             $borrowing->update([
-                'status' => 'returned',
+                'status'      => 'returned',
                 'return_date' => now(),
                 'fine_amount' => $fine,
             ]);
 
             $book->increment('stock');
+
+            // Fitur 5: Notifikasi siswa pertama dalam antrean reservasi
+            \App\Http\Controllers\LibraryReservationController::notifyNextInQueue($book->id);
             
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Buku berhasil dikembalikan.']);
@@ -499,6 +521,57 @@ class LibraryCirculationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal memproses peminjaman: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * FITUR 4: Perpanjang Masa Peminjaman Buku (Maks 1x, Belum Overdue)
+     */
+    public function extendBorrowing(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'borrowing_id' => 'required|exists:borrowings,id',
+            ]);
+
+            $borrowing = Borrowing::with('book')->findOrFail($request->borrowing_id);
+
+            // Validasi: harus berstatus borrowed
+            if ($borrowing->status !== 'borrowed') {
+                return response()->json(['success' => false, 'message' => 'Hanya peminjaman aktif yang bisa diperpanjang.']);
+            }
+
+            // Validasi: maks 1x perpanjangan
+            if ($borrowing->extension_count >= 1) {
+                return response()->json(['success' => false, 'message' => 'Peminjaman ini sudah pernah diperpanjang sebelumnya.']);
+            }
+
+            // Validasi: tidak boleh perpanjang jika sudah overdue
+            if (Carbon::now()->gt($borrowing->due_date)) {
+                $days = Carbon::now()->diffInDays($borrowing->due_date);
+                return response()->json(['success' => false, 'message' => "Tidak bisa diperpanjang — sudah terlambat {$days} hari. Kembalikan buku terlebih dahulu."]);
+            }
+
+            $newDueDate = Carbon::parse($borrowing->due_date)->addDays(7);
+
+            $borrowing->update([
+                'due_date'        => $newDueDate,
+                'is_extended'     => true,
+                'extension_count' => $borrowing->extension_count + 1,
+                'extended_at'     => now(),
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success'       => true,
+                'message'       => 'Peminjaman berhasil diperpanjang 7 hari.',
+                'new_due_date'  => $newDueDate->format('d M Y'),
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Gagal perpanjang: ' . $e->getMessage()]);
         }
     }
 }

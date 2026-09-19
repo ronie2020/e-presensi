@@ -453,7 +453,59 @@ class LandingPageController extends Controller
         }
 
         $teachers = $query->orderBy('name', 'asc')->paginate(12);
-        return view('teachers', compact('teachers'));
+
+        // Fitur Teacher Spotlight (Pilih acak guru yang memiliki foto)
+        $spotlightTeacher = User::where(function($q) {
+            $roles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Kepala Sekolah'];
+            foreach ($roles as $role) {               
+                $q->orWhere('role', 'LIKE', '%' . $role . '%');
+            }
+        })->whereNotNull('photo_path')->inRandomOrder()->first();
+
+        // Jika Request dari AJAX, kita return grid partial nya saja
+        if ($request->ajax()) {
+            return view('landing.partials.teacher-grid', compact('teachers'))->render();
+        }
+
+        return view('teachers', compact('teachers', 'spotlightTeacher'));
+    }
+
+    public function downloadVcard($id)
+    {
+        $teacher = User::findOrFail($id);
+        
+        $vcf = "BEGIN:VCARD\r\n";
+        $vcf .= "VERSION:3.0\r\n";
+        $vcf .= "FN:" . $teacher->name . "\r\n";
+        $vcf .= "ORG:" . config('app.name', 'SMP Negeri 3 Lakbok') . "\r\n";
+        
+        $role = $teacher->position ?: (is_string($teacher->role) ? json_decode($teacher->role) ? implode(', ', json_decode($teacher->role)) : $teacher->role : '');
+        if (!empty($role)) {
+            $vcf .= "TITLE:" . $role . "\r\n";
+        }
+        
+        if (!empty($teacher->phone)) {
+            $phone = preg_replace('/[^0-9+]/', '', $teacher->phone);
+            if(str_starts_with($phone, '0')) $phone = '+62' . substr($phone, 1);
+            $vcf .= "TEL;TYPE=CELL:" . $phone . "\r\n";
+        }
+        if (!empty($teacher->email)) {
+            $vcf .= "EMAIL:" . $teacher->email . "\r\n";
+        }
+        $vcf .= "URL:" . route('teachers.show', $teacher->id) . "\r\n";
+        
+        if (!empty($teacher->photo_path)) {
+            $photoUrl = url('storage/' . $teacher->photo_path);
+            $vcf .= "PHOTO;VALUE=URI:" . $photoUrl . "\r\n";
+        }
+        $vcf .= "END:VCARD\r\n";
+
+        $filename = 'Kontak_Guru_' . str_replace(' ', '_', $teacher->name) . '.vcf';
+
+        return response($vcf, 200, [
+            'Content-Type' => 'text/vcard',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ==============================================================

@@ -59,4 +59,10 @@ class BkSession extends Model
     {
         return $this->hasMany(BkChat::class, 'bk_session_id');
     }
+
+    // Relasi ke Siswa Lainnya (Untuk Bimbingan Kelompok)
+    public function groupMembers()
+    {
+        return $this->belongsToMany(Student::class, 'bk_session_student', 'bk_session_id', 'student_id')->withTimestamps();
+    }
 }

@@ -278,6 +278,48 @@
             </div>
         </div>
 
+        {{-- NEW: ANALYTICS & CALENDAR SECTION --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 print:hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {{-- Kiri: Chart Analitik --}}
+                <div class="lg:col-span-1 flex flex-col gap-6">
+                    {{-- Chart Kategori --}}
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex-1">
+                        <h3 class="text-sm font-black text-elevate-dark mb-4 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-bold ph-chart-pie-slice text-elevate-primary text-xl"></i> Sebaran Topik
+                        </h3>
+                        <div class="relative w-full h-48">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    {{-- Chart Kelas --}}
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex-1">
+                        <h3 class="text-sm font-black text-elevate-dark mb-4 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-bold ph-chart-bar text-elevate-primary text-xl"></i> Kelas Terbanyak
+                        </h3>
+                        <div class="relative w-full h-48">
+                            <canvas id="classChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Kanan: Kalender Jadwal --}}
+                <div class="lg:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-black text-elevate-dark flex items-center gap-2 uppercase tracking-wider">
+                            <i class="ph-bold ph-calendar text-elevate-primary text-xl"></i> Jadwal Konseling
+                        </h3>
+                        <span class="px-3 py-1 bg-elevate-accent/10 text-elevate-primary text-[10px] font-bold rounded-lg border border-elevate-accent/20">
+                            Hanya yang disetujui
+                        </span>
+                    </div>
+                    <div id="calendar" class="w-full"></div>
+                </div>
+
+            </div>
+        </div>
       
         {{-- MAIN CONTENT: TABEL DAFTAR --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -599,6 +641,79 @@
                     customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                 });
             @endif
+        });
+    </script>
+
+    {{-- Script untuk Chart & Calendar --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data dari Controller
+            const categoryData = @json($chartCategoryData);
+            const classData = @json($chartClassData);
+            
+            // 1. Render Category Chart (Pie)
+            const ctxCat = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctxCat, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categoryData),
+                    datasets: [{
+                        data: Object.values(categoryData),
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // 2. Render Class Chart (Bar)
+            const ctxClass = document.getElementById('classChart').getContext('2d');
+            new Chart(ctxClass, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(classData),
+                    datasets: [{
+                        label: 'Total Kasus',
+                        data: Object.values(classData),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // 3. Render FullCalendar
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                height: 400,
+                events: {!! $calendarEvents ?? '[]' !!},
+                eventClick: function(info) {
+                    info.jsEvent.preventDefault(); // don't let the browser navigate
+                    if (info.event.url) {
+                        window.open(info.event.url, '_blank');
+                    }
+                }
+            });
+            calendar.render();
         });
     </script>
 </x-app-layout>

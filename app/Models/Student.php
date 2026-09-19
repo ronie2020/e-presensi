@@ -185,9 +185,21 @@ class Student extends Authenticatable
         return $this->hasMany(AttendanceSiswa::class, 'student_id');
     }
 
-    /**
-     * Relasi ke Catatan Disiplin
-     */
+    // --- RELASI E-COUNSELING & KEDISIPLINAN ---
+
+    // 1. Sesi BK (Individual/Pembuat Pengajuan)
+    public function bkSessions()
+    {
+        return $this->hasMany(BkSession::class, 'student_id');
+    }
+
+    // 2. Sesi BK (Anggota Bimbingan Kelompok)
+    public function bkGroupSessions()
+    {
+        return $this->belongsToMany(BkSession::class, 'bk_session_student', 'student_id', 'bk_session_id')->withTimestamps();
+    }
+
+    // 3. Catatan Kedisiplinan
     public function disciplineRecords(): HasMany
     {
         return $this->hasMany(DisciplineRecord::class, 'student_id');

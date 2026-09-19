@@ -155,9 +155,25 @@
                             </div>
                             
                             <div class="font-black text-xl text-elevate-dark leading-tight">{{ $session->student->name ?? 'Siswa Terhapus' }}</div>
-                            <div class="text-[10px] font-black text-elevate-primary bg-elevate-accent/10 px-3 py-1 rounded-full mt-2 border border-elevate-accent/20 uppercase tracking-wider">
+                            <div class="text-[10px] font-black text-elevate-primary bg-elevate-accent/10 px-3 py-1 rounded-full mt-2 border border-elevate-accent/20 uppercase tracking-wider mb-2">
                                 {{ $session->student->schoolClass->name ?? 'Tanpa Kelas' }}
                             </div>
+
+                            @if($session->groupMembers && $session->groupMembers->count() > 0)
+                                <div class="mt-4 pt-4 border-t border-slate-100 w-full text-left">
+                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 text-center">Anggota Kelompok</span>
+                                    <div class="flex flex-col gap-2">
+                                        @foreach($session->groupMembers as $member)
+                                            <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                                <div class="w-6 h-6 rounded-lg bg-elevate-primary text-white flex items-center justify-center text-[10px] font-bold">
+                                                    {{ substr($member->name, 0, 1) }}
+                                                </div>
+                                                <div class="text-xs font-bold text-slate-700 truncate flex-1">{{ $member->name }}</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="space-y-4 relative z-10">
@@ -735,12 +751,12 @@
                 messages: [], newMessage: '', isSending: false,
                 init() { 
                     this.fetchMessages(); 
-                    // Perlambat jadi 5 detik, dan HANYA menembak server jika tab browser sedang aktif dibuka
+                    // Perlambat jadi 2 detik, dan HANYA menembak server jika tab browser sedang aktif dibuka
                         setInterval(() => {
                             if (!document.hidden) {
                             this.fetchMessages();
                         }
-                    }, 5000); 
+                    }, 2000); 
                 },
                 fetchMessages() {
                     fetch(`/admin/bk/chat/${sessionId}`, { headers: { 'Accept': 'application/json' } })

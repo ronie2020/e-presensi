@@ -250,6 +250,89 @@
                 </div>
 
             </div>
+
+            {{-- BARIS KEDUA: BEBAS PUSTAKA --}}
+            <div class="mt-8">
+                {{-- CARD 4: BEBAS PUSTAKA --}}
+                <div class="animate-enter bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-80 h-80 bg-emerald-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:bg-emerald-100/60 transition-colors duration-500"></div>
+                    <div class="absolute bottom-0 left-0 w-64 h-64 bg-teal-50 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+
+                    <div class="p-8 relative z-10">
+                        <div class="flex items-start gap-6">
+                            {{-- Icon & Title --}}
+                            <div class="shrink-0">
+                                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-[1.5rem] flex items-center justify-center text-3xl shadow-sm border border-emerald-100 group-hover:scale-110 transition-transform">
+                                    <i class="ph-duotone ph-seal-check"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-3 mb-2">
+                                    <h2 class="text-2xl font-black text-elevate-dark">Bebas Pustaka</h2>
+                                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black uppercase tracking-wide">Surat Keterangan</span>
+                                </div>
+                                <p class="text-sm text-elevate-dark/70 font-medium leading-relaxed max-w-xl">
+                                    Cek status bebas pinjam siswa dan cetak Surat Keterangan Bebas Pustaka — digunakan saat perpisahan, PPDB, atau lulus sekolah.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Form Grid --}}
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-100" x-data="{ mode: 'single' }">
+                            
+                            {{-- Kiri: Cek Per Siswa --}}
+                            <div>
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-black">1</div>
+                                    <span class="text-xs font-black text-elevate-dark uppercase tracking-wider">Cek Siswa</span>
+                                </div>
+                                <form action="{{ route('library.tools.bebas_pustaka') }}" method="GET" target="_blank" class="space-y-3">
+                                    <input type="hidden" name="mode" value="single">
+                                    <div>
+                                        <label class="block text-xs font-black text-elevate-primary uppercase tracking-wider mb-2 ml-1">NISN / NIS Siswa</label>
+                                        <div class="flex items-center px-4 py-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-400/20 transition-all shadow-sm">
+                                            <i class="ph-bold ph-user text-emerald-500 mr-3 shrink-0"></i>
+                                            <input type="text" name="nisn" class="w-full bg-transparent border-none focus:ring-0 text-elevate-dark font-bold text-sm placeholder-slate-400" placeholder="Contoh: 1234567890" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-magnifying-glass text-base"></i>
+                                        <span>Cek & Cetak</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                            {{-- Kanan: Cetak Per Kelas --}}
+                            <div>
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-xs font-black">2</div>
+                                    <span class="text-xs font-black text-elevate-dark uppercase tracking-wider">Per Kelas (Batch)</span>
+                                </div>
+                                <form action="{{ route('library.tools.bebas_pustaka') }}" method="GET" target="_blank" class="space-y-3">
+                                    <input type="hidden" name="mode" value="class">
+                                    <div>
+                                        <label class="block text-xs font-black text-elevate-primary uppercase tracking-wider mb-2 ml-1">Pilih Kelas</label>
+                                        <div class="relative">
+                                            <select name="class_id" class="w-full bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3.5 font-bold text-elevate-dark text-sm focus:ring-4 focus:ring-teal-400/20 focus:border-teal-400 transition-all appearance-none cursor-pointer shadow-sm">
+                                                <option value="" disabled selected>-- Pilih Kelas --</option>
+                                                @foreach($classes as $class)
+                                                    <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-4 text-teal-500 pointer-events-none"></i>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl shadow-lg shadow-teal-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-printer text-base"></i>
+                                        <span>Cetak Batch</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>
