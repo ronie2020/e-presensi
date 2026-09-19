@@ -126,7 +126,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Gambar Banner / Pop-up (Opsional)</label>
                                     <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-5 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-elevate-peach-light file:text-elevate-primary hover:file:bg-elevate-peach/30 transition-all border border-slate-200 rounded-2xl bg-slate-50 focus:bg-white p-2">
-                                    <p class="text-[10px] text-elevate-text/60 font-bold mt-2 ml-1">Format: JPG/PNG. Jika diisi, gambar ini akan tampil sebagai header Pop-up Halaman Utama.</p>
+                                     <p class="text-[10px] text-elevate-text/60 font-bold mt-2 ml-1">Format: JPG/PNG/WEBP (Maksimal 10MB). Jika diisi, gambar ini akan tampil pada Pop-up & Papan Pengumuman.</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

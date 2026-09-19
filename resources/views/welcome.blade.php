@@ -65,12 +65,10 @@
             $popupImage = null;
             if (!empty($popupAnnouncement->image)) {
                 $imgPath = $popupAnnouncement->image;
-                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imgPath)) {
-                    if (request()->is('public/*') || str_contains(request()->getRequestUri(), '/public/')) {
-                        $popupImage = asset('public/storage/' . $imgPath);
-                    } else {
-                        $popupImage = asset('storage/' . $imgPath);
-                    }
+                if (request()->is('public/*') || str_contains(request()->getRequestUri(), '/public/')) {
+                    $popupImage = asset('public/storage/' . $imgPath);
+                } else {
+                    $popupImage = asset('storage/' . $imgPath);
                 }
             }
             

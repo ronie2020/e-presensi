@@ -61,7 +61,7 @@ class AnnouncementController extends Controller
             'content' => 'required|string',
             'category' => 'nullable|string|in:Umum,Akademik,Kesiswaan,Penting',
             'expired_at' => 'nullable|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:10240',
         ]);
 
         $data = [
