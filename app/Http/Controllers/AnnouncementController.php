@@ -87,6 +87,40 @@ class AnnouncementController extends Controller
         return back()->with('success', 'Pengumuman berhasil dipublikasikan.');
     }
 
+    public function update(Request $request, $id)
+    {
+        $announcement = Announcement::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'category' => 'nullable|string|in:Umum,Akademik,Kesiswaan,Penting',
+            'expired_at' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:10240',
+        ]);
+
+        $data = [
+            'title' => $request->title,
+            'content' => $request->content,
+            'category' => $request->category ?? 'Umum',
+            'is_popup' => $request->has('is_popup') ? true : false,
+            'expired_at' => $request->filled('expired_at') ? $request->expired_at : null,
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($announcement->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($announcement->image);
+            }
+            $data['image'] = $request->file('image')->store('announcements', 'public');
+        }
+
+        $announcement->update($data);
+
+        Cache::forget('landing_general_data');
+
+        return back()->with('success', 'Pengumuman berhasil diperbarui.');
+    }
+
 
     public function destroy($id)
     {

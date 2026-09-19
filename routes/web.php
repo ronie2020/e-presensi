@@ -740,6 +740,7 @@ Route::middleware('auth')->group(function () {
     // Pengumuman & Pengaturan (TERMASUK KALENDER PENDIDIKAN DI SINI)
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::put('/announcements/{id}', [AnnouncementController::class, 'update'])->name('announcements.update');
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
     Route::get('/agendas', [AnnouncementController::class, 'agendas'])->name('agendas.index'); 
