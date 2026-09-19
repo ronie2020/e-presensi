@@ -9,8 +9,9 @@
          x-data="{
              editModalOpen: false,
              editData: {},
+             announcementsMap: {{ \Illuminate\Support\Js::from($announcements->keyBy('id')) }},
              openEditModal(announce) {
-                 this.editData = announce;
+                 this.editData = Object.assign({}, announce);
                  this.editData.expired_at_date = announce.expired_at ? announce.expired_at.substring(0, 10) : '';
                  this.editModalOpen = true;
                  this.$nextTick(() => {
@@ -437,7 +438,7 @@
                                                  </div>
                                                  
                                                  <div class="flex items-center gap-1">
-                                                     <button type="button" @click="openEditModal({{ json_encode($announce) }})" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-elevate-primary transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 bg-slate-50 hover:shadow-md" title="Edit Post">
+                                                     <button type="button" @click="openEditModal(announcementsMap[{{ $announce->id }}])" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-elevate-primary transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 bg-slate-50 hover:shadow-md" title="Edit Post">
                                                          <i class="ph-bold ph-pencil-simple text-sm"></i>
                                                      </button>
                                                      <form action="{{ route('announcements.destroy', $announce->id) }}" method="POST" class="delete-announce-form">
@@ -462,6 +463,81 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        <!-- EDIT ANNOUNCEMENT MODAL -->
+        <div x-cloak x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true">
+            <div x-show="editModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div x-show="editModalOpen" x-transition class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-elevate-peach-light text-elevate-primary rounded-xl flex items-center justify-center text-xl">
+                                <i class="ph-bold ph-pencil-simple"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black text-elevate-dark">Edit Pengumuman Website</h3>
+                                <p class="text-xs text-slate-400 font-medium">Perbarui konten dan pengaturan pengumuman</p>
+                            </div>
+                        </div>
+                        <button @click="editModalOpen = false" class="w-9 h-9 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
+                    </div>
+
+                    <form :action="'{{ url('/announcements') }}/' + editData.id" method="POST" enctype="multipart/form-data" class="space-y-5" id="editAnnouncementForm">
+                        @csrf
+                        @method('PUT')
+                        <div>
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Judul Pengumuman</label>
+                            <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Isi Konten Pengumuman</label>
+                            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden focus-within:border-elevate-accent transition-all shadow-sm">
+                                <div id="quill-edit-editor" class="min-h-[160px] text-sm text-elevate-dark font-medium"></div>
+                            </div>
+                            <input type="hidden" name="content" id="edit-content-input" required>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Kategori / Urgensi</label>
+                                <select name="category" x-model="editData.category" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm">
+                                    <option value="Umum">Umum (Biasa)</option>
+                                    <option value="Akademik">Akademik</option>
+                                    <option value="Kesiswaan">Kesiswaan</option>
+                                    <option value="Penting">Penting / Urgent</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Tanggal Kadaluarsa (Opsional)</label>
+                                <input type="date" name="expired_at" x-model="editData.expired_at_date" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Ganti Gambar Banner (Opsional)</label>
+                            <template x-if="editData.image">
+                                <div class="mb-3 flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                                    <img :src="'{{ asset('storage') }}/' + editData.image" class="w-12 h-12 rounded-lg object-cover">
+                                    <span class="text-xs text-slate-500 font-medium">Gambar saat ini sudah terpasang. Pilih file baru jika ingin mengganti.</span>
+                                </div>
+                            </template>
+                            <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-elevate-peach-light file:text-elevate-primary hover:file:bg-elevate-peach/30 transition-all border border-slate-200 rounded-2xl bg-slate-50 focus:bg-white p-2">
+                        </div>
+
+                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <input type="checkbox" name="is_popup" value="1" id="edit_is_popup" :checked="editData.is_popup" class="w-5 h-5 rounded-lg text-elevate-primary border-slate-300 focus:ring-elevate-accent cursor-pointer">
+                            <label for="edit_is_popup" class="text-xs font-bold text-elevate-dark cursor-pointer select-none">
+                                Tampilkan sebagai Pop-Up Modal saat pengunjung membuka website
+                            </label>
+                        </div>
+
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button type="button" @click="editModalOpen = false" class="py-3 px-6 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 text-sm">Batal</button>
+                            <button type="submit" class="py-3 px-8 bg-elevate-primary text-white font-bold rounded-xl hover:bg-elevate-dark transition-all shadow-lg shadow-elevate-primary/20 text-sm">Simpan Perubahan</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -589,81 +665,4 @@
             }
         });
     </script>
-
-    <!-- EDIT ANNOUNCEMENT MODAL -->
-    <div x-cloak x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true">
-        <div x-show="editModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
-        <div class="flex min-h-screen items-center justify-center p-4">
-            <div x-show="editModalOpen" x-transition class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-100 p-6 sm:p-8">
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-elevate-peach-light text-elevate-primary rounded-xl flex items-center justify-center text-xl">
-                            <i class="ph-bold ph-pencil-simple"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-black text-elevate-dark">Edit Pengumuman Website</h3>
-                            <p class="text-xs text-slate-400 font-medium">Perbarui konten dan pengaturan pengumuman</p>
-                        </div>
-                    </div>
-                    <button @click="editModalOpen = false" class="w-9 h-9 rounded-full bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
-                </div>
-
-                <form :action="'{{ url('/announcements') }}/' + editData.id" method="POST" enctype="multipart/form-data" class="space-y-5" id="editAnnouncementForm">
-                    @csrf
-                    @method('PUT')
-                    <div>
-                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Judul Pengumuman</label>
-                        <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm" required>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Isi Konten Pengumuman</label>
-                        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden focus-within:border-elevate-accent transition-all shadow-sm">
-                            <div id="quill-edit-editor" class="min-h-[160px] text-sm text-elevate-dark font-medium"></div>
-                        </div>
-                        <input type="hidden" name="content" id="edit-content-input" required>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Kategori / Urgensi</label>
-                            <select name="category" x-model="editData.category" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm">
-                                <option value="Umum">Umum (Biasa)</option>
-                                <option value="Akademik">Akademik</option>
-                                <option value="Kesiswaan">Kesiswaan</option>
-                                <option value="Penting">Penting / Urgent</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Tanggal Kadaluarsa (Opsional)</label>
-                            <input type="date" name="expired_at" x-model="editData.expired_at_date" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Ganti Gambar Banner (Opsional)</label>
-                        <template x-if="editData.image">
-                            <div class="mb-3 flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-                                <img :src="'{{ asset('storage') }}/' + editData.image" class="w-12 h-12 rounded-lg object-cover">
-                                <span class="text-xs text-slate-500 font-medium">Gambar saat ini sudah terpasang. Pilih file baru jika ingin mengganti.</span>
-                            </div>
-                        </template>
-                        <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-elevate-peach-light file:text-elevate-primary hover:file:bg-elevate-peach/30 transition-all border border-slate-200 rounded-2xl bg-slate-50 focus:bg-white p-2">
-                    </div>
-
-                    <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-                        <input type="checkbox" name="is_popup" value="1" id="edit_is_popup" :checked="editData.is_popup" class="w-5 h-5 rounded-lg text-elevate-primary border-slate-300 focus:ring-elevate-accent cursor-pointer">
-                        <label for="edit_is_popup" class="text-xs font-bold text-elevate-dark cursor-pointer select-none">
-                            Tampilkan sebagai Pop-Up Modal saat pengunjung membuka website
-                        </label>
-                    </div>
-
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" @click="editModalOpen = false" class="py-3 px-6 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 text-sm">Batal</button>
-                        <button type="submit" class="py-3 px-8 bg-elevate-primary text-white font-bold rounded-xl hover:bg-elevate-dark transition-all shadow-lg shadow-elevate-primary/20 text-sm">Simpan Perubahan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </x-app-layout>
