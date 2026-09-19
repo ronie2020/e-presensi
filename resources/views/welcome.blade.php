@@ -52,6 +52,11 @@
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
         .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
         .prose p { margin-bottom: 0.75rem; }
+        /* Dukungan alignment Quill & HTML Rich Text */
+        .ql-align-center, [align="center"] { text-align: center !important; }
+        .ql-align-right, [align="right"] { text-align: right !important; }
+        .ql-align-justify, [align="justify"] { text-align: justify !important; }
+        .ql-align-left, [align="left"] { text-align: left !important; }
     </style>
 
     @php
@@ -64,9 +69,8 @@
             $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : null;
             $hasPopupImage = !empty($popupImage);
             $popupTitle = $popupAnnouncement->title;
-            // Izinkan tag format dasar saja (bukan <a>, untuk menghindari atribut href berbahaya)
-            // agar paragraf/daftar/penekanan teks tetap tampil rapi di dalam .prose, bukan jadi satu baris panjang.
-            $popupMessage = strip_tags($popupAnnouncement->content, '<p><br><strong><em><b><i><ul><ol><li>');
+            // Izinkan tag format Rich Text (bold, miring, alinea, alignment, daftar, judul)
+            $popupMessage = strip_tags($popupAnnouncement->content, '<div><p><br><strong><b><em><i><u><s><ul><ol><li><h1><h2><h3><h4><h5><h6><blockquote><span>');
         }
 
         $popupCategory = $hasPopup ? ($popupAnnouncement->category ?? 'Umum') : 'Umum';

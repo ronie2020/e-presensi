@@ -21,7 +21,7 @@
                         </div>
                     </template>
                     <div class="prose prose-slate max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
-                        <div x-html="activeAnnouncement?.content.replace(/\n/g, '<br>')"></div>
+                        <div x-html="activeAnnouncement?.content"></div>
                     </div>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700">

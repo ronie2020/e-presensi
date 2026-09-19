@@ -1,7 +1,9 @@
 <x-app-layout>
-    {{-- Load SweetAlert & Animate.css --}}
+    {{-- Load SweetAlert, Animate.css & Quill.js Rich Text Editor --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
     <div class="py-6 sm:py-8 font-sans text-elevate-text relative overflow-hidden min-h-screen">
         
@@ -119,8 +121,11 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Isi Konten</label>
-                                    <textarea name="content" rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm p-4 text-elevate-dark font-medium transition-all" placeholder="Tulis detail pengumuman di sini..." required></textarea>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Isi Konten Pengumuman</label>
+                                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden focus-within:border-elevate-accent transition-all shadow-sm">
+                                        <div id="quill-editor" class="min-h-[180px] text-sm text-elevate-dark font-medium"></div>
+                                    </div>
+                                    <input type="hidden" name="content" id="content-input" required>
                                 </div>
 
                                 <div>
@@ -508,6 +513,36 @@
                         if (result.isConfirmed) form.submit();
                     });
                 });
+            }
+
+            // --- INITIALIZE QUILL RICH TEXT EDITOR ---
+            if (document.getElementById('quill-editor')) {
+                var quill = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    placeholder: 'Tulis detail pengumuman di sini (Anda dapat mengatur Bold, Miring, Garis Bawah, Rata Kiri/Tengah/Kanan/Kiri-Kanan, Penomoran, Judul, dll)...',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'align': [] }],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                var announceForm = document.querySelector('form[action="{{ route('announcements.store') }}"]');
+                if (announceForm) {
+                    announceForm.addEventListener('submit', function() {
+                        var html = quill.root.innerHTML;
+                        if (quill.getText().trim().length === 0 && !html.includes('<img')) {
+                            document.getElementById('content-input').value = '';
+                        } else {
+                            document.getElementById('content-input').value = html;
+                        }
+                    });
+                }
             }
         });
     </script>
