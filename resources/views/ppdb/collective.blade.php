@@ -80,7 +80,7 @@
                                     <i class="ph-duotone ph-microsoft-excel-logo text-5xl"></i>
                                 </div>
                                 <div class="text-center md:text-left">
-                                    <h4 class="text-elevate-dark font-black text-lg">Template_PPDB_2025.xlsx</h4>
+                                    <h4 class="text-elevate-dark font-black text-lg">Template_PPDB_{{ date('Y') }}.xlsx</h4>
                                     <p class="text-slate-400 text-xs uppercase tracking-wider font-bold mt-1">Format Resmi Sekolah</p>
                                 </div>
                             </div>

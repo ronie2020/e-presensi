@@ -36,10 +36,17 @@ class AdminPpdbController extends Controller
         }
 
         $registrants = $query->latest()->paginate(10);
-        
+
+        // FIX C3: Ambil data siswa yang sudah dipromote dalam SATU query (bukan N+1 di view)
+        $nisns = $registrants->pluck('nisn')->filter()->toArray();
+        $promotedStudents = Student::with('schoolClass')
+            ->whereIn('nisn', $nisns)
+            ->get()
+            ->keyBy('nisn');
+
         $stats = [
-            'total' => PpdbRegistrant::where('academic_year', $year)->count(),
-            'pending' => PpdbRegistrant::where('academic_year', $year)->where('status', 'pending')->count(),
+            'total'    => PpdbRegistrant::where('academic_year', $year)->count(),
+            'pending'  => PpdbRegistrant::where('academic_year', $year)->where('status', 'pending')->count(),
             'verified' => PpdbRegistrant::where('academic_year', $year)->where('status', 'verified')->count(),
             'accepted' => PpdbRegistrant::where('academic_year', $year)->where('status', 'accepted')->count(),
         ];
@@ -49,7 +56,7 @@ class AdminPpdbController extends Controller
             $scheduleData = json_decode(Storage::get('ppdb_schedule.json'), true);
         }
 
-        return view('admin.ppdb.index', compact('registrants', 'stats', 'year', 'scheduleData'));
+        return view('admin.ppdb.index', compact('registrants', 'stats', 'year', 'scheduleData', 'promotedStudents'));
     }
 
     public function setSchedule(Request $request)
@@ -302,8 +309,9 @@ class AdminPpdbController extends Controller
             return back()->with('error', 'Hanya siswa DITERIMA yang bisa masuk Data Induk.');
         }
 
-        if (Student::where('nisn', $registrant->nisn)->exists()) {
-            return back()->with('error', 'Siswa dengan NISN ini sudah ada di Data Induk.');
+        // FIX BUG 7: Gunakan withTrashed() agar siswa yang pernah di-soft delete terdeteksi
+        if (Student::withTrashed()->where('nisn', $registrant->nisn)->exists()) {
+            return back()->with('error', 'Siswa dengan NISN ini sudah ada di Data Induk (atau pernah terdaftar sebelumnya).');
         }
 
         DB::beginTransaction();
@@ -383,7 +391,8 @@ class AdminPpdbController extends Controller
             $sequence = $nisData['sequence'];
 
             foreach ($registrants as $registrant) {
-                if (Student::where('nisn', $registrant->nisn)->exists()) {
+                // FIX BUG 7 (Catatan 5): Gunakan withTrashed() agar konsisten dengan autoDistribute
+                if (Student::withTrashed()->where('nisn', $registrant->nisn)->exists()) {
                     $failCount++;
                     $failedNames[] = $registrant->full_name . " (NISN Duplikat)";
                     continue;
@@ -461,33 +470,42 @@ class AdminPpdbController extends Controller
 
     public function print($id)
     {
+        // FIX BUG 1: Gunakan view khusus cetak bukti individual (bukan ppdb.success yang untuk rekap kolektif)
         $registrant = PpdbRegistrant::findOrFail($id);
-        return view('ppdb.success', compact('registrant')); 
+        return view('ppdb.print-bukti', compact('registrant'));
     }   
 
-    public function reports()
+    public function reports(Request $request)
     {
-        $year = date('Y');
+        // FIX BUG 9: Ambil tahun dari request agar admin bisa lihat laporan historis
+        $year         = $request->input('year', date('Y'));
+        $availableYears = PpdbRegistrant::selectRaw('DISTINCT academic_year')
+                            ->orderBy('academic_year', 'desc')
+                            ->pluck('academic_year');
+
         $genderStats = [
             'L' => PpdbRegistrant::where('academic_year', $year)->where('gender', 'L')->count(),
             'P' => PpdbRegistrant::where('academic_year', $year)->where('gender', 'P')->count(),
         ];
         $trackStats = [
-            'zonasi' => PpdbRegistrant::where('academic_year', $year)->where('track', 'zonasi')->count(),
-            'prestasi' => PpdbRegistrant::where('academic_year', $year)->where('track', 'prestasi')->count(),
-            'afirmasi' => PpdbRegistrant::where('academic_year', $year)->where('track', 'afirmasi')->count(),
+            'zonasi'       => PpdbRegistrant::where('academic_year', $year)->where('track', 'zonasi')->count(),
+            'prestasi'     => PpdbRegistrant::where('academic_year', $year)->where('track', 'prestasi')->count(),
+            'afirmasi'     => PpdbRegistrant::where('academic_year', $year)->where('track', 'afirmasi')->count(),
             'pindah_tugas' => PpdbRegistrant::where('academic_year', $year)->where('track', 'pindah_tugas')->count(),
+            'kolektif'     => PpdbRegistrant::where('academic_year', $year)->where('track', 'kolektif')->count(),
         ];
         $totalRegistrants = array_sum($trackStats);
-        $totalAccepted = PpdbRegistrant::where('academic_year', $year)->where('status', 'accepted')->count();
+        $totalAccepted    = PpdbRegistrant::where('academic_year', $year)->where('status', 'accepted')->count();
 
-        return view('admin.ppdb.reports', compact('genderStats', 'trackStats', 'totalAccepted', 'totalRegistrants'));
+        return view('admin.ppdb.reports', compact('genderStats', 'trackStats', 'totalAccepted', 'totalRegistrants', 'year', 'availableYears'));
     }
 
-    public function exportExcel()
+    public function exportExcel(Request $request)
     {
-        $fileName = 'data-ppdb-' . date('Y-m-d') . '.csv';
-        $registrants = PpdbRegistrant::all();
+        // FIX BUG 8: Tambahkan filter tahun agar export tidak campur semua tahun
+        $year        = $request->input('year', date('Y'));
+        $fileName    = 'data-ppdb-' . $year . '-' . date('m-d') . '.csv';
+        $registrants = PpdbRegistrant::where('academic_year', $year)->get();
 
         $headers = array(
             "Content-type"        => "text/csv",

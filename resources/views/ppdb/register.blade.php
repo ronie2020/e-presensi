@@ -158,6 +158,8 @@
 
             <form id="ppdbForm" action="{{ route('ppdb.store') }}" method="POST" enctype="multipart/form-data" class="p-6 md:p-12 min-h-[500px]">
                 @csrf
+                {{-- FIX BUG 6: Hidden input untuk menampung nilai rapor per mapel dalam format JSON --}}
+                <input type="hidden" name="grades_detail" id="grades_detail_input">
 
                 {{-- ================= TAB 1: JALUR ================= --}}
                 <div x-show="tab === 'jalur'" class="space-y-8 animate-enter">
@@ -294,8 +296,9 @@
                         </div>
 
                         <div class="form-group relative group">
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1 group-focus-within:text-elevate-primary transition-colors">NIK (16 Digit)</label>
-                            <input type="number" name="nik" value="{{ old('nik') }}" class="form-input save-local" data-key="nik" placeholder="3207xxxxxxxxxxxx" required>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1 group-focus-within:text-elevate-primary transition-colors">NIK (16 Digit) <span class="text-slate-400 font-normal text-[10px] normal-case">(Opsional)</span></label>
+                            {{-- FIX BUG 4: NIK nullable di server, hapus required di HTML agar konsisten --}}
+                            <input type="number" name="nik" value="{{ old('nik') }}" class="form-input save-local" data-key="nik" placeholder="3207xxxxxxxxxxxx">
                             <i class="ph-bold ph-fingerprint input-icon"></i>
                         </div>
 
@@ -382,7 +385,8 @@
                         
                         <div class="form-group relative group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1 group-focus-within:text-emerald-600 transition-colors">NPSN (Opsional)</label>
-                            <input type="number" name="npsn" class="form-input focus:border-emerald-500 focus:ring-emerald-500/20 save-local" data-key="npsn" placeholder="Nomor Pokok Sekolah">
+                            {{-- FIX BUG 5: nama field diperbaiki dari 'npsn' menjadi 'npsn_school_origin' agar tersimpan ke DB --}}
+                            <input type="number" name="npsn_school_origin" class="form-input focus:border-emerald-500 focus:ring-emerald-500/20 save-local" data-key="npsn_school_origin" placeholder="Nomor Pokok Sekolah">
                             <i class="ph-bold ph-hash input-icon group-focus-within:text-emerald-600"></i>
                         </div>
 
@@ -695,6 +699,19 @@
                 btn.disabled = true;
                 text.classList.add('hidden');
                 loading.classList.remove('hidden');
+
+                // FIX BUG 6: Kumpulkan nilai per mapel ke dalam JSON sebelum submit
+                const gradeInputs = document.querySelectorAll('input[name^="grade_"]');
+                if (gradeInputs.length > 0) {
+                    const gradesObj = {};
+                    gradeInputs.forEach(g => {
+                        const key = g.name.replace('grade_', '');
+                        if (g.value !== '') gradesObj[key] = parseFloat(g.value) || 0;
+                    });
+                    if (Object.keys(gradesObj).length > 0) {
+                        document.getElementById('grades_detail_input').value = JSON.stringify(gradesObj);
+                    }
+                }
 
                 // Clear storage on submit
                 inputs.forEach(input => localStorage.removeItem('ppdb_' + input.dataset.key));

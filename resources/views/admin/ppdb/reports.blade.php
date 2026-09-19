@@ -32,16 +32,29 @@
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] pointer-events-none group-hover:opacity-70 transition-opacity"></div>
                 
-                <div class="relative z-10">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
-                        <i class="ph-fill ph-chart-bar text-elevate-primary"></i> Pusat Data & Laporan
+                <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
+                            <i class="ph-fill ph-chart-bar text-elevate-primary"></i> Pusat Data & Laporan
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-3">
+                            Laporan & Unduhan
+                        </h1>
+                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
+                            Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data untuk keperluan arsip sekolah.
+                        </p>
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-3">
-                        Laporan & Unduhan
-                    </h1>
-                    <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                        Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data untuk keperluan arsip sekolah.
-                    </p>
+
+                    {{-- FIX BUG 9: Filter Tahun agar admin bisa lihat laporan historis --}}
+                    <form method="GET" class="flex items-center gap-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-2xl p-3 shadow-sm">
+                        <label class="text-xs font-bold text-elevate-dark/80 whitespace-nowrap">Tahun Ajaran:</label>
+                        <select name="year" onchange="this.form.submit()" class="px-3 py-2 bg-white/80 border border-white/60 rounded-xl text-sm font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent outline-none cursor-pointer shadow-sm">
+                            @foreach($availableYears as $yr)
+                                <option value="{{ $yr }}" {{ $yr == $year ? 'selected' : '' }}>{{ $yr }}/{{ $yr + 1 }}</option>
+                            @endforeach
+                        </select>
+                        <span class="text-xs text-elevate-dark/60 font-bold">Data: <strong>{{ $year }}</strong></span>
+                    </form>
                 </div>
             </div>
 
@@ -74,7 +87,8 @@
                                 ['label' => 'Zonasi', 'val' => $trackStats['zonasi'], 'color' => 'bg-elevate-primary', 'bg' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-elevate-accent/30'],
                                 ['label' => 'Prestasi', 'val' => $trackStats['prestasi'], 'color' => 'bg-emerald-600', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200'],
                                 ['label' => 'Afirmasi', 'val' => $trackStats['afirmasi'], 'color' => 'bg-amber-500', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'border' => 'border-amber-200'],
-                                ['label' => 'Pindah', 'val' => $trackStats['pindah_tugas'], 'color' => 'bg-elevate-dark', 'bg' => 'bg-slate-50', 'text' => 'text-elevate-dark', 'border' => 'border-slate-200']
+                                ['label' => 'Pindah Tugas', 'val' => $trackStats['pindah_tugas'], 'color' => 'bg-elevate-dark', 'bg' => 'bg-slate-50', 'text' => 'text-elevate-dark', 'border' => 'border-slate-200'],
+                                ['label' => 'Kolektif (Guru SD)', 'val' => $trackStats['kolektif'] ?? 0, 'color' => 'bg-indigo-600', 'bg' => 'bg-indigo-50', 'text' => 'text-indigo-700', 'border' => 'border-indigo-200']
                             ] as $stat)
                             <div class="flex justify-between items-center p-3 rounded-xl border {{ $stat['bg'] }} {{ $stat['border'] }} hover:shadow-sm transition-shadow">
                                 <div class="flex items-center gap-3">
@@ -194,17 +208,18 @@
                 zonasi: {{ $trackStats['zonasi'] }},
                 prestasi: {{ $trackStats['prestasi'] }},
                 afirmasi: {{ $trackStats['afirmasi'] }},
-                pindah: {{ $trackStats['pindah_tugas'] }}
+                pindah: {{ $trackStats['pindah_tugas'] }},
+                kolektif: {{ $trackStats['kolektif'] ?? 0 }}
             };
 
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Zonasi', 'Prestasi', 'Afirmasi', 'Pindah Tugas'],
+                    labels: ['Zonasi', 'Prestasi', 'Afirmasi', 'Pindah Tugas', 'Kolektif (Guru)'],
                     datasets: [{
-                        data: [trackData.zonasi, trackData.prestasi, trackData.afirmasi, trackData.pindah],
+                        data: [trackData.zonasi, trackData.prestasi, trackData.afirmasi, trackData.pindah, trackData.kolektif],
                         // Diselaraskan dengan hex dari tema Elevate & Semantic
-                        backgroundColor: ['#0d52a1', '#10b981', '#f59e0b', '#2c3f61'], 
+                        backgroundColor: ['#0d52a1', '#10b981', '#f59e0b', '#2c3f61', '#4f46e5'], 
                         borderWidth: 0, hoverOffset: 10
                     }]
                 },
