@@ -844,7 +844,10 @@ Route::middleware('auth')->group(function () {
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
         Route::resource('spt', SptController::class);
     });
+    Route::get('sppd/dashboard', [SppdController::class, 'dashboard'])->name('sppd.dashboard');
     Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
+    Route::get('sppd/{id}/print-spj', [SppdController::class, 'printSpj'])->name('sppd.print-spj');
+    Route::patch('sppd/{id}/status', [SppdController::class, 'updateStatus'])->name('sppd.update-status');
     Route::resource('sppd', SppdController::class);
 
     // =========================================================================

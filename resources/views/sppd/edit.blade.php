@@ -189,6 +189,43 @@
                             </div>
                         </div>
 
+                        <!-- SECTION 4: REKAP BIAYA -->
+                        <div class="p-6 bg-emerald-50/50 rounded-[2rem] border border-emerald-100 hover:border-emerald-200 transition-colors">
+                            <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider mb-1 flex items-center gap-2">
+                                <span class="bg-emerald-100 text-emerald-600 rounded-full w-7 h-7 flex items-center justify-center text-xs">4</span>
+                                Rekap Biaya Perjalanan
+                                <span class="text-[10px] font-medium text-slate-400 normal-case tracking-normal ml-1">(opsional)</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pl-9 mt-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Biaya Transport (Rp)</label>
+                                    <input type="number" name="biaya_transport" id="biaya_transport" value="{{ old('biaya_transport', $sppd->biaya_transport) }}" min="0" step="1000" onchange="hitungTotal()" placeholder="0" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-emerald-400 focus:ring-emerald-400 text-sm py-3 font-mono font-bold text-emerald-700 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Biaya Penginapan (Rp)</label>
+                                    <input type="number" name="biaya_penginapan" id="biaya_penginapan" value="{{ old('biaya_penginapan', $sppd->biaya_penginapan) }}" min="0" step="1000" onchange="hitungTotal()" placeholder="0" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-emerald-400 focus:ring-emerald-400 text-sm py-3 font-mono font-bold text-emerald-700 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Uang Harian (Rp)</label>
+                                    <input type="number" name="uang_harian" id="uang_harian" value="{{ old('uang_harian', $sppd->uang_harian) }}" min="0" step="1000" onchange="hitungTotal()" placeholder="0" class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-emerald-400 focus:ring-emerald-400 text-sm py-3 font-mono font-bold text-emerald-700 transition-all">
+                                </div>
+                            </div>
+                            <div class="ml-9 mt-4 p-4 bg-white rounded-2xl border border-emerald-200 flex items-center justify-between">
+                                <span class="text-sm font-bold text-slate-600">Total Biaya:</span>
+                                <span id="total_biaya_display" class="text-xl font-black text-emerald-600">Rp {{ number_format($sppd->total_biaya, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+
+                        @if($sppd->catatan_kepala)
+                        <!-- Catatan Kepala (readonly) -->
+                        <div class="p-5 bg-sky-50 rounded-[2rem] border border-sky-200">
+                            <h3 class="text-sm font-black text-sky-700 mb-2 flex items-center gap-2">
+                                <i class="ph-fill ph-chats-circle text-sky-500"></i> Catatan Kepala Sekolah
+                            </h3>
+                            <p class="text-sm text-sky-800 pl-7 font-medium">{{ $sppd->catatan_kepala }}</p>
+                        </div>
+                        @endif
+
                         {{-- Action Footer --}}
                         <div class="flex items-center justify-end gap-4 pt-6 mt-4 border-t border-slate-100">
                             <a href="{{ route('sppd.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batal</a>
@@ -208,37 +245,25 @@
         function confirmSubmit(e) {
             e.preventDefault();
             const form = document.getElementById('form-edit-sppd');
-            
-            if (!form.checkValidity()) { 
-                form.reportValidity(); 
-                return; 
-            }
-
+            if (!form.checkValidity()) { form.reportValidity(); return; }
             Swal.fire({
-                title: 'Simpan Perubahan?', 
-                text: 'Pastikan data perjalanan dinas sudah sesuai.', 
-                icon: 'question',
-                showCancelButton: true, 
-                confirmButtonText: 'Ya, Update!', 
-                cancelButtonText: 'Periksa Lagi',
-                reverseButtons: true, 
-                customClass: {
-                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                    confirmButton: 'bg-elevate-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-primary mx-2 shadow-lg shadow-elevate-dark/20',
-                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 mx-2'
-                }, 
+                title: 'Simpan Perubahan?', text: 'Pastikan data perjalanan dinas sudah sesuai.', icon: 'question',
+                showCancelButton: true, confirmButtonText: 'Ya, Update!', cancelButtonText: 'Periksa Lagi', reverseButtons: true,
+                customClass: { popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl', confirmButton: 'bg-elevate-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-primary mx-2 shadow-lg shadow-elevate-dark/20', cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 mx-2' },
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({ 
-                        title: 'Memperbarui Data...', 
-                        allowOutsideClick: false,
-                        showConfirmButton: false, 
-                        didOpen: () => Swal.showLoading() 
-                    });
+                    Swal.fire({ title: 'Memperbarui Data...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
                     form.submit();
                 }
             });
+        }
+
+        function hitungTotal() {
+            const t = parseFloat(document.getElementById('biaya_transport').value) || 0;
+            const p = parseFloat(document.getElementById('biaya_penginapan').value) || 0;
+            const h = parseFloat(document.getElementById('uang_harian').value) || 0;
+            document.getElementById('total_biaya_display').innerText = 'Rp ' + (t+p+h).toLocaleString('id-ID');
         }
     </script>
 </x-app-layout>

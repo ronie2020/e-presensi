@@ -1,12 +1,14 @@
 <!-- DEFINISI FUNGSI TERBILANG -->
 @php
     if (!function_exists('Terbilang')) {
-        function Terbilang($x) {
-            $angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
-            if ($x < 12) return $angka[$x];
-            elseif ($x < 20) return $angka[$x - 10] . " Belas";
-            elseif ($x < 100) return $angka[$x / 10] . " Puluh " . $angka[$x % 10];
-            return $x;
+        function Terbilang($n) {
+            $satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+            if ($n < 12)  return $satuan[$n];
+            if ($n < 20)  return $satuan[$n - 10] . ' Belas';
+            if ($n < 100) return $satuan[intdiv($n, 10)] . ' Puluh' . ($n % 10 ? ' ' . $satuan[$n % 10] : '');
+            if ($n < 200) return 'Seratus' . ($n > 100 ? ' ' . Terbilang($n - 100) : '');
+            if ($n < 1000) return $satuan[intdiv($n, 100)] . ' Ratus' . ($n % 100 ? ' ' . Terbilang($n % 100) : '');
+            return $n;
         }
     }
 @endphp
@@ -184,8 +186,8 @@
 
         <table class="data">
             <tr><td>1</td><td>Pejabat berwenang yang memberi perintah</td><td colspan="2">{{ $sppd->pejabat_jabatan }}</td></tr>
-            <tr><td>2</td><td>Nama / NIP Pegawai yang diperintah</td><td colspan="2"><strong>{{ $sppd->user->name }}</strong><br>NIP. {{ $sppd->user->nip ?? '-' }}</td></tr>
-            <tr><td>3</td><td>a. Pangkat dan Golongan<br>b. Jabatan / Instansi<br>c. Tingkat Biaya</td><td colspan="2">a. {{ $sppd->user->pangkat ?? '-' }}<br>b. {{ $sppd->user->position ?? 'Guru' }}<br>c. -</td></tr>
+            <tr><td>2</td><td>Nama / NIP Pegawai yang diperintah</td><td colspan="2"><strong>{{ $sppd->user?->name ?? 'Pegawai Tidak Ditemukan' }}</strong><br>NIP. {{ $sppd->user?->nip ?? '-' }}</td></tr>
+            <tr><td>3</td><td>a. Pangkat dan Golongan<br>b. Jabatan / Instansi<br>c. Tingkat Biaya</td><td colspan="2">a. {{ $sppd->user?->pangkat ?? '-' }}<br>b. {{ $sppd->user?->position ?? 'Guru' }}<br>c. -</td></tr>
             <tr><td>4</td><td>Maksud Perjalanan Dinas</td><td colspan="2">{{ $sppd->maksud_perjalanan }}</td></tr>
             <tr><td>5</td><td>Alat Angkutan</td><td colspan="2">{{ $sppd->alat_angkut ?? 'Kendaraan Umum' }}</td></tr>
             <tr><td>6</td><td>a. Tempat Berangkat<br>b. Tempat Tujuan</td><td colspan="2">a. {{ $sppd->tempat_berangkat }}<br>b. {{ $sppd->tempat_tujuan }}</td></tr>
@@ -328,7 +330,7 @@
         
         <div class="content" style="line-height: 1.6;">
             <p><span class="label-section">I. DASAR</span></p>
-            <span class="indent">Surat Perintah Tugas Kepala SMP Negeri 3 Lakbok Nomor: {{ str_replace('090', '094', $sppd->nomor_sppd) }} Tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }}.</span>
+            <span class="indent">Surat Perintah Tugas Kepala SMP Negeri 3 Lakbok Nomor: {{ $sppd->spt?->nomor_spt ?? str_replace('090', '094', $sppd->nomor_sppd) }} Tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }}.</span>
             
             <p class="mt-4"><span class="label-section">II. MAKSUD DAN TUJUAN</span></p>
             <span class="indent">{{ $sppd->maksud_perjalanan }}</span>
@@ -365,8 +367,8 @@
             <div style="float: right; width: 48%; text-align: center;">
                 <p>Lakbok, {{ \Carbon\Carbon::parse($sppd->tgl_kembali)->isoFormat('D MMMM Y') }}<br>Pelapor,</p>
                 <div style="height: 60px;"></div>
-                <p style="font-weight: bold; text-decoration: underline; white-space: nowrap;">{{ $sppd->user->name }}</p>
-                <p>NIP. {{ $sppd->user->nip ?? '-' }}</p>
+                <p style="font-weight: bold; text-decoration: underline; white-space: nowrap;">{{ $sppd->user?->name ?? 'Pegawai Tidak Ditemukan' }}</p>
+                <p>NIP. {{ $sppd->user?->nip ?? '-' }}</p>
             </div>
             <div class="clear"></div>
         </div>
