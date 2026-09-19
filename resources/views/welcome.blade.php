@@ -59,23 +59,65 @@
         $hasPopup = isset($popupAnnouncement) && !empty($popupAnnouncement);
 
         if ($hasPopup) {
-            $popupId = 'pengumuman_' .$popupAnnouncement->id;
-            $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : asset('images/logo-sekolah.png');
-            $popupTitle =$popupAnnouncement->title;
+            $popupId = 'pengumuman_' . $popupAnnouncement->id;
+            
+            // Perbaikan URL Gambar: Dukung penanganan subfolder /public/ di cPanel/Hosting maupun domain root
+            $popupImage = null;
+            if (!empty($popupAnnouncement->image)) {
+                $imgPath = $popupAnnouncement->image;
+                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($imgPath)) {
+                    if (request()->is('public/*') || str_contains(request()->getRequestUri(), '/public/')) {
+                        $popupImage = asset('public/storage/' . $imgPath);
+                    } else {
+                        $popupImage = asset('storage/' . $imgPath);
+                    }
+                }
+            }
+            
+            $hasPopupImage = !empty($popupImage);
+            $popupTitle = $popupAnnouncement->title;
             // Izinkan tag format dasar saja (bukan <a>, untuk menghindari atribut href berbahaya)
             // agar paragraf/daftar/penekanan teks tetap tampil rapi di dalam .prose, bukan jadi satu baris panjang.
             $popupMessage = strip_tags($popupAnnouncement->content, '<p><br><strong><em><b><i><ul><ol><li>');
         }
 
-        // Tema warna default disesuaikan dengan Microsoft Elevate
-        $colorTheme = [
-            'badge_bg' => 'bg-elevate-accent/10', 
-            'badge_text' => 'text-elevate-primary', 
-            'badge_ring' => 'ring-elevate-accent/30', 
-            'btn_bg' => 'bg-elevate-primary', 
-            'btn_hover' => 'hover:bg-elevate-dark', 
-            'btn_ring' => 'focus-visible:outline-elevate-primary'
-        ];
+        $popupCategory = $hasPopup ? ($popupAnnouncement->category ?? 'Umum') : 'Umum';
+
+        // Tema warna dinamis sesuai kategori pengumuman
+        $colorTheme = match($popupCategory) {
+            'Penting' => [
+                'badge_bg' => 'bg-rose-500/10', 
+                'badge_text' => 'text-rose-600', 
+                'badge_ring' => 'ring-rose-500/30', 
+                'btn_bg' => 'bg-rose-600', 
+                'btn_hover' => 'hover:bg-rose-700', 
+                'btn_ring' => 'focus-visible:outline-rose-600'
+            ],
+            'Akademik' => [
+                'badge_bg' => 'bg-blue-500/10', 
+                'badge_text' => 'text-blue-600', 
+                'badge_ring' => 'ring-blue-500/30', 
+                'btn_bg' => 'bg-blue-600', 
+                'btn_hover' => 'hover:bg-blue-700', 
+                'btn_ring' => 'focus-visible:outline-blue-600'
+            ],
+            'Kesiswaan' => [
+                'badge_bg' => 'bg-emerald-500/10', 
+                'badge_text' => 'text-emerald-600', 
+                'badge_ring' => 'ring-emerald-500/30', 
+                'btn_bg' => 'bg-emerald-600', 
+                'btn_hover' => 'hover:bg-emerald-700', 
+                'btn_ring' => 'focus-visible:outline-emerald-600'
+            ],
+            default => [
+                'badge_bg' => 'bg-elevate-accent/10', 
+                'badge_text' => 'text-elevate-primary', 
+                'badge_ring' => 'ring-elevate-accent/30', 
+                'btn_bg' => 'bg-elevate-primary', 
+                'btn_hover' => 'hover:bg-elevate-dark', 
+                'btn_ring' => 'focus-visible:outline-elevate-primary'
+            ]
+        };
     @endphp
 
 </head>
@@ -166,15 +208,17 @@
 <div x-cloak x-show="infoPopupOpen" @keydown.escape.window="if(infoPopupOpen) closeInfoPopup(false)" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-elevate-dark/70 backdrop-blur-sm transition-opacity" @click="closeInfoPopup(false)"></div>
     <div class="flex min-h-full p-4 sm:p-6">
-        <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full sm:max-w-2xl border border-slate-100">
+        <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full {{ $hasPopupImage ? 'sm:max-w-2xl' : 'sm:max-w-xl' }} border border-slate-100">
             <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 z-20 w-10 h-10 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
-            <div class="flex flex-col md:flex-row w-full">
-                <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-100 p-6 flex items-center justify-center">
-                    <img src="{{ $popupImage }}" alt="{{ $popupTitle }}" class="w-full h-full object-contain drop-shadow-lg">
+            <div class="flex flex-col {{ $hasPopupImage ? 'md:flex-row' : '' }} w-full">
+                @if($hasPopupImage)
+                <div class="img-container md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-100 p-6 flex items-center justify-center">
+                    <img src="{{ $popupImage }}" alt="{{ $popupTitle }}" class="w-full h-full object-contain drop-shadow-lg" onerror="if(this.closest('.img-container')) this.closest('.img-container').style.display='none';">
                 </div>
-                <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
+                @endif
+                <div class="{{ $hasPopupImage ? 'md:w-7/12' : 'w-full' }} p-6 md:p-8 flex flex-col justify-center bg-white relative">
                     <div class="mb-4">
-                        <span class="inline-flex items-center rounded-lg {{ $colorTheme['badge_bg'] }} px-3 py-1.5 text-[10px] font-black uppercase tracking-widest {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{$colorTheme['badge_ring'] }} mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> Pengumuman</span>
+                        <span class="inline-flex items-center rounded-lg {{ $colorTheme['badge_bg'] }} px-3 py-1.5 text-[10px] font-black uppercase tracking-widest {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{$colorTheme['badge_ring'] }} mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> {{ $popupCategory }}</span>
                         <h3 id="modal-title" class="text-2xl font-black text-elevate-dark leading-tight">{{ $popupTitle }}</h3>
                     </div>
                    <div class="prose prose-sm text-slate-500 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2">{!! $popupMessage !!}</div>

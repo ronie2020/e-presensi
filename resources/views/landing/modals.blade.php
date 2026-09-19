@@ -15,6 +15,11 @@
                         <i class="ph-fill ph-calendar-blank"></i>
                         <span x-text="new Date(activeAnnouncement?.created_at).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })"></span>
                     </div>
+                    <template x-if="activeAnnouncement?.image">
+                        <div class="mb-6 rounded-xl overflow-hidden max-h-64 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                            <img :src="'{{ asset('storage') }}/' + activeAnnouncement.image" alt="Gambar Pengumuman" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
+                        </div>
+                    </template>
                     <div class="prose prose-slate max-w-none text-slate-600 dark:text-slate-300 leading-relaxed">
                         <div x-html="activeAnnouncement?.content.replace(/\n/g, '<br>')"></div>
                     </div>

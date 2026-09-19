@@ -129,6 +129,33 @@
                                     <p class="text-[10px] text-elevate-text/60 font-bold mt-2 ml-1">Format: JPG/PNG. Jika diisi, gambar ini akan tampil sebagai header Pop-up Halaman Utama.</p>
                                 </div>
 
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Kategori / Urgensi</label>
+                                        <div class="relative">
+                                            <select name="category" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 text-sm transition-colors cursor-pointer appearance-none">
+                                                <option value="Umum">Umum (Biasa)</option>
+                                                <option value="Akademik">Akademik</option>
+                                                <option value="Kesiswaan">Kesiswaan</option>
+                                                <option value="Penting">Penting / Urgent</option>
+                                            </select>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Tanggal Kadaluarsa (Opsional)</label>
+                                        <input type="date" name="expired_at" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 transition-colors">
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                                    <input type="checkbox" name="is_popup" value="1" id="is_popup" checked class="w-5 h-5 rounded-lg text-elevate-primary border-slate-300 focus:ring-elevate-accent cursor-pointer">
+                                    <label for="is_popup" class="text-xs font-bold text-elevate-dark cursor-pointer select-none">
+                                        Tampilkan sebagai Pop-Up Modal saat pengunjung membuka website
+                                        <span class="block text-[10px] text-slate-400 font-medium">Jika di centang, pengumuman akan muncul sebagai jendela pop-up di layar beranda.</span>
+                                    </label>
+                                </div>
+
                                 <div class="flex justify-end pt-2">
                                     <button type="submit" class="w-full sm:w-auto py-3.5 px-8 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/20 text-sm flex items-center justify-center gap-2 transform active:scale-95">
                                         <i class="ph-bold ph-paper-plane-right text-lg"></i>
@@ -338,25 +365,50 @@
                                                     <span class="inline-block ml-1 align-middle text-[9px] bg-elevate-peach-light text-elevate-primary px-1.5 py-0.5 rounded uppercase font-black border border-elevate-peach/30"><i class="ph-bold ph-image"></i> Berfoto</span>
                                                 @endif
                                             </h4>
-                                            <p class="text-xs text-elevate-text/80 line-clamp-3 leading-relaxed mb-4 font-medium">
-                                                {{ Str::limit(strip_tags($announce->content), 120) }}
-                                            </p>
+                                             @if(!empty($announce->image))
+                                                 <div class="mt-2 mb-3 rounded-xl overflow-hidden border border-slate-100 max-h-40">
+                                                     <img src="{{ asset('storage/' . $announce->image) }}" alt="Banner" class="w-full h-36 object-cover" onerror="this.parentElement.style.display='none'">
+                                                 </div>
+                                             @endif
+                                             <p class="text-xs text-elevate-text/80 line-clamp-3 leading-relaxed mb-4 font-medium">
+                                                 {{ Str::limit(strip_tags($announce->content), 120) }}
+                                             </p>
                                             
-                                            <!-- Actions -->
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-[10px] font-bold text-elevate-primary flex items-center gap-1 bg-elevate-peach-light px-2.5 py-1 rounded-lg border border-elevate-peach/20">
-                                                        <i class="ph-bold ph-calendar-blank"></i> {{ $announce->created_at->format('d M Y') }}
-                                                    </span>
-                                                </div>
-                                                
-                                                <form action="{{ route('announcements.destroy', $announce->id) }}" method="POST" class="delete-announce-form">
-                                                    @csrf @method('DELETE')
-                                                    <button type="button" class="btn-delete-announce w-8 h-8 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-500 transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 bg-slate-50 hover:shadow-md" title="Hapus Post">
-                                                        <i class="ph-bold ph-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                             <!-- Actions -->
+                                             <div class="flex flex-wrap items-center justify-between gap-2">
+                                                 <div class="flex flex-wrap items-center gap-2">
+                                                     @php
+                                                         $badgeStyle = match($announce->category ?? 'Umum') {
+                                                             'Penting' => 'bg-rose-50 text-rose-600 border-rose-200',
+                                                             'Akademik' => 'bg-blue-50 text-blue-600 border-blue-200',
+                                                             'Kesiswaan' => 'bg-emerald-50 text-emerald-600 border-emerald-200',
+                                                             default => 'bg-sky-50 text-sky-600 border-sky-200',
+                                                         };
+                                                     @endphp
+                                                     <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border {{ $badgeStyle }}">
+                                                         {{ $announce->category ?? 'Umum' }}
+                                                     </span>
+
+                                                     @if($announce->is_popup)
+                                                         <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 flex items-center gap-1" title="Tampil Pop-Up Modal">
+                                                             <i class="ph-bold ph-lightning"></i> Pop-Up
+                                                         </span>
+                                                     @endif
+
+                                                     @if($announce->expired_at)
+                                                         <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 flex items-center gap-1" title="Kadaluarsa">
+                                                             <i class="ph-bold ph-clock"></i> s/d {{ $announce->expired_at->format('d M Y') }}
+                                                         </span>
+                                                     @endif
+                                                 </div>
+                                                 
+                                                 <form action="{{ route('announcements.destroy', $announce->id) }}" method="POST" class="delete-announce-form">
+                                                     @csrf @method('DELETE')
+                                                     <button type="button" class="btn-delete-announce w-8 h-8 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-500 transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 bg-slate-50 hover:shadow-md" title="Hapus Post">
+                                                         <i class="ph-bold ph-trash"></i>
+                                                     </button>
+                                                 </form>
+                                             </div>
                                         </div>
                                     </div>
                                 @empty

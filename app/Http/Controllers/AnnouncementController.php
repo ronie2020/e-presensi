@@ -59,13 +59,19 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // TAMBAHAN: Validasi file gambar maksimal 2MB
+            'category' => 'nullable|string|in:Umum,Akademik,Kesiswaan,Penting',
+            'expired_at' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $data = [
             'title' => $request->title,
             'content' => $request->content,
             'user_id' => Auth::id(),
+            'is_active' => true,
+            'category' => $request->category ?? 'Umum',
+            'is_popup' => $request->has('is_popup') ? true : false,
+            'expired_at' => $request->filled('expired_at') ? $request->expired_at : null,
         ];
 
         // TAMBAHAN: Proses penyimpanan file gambar jika ada

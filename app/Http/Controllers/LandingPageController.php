@@ -213,7 +213,14 @@ class LandingPageController extends Controller
                         $query->orWhere('role', 'LIKE', '%' . $role . '%');
                     }
                 })->latest()->take(8)->get(),
-                'announcements' => Announcement::orderBy('created_at', 'desc')->limit(3)->get(),
+                'announcements' => Announcement::where('is_active', true)
+                    ->where(function($query) {
+                        $query->whereNull('expired_at')
+                              ->orWhere('expired_at', '>=', now());
+                    })
+                    ->orderBy('created_at', 'desc')
+                    ->limit(6)
+                    ->get(),
                 // PERBAIKAN: Tambahkan where('status', 'approved')
                 'achievements' => Achievement::with('student')->where('status', 'approved')->orderBy('date', 'desc')->limit(6)->get(),
                 'activities' => SchoolActivity::latest()->take(3)->get(),
@@ -288,7 +295,14 @@ class LandingPageController extends Controller
             ->first();
 
              // TAMBAHAN: Ambil 1 Pengumuman Terbaru untuk dijadikan Pop-up
-        $popupAnnouncement = \App\Models\Announcement::latest()->first();
+        $popupAnnouncement = \App\Models\Announcement::where('is_active', true)
+            ->where('is_popup', true)
+            ->where(function($query) {
+                $query->whereNull('expired_at')
+                      ->orWhere('expired_at', '>=', now());
+            })
+            ->latest()
+            ->first();
 
         // --- 11. DATA JADWAL PELAJARAN (TIMETABLE) ---
         // CATATAN PERBAIKAN: dengan 18 kelas x 41 JP/minggu, jadwal per hari bisa

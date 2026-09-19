@@ -22,7 +22,15 @@
                     <!-- Hover disesuaikan ke Elevate Theme -->
                     <article class="bg-white dark:bg-slate-900/50 backdrop-blur-md rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-elevate-accent dark:hover:border-elevate-accent/50 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col cursor-pointer" @click="openAnnouncementByIndex({{ $index }})" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="flex justify-between items-start mb-4">
-                            <span class="px-2 py-1 rounded bg-elevate-accent/10 dark:bg-elevate-accent/20 text-elevate-primary dark:text-elevate-accent text-[10px] font-bold uppercase tracking-wide border border-elevate-accent/20">Info</span>
+                            @php
+                                $badgeStyle = match($item->category ?? 'Umum') {
+                                    'Penting' => 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+                                    'Akademik' => 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+                                    'Kesiswaan' => 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+                                    default => 'bg-elevate-accent/10 text-elevate-primary dark:text-elevate-accent border-elevate-accent/20',
+                                };
+                            @endphp
+                            <span class="px-2.5 py-1 rounded-md {{ $badgeStyle }} text-[10px] font-black uppercase tracking-wide border">{{ $item->category ?? 'Info' }}</span>
                             <span class="text-xs text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
                                 <i class="ph-fill ph-calendar-blank"></i> {{ $item->created_at->format('d M') }}
                             </span>
