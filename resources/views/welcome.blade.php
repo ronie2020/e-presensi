@@ -200,8 +200,8 @@
             <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 z-20 w-10 h-10 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
             <div class="flex flex-col {{ $hasPopupImage ? 'md:flex-row' : '' }} w-full">
                 @if($hasPopupImage)
-                <div class="img-container md:w-5/12 h-56 sm:h-64 md:h-auto shrink-0 relative bg-slate-100 dark:bg-slate-800 p-4 flex items-center justify-center">
-                    <img src="{{ $popupImage }}" alt="{{ $popupTitle }}" class="w-full h-full object-cover rounded-2xl shadow-sm" onerror="if(this.closest('.img-container')) this.closest('.img-container').style.display='none';">
+                <div class="img-container md:w-5/12 h-56 sm:h-64 md:h-auto shrink-0 relative bg-elevate-dark/95 p-3 md:p-4 flex items-center justify-center overflow-hidden">
+                    <img src="{{ $popupImage }}" alt="{{ $popupTitle }}" class="max-w-full max-h-full object-contain rounded-2xl drop-shadow-lg" onerror="if(this.closest('.img-container')) this.closest('.img-container').style.display='none';">
                 </div>
                 @endif
                 <div class="{{ $hasPopupImage ? 'md:w-7/12' : 'w-full' }} p-6 md:p-8 flex flex-col justify-center bg-white relative">
