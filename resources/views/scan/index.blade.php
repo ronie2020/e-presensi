@@ -79,19 +79,8 @@
         $scheduleJson = json_encode($safeSchedule);
         $totalTarget = $statsConfig['total_target'] ?? 0;
         $currentTaken = $statsConfig['current_taken'] ?? 0;
-
-        // MENGAMBIL DATA SISWA UNTUK DROPDOWN PENCARIAN (NAMA, KELAS, NISN)
-        $allStudents = \App\Models\Student::with('schoolClass')
-            ->where('status', 'active')
-            ->get()
-            ->map(function($s) {
-                return [
-                    'id' => $s->id,
-                    'name' => $s->name,
-                    'nisn' => $s->nisn ?? $s->student_id ?? '-',
-                    'class_name' => $s->schoolClass->name ?? '-'
-                ];
-            })->toArray();
+        // Data siswa aktif diambil secara efisien dari Controller
+        $allStudents = $allStudents ?? [];
     @endphp
 
     <div class="py-6 sm:py-8 font-sans text-elevate-text bg-elevate-surface min-h-screen relative overflow-hidden">
@@ -327,7 +316,8 @@
                                         @if(isset($recentScans))
                                             @foreach($recentScans as $scan)
                                                 <tr class="log-entry group hover:bg-slate-50 transition-all duration-300 border-b border-slate-50 last:border-0"
-                                                    data-type-raw="{{ $scan['type_raw'] }}">
+                                                    data-type-raw="{{ $scan['type_raw'] }}"
+                                                    data-activity="{{ $scan['activity'] ?? '' }}">
                                                     
                                                     <td class="px-6 py-4 rounded-l-xl">
                                                         <div class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">{{ $scan['student_name'] }}</div>
@@ -546,7 +536,40 @@
             osc.stop(state.audioCtx.currentTime + 0.3);
         }
 
-        const toMinutes = (s) => { const [h, m] = s.split(':'); return h * 60 + +m; };
+        const toMinutes = (s) => {
+            if (!s || typeof s !== 'string' || !s.includes(':')) return 0;
+            const [h, m] = s.split(':');
+            return (parseInt(h, 10) || 0) * 60 + (parseInt(m, 10) || 0);
+        };
+
+        // Formatter jam terstandarisasi waktu lokal WIB (Asia/Jakarta)
+        const timeFormatterWib = new Intl.DateTimeFormat('id-ID', {
+            timeZone: 'Asia/Jakarta',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+
+        // Ambil menit WIB saat ini untuk perbandingan jadwal otomatis
+        function getWibMinutes(date) {
+            try {
+                const parts = new Intl.DateTimeFormat('id-ID', {
+                    timeZone: 'Asia/Jakarta',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: false
+                }).formatToParts(date);
+                let h = 0, m = 0;
+                for (const p of parts) {
+                    if (p.type === 'hour') h = parseInt(p.value, 10);
+                    if (p.type === 'minute') m = parseInt(p.value, 10);
+                }
+                return h * 60 + m;
+            } catch(e) {
+                return date.getHours() * 60 + date.getMinutes();
+            }
+        }
         
         document.addEventListener('DOMContentLoaded', () => {
             const dom = {
@@ -593,12 +616,12 @@
 
             setInterval(() => {
                 const now = new Date();
-                dom.clock.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+                dom.clock.textContent = timeFormatterWib.format(now);
                 if (!state.manualOverride) checkAutoMode(now);
             }, 1000);
 
             function checkAutoMode(now) {
-                const mins = now.getHours() * 60 + now.getMinutes();
+                const mins = getWibMinutes(now);
                 let nextMode = 'Harian';
 
                 if (inRange(mins, CONFIG.schedule.makan_start, CONFIG.schedule.makan_end)) nextMode = 'Makan';
@@ -692,11 +715,13 @@
                 let count = 0;
                 rows.forEach(row => {
                     const rowType = row.dataset.typeRaw; 
+                    const rowActivity = row.dataset.activity || '';
                     let match = false;
 
                     if (mode === 'Harian') match = ['Harian', 'Masuk', 'Pulang'].includes(rowType);
                     else if (mode === 'Makan') match = ['Meal', 'Makan'].includes(rowType);
-                    else if (mode === 'Dhuha' || mode === 'Dhuhur') match = rowType === 'Keagamaan'; 
+                    else if (mode === 'Dhuha') match = rowType === 'Keagamaan' && (rowActivity === 'Dhuha' || row.innerText.includes('Dhuha')); 
+                    else if (mode === 'Dhuhur') match = rowType === 'Keagamaan' && (rowActivity === 'Dhuhur' || row.innerText.includes('Dhuhur')); 
                     else if (mode === 'Ekstrakurikuler') match = rowType === 'Extracurricular';
 
                     row.classList.toggle('hidden-row', !match);
@@ -707,26 +732,24 @@
             }
 
             const processAttendanceData = async (studentId) => {
-                if (state.isProcessing) return;
-                if (state.processedQr.has(studentId)) return; 
+                if (state.isProcessing) return false;
+                if (state.processedQr.has(studentId)) return false; 
 
                 if (state.mode === 'Ekstrakurikuler' && !state.extraId) {
                     playBeep('warning');
                     Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-xl border border-slate-100 shadow-xl' } });
-                    return;
+                    return false;
                 }
 
                 state.isProcessing = true;
                 state.processedQr.add(studentId);
                 dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-elevate-accent"></i> Memproses...`;
 
+                let isSuccess = false;
+
                 try {
-                    let finalType = state.mode;
-                    if (state.mode === 'Harian') {
-                        const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-                        const switchMin = toMinutes(CONFIG.schedule.start_out || '12:00');
-                        finalType = nowMin < switchMin ? 'Masuk' : 'Pulang';
-                    }
+                    // Kirim mode terpilih, penentuan Masuk/Pulang dilakukan di server mengacu pada waktu lokal WIB
+                    const finalType = state.mode;
 
                     const res = await fetch(CONFIG.routes.process, {
                         method: 'POST',
@@ -744,6 +767,7 @@
 
                     if (res.ok) {
                         handleSuccess(data, finalType);
+                        isSuccess = true;
                     } else {
                         let errorMsg = data.message || 'Error Server';
                         if (data.errors) {
@@ -760,6 +784,8 @@
                         setMode(state.mode, !state.manualOverride); 
                     }, 2000);
                 }
+
+                return isSuccess;
             };
 
             const onScanSuccess = async (decodedText) => {
@@ -788,12 +814,16 @@
                         input: 'rounded-xl border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent text-center text-lg font-mono font-black w-4/5 mx-auto py-3'
                     },
                     buttonsStyling: false,
-                    preConfirm: (inputValue) => {
-                        if (!inputValue) {
-                            Swal.showValidationMessage('ID tidak boleh kosong!');
+                    preConfirm: async (inputValue) => {
+                        if (!inputValue || !inputValue.trim()) {
+                            Swal.showValidationMessage('ID atau NISN tidak boleh kosong!');
                             return false;
                         }
-                        return processAttendanceData(inputValue);
+                        const ok = await processAttendanceData(inputValue.trim());
+                        if (!ok) {
+                            return false;
+                        }
+                        return true;
                     },
                     allowOutsideClick: () => !Swal.isLoading()
                 });
@@ -815,7 +845,7 @@
 
                 if (data.stats) {
                     dom.statTaken.innerText = data.stats.taken;
-                    dom.statRemaining.innerText = {{ $totalTarget }} - data.stats.taken;
+                    dom.statRemaining.innerText = Math.max(0, {{ $totalTarget }} - data.stats.taken);
                 }
 
                 if (data.scan) addTableRow(data.scan);
@@ -824,6 +854,9 @@
             function handleError(msg) {
                 playBeep('error');
                 triggerOverlay('error');
+                if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+                    Swal.showValidationMessage(msg);
+                }
                 dom.scanResult.innerHTML = `<span class="text-rose-600 flex items-center justify-center gap-2"><i class="ph-fill ph-x-circle"></i> ${msg}</span>`;
                 dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border bg-rose-50 border-rose-200 shadow-sm`;
                 dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
@@ -841,6 +874,7 @@
                 const row = document.createElement('tr');
                 row.className = 'new-row-entry border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors group';
                 row.dataset.typeRaw = scan.type_raw;
+                row.dataset.activity = scan.activity || '';
 
                 row.innerHTML = `
                     <td class="px-6 py-4 rounded-l-xl">
@@ -910,10 +944,12 @@
             
             window.switchCamera = () => {
                 initAudio();
+                if (!qrScanner) return;
+
                 currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
                 dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-elevate-accent"></i> Memutar Kamera...`;
 
-                qrScanner.stop().then(() => {
+                const startNewCamera = () => {
                     qrScanner.start(
                         { facingMode: currentFacingMode }, 
                         config, 
@@ -924,9 +960,24 @@
                         handleError('Gagal memuat kamera tujuan.');
                         console.warn(err);
                     });
-                }).catch(err => {
-                    console.error("Gagal menghentikan kamera saat ini:", err);
-                });
+                };
+
+                try {
+                    const isScanning = (typeof Html5QrcodeScannerState !== 'undefined')
+                        ? qrScanner.getState() === Html5QrcodeScannerState.SCANNING
+                        : true;
+
+                    if (isScanning) {
+                        qrScanner.stop().then(startNewCamera).catch(err => {
+                            console.warn("Gagal menghentikan kamera saat ini:", err);
+                            startNewCamera();
+                        });
+                    } else {
+                        startNewCamera();
+                    }
+                } catch (e) {
+                    startNewCamera();
+                }
             };
             
             checkAutoMode(new Date());
