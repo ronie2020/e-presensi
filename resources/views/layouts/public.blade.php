@@ -205,7 +205,7 @@
         @endif
     </main>
 
-    <!-- === FOOTER (ELEVATE NAVY) === -->
+    <!-- === FOOTER (ELEVATE NAVY DENGAN INDIKATOR 4 DOTS) === -->
     <footer class="bg-elevate-dark text-white pt-16 pb-8 border-t border-white/10 relative z-20 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -215,31 +215,46 @@
                              <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                              <i class="ph-bold ph-graduation-cap text-xl hidden"></i>
                         </div>
-                        <span class="text-xl font-bold tracking-tight text-white">SMPN 3 LAKBOK</span>
+                        <div class="flex flex-col">
+                            <span class="text-xl font-bold tracking-tight text-white leading-tight">SMPN 3 LAKBOK</span>
+                            <span class="text-[10px] font-bold text-elevate-accent uppercase tracking-widest">Sistem Informasi Terpadu</span>
+                        </div>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">
-                        Platform layanan pendidikan digital terintegrasi untuk mendukung kegiatan akademik dan pembentukan karakter siswa.
+                        Platform layanan pendidikan digital terintegrasi untuk mendukung kegiatan akademik, presensi GPS, modul belajar LMS, dan pembentukan karakter siswa.
                     </p>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Akses Cepat</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="{{ url('/') }}" class="hover:text-elevate-accent transition-colors">Beranda</a></li>
-                        <li><a href="{{ route('portal.index') }}" class="hover:text-elevate-accent transition-colors">Portal Siswa</a></li>
-                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-elevate-accent transition-colors">E-Library</a></li>
+                        <li><a href="{{ url('/') }}" class="hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-elevate-accent text-xs"></i> Beranda</a></li>
+                        <li><a href="{{ route('student.login.learning') }}" class="hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-books text-elevate-accent text-xs"></i> Ruang Belajar (LMS)</a></li>
+                        <li><a href="{{ route('student.login.cbt') }}" class="hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-monitor-play text-sky-400 text-xs"></i> Ujian CBT</a></li>
+                        <li><a href="{{ route('portal.index') }}" class="hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-elevate-accent text-xs"></i> Portal Siswa</a></li>
+                        <li><a href="{{ route('login') }}" class="hover:text-elevate-accent transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-elevate-accent text-xs"></i> Masuk Akun</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="text-white font-bold mb-6 text-lg">Kontak</h4>
+                    <h4 class="text-white font-bold mb-6 text-lg">Kontak &amp; Alamat</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
+                        <li class="flex items-start gap-3"><i class="ph-fill ph-map-pin text-elevate-accent shrink-0 mt-1"></i> <span>Sidaharja Kec. Lakbok, Ciamis 46385</span></li>
                         <li class="flex items-center gap-3"><i class="ph-fill ph-phone text-elevate-accent"></i> +62 85135961994</li>
                         <li class="flex items-center gap-3"><i class="ph-fill ph-envelope text-elevate-accent"></i> admin@smpn3lakbok.sch.id</li>
                     </ul>
                 </div>
             </div>
-            <div class="text-center pt-8 border-t border-white/10">
-                <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Unggul & Berkarakter. All rights reserved.
+
+            <!-- 4 DOTS INDICATOR & COPYRIGHT (Persis Mockup Lampiran) -->
+            <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-6 h-2 rounded-full bg-elevate-accent shadow-[0_0_10px_rgba(86,187,241,0.7)]"></span>
+                    <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                    <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                    <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                </div>
+
+                <p class="text-slate-400 text-xs font-medium">
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok &bull; Terakreditasi A &bull; All rights reserved.
                 </p>
             </div>
         </div>

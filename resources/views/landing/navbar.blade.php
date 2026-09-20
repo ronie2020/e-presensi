@@ -3,20 +3,8 @@
         searchOpen: false,
         mobileMenuOpen: false,
         scrolled: window.scrollY > 20,
-        isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
-        toggleTheme() {
-            this.isDark = !this.isDark;
-            if (this.isDark) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            }
-        }
     }"
     x-init="
-        if(isDark) document.documentElement.classList.add('dark');
         window.addEventListener('scroll', () => {
             scrolled = window.scrollY > 20;
         }, { passive: true });
@@ -35,87 +23,78 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Floating Pill Style on Scroll -->
         <div class="flex justify-between items-center transition-all duration-500"
-             :class="{ 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-white/80 dark:border-slate-800 shadow-xl shadow-elevate-dark/5 rounded-[2.5rem] px-4 md:px-6 py-3': scrolled, 'px-2 py-2': !scrolled }">
+             :class="{ 'bg-white/5 backdrop-blur-[32px] border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] rounded-[2.5rem] px-4 md:px-6 py-3': scrolled, 'px-2 py-2': !scrolled }">
             
             <!-- Logo Brand -->
             <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group z-50">
-                <div class="relative w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl flex items-center justify-center text-elevate-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-105 group-hover:rotate-3 transition-transform overflow-hidden">
+                <div class="relative w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-xl md:rounded-2xl flex items-center justify-center text-elevate-accent shadow-sm border border-white/20 group-hover:scale-105 group-hover:rotate-3 transition-transform overflow-hidden backdrop-blur-md">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-7 h-7 md:w-8 md:h-8 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                     <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                 </div>
                 
                 <div class="flex flex-col leading-tight">
-                    <span class="font-black text-elevate-dark dark:text-white text-base md:text-lg tracking-tight group-hover:text-elevate-primary dark:group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
+                    <span class="font-black text-white text-base md:text-lg tracking-tight group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
                     <div class="flex items-center gap-1.5">
                         <span class="font-bold text-elevate-accent uppercase tracking-widest text-[9px] md:text-[10px]">Berjaya</span>
-                        <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 hidden sm:block"></span>
-                        <span class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">Unggul & Berkarakter</span>
+                        <span class="w-1 h-1 rounded-full bg-white/30 hidden sm:block"></span>
+                        <span class="text-[8px] font-bold text-slate-300 uppercase tracking-widest hidden sm:block">Unggul & Berkarakter</span>
                     </div>
                 </div>
             </a>
 
             <!-- Desktop Menu -->
-            <div class="hidden lg:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md px-2 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/50 shadow-inner">
-                <!-- Aktif/tidaknya sekarang mengikuti activeSection (scrollspy) dari welcome.blade.php, bukan statis -->
-                <a href="#home" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Beranda</a>
-                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Profil</a>
-                <a href="#layanan" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Layanan</a>
-                <!-- FIX: sebelumnya href="#galeri" (id ini tidak ada di halaman); disamakan dgn scrollspy & menu mobile yg sama2 pakai #kegiatan -->
-                <a href="#kegiatan" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Galeri</a>
-                <!-- FIX: Prestasi & Kontak ada di menu mobile tapi hilang di desktop -->
-                <a href="#prestasi" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'prestasi' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Prestasi</a>
-                <a href="#kontak" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kontak' ? 'bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm'">Kontak</a>
+            <div class="hidden lg:flex items-center gap-1 bg-white/5 backdrop-blur-md px-2 py-1.5 rounded-full border border-white/10 shadow-inner">
+                <a href="#home" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Beranda</a>
+                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Profil</a>
+                <a href="#layanan" class="px-5 py-2 rounded-full text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">Layanan</a>
+                <a href="#kegiatan" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Galeri</a>
+                <a href="#prestasi" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'prestasi' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Prestasi</a>
+                <a href="#kontak" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kontak' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Kontak</a>
             </div>                    
 
             <!-- Right Actions (Desktop) -->
             <div class="hidden md:flex items-center gap-4">
                 
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="px-6 py-2.5 rounded-full bg-elevate-accent hover:bg-elevate-accent/80 text-elevate-dark text-xs font-bold shadow-lg shadow-elevate-accent/20 transition-all flex items-center gap-2 group">
+                    <a href="{{ route('students.learning.index') }}" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-elevate-accent to-elevate-primary hover:to-elevate-accent text-white text-xs font-bold shadow-[0_0_20px_rgba(86,187,241,0.4)] transition-all flex items-center gap-2 group border border-elevate-accent/30">
                         <span>Dashboard Siswa</span>
                         <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </a>
                 @else
                     <div class="flex items-center gap-3 mr-2">
-                        <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-elevate-primary dark:hover:text-elevate-accent transition flex items-center gap-1.5">
+                        <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
                             <i class="ph-bold ph-books text-sm"></i> Katalog
                         </a>
-                        <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-elevate-primary dark:hover:text-elevate-accent transition flex items-center gap-1.5">
+                        <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
                             <i class="ph-bold ph-student text-sm"></i> PPDB
                         </a> 
                     </div>
                     
                     <!-- Tombol Masuk Terpadu (Guru & Siswa) -->
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-elevate-dark dark:bg-elevate-primary text-white text-xs font-black hover:bg-elevate-primary dark:hover:bg-elevate-accent dark:hover:text-elevate-dark transition-all shadow-lg shadow-elevate-dark/20 flex items-center gap-1.5">
-                            <i class="ph-bold ph-sign-in"></i> Masuk / Login
+                        <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-black hover:bg-white/20 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-1.5">
+                            <i class="ph-bold ph-sign-in text-elevate-accent"></i> Masuk / Login
                         </a>
                     </div>
                 @endif
 
                 <!-- Divider -->
-                <div class="h-6 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>                  
+                <div class="h-6 w-px bg-white/20 mx-1"></div>                  
                     
-                <!-- Tools (Search & Dark Mode) -->
+                <!-- Tools (Search) -->
                 <div class="flex items-center gap-1.5">
-                    <button @click="searchOpen = true" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-elevate-soft dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent transition-all focus:outline-none" title="Pencarian Global">
+                    <button @click="searchOpen = true" class="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center shadow-sm border border-white/20 hover:bg-white/20 transition-all focus:outline-none backdrop-blur-sm" title="Pencarian Global">
                         <i class="ph-bold ph-magnifying-glass text-lg"></i>
-                    </button>
-                    <button @click="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-elevate-soft dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent transition-all focus:outline-none" title="Mode Gelap / Terang">
-                        <i class="ph-bold text-lg" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Menu Button & Tools -->
             <div class="flex md:hidden items-center gap-1.5 z-50">
-                <button @click="searchOpen = true" class="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800/80 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 backdrop-blur-sm focus:outline-none">
+                <button @click="searchOpen = true" class="w-9 h-9 rounded-xl bg-white/10 text-white flex items-center justify-center shadow-sm border border-white/20 backdrop-blur-sm focus:outline-none hover:bg-white/20">
                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                 </button>
-                <button @click="toggleTheme()" class="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800/80 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 backdrop-blur-sm focus:outline-none">
-                    <i class="ph-bold text-lg" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
-                </button>
-                <button @click="mobileMenuOpen = !mobileMenuOpen" :aria-expanded="mobileMenuOpen.toString()" aria-label="Buka menu navigasi" class="w-9 h-9 rounded-xl bg-elevate-dark text-white flex items-center justify-center shadow-md focus:outline-none ml-1">
+                <button @click="mobileMenuOpen = !mobileMenuOpen" :aria-expanded="mobileMenuOpen.toString()" aria-label="Buka menu navigasi" class="w-9 h-9 rounded-xl bg-gradient-to-r from-elevate-accent to-elevate-primary text-white flex items-center justify-center shadow-[0_0_15px_rgba(86,187,241,0.4)] focus:outline-none ml-1">
                     <i class="ph-bold text-xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                 </button>
             </div>

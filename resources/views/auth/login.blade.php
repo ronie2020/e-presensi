@@ -4,47 +4,52 @@
     {{-- TAB SWITCHER: Guru / Staff  vs  Siswa                        --}}
     {{-- State dikelola Alpine.js: activeTab = 'guru' | 'siswa'       --}}
     {{-- ============================================================ --}}
-    <div x-data="{ activeTab: '{{ $errors->has('student_id') ? 'siswa' : 'guru' }}' }">
+    <div x-data="{ activeTab: '{{ $errors->has('student_id') ? 'siswa' : 'guru' }}' }" class="relative z-10 w-full max-w-sm mx-auto">
 
         {{-- Session Status (Guru) --}}
         <x-auth-session-status
-            class="mb-4 bg-emerald-50 text-emerald-600 px-4 py-3 rounded-xl text-sm font-medium border border-emerald-100 flex items-center gap-2"
+            class="mb-6 bg-emerald-500/20 text-emerald-300 px-5 py-4 rounded-2xl text-sm font-bold border border-emerald-500/30 shadow-lg flex items-center gap-3 transform transition-all duration-300"
             :status="session('status')" />
 
         {{-- Error session dari login siswa --}}
         @if (session('error'))
-            <div class="mb-4 bg-rose-50 text-rose-600 px-4 py-3 rounded-xl text-sm font-medium border border-rose-100 flex items-center gap-2">
-                <i class="ph-fill ph-warning-circle text-base"></i>
+            <div class="mb-6 bg-rose-500/20 text-rose-300 px-5 py-4 rounded-2xl text-sm font-bold border border-rose-500/30 shadow-lg flex items-center gap-3 transform transition-all duration-300">
+                <i class="ph-fill ph-warning-circle text-xl animate-pulse"></i>
                 {{ session('error') }}
             </div>
         @endif
 
-        {{-- ===== TAB PILLS ===== --}}
-        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1.5 rounded-2xl mb-6">
+        {{-- ===== PREMIUM TAB PILLS ===== --}}
+        <div class="relative p-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl mb-8 shadow-inner overflow-hidden">
+            {{-- Animated Background Slider --}}
+            <div class="absolute inset-y-1.5 w-[calc(50%-0.375rem)] bg-gradient-to-r from-elevate-accent to-elevate-primary rounded-xl shadow-[0_0_15px_rgba(86,187,241,0.3)] transition-transform duration-500 ease-out z-0 border border-elevate-accent/30"
+                 :class="activeTab === 'siswa' ? 'translate-x-full left-auto right-1.5' : 'translate-x-0 left-1.5'"></div>
 
-            {{-- Tab: Guru / Staff --}}
-            <button
-                type="button"
-                @click="activeTab = 'guru'"
-                :class="activeTab === 'guru'
-                    ? 'bg-elevate-dark text-white shadow-md shadow-elevate-dark/30'
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-white/60'"
-                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-extrabold transition-all duration-250 cursor-pointer">
-                <i class="ph-duotone ph-chalkboard-teacher text-base"></i>
-                Guru / Staff
-            </button>
+            <div class="relative z-10 grid grid-cols-2 gap-1">
+                {{-- Tab: Guru / Staff --}}
+                <button
+                    type="button"
+                    @click="activeTab = 'guru'"
+                    :class="activeTab === 'guru'
+                        ? 'text-white font-black'
+                        : 'text-slate-400 hover:text-white font-bold'"
+                    class="flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-[13px] transition-all duration-300 cursor-pointer tracking-wide">
+                    <i class="ph-bold ph-chalkboard-teacher text-lg transition-transform duration-300" :class="activeTab === 'guru' ? 'scale-110 text-white' : ''"></i>
+                    Guru / Staff
+                </button>
 
-            {{-- Tab: Siswa --}}
-            <button
-                type="button"
-                @click="activeTab = 'siswa'"
-                :class="activeTab === 'siswa'
-                    ? 'bg-gradient-to-r from-elevate-primary to-elevate-accent text-white shadow-md shadow-elevate-primary/30'
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-white/60'"
-                class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-extrabold transition-all duration-250 cursor-pointer">
-                <i class="ph-duotone ph-student text-base"></i>
-                Siswa
-            </button>
+                {{-- Tab: Siswa --}}
+                <button
+                    type="button"
+                    @click="activeTab = 'siswa'"
+                    :class="activeTab === 'siswa'
+                        ? 'text-white font-black'
+                        : 'text-slate-400 hover:text-white font-bold'"
+                    class="flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-[13px] transition-all duration-300 cursor-pointer tracking-wide">
+                    <i class="ph-bold ph-student text-lg transition-transform duration-300" :class="activeTab === 'siswa' ? 'scale-110 text-white' : ''"></i>
+                    Siswa
+                </button>
+            </div>
         </div>
 
 
@@ -53,26 +58,29 @@
         {{-- ================================================================ --}}
         <form
             x-show="activeTab === 'guru'"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:enter="transition ease-out duration-300 delay-100"
+            x-transition:enter-start="opacity-0 translate-x-4"
+            x-transition:enter-end="opacity-100 translate-x-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 absolute w-full top-0"
+            x-transition:leave-end="opacity-0 -translate-x-4 absolute w-full top-0"
             method="POST"
             action="{{ route('login') }}"
-            class="space-y-4"
+            class="space-y-5 relative"
             x-data="{ isLoggingIn: false }"
             @submit="isLoggingIn = true">
             @csrf
 
             {{-- Email --}}
-            <div class="space-y-1">
-                <label for="email" class="text-xs font-extrabold text-slate-600 ml-0.5 uppercase tracking-wide">Email / NIP</label>
+            <div class="space-y-1.5">
+                <label for="email" class="text-[11px] font-black text-slate-300 ml-1 uppercase tracking-widest">Email / NIP</label>
                 <div class="relative group">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 group-focus-within:text-elevate-primary transition-colors">
-                        <i class="ph-duotone ph-envelope-simple text-lg"></i>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors duration-300 group-focus-within:text-elevate-accent text-slate-400">
+                        <i class="ph-duotone ph-envelope-simple text-xl"></i>
                     </div>
                     <x-text-input
                         id="email"
-                        class="block w-full rounded-xl border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 text-sm focus:border-elevate-primary focus:bg-white focus:ring-elevate-primary transition-all shadow-sm"
+                        class="block w-full rounded-2xl border-white/15 bg-white/5 py-3.5 pl-12 pr-4 text-sm font-semibold text-white placeholder-slate-400 backdrop-blur-md focus:border-elevate-accent focus:bg-white/10 focus:ring-2 focus:ring-elevate-accent/20 transition-all duration-300 shadow-inner"
                         type="email"
                         name="email"
                         :value="old('email')"
@@ -80,62 +88,66 @@
                         autocomplete="username"
                         placeholder="nama@sekolah.sch.id" />
                 </div>
-                <x-input-error :messages="$errors->get('email')" class="mt-1 text-xs text-rose-500 font-semibold ml-0.5" />
+                <x-input-error :messages="$errors->get('email')" class="mt-1.5 text-xs text-rose-400 font-bold ml-1" />
             </div>
 
             {{-- Password --}}
-            <div class="space-y-1">
-                <label for="password" class="text-xs font-extrabold text-slate-600 ml-0.5 uppercase tracking-wide">Password</label>
+            <div class="space-y-1.5">
+                <label for="password" class="text-[11px] font-black text-slate-300 ml-1 uppercase tracking-widest">Password</label>
                 <div class="relative group" x-data="{ show: false }">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 group-focus-within:text-elevate-primary transition-colors">
-                        <i class="ph-duotone ph-lock-key text-lg"></i>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors duration-300 group-focus-within:text-elevate-accent text-slate-400">
+                        <i class="ph-duotone ph-lock-key text-xl"></i>
                     </div>
                     <x-text-input
                         id="password"
-                        class="block w-full rounded-xl border-slate-200 bg-slate-50/50 py-3 pl-10 pr-11 text-sm focus:border-elevate-primary focus:bg-white focus:ring-elevate-primary transition-all shadow-sm"
+                        class="block w-full rounded-2xl border-white/15 bg-white/5 py-3.5 pl-12 pr-12 text-sm font-semibold text-white placeholder-slate-400 backdrop-blur-md focus:border-elevate-accent focus:bg-white/10 focus:ring-2 focus:ring-elevate-accent/20 transition-all duration-300 shadow-inner"
                         ::type="show ? 'text' : 'password'"
                         name="password"
                         required
                         autocomplete="current-password"
                         placeholder="••••••••" />
                     <button type="button" @click="show = !show"
-                        class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-elevate-accent transition-colors focus:outline-none cursor-pointer"
                         tabindex="-1">
-                        <i class="ph-bold text-sm" :class="show ? 'ph-eye' : 'ph-eye-slash'"></i>
+                        <i class="ph-bold text-lg transition-transform duration-200 hover:scale-110" :class="show ? 'ph-eye' : 'ph-eye-slash'"></i>
                     </button>
                 </div>
-                <x-input-error :messages="$errors->get('password')" class="mt-1 text-xs text-rose-500 font-semibold ml-0.5" />
+                <x-input-error :messages="$errors->get('password')" class="mt-1.5 text-xs text-rose-400 font-bold ml-1" />
             </div>
 
             {{-- Remember Me & Lupa Password --}}
-            <div class="flex items-center justify-between pt-0.5">
+            <div class="flex items-center justify-between pt-1">
                 <label for="remember_me" class="inline-flex items-center cursor-pointer group select-none">
-                    <input id="remember_me" type="checkbox" class="rounded border-slate-300 text-elevate-primary shadow-sm focus:ring-elevate-primary cursor-pointer" name="remember">
-                    <span class="ml-2 text-xs font-bold text-slate-500 group-hover:text-elevate-primary transition-colors">Ingat Saya</span>
+                    <div class="relative flex items-center">
+                        <input id="remember_me" type="checkbox" class="peer h-5 w-5 rounded-md border-white/20 bg-white/10 text-elevate-primary shadow-sm focus:ring-elevate-accent/30 transition-all cursor-pointer" name="remember">
+                    </div>
+                    <span class="ml-2.5 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">Ingat Saya</span>
                 </label>
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-xs font-bold text-elevate-primary hover:text-elevate-dark transition-colors hover:underline">
+                    <a href="{{ route('password.request') }}" class="text-xs font-bold text-elevate-accent hover:text-white transition-colors hover:underline underline-offset-4">
                         Lupa Password?
                     </a>
                 @endif
             </div>
 
             {{-- Tombol Submit --}}
-            <button
-                type="submit"
-                :disabled="isLoggingIn"
-                :class="{ 'opacity-70 cursor-wait': isLoggingIn, 'hover:shadow-lg hover:shadow-elevate-dark/25 hover:-translate-y-px active:scale-[0.98]': !isLoggingIn }"
-                class="group relative flex w-full justify-center rounded-xl bg-elevate-dark py-3.5 px-4 text-sm font-extrabold text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-elevate-primary focus:ring-offset-2 overflow-hidden transform">
-
-                <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2">
-                    Masuk Sekarang
-                    <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </span>
-                <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2" style="display:none">
-                    <i class="ph-bold ph-spinner animate-spin text-base"></i> Memverifikasi...
-                </span>
-                <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
-            </button>
+            <div class="pt-2">
+                <button
+                    type="submit"
+                    :disabled="isLoggingIn"
+                    :class="{ 'opacity-70 cursor-wait': isLoggingIn, 'hover:shadow-[0_0_25px_rgba(86,187,241,0.5)] hover:-translate-y-0.5 active:scale-[0.98]': !isLoggingIn }"
+                    class="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-elevate-accent to-elevate-primary py-4 px-4 text-[14px] font-black text-white transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-elevate-accent/30 overflow-hidden transform shadow-[0_0_20px_rgba(86,187,241,0.3)] border border-elevate-accent/30">
+                    
+                    <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2.5 tracking-wide">
+                        Masuk Sekarang
+                        <i class="ph-bold ph-arrow-right text-lg group-hover:translate-x-1.5 transition-transform duration-300"></i>
+                    </span>
+                    <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2.5 tracking-wide" style="display:none">
+                        <i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengautentikasi...
+                    </span>
+                    <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
+                </button>
+            </div>
         </form>
 
 
@@ -144,31 +156,36 @@
         {{-- ================================================================ --}}
         <form
             x-show="activeTab === 'siswa'"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:enter="transition ease-out duration-300 delay-100"
+            x-transition:enter-start="opacity-0 -translate-x-4"
+            x-transition:enter-end="opacity-100 translate-x-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 absolute w-full top-0"
+            x-transition:leave-end="opacity-0 translate-x-4 absolute w-full top-0"
             method="POST"
             action="{{ route('student.login.post') }}"
-            class="space-y-4"
+            class="space-y-5 relative"
             x-data="{ isLoggingIn: false }"
             @submit="isLoggingIn = true"
             style="display:none">
             @csrf
 
             {{-- Info Helper --}}
-            <div class="flex items-start gap-2.5 bg-elevate-soft border border-elevate-accent/30 rounded-xl px-4 py-3">
-                <i class="ph-duotone ph-info text-elevate-primary text-lg shrink-0 mt-0.5"></i>
-                <p class="text-xs font-semibold text-elevate-primary/80 leading-relaxed">
-                    Masukkan <strong>NISN</strong> atau <strong>NIS</strong> kamu. Tidak perlu password — cukup nomor identitasmu.
+            <div class="flex items-start gap-3 bg-elevate-accent/10 backdrop-blur-md border border-elevate-accent/20 rounded-2xl px-5 py-4 shadow-sm">
+                <div class="p-1.5 bg-elevate-accent/20 text-elevate-accent rounded-lg shrink-0">
+                    <i class="ph-bold ph-info text-lg"></i>
+                </div>
+                <p class="text-xs font-semibold text-slate-300 leading-relaxed pt-0.5">
+                    Masukkan <span class="text-white font-bold bg-white/10 px-1.5 py-0.5 rounded-md">NISN</span> atau <span class="text-white font-bold bg-white/10 px-1.5 py-0.5 rounded-md">NIS</span> kamu. Tidak perlu password untuk masuk.
                 </p>
             </div>
 
             {{-- Input NISN --}}
-            <div class="space-y-1">
-                <label for="student_id" class="text-xs font-extrabold text-slate-600 ml-0.5 uppercase tracking-wide">NISN / NIS</label>
+            <div class="space-y-1.5">
+                <label for="student_id" class="text-[11px] font-black text-slate-300 ml-1 uppercase tracking-widest">NISN / NIS</label>
                 <div class="relative group">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 group-focus-within:text-elevate-primary transition-colors">
-                        <i class="ph-duotone ph-identification-card text-lg"></i>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors duration-300 group-focus-within:text-elevate-accent text-slate-400">
+                        <i class="ph-duotone ph-identification-card text-xl"></i>
                     </div>
                     <input
                         id="student_id"
@@ -178,31 +195,33 @@
                         autofocus
                         value="{{ old('student_id') }}"
                         placeholder="Contoh: 0056789012"
-                        class="block w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 text-sm font-bold tracking-wide focus:border-elevate-primary focus:bg-white focus:ring-2 focus:ring-elevate-primary/20 transition-all shadow-sm outline-none"
-                        style="font-size:0.9rem; letter-spacing:0.04em;" />
+                        class="block w-full rounded-2xl border-white/15 bg-white/5 py-3.5 pl-12 pr-4 text-sm font-bold text-white placeholder-slate-400 backdrop-blur-md focus:border-elevate-accent focus:bg-white/10 focus:ring-2 focus:ring-elevate-accent/20 transition-all duration-300 shadow-inner outline-none"
+                        style="letter-spacing:0.05em;" />
                 </div>
-                <x-input-error :messages="$errors->get('student_id')" class="mt-1 text-xs text-rose-500 font-semibold ml-0.5" />
+                <x-input-error :messages="$errors->get('student_id')" class="mt-1.5 text-xs text-rose-400 font-bold ml-1" />
             </div>
 
-            {{-- Spacer agar tinggi form sama dengan tab Guru --}}
-            <div class="pt-[3.35rem]"></div>
+            {{-- Spacer agar tinggi form mirip --}}
+            <div class="pt-[2rem]"></div>
 
             {{-- Tombol Submit --}}
-            <button
-                type="submit"
-                :disabled="isLoggingIn"
-                :class="{ 'opacity-70 cursor-wait': isLoggingIn, 'hover:shadow-lg hover:shadow-elevate-primary/25 hover:-translate-y-px active:scale-[0.98]': !isLoggingIn }"
-                class="group relative flex w-full justify-center rounded-xl bg-gradient-to-r from-elevate-primary to-elevate-accent py-3.5 px-4 text-sm font-extrabold text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-elevate-primary focus:ring-offset-2 overflow-hidden transform">
-
-                <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2">
-                    Masuk Sekarang
-                    <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </span>
-                <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2" style="display:none">
-                    <i class="ph-bold ph-spinner animate-spin text-base"></i> Memverifikasi...
-                </span>
-                <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
-            </button>
+            <div class="pt-2">
+                <button
+                    type="submit"
+                    :disabled="isLoggingIn"
+                    :class="{ 'opacity-70 cursor-wait': isLoggingIn, 'hover:shadow-[0_0_25px_rgba(86,187,241,0.5)] hover:-translate-y-0.5 active:scale-[0.98]': !isLoggingIn }"
+                    class="group relative flex w-full justify-center rounded-2xl bg-gradient-to-r from-elevate-accent to-elevate-primary py-4 px-4 text-[14px] font-black text-white transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-elevate-accent/30 overflow-hidden transform shadow-[0_0_20px_rgba(86,187,241,0.3)] border border-elevate-accent/30">
+                    
+                    <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2.5 tracking-wide">
+                        Masuk Sebagai Siswa
+                        <i class="ph-bold ph-arrow-right text-lg group-hover:translate-x-1.5 transition-transform duration-300"></i>
+                    </span>
+                    <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2.5 tracking-wide" style="display:none">
+                        <i class="ph-bold ph-spinner animate-spin text-lg"></i> Mengautentikasi...
+                    </span>
+                    <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0"></div>
+                </button>
+            </div>
         </form>
 
     </div>{{-- end x-data --}}

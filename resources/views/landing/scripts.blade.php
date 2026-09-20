@@ -6,28 +6,25 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Chart Default Styling
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-        Chart.defaults.color = '#64748b'; // Teks disesuaikan ke abu-abu medium agar terbaca di background putih
+        Chart.defaults.color = '#94a3b8';
         
-        // WARNA ELEVATE DISINKRONKAN DENGAN tailwind.config.js
-        const elevateAccent = '#56bbf1'; // Hex elevate-accent
-        const elevatePrimary = '#0d52a1'; // Hex elevate-primary
-        const elevateDark = '#2c3f61'; // Hex elevate-dark
-        
-        // RGB referensi untuk gradient Elevate Accent (#56bbf1)
+        // WARNA THEME ELEVATE (tailwind.config.js)
+        const elevateAccent = '#56bbf1';      // Biru Muda / Highlight (#56bbf1)
+        const elevatePrimary = '#0d52a1';     // Biru Pekat / Primary (#0d52a1)
+        const elevateDark = '#2c3f61';        // Biru Navy (#2c3f61)
+        const elevatePeach = '#f9a282';       // Peach Highlight (#f9a282)
         const elevateAccentRgb = '86, 187, 241';
+        const elevatePeachRgb = '249, 162, 130';
         
         // --- 1. CHART ATTENDANCE (HERO SECTION) ---
         const ctx = document.getElementById('publicWeeklyChart');
         if(ctx) {
             const chartData = @json($barChartData ?? ['labels'=>[],'datasets'=>[]]); 
             
-            // Menimpa warna dari backend (opsional) agar seragam dengan tema Elevate
             if(chartData.datasets && chartData.datasets.length > 0) {
                 chartData.datasets.forEach((ds, index) => { 
                     if(index === 0) ds.backgroundColor = elevateAccent; 
                     if(index === 1) ds.backgroundColor = elevatePrimary; 
-                    // FIX: borderRadius & maxBarThickness adalah properti per-dataset di Chart.js,
-                    // bukan top-level "options" — sebelumnya diletakkan di options sehingga tidak pernah berpengaruh
                     ds.borderRadius = 6;
                     ds.maxBarThickness = 24;
                 });
@@ -45,31 +42,39 @@
                     plugins: { 
                         legend: { 
                             position: 'bottom',
-                            // PERBAIKAN 2: Perkecil indikator warna legend agar tidak memakan tempat ke bawah
                             labels: {
                                 boxWidth: 10,
                                 padding: 15,
+                                color: '#cbd5e1',
                                 font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" }
                             }
-                        } 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(2, 17, 36, 0.95)',
+                            borderColor: 'rgba(86, 187, 241, 0.3)',
+                            borderWidth: 1,
+                            titleColor: '#fff',
+                            bodyColor: '#e2e8f0',
+                            padding: 10,
+                            cornerRadius: 8
+                        }
                     },
                     scales: {
                         x: { 
                             grid: { display: false }, 
                             ticks: { 
-                                color: '#64748b', 
+                                color: '#94a3b8', 
                                 font: { weight: '600', size: 10 },
-                                // PERBAIKAN 3: Cegah teks tanggal bertumpuk
                                 autoSkip: true,
-                                maxTicksLimit: 5, // Batasi jumlah label tanggal yang muncul di HP
-                                maxRotation: 0 // Pastikan teks tetap mendatar (tidak miring yang memakan tinggi)
+                                maxTicksLimit: 5,
+                                maxRotation: 0
                             } 
                         },
                         y: { 
-                            grid: { color: '#f1f5f9', borderDash: [4, 4] }, 
+                            grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [4, 4] }, 
                             border: { display: false }, 
                             ticks: { 
-                                color: '#64748b', 
+                                color: '#94a3b8', 
                                 font: { weight: '600', size: 10 } 
                             } 
                         }
@@ -89,16 +94,16 @@
                     datasets: [{
                         label: 'Kunjungan',
                         data: libData.data,
-                        borderColor: elevateAccent, // Menggunakan Elevate Accent
+                        borderColor: elevateAccent,
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.15)`); // Sinkron RGB Elevate
+                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.25)`);
                             gradient.addColorStop(1, `rgba(${elevateAccentRgb}, 0)`);
                             return gradient;
                         },
                         borderWidth: 3,
-                        pointBackgroundColor: '#ffffff',
+                        pointBackgroundColor: '#021124',
                         pointBorderColor: elevateAccent,
                         pointBorderWidth: 2,
                         pointRadius: 4,
@@ -113,9 +118,11 @@
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: elevatePrimary,
+                            backgroundColor: 'rgba(2, 17, 36, 0.95)',
+                            borderColor: 'rgba(86, 187, 241, 0.3)',
+                            borderWidth: 1,
                             titleColor: '#fff',
-                            bodyColor: '#fff',
+                            bodyColor: '#e2e8f0',
                             padding: 10,
                             cornerRadius: 8,
                             displayColors: false
@@ -125,12 +132,12 @@
                         y: { 
                             beginAtZero: true, 
                             border: { display: false }, 
-                            grid: { color: '#f1f5f9' },
-                            ticks: { stepSize: 1, color: '#64748b' }
+                            grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [4, 4] },
+                            ticks: { stepSize: 1, color: '#94a3b8' }
                         }, 
                         x: { 
-                            grid: { display: false },
-                            ticks: { color: '#64748b' }
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8' }
                         } 
                     }
                 }
@@ -147,48 +154,50 @@
                     datasets: [{
                         label: 'Siswa Melapor',
                         data: @json($habitData ?? []),
-                        borderColor: elevateAccent, // Menggunakan Elevate Accent
+                        borderColor: elevateAccent,
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.2)`); // Sinkron RGB Elevate
+                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.25)`);
                             gradient.addColorStop(1, `rgba(${elevateAccentRgb}, 0)`);
                             return gradient;
                         },
                         borderWidth: 4,
-                        pointBackgroundColor: '#ffffff',
+                        pointBackgroundColor: '#021124',
                         pointBorderColor: elevateAccent,
                         pointBorderWidth: 3,
                         pointRadius: 5,
                         pointHoverRadius: 8,
-                        fill: true,
+                        fill: true, 
                         tension: 0.4
                     }]
                 },
                 options: {
-                    responsive: true,
+                    responsive: true, 
                     maintainAspectRatio: false,
-                    plugins: {
+                    plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: elevateDark,
+                            backgroundColor: 'rgba(2, 17, 36, 0.95)',
+                            borderColor: 'rgba(86, 187, 241, 0.3)',
+                            borderWidth: 1,
                             titleColor: '#fff',
-                            bodyColor: '#fff',
+                            bodyColor: '#e2e8f0',
                             padding: 12,
                             cornerRadius: 12,
                             displayColors: false
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#e2e8f0', drawBorder: false },
-                            ticks: { color: '#64748b', font: { weight: 'bold' } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { weight: 'bold' } }
-                        }
+                    scales: { 
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [4, 4] },
+                            ticks: { color: '#94a3b8', font: { weight: 'bold' } }
+                        }, 
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#94a3b8', font: { weight: 'bold' } }
+                        } 
                     }
                 }
             });

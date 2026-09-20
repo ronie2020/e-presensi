@@ -11,7 +11,7 @@
         }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#2c3f61">
+    <meta name="theme-color" content="#021124">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sekolah.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo-sekolah.png') }}">
 
@@ -29,18 +29,18 @@
     <style>
         [x-cloak] { display: none !important; }
         
-        /* Style Preloader Elevate */
+        /* Style Preloader Glassmorphism */
         #preloader {
             position: fixed; inset: 0; z-index: 9999;
-            background: #2c3f61; /* elevate-dark */
+            background: #021124;
             display: flex; align-items: center; justify-content: center;
             transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
         }
         #preloader.hide-preloader { opacity: 0; visibility: hidden; }
         .loader {
             width: 48px; height: 48px;
-            border: 5px solid #e5eff5; /* elevate-soft */
-            border-bottom-color: #56bbf1; /* elevate-accent */
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-bottom-color: #06b6d4;
             border-radius: 50%;
             display: inline-block;
             box-sizing: border-box;
@@ -114,8 +114,8 @@
 
 </head>
 
-<!-- TEMA ELEVATE: Background terang (slate-50), text navy (elevate-dark), tanpa dark mode class -->
-<body class="antialiased text-elevate-dark bg-slate-50 overflow-x-hidden w-full selection:bg-elevate-accent selection:text-white" 
+<!-- TEMA ELEVATE PREMIUM GLASSMORPHISM: Background gelap dengan gambar sekolah fixed -->
+<body class="antialiased text-white bg-[#021124] overflow-x-hidden w-full selection:bg-elevate-accent selection:text-elevate-dark" 
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
@@ -131,22 +131,19 @@
             if (!hasSeen) {
                 setTimeout(() => {
                     this.infoPopupOpen = true;
-                    document.body.style.overflow = 'hidden'; 
-                }, 1000);
+                }, 1500);
             }
         @endif
     },
 
-          closeInfoPopup(dontShowAgain) {
-        this.infoPopupOpen = false;
-        document.body.style.overflow = ''; 
-        
-        if (dontShowAgain) {
+        closeInfoPopup(dontShowAgain = false) {
+            this.infoPopupOpen = false;
             @if($hasPopup)
+            if (dontShowAgain) {
                 localStorage.setItem('seen_{{ $popupId }}', 'true');
+            }
             @endif
-        }
-    },
+        },
 
     activeAnnouncement: null,
     scrolled: false,
@@ -187,6 +184,20 @@
     }
 ">
 
+<!-- GLOBAL FIXED BACKGROUND (Premium Glassmorphism Style) -->
+<div class="fixed inset-0 z-[-1] w-full h-full pointer-events-none">
+    {{-- Background Image --}}
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+    
+    {{-- Deep Gradient Overlay for Readability (Elevate dark & primary tint) --}}
+    <div class="absolute inset-0 bg-gradient-to-br from-[#021124]/95 via-[#0d52a1]/80 to-[#2c3f61]/70 mix-blend-multiply"></div>
+    
+    {{-- Floating Glowing Orbs for ambiance (Elevate brand colors) --}}
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-elevate-accent/15 rounded-full blur-[150px] pointer-events-none animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-elevate-primary/20 rounded-full blur-[150px] pointer-events-none animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute top-2/3 left-1/3 w-80 h-80 bg-elevate-peach/10 rounded-full blur-[140px] pointer-events-none animate-pulse" style="animation-delay: 4s;"></div>
+</div>
+
 <!-- PRELOADER (Elevate Navy) -->
 <div id="preloader">
     <div class="flex flex-col items-center gap-4">
@@ -198,25 +209,25 @@
 <!-- INFO POPUP MODAL (Elevate Style) -->
 @if($hasPopup)
 <div x-cloak x-show="infoPopupOpen" @keydown.escape.window="if(infoPopupOpen) closeInfoPopup(false)" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-elevate-dark/70 backdrop-blur-sm transition-opacity" @click="closeInfoPopup(false)"></div>
+    <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-[#021124]/80 backdrop-blur-md transition-opacity" @click="closeInfoPopup(false)"></div>
     <div class="flex min-h-full p-4 sm:p-6">
-        <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full {{ $hasPopupImage ? 'sm:max-w-2xl' : 'sm:max-w-xl' }} border border-slate-100">
-            <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 z-20 w-10 h-10 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
+        <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-[2.5rem] bg-white/10 backdrop-blur-2xl border border-white/20 text-left shadow-[0_15px_50px_rgba(0,0,0,0.5)] transition-all w-full {{ $hasPopupImage ? 'sm:max-w-2xl' : 'sm:max-w-xl' }}">
+            <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 z-20 w-10 h-10 bg-white/10 text-white/70 hover:text-rose-400 hover:bg-rose-500/20 transition-colors shadow-sm rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
             <div class="flex flex-col {{ $hasPopupImage ? 'md:flex-row' : '' }} w-full">
                 @if($hasPopupImage)
-                <div class="img-container md:w-5/12 h-56 sm:h-64 md:h-auto shrink-0 relative bg-elevate-dark/95 p-3 md:p-4 flex items-center justify-center overflow-hidden">
+                <div class="img-container md:w-5/12 h-56 sm:h-64 md:h-auto shrink-0 relative bg-black/30 p-3 md:p-4 flex items-center justify-center overflow-hidden">
                     <img src="{{ $popupImage }}" alt="{{ $popupTitle }}" class="max-w-full max-h-full object-contain rounded-2xl drop-shadow-lg" onerror="if(this.closest('.img-container')) this.closest('.img-container').style.display='none';">
                 </div>
                 @endif
-                <div class="{{ $hasPopupImage ? 'md:w-7/12' : 'w-full' }} p-6 md:p-8 flex flex-col justify-center bg-white relative">
+                <div class="{{ $hasPopupImage ? 'md:w-7/12' : 'w-full' }} p-6 md:p-8 flex flex-col justify-center bg-transparent relative">
                     <div class="mb-4">
-                        <span class="inline-flex items-center rounded-lg {{ $colorTheme['badge_bg'] }} px-3 py-1.5 text-[10px] font-black uppercase tracking-widest {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{$colorTheme['badge_ring'] }} mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> {{ $popupCategory }}</span>
-                        <h3 id="modal-title" class="text-2xl font-black text-elevate-dark leading-tight">{{ $popupTitle }}</h3>
+                        <span class="inline-flex items-center rounded-lg bg-elevate-accent/20 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-elevate-accent ring-1 ring-inset ring-elevate-accent/30 mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> {{ $popupCategory }}</span>
+                        <h3 id="modal-title" class="text-2xl font-black text-white leading-tight">{{ $popupTitle }}</h3>
                     </div>
-                   <div class="prose prose-sm text-slate-500 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2">{!! $popupMessage !!}</div>
+                   <div class="prose prose-sm text-slate-300 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2">{!! $popupMessage !!}</div>
                     <div class="flex flex-col gap-3 mt-auto">
-                        <button @click="closeInfoPopup(false)" class="w-full text-center justify-center items-center rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-3.5 text-xs font-black text-white shadow-lg shadow-elevate-primary/20 {{$colorTheme['btn_hover'] }} transition-all">SAYA MENGERTI</button>
-                        <button @click="closeInfoPopup(true)" class="text-xs font-bold text-slate-400 hover:text-elevate-peach transition-colors text-center py-2">Jangan tampilkan pengumuman ini lagi</button>
+                        <button @click="closeInfoPopup(false)" class="w-full text-center justify-center items-center rounded-xl bg-gradient-to-r from-elevate-accent to-elevate-primary px-5 py-3.5 text-xs font-black text-white shadow-[0_0_20px_rgba(86,187,241,0.3)] hover:shadow-[0_0_30px_rgba(86,187,241,0.5)] transition-all">SAYA MENGERTI</button>
+                        <button @click="closeInfoPopup(true)" class="text-xs font-bold text-slate-400 hover:text-elevate-accent transition-colors text-center py-2">Jangan tampilkan pengumuman ini lagi</button>
                     </div>
                 </div>
             </div>
@@ -256,25 +267,25 @@
     @include('landing.modals')
 
 <!-- VISITOR COUNTER -->
-<div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-xl p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
-    <div class="bg-elevate-accent/10 text-elevate-primary dark:text-elevate-accent p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-elevate-primary group-hover:text-white transition-colors duration-300">
+<div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-[#021124]/80 backdrop-blur-xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:border-elevate-accent/40 hover:shadow-[0_8px_32px_rgba(86,187,241,0.3)] transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
+    <div class="bg-elevate-accent/20 text-elevate-accent border border-elevate-accent/30 p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-elevate-accent group-hover:text-elevate-dark transition-colors duration-300">
         <i class="ph-fill ph-users text-sm sm:text-lg"></i>
     </div>
     
     <!-- Teks Detail (Hanya muncul di Desktop/Tablet) -->
     <div class="hidden sm:flex flex-col truncate">
-        <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-none mb-0.5">Pengunjung</span>
-        <span class="text-sm font-black text-elevate-dark dark:text-slate-200 leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Pengunjung</span>
+        <span class="text-sm font-black text-white leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
     </div>
     
     <!-- Angka saja (Muncul di Mobile HP) -->
     <div class="flex sm:hidden pr-2 shrink-0">
-        <span class="text-xs font-black text-elevate-dark dark:text-slate-200 leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
+        <span class="text-xs font-black text-white leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
     </div>
 </div>
 
 <!-- BACK TO TOP -->
-<button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-elevate-dark text-white w-12 h-12 rounded-2xl shadow-xl shadow-elevate-dark/20 flex items-center justify-center hover:bg-elevate-primary hover:-translate-y-1 transition-all duration-300 focus:outline-none border border-elevate-accent/30">
+<button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-gradient-to-r from-elevate-accent to-elevate-primary text-white w-12 h-12 rounded-2xl shadow-[0_0_20px_rgba(86,187,241,0.3)] flex items-center justify-center hover:shadow-[0_0_30px_rgba(86,187,241,0.5)] hover:-translate-y-1 transition-all duration-300 focus:outline-none border border-elevate-accent/40">
     <i class="ph-bold ph-arrow-up text-lg sm:text-xl"></i>
 </button>
 
