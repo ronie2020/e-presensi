@@ -88,55 +88,58 @@
                             </div>
                         </div>
 
-                       <form action="{{ route('reports.daily') }}" method="GET" class="flex flex-col xl:flex-row gap-3 w-full" @submit.prevent="submitFilter">
+                       <form action="{{ route('reports.daily') }}" method="GET" class="w-full flex flex-col gap-3" @submit.prevent="submitFilter">
                             <input type="hidden" name="report_type" x-model="reportType">
                             <input type="hidden" name="activeTab" x-model="activeTab">
                             
-                            {{-- Input Tanggal/Periode --}}
-                            <div class="flex-1 min-w-[180px]">
-                                <div x-show="reportType === 'daily'">
-                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
-                                           class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                            {{-- Row Input: Tanggal, Kelas, Pencarian --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                                {{-- Input Tanggal/Periode --}}
+                                <div>
+                                    <div x-show="reportType === 'daily'">
+                                        <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
+                                               class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                    </div>
+                                    <div x-show="reportType === 'weekly'" style="display: none;">
+                                        <input type="week" name="week" value="{{ request('week') }}" 
+                                               class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                    </div>
+                                    <div x-show="reportType === 'monthly'" style="display: none;">
+                                        <input type="month" name="month" value="{{ request('month') }}" 
+                                               class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                    </div>
                                 </div>
-                                <div x-show="reportType === 'weekly'" style="display: none;">
-                                    <input type="week" name="week" value="{{ request('week') }}" 
-                                           class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+
+                                {{-- Filter Kelas --}}
+                                <div>
+                                    <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach($allClasses ?? [] as $c)
+                                            <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>
+                                                {{ $c->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div x-show="reportType === 'monthly'" style="display: none;">
-                                    <input type="month" name="month" value="{{ request('month') }}" 
-                                           class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+
+                                {{-- Filter Pencarian Siswa --}}
+                                <div class="relative">
+                                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / NISN..."
+                                           class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm pl-11 pr-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                    <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 text-lg pointer-events-none"></i>
                                 </div>
                             </div>
 
-                            {{-- Filter Kelas --}}
-                            <div class="w-full xl:w-44">
-                                <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($allClasses ?? [] as $c)
-                                        <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>
-                                            {{ $c->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            {{-- Filter Pencarian Siswa --}}
-                            <div class="w-full xl:w-56 relative">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / NISN..."
-                                       class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-14 text-sm pl-11 pr-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
-                                <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 text-lg pointer-events-none"></i>
-                            </div>
-
-                            {{-- Tombol Aksi --}}
-                            <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full xl:w-auto">
-                                <button type="submit" title="Terapkan Filter" class="flex-1 xl:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-5 rounded-2xl h-14 font-bold text-sm shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2 transition-all active:scale-95">
-                                    <i class="ph-bold ph-funnel text-lg"></i> <span class="xl:inline">Filter</span>
+                            {{-- Row Aksi: Filter, Cetak, Excel --}}
+                            <div class="flex flex-wrap sm:flex-nowrap items-center justify-end gap-2.5 pt-1">
+                                <button type="submit" title="Terapkan Filter" class="flex-1 sm:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-5 rounded-2xl h-11 font-bold text-sm shadow-md shadow-elevate-dark/20 flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    <i class="ph-bold ph-funnel text-base"></i> <span>Filter</span>
                                 </button>
-                                <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" title="Cetak Laporan" class="flex-1 xl:flex-none bg-white border-2 border-slate-100 text-elevate-dark hover:bg-elevate-soft px-5 rounded-2xl h-14 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-sm">
-                                    <i class="ph-bold ph-printer text-xl"></i> <span class="xl:inline">Cetak</span>
+                                <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" title="Cetak Laporan" class="flex-1 sm:flex-none bg-white border-2 border-slate-100 text-elevate-dark hover:bg-elevate-soft px-5 rounded-2xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-sm">
+                                    <i class="ph-bold ph-printer text-lg"></i> <span>Cetak</span>
                                 </a>
-                                <a href="{{ route('reports.exportDaily', request()->all()) }}" title="Unduh Excel (.xlsx)" class="flex-1 xl:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-5 rounded-2xl h-14 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-md shadow-emerald-600/20">
-                                    <i class="ph-bold ph-file-xls text-xl"></i> <span class="xl:inline">Excel</span>
+                                <a href="{{ route('reports.exportDaily', request()->all()) }}" title="Unduh Excel (.xlsx)" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-5 rounded-2xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-md shadow-emerald-600/20">
+                                    <i class="ph-bold ph-file-xls text-lg"></i> <span>Excel</span>
                                 </a>
                             </div>
                         </form>
