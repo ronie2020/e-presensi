@@ -185,17 +185,18 @@
 ">
 
 <!-- GLOBAL FIXED BACKGROUND (Premium Glassmorphism Style) -->
-<div class="fixed inset-0 z-[-1] w-full h-full pointer-events-none">
-    {{-- Background Image --}}
-    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+<div class="fixed inset-0 z-[-1] w-full h-full pointer-events-none bg-[#021124] overflow-hidden">
+    {{-- Background Image Sekolah (Terlihat jelas dan estetik, tidak terlalu gelap) --}}
+    <div class="absolute inset-0 bg-cover bg-center opacity-70 filter brightness-85 contrast-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
     
-    {{-- Deep Gradient Overlay for Readability (Elevate dark & primary tint) --}}
-    <div class="absolute inset-0 bg-gradient-to-br from-[#021124]/95 via-[#0d52a1]/80 to-[#2c3f61]/70 mix-blend-multiply"></div>
+    {{-- Soft Navy Gradient & Vignette Overlay (Transparan seimbang agar gedung & suasana sekolah nampak jelas) --}}
+    <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/75 via-[#021124]/50 to-[#021124]/80"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.5)_60%,_#021124_100%)]"></div>
     
-    {{-- Floating Glowing Orbs for ambiance (Elevate brand colors) --}}
-    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-elevate-accent/15 rounded-full blur-[150px] pointer-events-none animate-pulse"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-elevate-primary/20 rounded-full blur-[150px] pointer-events-none animate-pulse" style="animation-delay: 2s;"></div>
-    <div class="absolute top-2/3 left-1/3 w-80 h-80 bg-elevate-peach/10 rounded-full blur-[140px] pointer-events-none animate-pulse" style="animation-delay: 4s;"></div>
+    {{-- Floating Glowing Orbs for subtle ambiance (Elevate brand colors) --}}
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-elevate-accent/10 rounded-full blur-[160px] pointer-events-none animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-elevate-primary/15 rounded-full blur-[160px] pointer-events-none animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute top-2/3 left-1/3 w-80 h-80 bg-elevate-peach/10 rounded-full blur-[150px] pointer-events-none animate-pulse" style="animation-delay: 4s;"></div>
 </div>
 
 <!-- PRELOADER (Elevate Navy) -->

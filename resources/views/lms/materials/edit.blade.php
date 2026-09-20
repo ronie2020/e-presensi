@@ -39,12 +39,23 @@
                     ['icon' => 'ph-check-circle', 'label' => 'Auto-Update']
                 ]"
                 heroIcon="ph-books"
+                showcaseValue="Edit"
+                showcaseLabel="Revisi Materi"
+                showcaseSubtitle="Pembaruan Bahan Ajar"
                 statusOrb="Mode Edit"
                 statusColor="amber"
-                ctaPrimaryText="Kembali ke Materi"
-                ctaPrimaryHref="{{ route('lms.materials.index') }}"
-                ctaPrimaryIcon="ph-arrow-left"
-            />
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.materials.index') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-2">
+                            <i class="ph-bold ph-arrow-left text-base text-sky-400"></i> Kembali ke Materi
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl border border-white/10 transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-squares-four text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
 
             {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) DITAMBAHKAN DI SINI --}}
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">

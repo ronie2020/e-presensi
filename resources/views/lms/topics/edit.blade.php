@@ -21,6 +21,37 @@
 
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Silabus & Kurikulum"
+                badgeIcon="ph-list-dashes"
+                title="Edit Pokok Bahasan"
+                titleHighlight="{{ $topic->title }}"
+                description="Perbarui informasi bab untuk mengatur urutan materi dan alur belajar siswa (Learning Player)."
+                :chips="[
+                    ['icon' => 'ph-pencil-simple', 'label' => 'Revisi Bab'],
+                    ['icon' => 'ph-books', 'label' => $topic->subject->name ?? 'Mata Pelajaran'],
+                    ['icon' => 'ph-tree-structure', 'label' => 'Modul Terstruktur']
+                ]"
+                heroIcon="ph-list-dashes"
+                showcaseValue="Edit"
+                showcaseLabel="Update Bab"
+                showcaseSubtitle="Silabus Pembelajaran"
+                statusOrb="Mode Revisi"
+                statusColor="amber"
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.topics.index') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-2">
+                            <i class="ph-bold ph-arrow-left text-base text-sky-400"></i> Kembali ke Bab
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl border border-white/10 transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-squares-four text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
+            
             @if ($errors->any())
                 <div class="mb-6 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm animate-enter">
                     <div class="p-2 bg-white text-[#D13438] rounded-xl shrink-0"><i class="ph-bold ph-warning text-xl"></i></div>

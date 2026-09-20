@@ -39,12 +39,23 @@
                     ['icon' => 'ph-file-arrow-up', 'label' => 'Format Pengumpulan']
                 ]"
                 heroIcon="ph-clipboard-text"
-                statusOrb="Buat Tugas"
+                showcaseValue="Baru"
+                showcaseLabel="Tugas Baru"
+                showcaseSubtitle="Kuis & Asesmen"
+                statusOrb="Form Input"
                 statusColor="sky"
-                ctaPrimaryText="Kembali ke Tugas"
-                ctaPrimaryHref="{{ route('lms.assignments.index') }}"
-                ctaPrimaryIcon="ph-arrow-left"
-            />
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.assignments.index') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-2">
+                            <i class="ph-bold ph-arrow-left text-base text-sky-400"></i> Kembali ke Tugas
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl border border-white/10 transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-squares-four text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
 
             {{-- ERROR BLOCK --}}
             @if ($errors->any())

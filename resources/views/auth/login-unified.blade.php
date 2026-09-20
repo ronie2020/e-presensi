@@ -325,13 +325,16 @@
                                         </div>
                                         <input id="password"
                                             class="block w-full rounded-xl border border-white/20 bg-black/25 py-3 pl-10 pr-10 text-xs text-white placeholder-slate-400 focus:border-elevate-accent focus:bg-black/35 focus:ring-1 focus:ring-elevate-accent transition-all outline-none"
-                                            ::type="show ? 'text' : 'password'"
+                                            type="password"
+                                            :type="show ? 'text' : 'password'"
                                             name="password" required autocomplete="current-password"
                                             placeholder="••••••••" />
                                         <button type="button" @click="show = !show"
-                                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-elevate-accent transition-colors"
-                                                tabindex="-1">
-                                            <i class="ph-bold text-base" :class="show ? 'ph-eye' : 'ph-eye-slash'"></i>
+                                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-elevate-accent transition-colors cursor-pointer"
+                                                tabindex="-1"
+                                                :title="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                                                :aria-label="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
+                                            <i class="ph-bold text-base" :class="show ? 'ph-eye-slash' : 'ph-eye'"></i>
                                         </button>
                                     </div>
                                     <x-input-error :messages="$errors->get('password')" class="mt-1 text-[11px] text-rose-300 font-semibold" />

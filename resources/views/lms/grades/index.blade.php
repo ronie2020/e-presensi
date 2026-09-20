@@ -33,29 +33,32 @@
                     ['icon' => 'ph-file-xls', 'label' => 'Export Excel & Cetak PDF']
                 ]"
                 heroIcon="ph-chart-bar"
+                :showcaseNumber="isset($students) && count($students) > 0 ? count($students) : (isset($assignments) && count($assignments) > 0 ? count($assignments) : 0)"
+                showcaseLabel="{{ isset($students) && count($students) > 0 ? 'Siswa Terdata' : 'Tugas Terdaftar' }}"
+                showcaseSubtitle="Buku Nilai LMS"
                 statusOrb="Nilai Terkini"
-                statusColor="sky"
-                ctaSecondaryText="Dashboard Utama"
-                ctaSecondaryHref="{{ route('dashboard') }}"
-                ctaSecondaryIcon="ph-arrow-left"
+                statusColor="emerald"
             >
-                @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty())
-                    <x-slot:cta>
-                        <div class="flex flex-wrap items-center gap-3">
-                            <a href="{{ route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" class="btn-export px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:to-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty())
+                            <a href="{{ route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" class="btn-export px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
                                 <i class="ph-bold ph-microsoft-excel-logo text-base"></i>
                                 <span>Export Excel</span>
                             </a>
-                            <a href="{{ route('lms.grades.print', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-print px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm border border-white/20 backdrop-blur-md transition-all flex items-center gap-2 active:scale-95">
+                            <a href="{{ route('lms.grades.print', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-print px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm border border-white/20 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-2 active:scale-95">
                                 <i class="ph-bold ph-printer text-base"></i>
                                 <span>Cetak PDF</span>
                             </a>
-                            <a href="{{ route('dashboard') }}" class="px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl border border-white/10 transition-all flex items-center gap-1.5">
-                                <i class="ph-bold ph-arrow-left text-sm"></i> Dashboard
-                            </a>
-                        </div>
-                    </x-slot:cta>
-                @endif
+                        @endif
+                        <a href="{{ route('lms.assignments.index') }}" class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-[#0d52a1] hover:from-sky-300 hover:to-sky-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-pencil-simple text-base"></i> Kelola Tugas
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-arrow-left text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
             </x-hero-section>
 
             {{-- CARD FILTER DENGAN ALPINE.JS --}}

@@ -1,100 +1,124 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Riwayat Pembaca Materi') }}
-            </h2>
-            <a href="{{ route('lms.materials.index') }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-bold hover:bg-gray-600 transition">
-                <i class="ph-bold ph-arrow-left"></i> Kembali
-            </a>
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-6 font-sans text-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 mb-6">
-                <div class="p-6 md:p-8 bg-blue-50 border-b border-blue-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="LMS Monitoring"
+                badgeIcon="ph-eye"
+                title="Riwayat Pembaca"
+                titleHighlight="{{ $material->title }}"
+                description="Pantau aktivitas siswa yang mengakses dan mempelajari materi digital {{ $material->subject->name }} secara real-time."
+                :chips="[
+                    ['icon' => 'ph-book-open-text', 'label' => $material->subject->name],
+                    ['icon' => 'ph-clock', 'label' => 'Time-on-Task Tracking'],
+                    ['icon' => 'ph-users', 'label' => $logs->count() . ' Siswa Telah Membaca']
+                ]"
+                heroIcon="ph-eye"
+                :showcaseNumber="$logs->count()"
+                showcaseLabel="Total Pembaca"
+                showcaseSubtitle="Siswa Terdata"
+                statusOrb="Tracking Aktif"
+                statusColor="emerald"
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.materials.index') }}" class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-[#0d52a1] hover:from-sky-300 hover:to-sky-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-arrow-left text-base"></i> Kembali ke Materi
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-squares-four text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
+
+            {{-- TABLE CONTAINER CARD --}}
+            <div class="rounded-[2.5rem] bg-[#031d3d]/85 backdrop-blur-2xl border border-white/15 p-6 sm:p-8 shadow-2xl shadow-black/50 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500"></div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <span class="text-xs font-bold bg-blue-200 text-blue-800 px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">Detail Materi</span>
-                        <h3 class="text-2xl font-black text-gray-900">{{ $material->title }}</h3>
-                        <p class="text-sm font-medium text-gray-600 mt-1">Mata Pelajaran: {{ $material->subject->name }}</p>
+                        <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5">
+                            <i class="ph-duotone ph-chart-line-up text-sky-400 text-2xl"></i>
+                            <span>Daftar Waktu Belajar Siswa</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Rekam jejak durasi keterlibatan (time-on-task) siswa pada materi ini.</p>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center min-w-[150px]">
-                        <p class="text-xs font-bold text-gray-500 uppercase">Total Pembaca</p>
-                        <p class="text-3xl font-black text-blue-600">{{ $logs->count() }} <span class="text-sm text-gray-400">Siswa</span></p>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                            <i class="ph-bold ph-check-circle"></i> {{ $logs->count() }} Terdata
+                        </span>
                     </div>
                 </div>
 
-                <div class="p-6">
-                    @if($logs->isEmpty())
-                        <div class="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                            <i class="ph-duotone ph-clock text-5xl text-gray-400 mb-3"></i>
-                            <h4 class="text-lg font-bold text-gray-700">Belum ada data</h4>
-                            <p class="text-gray-500 text-sm mt-1">Belum ada siswa yang membuka dan membaca materi ini.</p>
+                @if($logs->isEmpty())
+                    <div class="text-center py-16 rounded-2xl border-2 border-dashed border-white/10 bg-[#021124]/40">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl text-slate-400 mx-auto mb-3 border border-white/10">
+                            <i class="ph-duotone ph-clock"></i>
                         </div>
-                    @else
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Siswa</th>
-                                        <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Kelas</th>
-                                        <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Durasi Belajar (Time-on-Task)</th>
-                                        <th class="px-6 py-4 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Terakhir Akses</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($logs as $log)
-                                        @php
-                                            $minutes = floor($log->time_spent_seconds / 60);
-                                            $seconds = $log->time_spent_seconds % 60;
-                                            
-                                            // Warna indikator (Hijau jika baca > 3 menit, Merah jika < 1 menit)
-                                            $color = 'text-green-600 bg-green-50 border-green-200';
-                                            $icon = 'ph-check-circle';
-                                            if($log->time_spent_seconds < 60) {
-                                                $color = 'text-red-600 bg-red-50 border-red-200';
-                                                $icon = 'ph-warning-circle';
-                                            } elseif($log->time_spent_seconds < 180) {
-                                                $color = 'text-yellow-600 bg-yellow-50 border-yellow-200';
-                                                $icon = 'ph-clock';
-                                            }
-                                        @endphp
-                                        <tr class="hover:bg-gray-50 transition">
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                {{-- PERBAIKAN: Handle jika data siswa terhapus/null --}}
-                                                <div class="font-bold text-gray-900">{{ $log->student->name ?? 'Siswa (Telah Lulus/Dihapus)' }}</div>
-                                                <div class="text-xs text-gray-500">NIS: {{ $log->student->student_id ?? '-' }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
-                                                {{-- PERBAIKAN: Tampilkan Badge Alumni jika tidak punya kelas --}}
-                                                @if(isset($log->student) && $log->student->schoolClass)
+                        <h4 class="text-base font-bold text-slate-200">Belum Ada Pembaca</h4>
+                        <p class="text-slate-400 text-xs mt-1">Belum ada siswa yang membuka dan mempelajari materi ini.</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-sm min-w-[700px] border-separate border-spacing-y-2">
+                            <thead>
+                                <tr>
+                                    <th class="p-3.5 bg-[#021124]/90 text-sky-300 font-extrabold text-xs uppercase tracking-wider rounded-xl border border-white/10">Siswa</th>
+                                    <th class="p-3.5 bg-[#021124]/90 text-sky-300 font-extrabold text-xs uppercase tracking-wider rounded-xl border border-white/10">Kelas</th>
+                                    <th class="p-3.5 bg-[#021124]/90 text-sky-300 font-extrabold text-xs uppercase tracking-wider rounded-xl border border-white/10">Durasi Belajar (Time-on-Task)</th>
+                                    <th class="p-3.5 bg-[#021124]/90 text-sky-300 font-extrabold text-xs uppercase tracking-wider rounded-xl border border-white/10">Terakhir Akses</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($logs as $log)
+                                    @php
+                                        $minutes = floor($log->time_spent_seconds / 60);
+                                        $seconds = $log->time_spent_seconds % 60;
+                                        
+                                        $color = 'text-emerald-300 bg-emerald-500/15 border-emerald-400/30';
+                                        $icon = 'ph-check-circle';
+                                        if($log->time_spent_seconds < 60) {
+                                            $color = 'text-rose-300 bg-rose-500/15 border-rose-400/30';
+                                            $icon = 'ph-warning-circle';
+                                        } elseif($log->time_spent_seconds < 180) {
+                                            $color = 'text-amber-300 bg-amber-500/15 border-amber-400/30';
+                                            $icon = 'ph-clock';
+                                        }
+                                    @endphp
+                                    <tr class="hover:bg-white/[0.02] transition-colors">
+                                        <td class="p-3 bg-[#021124]/50 border border-white/10 rounded-xl">
+                                            <div class="font-bold text-white text-xs">{{ $log->student->name ?? 'Siswa (Telah Lulus/Dihapus)' }}</div>
+                                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">NIS: {{ $log->student->student_id ?? '-' }}</div>
+                                        </td>
+                                        <td class="p-3 bg-[#021124]/50 border border-white/10 rounded-xl text-xs font-bold text-slate-300">
+                                            @if(isset($log->student) && $log->student->schoolClass)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-400/30 text-xs font-bold">
                                                     {{ $log->student->schoolClass->name }}
-                                                @else
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wider">
-                                                        <i class="ph-bold ph-graduation-cap text-sm"></i> Alumni / Lulus
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold border {{ $color }}">
-                                                    <i class="ph-fill {{ $icon }} text-lg"></i>
-                                                    {{ $minutes }} Menit {{ $seconds }} Detik
                                                 </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $log->updated_at->translatedFormat('d M Y, H:i') }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/5 text-slate-400 border border-white/10 uppercase">
+                                                    <i class="ph-bold ph-graduation-cap"></i> Alumni / Lulus
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="p-3 bg-[#021124]/50 border border-white/10 rounded-xl">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border {{ $color }} shadow-sm">
+                                                <i class="ph-fill {{ $icon }} text-sm"></i>
+                                                {{ $minutes }} Menit {{ $seconds }} Detik
+                                            </span>
+                                        </td>
+                                        <td class="p-3 bg-[#021124]/50 border border-white/10 rounded-xl text-xs font-mono text-slate-300">
+                                            {{ $log->updated_at->translatedFormat('d M Y, H:i') }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
-
         </div>
     </div>
 </x-app-layout>

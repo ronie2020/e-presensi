@@ -29,15 +29,26 @@
                     ['icon' => 'ph-tree-structure', 'label' => 'Modul Terstruktur']
                 ]"
                 heroIcon="ph-list-dashes"
+                :showcaseNumber="isset($topics) ? ($topics->total() ?? count($topics)) : 0"
+                showcaseLabel="Total Bab"
+                showcaseSubtitle="Silabus Pembelajaran"
                 statusOrb="Sistem Aktif"
                 statusColor="sky"
-                ctaPrimaryText="Kembali ke Materi"
-                ctaPrimaryHref="{{ route('lms.materials.index') }}"
-                ctaPrimaryIcon="ph-arrow-left"
-                ctaSecondaryText="Dashboard Utama"
-                ctaSecondaryHref="{{ route('dashboard') }}"
-                ctaSecondaryIcon="ph-squares-four"
-            />
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.materials.index') }}" class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-[#0d52a1] hover:from-sky-300 hover:to-sky-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-book-open-text text-base"></i> Kelola Materi
+                        </a>
+                        <a href="{{ route('lms.assignments.index') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-pencil-simple text-base text-sky-400"></i> Kelola Tugas
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-arrow-left text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
 
             {{-- ERROR & SUCCESS MESSAGE --}}
             @if ($errors->any())

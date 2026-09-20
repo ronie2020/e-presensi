@@ -17,15 +17,19 @@
 @endphp
 
 <!-- LAYER START KIOSK -->
-<div id="start-overlay" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center cursor-pointer transition-all duration-700 backdrop-blur-md" onclick="startKiosk()">
-    <div class="relative mb-8 group animate-float">
+<div id="start-overlay" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center cursor-pointer transition-all duration-700 backdrop-blur-md overflow-hidden" onclick="startKiosk()">
+    <div class="absolute inset-0 bg-cover bg-center opacity-65 filter brightness-80 contrast-110 pointer-events-none" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/55 to-slate-950/85 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(13,82,161,0.25)_0%,_transparent_70%)] pointer-events-none"></div>
+
+    <div class="relative mb-8 group animate-float z-10">
         <div class="absolute inset-0 bg-blue-500/30 blur-[60px] rounded-full animate-pulse transition-all duration-500 group-hover:bg-blue-500/50 group-hover:scale-125"></div>
         <div class="w-36 h-36 bg-slate-900/90 backdrop-blur-xl rounded-full border border-blue-500/40 flex items-center justify-center relative z-10 shadow-[0_0_40px_rgba(59,130,246,0.3)] group-hover:scale-110 transition-transform duration-500">
             <i class="ph-bold ph-power text-7xl text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] group-hover:text-white transition-colors"></i>
         </div>
     </div>
-    <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-5 uppercase drop-shadow-2xl">SISTEM KIOSK</h1>
-    <p class="text-blue-300 font-bold uppercase tracking-widest text-xs bg-blue-900/40 px-8 py-3.5 rounded-full border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.2)] animate-pulse hover:scale-105 transition-transform cursor-pointer">Ketuk Layar Untuk Memulai</p>
+    <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-5 uppercase drop-shadow-2xl relative z-10">SISTEM KIOSK</h1>
+    <p class="text-blue-300 font-bold uppercase tracking-widest text-xs bg-blue-900/40 px-8 py-3.5 rounded-full border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.2)] animate-pulse hover:scale-105 transition-transform cursor-pointer relative z-10">Ketuk Layar Untuk Memulai</p>
 </div>
 
 <!-- CONTAINER UTAMA -->
@@ -33,8 +37,9 @@
     
     <!-- Background Texture & Glow -->
     <div class="absolute inset-0 z-0 pointer-events-none">
-        <div class="absolute inset-0 bg-[url('{{ asset('images/netila.jpg') }}')] bg-cover bg-center bg-no-repeat opacity-10 mix-blend-luminosity"></div>
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/95 to-slate-950 backdrop-blur-[4px]"></div>
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-70 filter brightness-85 contrast-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-950/75 via-slate-900/50 to-slate-950/80 backdrop-blur-[1px]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.55)_60%,_#020b18_100%)]"></div>
         
         <!-- Glowing Orbs -->
         <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>

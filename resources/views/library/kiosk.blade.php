@@ -4,13 +4,14 @@
 <div class="h-screen w-full flex relative overflow-hidden font-sans selection:bg-elevate-primary selection:text-white bg-elevate-dark">
     
     <!-- BACKGROUND IMAGE & OVERLAY (ELEVATE NAVY TINT) -->
-    <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" style="background-image: url('{{ asset('images/netila.jpg') }}');">
-        <!-- Overlay Biru Navy: Mengatasi overexposed agar gambar redup elegan dan UI di depannya stand-out -->
-        <div class="absolute inset-0 bg-elevate-dark/70 backdrop-blur-[3px]"></div>
-    </div>
+    <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70 filter brightness-85 contrast-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/75 via-[#021124]/50 to-[#021124]/80 backdrop-blur-[1px]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.55)_60%,_#021124_100%)]"></div>
 
     <!-- OVERLAY START (Untuk Audio Context Browser) -->
-    <div id="start-overlay" class="fixed inset-0 z-[100] bg-elevate-dark/95 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500">
+    <div id="start-overlay" class="fixed inset-0 z-[100] bg-[#021124]/95 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center opacity-65 filter brightness-80 contrast-110 pointer-events-none" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/80 via-[#021124]/55 to-[#021124]/85 pointer-events-none"></div>
         <div class="text-center space-y-8 animate-enter">
             <div class="relative inline-block">
                 <div class="absolute inset-0 bg-elevate-primary blur-3xl opacity-30 animate-pulse"></div>

@@ -101,6 +101,7 @@
                     <x-text-input
                         id="password"
                         class="block w-full rounded-2xl border-white/15 bg-white/5 py-3.5 pl-12 pr-12 text-sm font-semibold text-white placeholder-slate-400 backdrop-blur-md focus:border-elevate-accent focus:bg-white/10 focus:ring-2 focus:ring-elevate-accent/20 transition-all duration-300 shadow-inner"
+                        type="password"
                         ::type="show ? 'text' : 'password'"
                         name="password"
                         required
@@ -108,8 +109,10 @@
                         placeholder="••••••••" />
                     <button type="button" @click="show = !show"
                         class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-elevate-accent transition-colors focus:outline-none cursor-pointer"
-                        tabindex="-1">
-                        <i class="ph-bold text-lg transition-transform duration-200 hover:scale-110" :class="show ? 'ph-eye' : 'ph-eye-slash'"></i>
+                        tabindex="-1"
+                        :title="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                        :aria-label="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
+                        <i class="ph-bold text-lg transition-transform duration-200 hover:scale-110" :class="show ? 'ph-eye-slash' : 'ph-eye'"></i>
                     </button>
                 </div>
                 <x-input-error :messages="$errors->get('password')" class="mt-1.5 text-xs text-rose-400 font-bold ml-1" />

@@ -30,15 +30,26 @@
                     ['icon' => 'ph-check-circle', 'label' => 'Koreksi & Nilai Terpadu']
                 ]"
                 heroIcon="ph-pencil-simple"
+                :showcaseNumber="$assignments->total() ?? count($assignments)"
+                showcaseLabel="Total Tugas"
+                showcaseSubtitle="Kuis & Penugasan"
                 statusOrb="Sistem Aktif"
                 statusColor="emerald"
-                ctaPrimaryText="Buat Latihan Baru"
-                ctaPrimaryHref="{{ route('lms.assignments.create') }}"
-                ctaPrimaryIcon="ph-plus"
-                ctaSecondaryText="Dashboard Utama"
-                ctaSecondaryHref="{{ route('dashboard') }}"
-                ctaSecondaryIcon="ph-arrow-left"
-            />
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="{{ route('lms.assignments.create') }}" class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-[#0d52a1] hover:from-sky-300 hover:to-sky-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-plus text-base"></i> Buat Latihan Baru
+                        </a>
+                        <a href="{{ route('lms.grades.index') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-chart-bar text-base text-sky-400"></i> Rekap Nilai
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md hover:scale-[1.02] transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-arrow-left text-sm text-sky-400"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
 
             {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) --}}
             <div class="animate-enter mb-10 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">
