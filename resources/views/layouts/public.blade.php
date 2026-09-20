@@ -42,9 +42,9 @@
         
         /* Custom Scrollbar Elevate */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(86, 187, 241, 0.35); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #56bbf1; }
         
         /* Utility */
         .min-h-content { min-height: calc(100vh - 400px); }
@@ -59,12 +59,27 @@
 
     @stack('styles')
 </head>
-<body class="antialiased text-elevate-text bg-slate-50 overflow-x-hidden flex flex-col min-h-screen selection:bg-elevate-accent selection:text-white"
+<body class="antialiased text-white bg-[#021124] overflow-x-hidden flex flex-col min-h-screen selection:bg-elevate-accent selection:text-[#021124] relative"
     x-data="{ 
         mobileMenuOpen: false,
         scrolled: false
     }" 
     @scroll.window="scrolled = (window.pageYOffset > 20) ? true : false">
+
+    <!-- GLOBAL FIXED BACKGROUND (Elevate Dark Glassmorphism with School Photo) -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none bg-[#021124] overflow-hidden">
+        {{-- Background Image Sekolah (Terlihat jelas dan estetik, tidak terlalu gelap) --}}
+        <div class="absolute inset-0 bg-cover bg-center opacity-70 filter brightness-85 contrast-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        
+        {{-- Soft Navy Gradient & Vignette Overlay --}}
+        <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/75 via-[#021124]/50 to-[#021124]/80"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.55)_60%,_#021124_100%)]"></div>
+        
+        {{-- Floating Glowing Orbs for ambiance --}}
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-elevate-accent/10 rounded-full blur-[160px] pointer-events-none animate-pulse"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-elevate-primary/15 rounded-full blur-[160px] pointer-events-none animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute top-2/3 left-1/3 w-80 h-80 bg-elevate-peach/10 rounded-full blur-[150px] pointer-events-none animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
 
     <!-- === NAVBAR (TEMA: ELEVATE NAVY DARK) === -->
     <nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/10"

@@ -26,31 +26,25 @@
 @endpush
 
 @section('content')
-    <!-- HEADER SECTION (Tema Diselaraskan: Elevate Gradient Light) -->
-    <div class="pt-32 pb-32 relative overflow-hidden -mt-24 bg-elevate-gradient-main border-b border-white/60 shadow-sm">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
-
-        <!-- Animated Blobs Elevate Colors -->
-        <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-elevate-primary/10 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 pointer-events-none animate-blob"></div>
-        <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-elevate-peach/20 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 pointer-events-none animate-blob" style="animation-delay: 2s;"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-enter">
-            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/60 border border-white text-elevate-primary text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm shadow-sm">
+    <!-- HEADER SECTION (Dark Glassmorphism) -->
+    <div class="pt-32 pb-24 relative overflow-hidden -mt-24 text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 animate-enter">
+            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/10 border border-white/20 text-elevate-accent text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md shadow-sm">
                 <span class="relative flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-accent opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-elevate-primary"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                 </span>
                 <i class="ph-fill ph-image"></i> Dokumentasi Sekolah
             </span>
-            <h1 class="text-4xl md:text-6xl font-black text-elevate-dark mb-6 tracking-tight">Galeri Kegiatan</h1>
-            <p class="text-elevate-dark/80 text-lg max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-md">Galeri Kegiatan</h1>
+            <p class="text-slate-300 text-lg max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
                 Kumpulan momen, aktivitas, dan dokumentasi inspiratif dari siswa serta guru SMP Negeri 3 Lakbok.
             </p>
         </div>
     </div>
 
     <!-- MAIN CONTENT -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 pb-20">
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             @forelse($activities ?? [] as $index => $activity)
@@ -73,25 +67,25 @@
 
                 <!-- Card dengan Alpine.js Data -->
                 <div x-data="{ activeImg: '{{ $coverImage ? asset('storage/' . $coverImage) : '' }}' }" 
-                     class="group bg-elevate-surface rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full animate-enter" 
+                     class="group bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-elevate-accent/20 hover:border-elevate-accent/50 hover:-translate-y-2 transition-all duration-300 border border-white/15 flex flex-col h-full animate-enter hover:bg-white/15" 
                      style="animation-delay: {{ ($index % 6) * 100 }}ms">
                     
                     <!-- Area Gambar Utama -->
-                    <div class="relative h-60 overflow-hidden bg-elevate-soft shrink-0">
+                    <div class="relative h-60 overflow-hidden bg-black/30 shrink-0">
                         @if($coverImage)
                             <img :src="activeImg" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $activity->title }}">
                         @else
-                            <div class="w-full h-full flex flex-col items-center justify-center text-elevate-primary bg-elevate-soft">
+                            <div class="w-full h-full flex flex-col items-center justify-center text-elevate-accent bg-white/5">
                                 <i class="ph-duotone ph-image text-5xl mb-2 opacity-50"></i>
                             </div>
                         @endif
 
-                        <!-- Overlay Gelap di bawah (dipertahankan untuk keterbacaan teks/tombol tambahan jika ada) -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent opacity-80 pointer-events-none"></div>
+                        <!-- Overlay Gelap di bawah -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none"></div>
 
                         <!-- Tanggal -->
                         <div class="absolute top-4 left-4 z-10">
-                            <span class="bg-white/95 backdrop-blur text-elevate-dark text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                            <span class="bg-black/60 backdrop-blur-md text-slate-200 border border-white/20 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
                                 {{ isset($activity->created_at) ? $activity->created_at->translatedFormat('d M Y') : '-' }}
                             </span>
                         </div>
@@ -99,7 +93,7 @@
                         <!-- Label Video -->
                         @if(!empty($activity->video_url))
                             <div class="absolute top-4 right-4 z-10">
-                                <span class="bg-elevate-peach-dark text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 animate-pulse uppercase tracking-wider border border-elevate-peach">
+                                <span class="bg-rose-600/90 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 uppercase tracking-wider border border-rose-400/40">
                                     <i class="ph-fill ph-play-circle text-sm"></i> Video
                                 </span>
                             </div>
@@ -107,23 +101,23 @@
                     </div>
 
                     <!-- Area Teks -->
-                    <div class="p-6 flex-1 flex flex-col bg-elevate-surface">
-                        <h4 class="text-xl font-black text-elevate-dark mb-3 group-hover:text-elevate-primary transition-colors line-clamp-2 leading-tight">
+                    <div class="p-6 flex-1 flex flex-col bg-transparent text-white">
+                        <h4 class="text-xl font-black text-white mb-3 group-hover:text-elevate-accent transition-colors line-clamp-2 leading-tight">
                             {{ $activity->title }}
                         </h4>
-                        <p class="text-sm text-elevate-dark/70 leading-relaxed line-clamp-3 mb-4 flex-1 font-medium">
+                        <p class="text-sm text-slate-300 leading-relaxed line-clamp-3 mb-4 flex-1 font-medium">
                             {{ $activity->description }}
                         </p>
 
                         <!-- MINI GALLERY THUMBNAILS (Hanya Muncul Jika Foto > 1) -->
                         @if($totalImages > 1)
-                            <div class="mb-4 pt-4 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-elevate-dark/50 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-elevate-primary"></i> {{ $totalImages }} Foto Tersedia</p>
+                            <div class="mb-4 pt-4 border-t border-white/10">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-elevate-accent"></i> {{ $totalImages }} Foto Tersedia</p>
                                 <div class="flex gap-2 overflow-x-auto pb-2 mini-scroll">
                                     @foreach($images as $img)
                                         <button @click="activeImg = '{{ asset('storage/' . $img) }}'" 
                                                 class="w-14 h-14 shrink-0 rounded-xl overflow-hidden border-2 transition-all"
-                                                :class="activeImg === '{{ asset('storage/' . $img) }}' ? 'border-elevate-primary opacity-100 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'">
+                                                :class="activeImg === '{{ asset('storage/' . $img) }}' ? 'border-elevate-accent opacity-100 shadow-md ring-2 ring-elevate-accent/40' : 'border-white/10 opacity-60 hover:opacity-100 hover:scale-105'">
                                             <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover">
                                         </button>
                                     @endforeach
@@ -132,10 +126,10 @@
                         @endif
 
                         <!-- Area Tombol Aksi -->
-                        <div class="mt-auto pt-4 border-t border-slate-100 flex gap-2">
+                        <div class="mt-auto pt-4 border-t border-white/10 flex gap-2">
                             <!-- Tombol Lihat Foto Full -->
                             @if($coverImage)
-                                <a :href="activeImg" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-xl text-sm font-bold transition-colors">
+                                <a :href="activeImg" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-elevate-accent hover:text-elevate-dark text-slate-200 border border-white/15 rounded-xl text-sm font-bold transition-all shadow-sm">
                                     <i class="ph-bold ph-arrows-out text-lg"></i>
                                     <span>Zoom Foto</span>
                                 </a>
@@ -143,7 +137,7 @@
 
                             <!-- Tombol Lihat Video -->
                             @if(!empty($activity->video_url))
-                                <a href="{{ $activity->video_url }}" target="_blank" class="{{ empty($coverImage) ? 'w-full' : 'flex-1' }} flex items-center justify-center gap-2 px-4 py-2.5 bg-elevate-peach/10 text-elevate-peach-dark hover:bg-elevate-peach-dark hover:text-white rounded-xl text-sm font-bold transition-colors">
+                                <a href="{{ $activity->video_url }}" target="_blank" class="{{ empty($coverImage) ? 'w-full' : 'flex-1' }} flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white border border-rose-500/30 rounded-xl text-sm font-bold transition-all shadow-sm">
                                     <i class="ph-bold ph-youtube-logo text-lg"></i>
                                     <span>Tonton Video</span>
                                 </a>
@@ -154,12 +148,12 @@
                 </div>
             @empty
                 <!-- Empty State -->
-                <div class="col-span-full py-24 text-center animate-enter bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                    <div class="inline-flex bg-elevate-soft p-6 rounded-full mb-6 text-elevate-primary ring-8 ring-elevate-soft/50">
+                <div class="col-span-full py-24 text-center animate-enter bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/15">
+                    <div class="inline-flex bg-white/10 p-6 rounded-full mb-6 text-elevate-accent ring-8 ring-white/5">
                         <i class="ph-duotone ph-image text-5xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-elevate-dark mb-2">Belum Ada Galeri</h3>
-                    <p class="text-elevate-dark/60 text-sm max-w-md mx-auto">Saat ini belum ada dokumentasi kegiatan sekolah yang dipublikasikan.</p>
+                    <h3 class="text-xl font-bold text-white mb-2">Belum Ada Galeri</h3>
+                    <p class="text-slate-400 text-sm max-w-md mx-auto">Saat ini belum ada dokumentasi kegiatan sekolah yang dipublikasikan.</p>
                 </div>
             @endforelse
         </div>

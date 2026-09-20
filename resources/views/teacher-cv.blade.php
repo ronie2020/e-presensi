@@ -23,10 +23,10 @@
             border-collapse: collapse;
         }
         
-        /* Kolom Kiri (Sidebar Gelap - Diubah ke Blue 900) */
+        /* Kolom Kiri (Sidebar Gelap - Elevate Dark & Cyan) */
         .sidebar {
             width: 35%;
-            background-color: #1e3a8a; /* Warna biru gelap */
+            background-color: #021124; /* Elevate Dark */
             color: #ffffff;
             vertical-align: top;
             padding: 40px 25px;
@@ -50,10 +50,10 @@
             height: 150px;
             border-radius: 50%; /* Lingkaran */
             object-fit: cover;
-            border: 4px solid #3b82f6; /* Border biru lebih muda */
+            border: 4px solid #56bbf1; /* Elevate Accent */
         }
         .name {
-            color: #67e8f9; /* Warna Cyan cerah untuk nama */
+            color: #56bbf1; /* Elevate Cyan */
             font-size: 22px;
             font-weight: bold;
             text-align: center;
@@ -74,7 +74,7 @@
             font-size: 11px;
             line-height: 1.5;
             margin-bottom: 30px;
-            color: #bfdbfe; /* blue-200 */
+            color: #cbd5e1; /* slate-300 */
         }
         
         .sidebar-title {
@@ -82,7 +82,7 @@
             font-size: 14px;
             font-weight: bold;
             text-transform: uppercase;
-            border-bottom: 1px solid #3b82f6; /* Garis bawah biru */
+            border-bottom: 2px solid #56bbf1; /* Garis bawah cyan */
             padding-bottom: 5px;
             margin-top: 25px;
             margin-bottom: 15px;
@@ -99,19 +99,19 @@
             margin-bottom: 8px;
             padding-left: 12px;
             position: relative;
-            color: #e0e7ff; /* blue-100 */
+            color: #f1f5f9;
         }
         .sidebar-list li:before {
             content: "•";
             position: absolute;
             left: 0;
-            color: #06b6d4; /* Bullet cyan */
+            color: #56bbf1; /* Bullet cyan */
         }
         .contact-info {
             font-size: 11px;
             line-height: 1.8;
             margin-bottom: 20px;
-            color: #e0e7ff;
+            color: #f1f5f9;
         }
         
         .personal-data table {
@@ -122,20 +122,20 @@
         .personal-data td {
             vertical-align: top;
             padding-bottom: 4px;
-            color: #e0e7ff;
+            color: #f1f5f9;
         }
         .pd-label {
             width: 40%;
-            color: #93c5fd; /* blue-300 */
+            color: #94a3b8; /* slate-400 */
         }
 
         /* --- STYLING KONTEN (KANAN) --- */
         .content-title {
-            color: #1e3a8a; /* Biru gelap */
+            color: #021124; /* Elevate Dark */
             font-size: 18px;
             font-weight: bold;
             text-transform: uppercase;
-            border-bottom: 2px solid #06b6d4; /* Garis bawah cyan */
+            border-bottom: 2px solid #56bbf1; /* Garis bawah cyan */
             padding-bottom: 5px;
             margin-top: 0;
             margin-bottom: 15px;
@@ -154,7 +154,7 @@
         .time-col {
             width: 20%;
             font-weight: bold;
-            color: #06b6d4; /* Cyan */
+            color: #0d52a1; /* Elevate Primary */
             font-size: 12px;
         }
         .desc-col {
@@ -163,7 +163,7 @@
         .desc-col h4 {
             margin: 0 0 3px 0;
             font-size: 14px;
-            color: #1e3a8a; /* Biru gelap */
+            color: #021124; /* Elevate Dark */
         }
         .desc-col p {
             margin: 0;
@@ -183,8 +183,8 @@
             $data = file_get_contents(public_path('storage/' . $teacher->photo_path));
             $photoData = 'data:image/' . $type . ';base64,' . base64_encode($data);
         } else {
-            // Gambar default jika tidak ada foto (Background biru gelap, teks cyan)
-            $photoData = 'https://ui-avatars.com/api/?name='.urlencode($teacher->name).'&background=1e3a8a&color=67e8f9&size=300';
+            // Gambar default jika tidak ada foto (Elevate Dark background, teks cyan)
+            $photoData = 'https://ui-avatars.com/api/?name='.urlencode($teacher->name).'&background=021124&color=56bbf1&size=300';
         }
 
         // Decode Role
