@@ -109,10 +109,10 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
             'nisn'               => $nisn,
             'full_name'          => $row['nama_lengkap'],
             'gender'             => strtoupper($row['jk']),
-            'school_origin'      => $row['asal_sekolah'],
-            'birth_place'        => $row['tempat_lahir'],
+            'school_origin'      => !empty($row['asal_sekolah']) ? $row['asal_sekolah'] : '-',
+            'birth_place'        => !empty($row['tempat_lahir']) ? $row['tempat_lahir'] : '-',
             'birth_date'         => $birthDate,
-            'address'            => $row['alamat'],
+            'address'            => !empty($row['alamat']) ? $row['alamat'] : '-',
             
             // Input Nilai Rapor
             'average_grade'      => $row['rata_rata_nilai'] ?? 0, 

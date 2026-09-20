@@ -170,6 +170,11 @@ class BkTeacherController extends Controller
             ->whereIn('status', ['approved', 'ongoing', 'finished'])
             ->whereNotNull('scheduled_at')
             ->get()->map(function($session) {
+                // Skip jika student atau category sudah terhapus (null)
+                if (!$session->student || !$session->category) {
+                    return null;
+                }
+
                 $color = '#3b82f6'; // default blue
                 if ($session->status == 'ongoing') $color = '#8b5cf6'; // purple
                 if ($session->status == 'finished') $color = '#10b981'; // green
@@ -181,7 +186,7 @@ class BkTeacherController extends Controller
                     'url' => route('admin.bk.show', $session->id),
                     'color' => $color
                 ];
-            })->toJson();
+            })->filter()->values()->toJson();
 
         // Tambahkan ke compact()
         return view('admin.bk.index', compact('sessions', 'stats', 'classes', 'chartCategoryData', 'chartClassData', 'calendarEvents'));

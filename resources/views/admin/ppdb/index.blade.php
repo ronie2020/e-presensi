@@ -246,8 +246,10 @@
                             @forelse($registrants as $item)
                             
                             @php
-                                $studentData = \App\Models\Student::with('schoolClass')->where('nisn', $item->nisn)->first();
-                                $isPromoted = $studentData ? true : false;
+                                // FIX C3: Gunakan $promotedStudents yang sudah di-load controller (1 query)
+                                // bukan query per baris seperti sebelumnya (N+1 queries)
+                                $studentData = $promotedStudents[$item->nisn] ?? null;
+                                $isPromoted  = $studentData !== null;
                             @endphp
 
                             <tr class="hover:bg-slate-50/50 transition-colors group {{ $isPromoted ? 'bg-indigo-50/10' : '' }}">

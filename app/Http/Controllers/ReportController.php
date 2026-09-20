@@ -19,6 +19,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendWaManualNotificationJob; 
+use App\Exports\DailyAttendanceExport;
+use App\Exports\ReligiousAttendanceExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -151,15 +154,30 @@ class ReportController extends Controller
      public function dailyReport(Request $request)
     {
         $range = $this->getDateRange($request);
-        $selectedDate_db = Carbon::parse($range['start']);
+        $selectedDate_db = Carbon::parse($range['start'], 'Asia/Jakarta');
+        $classId = $request->input('class_id');
+        $search = $request->input('search');
 
         // Data Absensi Harian (List)
-        $attendances = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
+        $attendancesQuery = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) use ($classId, $search) { 
+                $q->where('status', '!=', 'graduated'); 
+                if (!empty($classId)) {
+                    $q->where('class_id', $classId);
+                }
+                if (!empty($search)) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('nisn', 'like', "%{$search}%")
+                           ->orWhere('student_id', 'like', "%{$search}%");
+                    });
+                }
+            })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->orderBy('attendance_date', 'desc')
-            ->get();
+            ->orderBy('attendance_date', 'desc');
+
+        $attendances = $attendancesQuery->get();
 
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
@@ -169,11 +187,22 @@ class ReportController extends Controller
         
         $existingStudentIds = $attendances->pluck('student_id')->unique()->toArray();
         
-        $belumAbsenListRaw = Student::with('schoolClass')
+        $belumAbsenQuery = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
-            ->whereNotIn('id', $existingStudentIds)
-            ->get();
+            ->whereNotIn('id', $existingStudentIds);
+
+        if (!empty($classId)) {
+            $belumAbsenQuery->where('class_id', $classId);
+        }
+        if (!empty($search)) {
+            $belumAbsenQuery->where(function($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('nisn', 'like', "%{$search}%")
+                   ->orWhere('student_id', 'like', "%{$search}%");
+            });
+        }
             
+        $belumAbsenListRaw = $belumAbsenQuery->get();
         $belumAbsenListAll = $this->sortStudents($belumAbsenListRaw);
         $mappedHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
         $mappedLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
@@ -188,10 +217,13 @@ class ReportController extends Controller
         $belumAbsenList = $this->paginate($belumAbsenListAll, 20, null, ['pageName' => 'page_belum'])
             ->appends(array_merge($request->all(), ['activeTab' => 'belum']));
 
+        // Master Kelas untuk Dropdown
+        $allClasses = SchoolClass::orderBy('name')->get();
+
         // =========================================================
         // TAMBAHAN: REKAP SEMESTER PER KELAS
         // =========================================================
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Jakarta');
         // Penentuan Semester Otomatis
         if ($now->month >= 7) {
             // Semester Ganjil (Juli - Desember)
@@ -225,28 +257,54 @@ class ReportController extends Controller
         return view('reports.daily', compact(
             'selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList',
             'hadirCount', 'terlambatCount', 'sakitCount', 'izinCount', 'alfaCount', 'range',
-            'rekapSemester', 'semesterStart', 'semesterEnd' // Pass variabel rekap
+            'rekapSemester', 'semesterStart', 'semesterEnd', 'allClasses', 'classId', 'search'
         ));
     }
 
    public function printDaily(Request $request)
     {
         $range = $this->getDateRange($request);
-        $selectedDate_db = Carbon::parse($range['start']);
+        $selectedDate_db = Carbon::parse($range['start'], 'Asia/Jakarta');
+        $classId = $request->input('class_id');
+        $search = $request->input('search');
 
-        $attendances = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
+        $attendancesQuery = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) use ($classId, $search) { 
+                $q->where('status', '!=', 'graduated'); 
+                if (!empty($classId)) {
+                    $q->where('class_id', $classId);
+                }
+                if (!empty($search)) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('nisn', 'like', "%{$search}%")
+                           ->orWhere('student_id', 'like', "%{$search}%");
+                    });
+                }
+            })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->orderBy('attendance_date', 'asc')
-            ->orderBy('student_id', 'asc')
-            ->get();
+            ->orderBy('student_id', 'asc');
+
+        $attendances = $attendancesQuery->get();
 
         $attendancesHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
         $attendancesLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
         
         $existingStudentIds = $attendances->pluck('student_id')->unique()->toArray();
-        $belumAbsenList = $this->sortStudents(Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingStudentIds)->get());
+        $belumAbsenQuery = Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingStudentIds);
+        if (!empty($classId)) {
+            $belumAbsenQuery->where('class_id', $classId);
+        }
+        if (!empty($search)) {
+            $belumAbsenQuery->where(function($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('nisn', 'like', "%{$search}%")
+                   ->orWhere('student_id', 'like', "%{$search}%");
+            });
+        }
+        $belumAbsenList = $this->sortStudents($belumAbsenQuery->get());
 
         $stats = [
             'hadir' => $attendances->where('status', 'Hadir')->count(),
@@ -259,6 +317,50 @@ class ReportController extends Controller
 
         return view('reports.print_daily', compact('selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList', 'stats', 'range'));
     }
+
+    /**
+     * EXPORT EXCEL LAPORAN PRESENSI HARIAN
+     */
+    public function exportDaily(Request $request)
+    {
+        $range = $this->getDateRange($request);
+        $classId = $request->input('class_id');
+        $search = $request->input('search');
+
+        $className = '';
+        if ($classId) {
+            $classModel = SchoolClass::find($classId);
+            $className = $classModel ? $classModel->name : '';
+        }
+
+        $attendancesQuery = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) use ($classId, $search) { 
+                $q->where('status', '!=', 'graduated');
+                if (!empty($classId)) {
+                    $q->where('class_id', $classId);
+                }
+                if (!empty($search)) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('nisn', 'like', "%{$search}%")
+                           ->orWhere('student_id', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->whereBetween('attendance_date', [$range['start'], $range['end']])
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->orderBy('attendance_date', 'asc');
+
+        $attendances = $this->sortStudents($attendancesQuery->get());
+
+        $dateSuffix = $range['start'] === $range['end'] ? $range['start'] : ($range['start'] . '_sd_' . $range['end']);
+        $filename = 'Laporan_Presensi_Harian_' . ($className ? str_replace(' ', '_', $className) . '_' : '') . $dateSuffix . '.xlsx';
+
+        return Excel::download(
+            new DailyAttendanceExport($attendances, $range['label'], $className, $range['start'], $range['end']),
+            $filename
+        );
+    }
     
     // =========================================================================
     // 2. REKAP KEAGAMAAN
@@ -268,20 +370,35 @@ class ReportController extends Controller
      * PRIVATE METHOD: Mengambil semua data keagamaan.
      * Digunakan oleh Web View dan Print View agar data konsisten.
      */
-   private function getReligiousData(Request $request)
+    private function getReligiousData(Request $request)
     {
         $range = $this->getDateRange($request);
-        $selectedDate_db = Carbon::parse($range['start']);
+        $selectedDate_db = Carbon::parse($range['start'], 'Asia/Jakarta');
         $selectedActivity = $request->input('activity', 'Dhuha'); 
+        $classId = $request->input('class_id');
+        $search = $request->input('search');
 
         // 1. DATA ATTENDANCE DETAIL (Hanya ambil sesuai Activity yang dipilih untuk list view)
-        $attendances = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
+        $attendancesQuery = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) use ($classId, $search) { 
+                $q->where('status', '!=', 'graduated'); 
+                if (!empty($classId)) {
+                    $q->where('class_id', $classId);
+                }
+                if (!empty($search)) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('nisn', 'like', "%{$search}%")
+                           ->orWhere('student_id', 'like', "%{$search}%");
+                    });
+                }
+            })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity) 
-            ->orderBy('attendance_date', 'desc')
-            ->get();
+            ->orderBy('attendance_date', 'desc');
+
+        $attendances = $attendancesQuery->get();
 
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
@@ -289,7 +406,18 @@ class ReportController extends Controller
 
         // 2. MENCARI SISWA BELUM ABSEN
         $existingIds = $attendances->pluck('student_id')->unique()->toArray();
-        $belumAbsenList = $this->sortStudents(Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingIds)->get());
+        $belumAbsenQuery = Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingIds);
+        if (!empty($classId)) {
+            $belumAbsenQuery->where('class_id', $classId);
+        }
+        if (!empty($search)) {
+            $belumAbsenQuery->where(function($sq) use ($search) {
+                $sq->where('name', 'like', "%{$search}%")
+                   ->orWhere('nisn', 'like', "%{$search}%")
+                   ->orWhere('student_id', 'like', "%{$search}%");
+            });
+        }
+        $belumAbsenList = $this->sortStudents($belumAbsenQuery->get());
         $belumAbsenCount = $belumAbsenList->count();
 
         $attendancesHadir = $this->sortStudents($attendances->where('status', 'Hadir'));
@@ -385,15 +513,12 @@ class ReportController extends Controller
             'trendLabel' => $trendLabel,
             'composition' => ['hadir' => $hadirCount, 'uzur' => $izinUzurCount, 'alfa' => $alfaCount, 'belum' => $belumAbsenCount]
         ];
-        
-        // Pass All Classes for checklist mode
-        $allClasses = SchoolClass::orderBy('name')->get();
 
         // Return array of data
         return compact(
             'selectedDate_db', 'selectedActivity', 'attendancesHadir', 'attendancesUzur',
             'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range',
-            'classRecap', 'chartData', 'allClasses'
+            'classRecap', 'chartData', 'allClasses', 'classId', 'search'
         );
     }
 
@@ -427,6 +552,52 @@ class ReportController extends Controller
         $data['viewMode'] = $request->view_mode ?? 'list';
 
         return view('reports.print_religious', $data);
+    }
+
+    /**
+     * EXPORT EXCEL LAPORAN KEAGAMAAN
+     */
+    public function exportReligious(Request $request)
+    {
+        $range = $this->getDateRange($request);
+        $selectedActivity = $request->input('activity', 'Dhuha');
+        $classId = $request->input('class_id');
+        $search = $request->input('search');
+
+        $className = '';
+        if ($classId) {
+            $classModel = SchoolClass::find($classId);
+            $className = $classModel ? $classModel->name : '';
+        }
+
+        $attendancesQuery = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) use ($classId, $search) { 
+                $q->where('status', '!=', 'graduated');
+                if (!empty($classId)) {
+                    $q->where('class_id', $classId);
+                }
+                if (!empty($search)) {
+                    $q->where(function($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                           ->orWhere('nisn', 'like', "%{$search}%")
+                           ->orWhere('student_id', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->whereBetween('attendance_date', [$range['start'], $range['end']])
+            ->where('type', 'Keagamaan')
+            ->where('activity', $selectedActivity)
+            ->orderBy('attendance_date', 'asc');
+
+        $attendances = $this->sortStudents($attendancesQuery->get());
+
+        $dateSuffix = $range['start'] === $range['end'] ? $range['start'] : ($range['start'] . '_sd_' . $range['end']);
+        $filename = 'Laporan_Ibadah_' . $selectedActivity . '_' . ($className ? str_replace(' ', '_', $className) . '_' : '') . $dateSuffix . '.xlsx';
+
+        return Excel::download(
+            new ReligiousAttendanceExport($attendances, $selectedActivity, $range['label'], $className, $range['start']),
+            $filename
+        );
     }
 
     // =========================================================================

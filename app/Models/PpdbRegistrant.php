@@ -23,33 +23,39 @@ class PpdbRegistrant extends Model
         'religion',
         'school_origin',
         'npsn_school_origin',
-        
+
         // DATA ORANG TUA
         'father_name',
         'mother_name',
         'parent_phone',
         'parent_job',
-        'parent_income', // <-- TADI HILANG (Tambahkan ini)
-        
+        'parent_income',
+
+        // DATA SISWA (FIX C1: student_phone ditambahkan)
+        'student_phone',
+
         // DATA JALUR & NILAI
         'track',
         'average_grade',
         'distance_in_meters',
-        
-        // DATA PRESTASI (TADI HILANG SEMUA - WAJIB DITAMBAHKAN)
+
+        // FIX BUG 6: Nilai detail per mapel (JSON) — sebelumnya tidak ada sama sekali
+        'grades_detail',
+
+        // DATA PRESTASI
         'achievement_type',
         'achievement_name',
         'achievement_level',
         'achievement_rank',
-        'file_achievement', // <-- INI YANG MENYEBABKAN SERTIFIKAT TIDAK TERSIMPAN
-        
-        // FILE DOKUMEN LAIN
+        'file_achievement',
+
+        // FILE DOKUMEN
         'file_photo',
         'file_kk',
         'file_akta',
         'file_grades',
         'file_kip',
-        
+
         // STATUS
         'status',
         'admin_note',
@@ -57,7 +63,8 @@ class PpdbRegistrant extends Model
 
     // Casting tipe data agar otomatis sesuai format saat diambil
     protected $casts = [
-        'birth_date' => 'date',
+        'birth_date'    => 'date',
         'average_grade' => 'decimal:2',
+        'grades_detail' => 'array', // FIX BUG 6: Otomatis decode JSON ke array PHP
     ];
 }
