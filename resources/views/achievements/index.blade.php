@@ -3,36 +3,43 @@
 
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         
-        {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60 group">
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-trophy"></i> Modul Kesiswaan
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Prestasi & Penghargaan
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Rekam jejak kejuaraan siswa dan guru. Kelola data prestasi akademik maupun non-akademik untuk arsip sekolah. Laporan dari siswa akan muncul di sini untuk diverifikasi.
-                        </p>
+        {{-- HERO SECTION --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
+            <x-hero-section
+                badge="MODUL KESISWAAN"
+                badgeIcon="ph-fill ph-trophy"
+                showcaseIcon="ph-duotone ph-medal"
+                showcaseTitle="Total Prestasi"
+                showcaseSubtitle="Arsip Kejuaraan">
+                <x-slot:title>
+                    <span class="block text-slate-100">Rekam Jejak</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Prestasi & Penghargaan
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Rekam jejak kejuaraan siswa dan guru. Kelola data prestasi akademik maupun non-akademik untuk arsip dan verifikasi sekolah.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-star text-amber-400"></i> Akademik & Seni
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-shield-check text-emerald-400"></i> Verifikasi Siswa
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-certificate text-sky-400"></i> E-Sertifikat
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md shadow-inner">
+                        <i class="ph-fill ph-medal text-amber-400 text-base"></i>
+                        <span class="text-xs font-bold text-slate-300 tracking-wide">Total:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $achievements->total() }}</span>
+                        <span class="text-xs text-slate-400 font-medium">Penghargaan</span>
                     </div>
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white flex-1 md:flex-none min-w-[140px] text-center md:text-left shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-medal text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Prestasi</span>
-                            </div>
-                            <span class="block text-3xl font-black text-elevate-dark tracking-tight">{{ $achievements->total() }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

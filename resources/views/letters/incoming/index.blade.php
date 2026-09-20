@@ -5,45 +5,49 @@
     <div class="py-8 sm:py-10 font-sans text-slate-700 bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider bg-white/50 px-3 py-1 rounded-full border border-white/60 backdrop-blur-sm shadow-sm">Administrasi Sekolah</span>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="ADMINISTRASI PERSURATAN"
+                    badgeIcon="ph-fill ph-tray-arrow-down"
+                    showcaseIcon="ph-duotone ph-envelope-open"
+                    showcaseTitle="Persuratan Masuk"
+                    showcaseSubtitle="Arsip & Disposisi SPT">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Arsip & Tata Usaha</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Surat Masuk Sekolah
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Kelola dokumen persuratan masuk secara tertib digital. Integrasikan surat masuk dengan pembuatan Surat Perintah Tugas (SPT) secara otomatis.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-envelope text-sky-400"></i> Registrasi Surat
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-file-arrow-down text-emerald-400"></i> Lampiran PDF
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-file-text text-cyan-400"></i> Disposisi SPT Otomatis
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('letters.incoming.create') }}"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="ph-bold ph-plus-circle text-lg"></i>
+                            <span>Catat Surat Masuk</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-tray text-sky-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Total Masuk:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $letters->total() }}</span>
                         </div>
-                        <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center shrink-0">
-                                <i class="ph-bold ph-tray-arrow-down text-xl"></i>
-                            </div>
-                            Arsip Surat Masuk
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-medium leading-relaxed max-w-lg ml-0 md:ml-12">
-                            Kelola dokumen persuratan masuk. Integrasikan surat masuk dengan pembuatan Surat Perintah Tugas (SPT) secara otomatis.
-                        </p>
-                        
-                        <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3 ml-0 md:ml-12">
-                            <a href="{{ route('letters.incoming.create') }}" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
-                                <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-plus text-sm"></i>
-                                </div>
-                                <span>Catat Surat Masuk</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    {{-- Statistik Ringkas --}}
-                    <div class="flex gap-3">
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center min-w-[140px]">
-                            <span class="block text-4xl font-black text-elevate-dark mb-1">{{ $letters->total() }}</span>
-                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">Total Masuk</span>
-                        </div>
-                    </div>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- Toolbar Pencarian & Tabel --}}

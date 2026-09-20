@@ -30,85 +30,96 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HEADER SECTION (HERO + FILTER) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                
-                {{-- Hero Card Elevate Theme --}}
-                <div class="animate-enter lg:col-span-1 bg-elevate-gradient-main rounded-[2.5rem] p-6 lg:p-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 relative overflow-hidden flex flex-col justify-between min-h-[200px] border border-white/60 group">
-                    {{-- Decorative Blobs --}}
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-elevate-primary/10 rounded-full blur-2xl group-hover:bg-elevate-primary/20 transition-all duration-700 pointer-events-none"></div>
-                    <div class="absolute -left-10 bottom-0 w-32 h-32 bg-elevate-peach/20 rounded-full blur-xl group-hover:bg-elevate-peach/30 transition-all duration-700 pointer-events-none"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-book-open"></i> E-Library
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="E-LIBRARY & LITERASI"
+                    badgeIcon="ph-fill ph-book-open"
+                    showcaseIcon="ph-duotone ph-books"
+                    showcaseTitle="Monitoring Literasi"
+                    showcaseSubtitle="Aktivitas Membaca Siswa">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Monitoring & Jurnal</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Literasi Siswa
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Pantau aktivitas membaca buku, resume harian, dan evaluasi keterlibatan literasi siswa secara real-time.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-book-bookmark text-sky-400"></i> Jurnal Membaca
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-chart-donut text-emerald-400"></i> Analisis Partisipasi
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-calendar text-cyan-400"></i> Rekap Harian
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-chart-pie-slice text-sky-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Partisipasi:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $participationRate }}%</span>
                         </div>
-                        <h1 class="text-2xl lg:text-3xl font-black mb-1 tracking-tight text-elevate-dark flex items-center gap-2 leading-tight">
-                            Monitoring <br> Literasi
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-medium tracking-wide mt-2">Pantau aktivitas membaca siswa secara real-time.</p>
-                    </div>
-                    
-                    <div class="relative z-10 mt-6">
-                        <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider shadow-sm text-elevate-dark">
-                            <i class="ph-bold ph-calendar-blank text-elevate-primary text-lg"></i>
-                            <span>
-                                @if(request('date'))
-                                    {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d M Y') }}
-                                @else
-                                    Semua Waktu
-                                @endif
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
+            </div>
 
-                {{-- Filter Card --}}
-                <div class="animate-enter lg:col-span-2 bg-white rounded-[2.5rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden" style="animation-delay: 100ms">
-                    <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
-                    
-                    <div class="relative z-10 h-full flex flex-col justify-center">
-                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                            <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2 uppercase tracking-wider">
-                                <i class="ph-fill ph-funnel text-elevate-primary"></i>
-                                Filter Jurnal
-                            </h2>
-                        </div>
-
-                        <form method="GET" class="flex flex-col md:flex-row gap-4 w-full" @submit.prevent="submitFilter">
-                            {{-- Class Select --}}
-                            <div class="flex-1 relative">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pilih Kelas</label>
-                                <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 focus:ring-elevate-primary focus:border-elevate-primary text-elevate-dark shadow-sm transition-all cursor-pointer appearance-none">
-                                    <option value="">-- Semua Kelas --</option>
-                                    @foreach($classes as $c)
-                                        <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="absolute bottom-3 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
-                            </div>
-
-                            {{-- Date Picker --}}
-                            <div class="flex-1">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pilih Tanggal</label>
-                                <div class="relative">
-                                    <input type="date" name="date" value="{{ request('date') }}" 
-                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 pl-11 focus:ring-elevate-primary focus:border-elevate-primary text-elevate-dark shadow-sm placeholder-slate-400 transition-all">
-                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2 w-full md:w-auto items-end">
-                                <button type="submit" class="flex-[3] md:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-8 rounded-2xl h-12 font-bold text-sm shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2 transition-all active:scale-95 group">
-                                    <i class="ph-bold ph-magnifying-glass text-lg group-hover:scale-110 transition-transform"></i> <span class="md:hidden">Terapkan</span>
-                                </button>
-                                <a href="{{ route('admin.literacy.index') }}" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-500 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
-                                    <i class="ph-bold ph-arrow-counter-clockwise text-lg"></i>
-                                </a>
-                            </div>
-                        </form>
+            {{-- FILTER CARD --}}
+            <div class="mb-8 bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-3">
+                    <h2 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-wider">
+                        <i class="ph-fill ph-funnel text-sky-600"></i>
+                        Filter Jurnal Literasi
+                    </h2>
+                    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600">
+                        <i class="ph-bold ph-calendar-blank text-sky-600"></i>
+                        <span>
+                            @if(request('date'))
+                                {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d M Y') }}
+                            @else
+                                Semua Waktu
+                            @endif
+                        </span>
                     </div>
                 </div>
+
+                <form method="GET" class="flex flex-col md:flex-row gap-4 w-full" @submit.prevent="submitFilter">
+                    {{-- Class Select --}}
+                    <div class="flex-1 relative">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Kelas</label>
+                        <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 focus:ring-sky-500 focus:border-sky-500 text-slate-800 shadow-sm transition-all cursor-pointer appearance-none">
+                            <option value="">-- Semua Kelas --</option>
+                            @foreach($classes as $c)
+                                <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="absolute bottom-3 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
+                    </div>
+
+                    {{-- Date Picker --}}
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Tanggal</label>
+                        <div class="relative">
+                            <input type="date" name="date" value="{{ request('date') }}" 
+                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 pl-11 focus:ring-sky-500 focus:border-sky-500 text-slate-800 shadow-sm placeholder-slate-400 transition-all">
+                            <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 w-full md:w-auto items-end">
+                        <button type="submit" class="flex-[3] md:flex-none bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white px-8 rounded-2xl h-12 font-bold text-sm shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 group">
+                            <i class="ph-bold ph-magnifying-glass text-lg group-hover:scale-110 transition-transform"></i>
+                            <span>Terapkan</span>
+                        </button>
+                        <a href="{{ route('admin.literacy.index') }}" class="flex-1 md:flex-none bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
+                            <i class="ph-bold ph-arrow-counter-clockwise text-lg"></i>
+                        </a>
+                    </div>
+                </form>
             </div>
 
             {{-- DASHBOARD / KPI CARDS --}}

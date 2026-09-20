@@ -5,25 +5,48 @@
         <div class="absolute top-0 left-0 w-full h-[300px] bg-amber-400/10 -z-10 blur-3xl pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- HERO --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-br from-amber-400 via-amber-300 to-yellow-300 p-8 mb-8 shadow-xl overflow-hidden border border-white/60">
-                <div class="absolute -top-16 -right-16 w-56 h-56 bg-white/30 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <a href="{{ route('library.tools.index') }}" class="px-3 py-1 bg-white/50 hover:bg-white/80 rounded-lg text-xs font-bold text-amber-800 transition flex items-center gap-1 border border-white/60">
-                                <i class="ph-bold ph-arrow-left"></i> Tools
-                            </a>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="KEUANGAN PERPUSTAKAAN"
+                    badgeIcon="ph-fill ph-coins"
+                    showcaseIcon="ph-duotone ph-coins"
+                    showcaseTitle="Manajemen Denda"
+                    showcaseSubtitle="Keterlambatan Pustaka">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Manajemen &</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Pelunasan Denda
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Kelola dan konfirmasi pembayaran denda keterlambatan pengembalian buku siswa secara transparan dan akuntabel.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-coins text-amber-400"></i> Rekap Denda
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-check-circle text-emerald-400"></i> Konfirmasi Bayar
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-clock-counter-clockwise text-rose-400"></i> Tunggakan
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('library.tools.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Menu Tools</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-rose-500/30 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Tunggakan:</span>
+                            <span class="text-sm font-black text-rose-400 font-mono">Rp {{ number_format($summary['total_unpaid'], 0, ',', '.') }}</span>
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight text-amber-900 flex items-center gap-3">
-                            <span class="text-4xl">💰</span> Manajemen Denda
-                        </h1>
-                        <p class="text-amber-800/80 text-sm font-semibold mt-1">Kelola dan konfirmasi pembayaran denda keterlambatan peminjaman buku.</p>
-                    </div>
-                    <div class="hidden md:flex items-center justify-center w-16 h-16 bg-white/50 rounded-2xl border border-white/60">
-                        <i class="ph-duotone ph-coins text-4xl text-amber-600"></i>
-                    </div>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- SUMMARY CARDS --}}

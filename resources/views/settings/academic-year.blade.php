@@ -4,41 +4,42 @@
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         {{-- HERO SECTION --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 relative z-10">
-            <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                
-                {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none group-hover:bg-white/60 transition-all duration-700"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
-                    {{-- Text Content --}}
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-gear"></i> Konfigurasi Sistem
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Tahun Ajaran
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-semibold leading-relaxed max-w-lg">
-                            Kelola periode akademik sekolah. Aktifkan semester berjalan untuk memulai kegiatan belajar mengajar dan pelaporan nilai.
-                        </p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
+            <x-hero-section
+                badge="KONFIGURASI SISTEM"
+                badgeIcon="ph-fill ph-gear"
+                showcaseIcon="ph-duotone ph-calendar"
+                showcaseTitle="Tahun Ajaran"
+                showcaseSubtitle="Kalender Akademik">
+                <x-slot:title>
+                    <span class="block text-slate-100">Pengaturan Periode</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Tahun Ajaran & Semester
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Kelola periode akademik sekolah. Aktifkan semester berjalan untuk memulai kegiatan belajar mengajar dan pelaporan nilai.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-calendar text-sky-400"></i> Ganjil & Genap
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-toggle-right text-emerald-400"></i> Status Aktif
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-lock-key text-cyan-400"></i> Kunci Riwayat Nilai
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-calendar-blank text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Total:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $years->count() }}</span>
+                        <span class="text-xs text-slate-400">Periode</span>
                     </div>
-                    
-                    {{-- Stats Cards --}}
-                    <div class="flex gap-4">
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/80 min-w-[140px] text-center md:text-left hover:bg-white transition-colors shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-calendar-check text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Periode</span>
-                            </div>
-                            <span class="block text-3xl font-black text-elevate-dark tracking-tight">{{ $years->count() }}</span>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

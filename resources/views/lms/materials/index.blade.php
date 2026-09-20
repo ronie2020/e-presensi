@@ -17,39 +17,28 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                
-                {{-- Dekorasi Background --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div class="text-center md:text-left">
-                        <a href="{{ route('dashboard') }}" class="group/btn bg-white/60 hover:bg-white text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0 active:scale-95">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover/btn:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard</span>
-                        </a>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-3 backdrop-blur-md shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher"></i> Area Guru
-                        </div>
-                        <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3 text-elevate-dark">
-                            Kelola Materi
-                        </h2>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium max-w-lg leading-relaxed">
-                            Bagikan bahan ajar digital (Dokumen, Video, Link) kepada siswa untuk mendukung kegiatan belajar mengajar.
-                        </p>
-                    </div>
-                    
-                    {{-- Tombol Upload Responsif --}}
-                    <a href="{{ route('lms.materials.create') }}" class="w-full md:w-auto group/add bg-elevate-dark text-white px-7 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 border border-transparent">
-                        <div class="bg-white/20 text-white w-8 h-8 rounded-xl flex items-center justify-center group-hover/add:bg-white group-hover/add:text-elevate-primary transition-colors">
-                            <i class="ph-bold ph-plus"></i>
-                        </div>
-                        <span>Upload Materi Baru</span>
-                    </a>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="E-Learning & Bahan Ajar"
+                badgeIcon="ph-book-open-text"
+                title="Kelola Materi"
+                titleHighlight="Pelajaran Digital"
+                description="Bagikan bahan ajar digital (Dokumen, Video Pembelajaran, Tautan Web) kepada siswa untuk mendukung kegiatan belajar mengajar."
+                :chips="[
+                    ['icon' => 'ph-files', 'label' => 'Materi Multi-Format'],
+                    ['icon' => 'ph-chalkboard-teacher', 'label' => 'Terintegrasi Jadwal'],
+                    ['icon' => 'ph-lightning', 'label' => 'Akses Langsung Siswa']
+                ]"
+                heroIcon="ph-book-open-text"
+                statusOrb="Aktif"
+                statusColor="emerald"
+                ctaPrimaryText="Upload Materi Baru"
+                ctaPrimaryHref="{{ route('lms.materials.create') }}"
+                ctaPrimaryIcon="ph-plus"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            />
 
             {{-- SEARCH & FILTER BAR ELEVATE --}}
             <div class="animate-enter mb-10 bg-white p-5 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col md:flex-row gap-4" style="animation-delay: 100ms">

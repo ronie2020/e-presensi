@@ -1,52 +1,64 @@
-﻿<x-app-layout>
+<x-app-layout>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- HERO SECTION --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider bg-white/50 px-3 py-1 rounded-full border border-white/60 backdrop-blur-sm shadow-sm">Administrasi Sekolah</span>
-                        </div>
-                        <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center shrink-0">
-                                <i class="ph-bold ph-car-profile text-xl"></i>
-                            </div>
-                            Surat Perjalanan Dinas
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-medium leading-relaxed max-w-lg ml-0 md:ml-12">
-                            Kelola SPPD, tracking status, cetak dokumen, dan pantau rekapitulasi biaya perjalanan dinas.
-                        </p>
-                        <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3 ml-0 md:ml-12">
-                            <a href="{{ route('sppd.create') }}" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
-                                <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-plus text-sm"></i>
-                                </div>
-                                <span>Input SPPD Baru</span>
-                            </a>
-                            <a href="{{ route('sppd.dashboard') }}" class="group bg-elevate-primary/20 text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-elevate-primary hover:text-white flex items-center gap-2 border border-white/60 active:scale-95">
-                                <i class="ph-bold ph-chart-bar text-sm"></i>
-                                <span>Dashboard Rekap</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    {{-- Statistik Status --}}
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        @foreach(['draft' => ['Draft','slate'], 'submitted' => ['Diajukan','amber'], 'approved' => ['Disetujui','sky'], 'selesai' => ['Selesai','emerald']] as $key => $info)
-                        <a href="{{ route('sppd.index', ['status' => $key]) }}" class="bg-white/60 backdrop-blur-md px-4 py-4 rounded-[1.5rem] border border-white shadow-sm text-center min-w-[100px] hover:bg-white transition-colors group">
-                            <span class="block text-3xl font-black text-elevate-dark mb-1 group-hover:scale-110 transition-transform inline-block">{{ $stats[$key] }}</span>
-                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">{{ $info[0] }}</span>
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="ADMINISTRASI SEKOLAH"
+                    badgeIcon="ph-fill ph-car-profile"
+                    showcaseIcon="ph-duotone ph-briefcase"
+                    showcaseTitle="SPPD Digital"
+                    showcaseSubtitle="Perjalanan Dinas GTK">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Surat Perintah</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Perjalanan Dinas (SPPD)
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Kelola pengajuan SPPD, tracking status verifikasi, cetak dokumen resmi, dan pantau rekapitulasi biaya perjalanan dinas.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-airplane-takeoff text-sky-400"></i> Tugas Dinas Luar
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-receipt text-emerald-400"></i> Rekap Anggaran
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-printer text-cyan-400"></i> Cetak Format Standar
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('sppd.create') }}"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="ph-bold ph-plus-circle text-lg"></i>
+                            <span>Input SPPD Baru</span>
                         </a>
-                        @endforeach
-                    </div>
-                </div>
+                        <a href="{{ route('sppd.dashboard') }}"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-chart-bar text-lg text-sky-400"></i>
+                            <span>Dashboard Rekap</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Diajukan:</span>
+                            <span class="text-sm font-black text-amber-400 font-mono">{{ $stats['submitted'] ?? 0 }}</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Disetujui:</span>
+                            <span class="text-sm font-black text-sky-400 font-mono">{{ $stats['approved'] ?? 0 }}</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Selesai:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">{{ $stats['selesai'] ?? 0 }}</span>
+                        </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- Toolbar & Table --}}

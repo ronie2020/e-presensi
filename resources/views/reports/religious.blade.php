@@ -25,26 +25,45 @@
         </template>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
-                <div class="animate-enter bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach rounded-[2rem] p-6 lg:p-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/60">
-                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
-                    
-                    <div class="relative z-10">
-                        <h1 class="text-2xl lg:text-3xl font-black mb-1 tracking-tight flex items-center gap-2">Rekap Keagamaan</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold">Laporan ibadah siswa.</p>
-                    </div>
-                    <div class="relative z-10 mt-6 bg-white/40 backdrop-blur-md p-1.5 rounded-2xl flex border border-white/50 shadow-sm">
-                        <button @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}')" class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuha' ? 'bg-white text-elevate-peach-dark shadow-sm' : 'text-elevate-dark hover:bg-white/60' }}">
-                            <i class="ph-bold ph-sun text-lg"></i> Dhuha
-                        </button>
-                        <button @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}')" class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuhur' ? 'bg-white text-elevate-primary shadow-sm' : 'text-elevate-dark hover:bg-white/60' }}">
-                            <i class="ph-fill ph-moon-stars text-lg"></i> Dhuhur
-                        </button>
-                    </div>
-                </div>
+            <div class="mb-8 no-print">
+                <x-hero-section
+                    badge="Pembiasaan & Ibadah"
+                    badgeIcon="ph-star"
+                    title="Rekap Keagamaan"
+                    titleHighlight="Shalat {{ $selectedActivity }}"
+                    description="Pantau konsistensi dan kehadiran pembiasaan ibadah harian peserta didik secara transparan dan akurat."
+                    :chips="[
+                        ['icon' => 'ph-sun', 'label' => 'Shalat ' . $selectedActivity],
+                        ['icon' => 'ph-calendar-check', 'label' => 'Periode Terpilih'],
+                        ['icon' => 'ph-chart-bar', 'label' => 'Grafik & Tabel Terintegrasi']
+                    ]"
+                    heroIcon="ph-star"
+                    showcaseLabel="Aktivitas Ibadah"
+                    :showcaseNumber="'Shalat ' . $selectedActivity"
+                    statusOrb="Terekam"
+                    statusColor="amber"
+                    ctaSecondaryText="Dashboard Utama"
+                    ctaSecondaryHref="{{ route('dashboard') }}"
+                    ctaSecondaryIcon="ph-arrow-left"
+                >
+                    <x-slot:cta>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}')" class="px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 {{ $selectedActivity == 'Dhuha' ? 'bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] text-white shadow-lg shadow-[#56bbf1]/30 border border-white/40' : 'bg-white/10 hover:bg-white/20 text-slate-200 border border-white/15' }}">
+                                <i class="ph-bold ph-sun text-base"></i> Shalat Dhuha
+                            </button>
+                            <button type="button" @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}')" class="px-5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center gap-2 {{ $selectedActivity == 'Dhuhur' ? 'bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] text-white shadow-lg shadow-[#56bbf1]/30 border border-white/40' : 'bg-white/10 hover:bg-white/20 text-slate-200 border border-white/15' }}">
+                                <i class="ph-fill ph-moon-stars text-base"></i> Shalat Dhuhur
+                            </button>
+                            <a href="{{ route('dashboard') }}" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs tracking-wide border border-white/10 transition-all flex items-center gap-1.5">
+                                <i class="ph-bold ph-arrow-left text-sm"></i> Dashboard
+                            </a>
+                        </div>
+                    </x-slot:cta>
+                </x-hero-section>
+            </div>
 
-                <div class="animate-enter lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-xl shadow-slate-200/40 relative" style="animation-delay: 100ms">
+            <div class="grid grid-cols-1 gap-6 mb-8 no-print">
+                <div class="animate-enter bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-xl shadow-slate-200/40 relative" style="animation-delay: 100ms">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
                         <h2 class="text-xl font-black text-elevate-dark flex items-center gap-3"><span class="w-1.5 h-6 bg-elevate-accent rounded-full"></span> Filter Data</h2>
                         <div class="bg-elevate-soft p-1.5 rounded-2xl flex w-full md:w-auto">

@@ -57,18 +57,24 @@
             
             {{-- HERO SECTION --}}
              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
-                <div class="animate-enter rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 lg:p-8 text-elevate-dark relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/60 shadow-xl shadow-elevate-accent/20 group">
-                    <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="animate-enter rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-6 lg:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/20 shadow-2xl shadow-[#0d52a1]/25 backdrop-blur-2xl group">
+                    {{-- Specular Top Rim Light (Ref 2) --}}
+                    <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
+                    <div class="absolute -top-10 -left-10 w-56 h-56 bg-[#56bbf1]/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-[#0d52a1]/30 rounded-full blur-2xl pointer-events-none"></div>
                     <div class="relative z-10">
-                        <h1 class="text-2xl lg:text-3xl font-black mb-1 tracking-tight flex items-center gap-2">
-                            Rekap Absensi
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sky-300 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md mb-3 shadow-sm">
+                            <i class="ph-fill ph-chart-bar text-sky-400"></i> Rekap Presensi
+                        </div>
+                        <h1 class="text-2xl lg:text-3xl font-black mb-1 tracking-tight text-white leading-tight">
+                            <span class="block text-slate-100">Laporan &</span>
+                            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">Kehadiran Harian</span>
                         </h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold tracking-wide">Kehadiran siswa harian.</p>
+                        <p class="text-slate-300 text-xs sm:text-sm font-medium">Rekapitulasi absensi harian, mingguan, dan bulanan siswa.</p>
                     </div>
                     <div class="relative z-10 mt-6">
-                        <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-md border border-white/50 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm text-elevate-dark">
-                            <i class="ph-bold ph-calendar-blank"></i>
+                        <div class="inline-flex items-center gap-2 bg-[#021124]/80 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-inner text-sky-300">
+                            <i class="ph-bold ph-calendar-blank text-sky-400"></i>
                             <span>{{ $selectedDate_db->translatedFormat('d F Y') }}</span>
                         </div>
                     </div>

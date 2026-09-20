@@ -3,26 +3,38 @@
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark">
-                        <i class="ph-fill ph-calendar-plus text-elevate-primary"></i> Susun Jadwal Mandiri
-                    </h1>
-                    <p class="text-elevate-dark/80 text-sm font-semibold max-w-2xl">
-                        Pilih mata pelajaran dan kelas pada setiap jam sesuai dengan jadwal yang telah Anda terima. Perubahan akan disimpan secara otomatis dan tersinkronisasi dengan admin.
-                    </p>
-                </div>
-                
-                {{-- TOMBOL EXPORT BARU --}}
-                <div class="flex items-center gap-3 shrink-0 w-full md:w-auto mt-4 md:mt-0">
-                    <a href="{{ route('teacher.timetable.export_pdf') }}" class="flex-1 md:flex-none px-5 py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 group active:scale-95 text-sm border border-rose-600/20">
-                        <i class="ph-bold ph-file-pdf text-lg group-hover:scale-110 transition-transform"></i> PDF
-                    </a>
-                    <a href="{{ route('teacher.timetable.export_excel') }}" class="flex-1 md:flex-none px-5 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 group active:scale-95 text-sm border border-emerald-600/20">
-                        <i class="ph-bold ph-file-xls text-lg group-hover:scale-110 transition-transform"></i> Excel
-                    </a>
-                </div>
-            </div>
+            <x-hero-section
+                badge="Plotting Mandiri"
+                badgeIcon="ph-calendar-plus"
+                title="Susun Jadwal"
+                titleHighlight="Pribadi Guru"
+                description="Pilih mata pelajaran dan kelas pada setiap jam pelajaran sesuai jadwal tugas. Perubahan tersimpan otomatis dan tersinkronisasi."
+                :chips="[
+                    ['icon' => 'ph-calendar-check', 'label' => 'Jadwal Mingguan'],
+                    ['icon' => 'ph-arrows-clockwise', 'label' => 'Auto-Save Cloud'],
+                    ['icon' => 'ph-printer', 'label' => 'Export PDF & Excel']
+                ]"
+                heroIcon="ph-calendar-plus"
+                statusOrb="Sinkron"
+                statusColor="emerald"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('teacher.timetable.export_pdf') }}" class="px-5 py-3 bg-gradient-to-r from-rose-500 to-red-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-rose-500/30 transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-file-pdf text-base"></i> PDF
+                        </a>
+                        <a href="{{ route('teacher.timetable.export_excel') }}" class="px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                            <i class="ph-bold ph-file-xls text-base"></i> Excel
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-3 bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl border border-white/15 backdrop-blur-md transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-arrow-left text-sm"></i> Dashboard
+                        </a>
+                    </div>
+                </x-slot:cta>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

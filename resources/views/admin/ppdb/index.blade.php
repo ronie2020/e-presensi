@@ -29,71 +29,135 @@
 
     <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-elevate-dark bg-elevate-surface">
         
-        {{-- HERO SECTION --}}
-        <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/60">
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
-            <div class="absolute top-0 left-0 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] group-hover:opacity-70 transition-opacity duration-1000 pointer-events-none -ml-20 -mt-20"></div>
-            <div class="absolute bottom-0 right-0 w-[300px] h-[300px] bg-white/20 rounded-full blur-[120px] pointer-events-none"></div>
+        {{-- HERO SECTION (UNIFIED ELEVATE DARK GLASS - AQUALIFE & E-LEARNING) --}}
+        <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 md:p-10 text-white shadow-2xl shadow-[#0d52a1]/25 border border-white/20 backdrop-blur-2xl overflow-hidden group">
+            {{-- Specular Top Rim Light (Ref 2) --}}
+            <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
+            <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
 
-            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
-                        <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-peach-dark opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-elevate-peach-dark"></span>
-                        </span>
-                        Portal Penerimaan Siswa Baru
+            {{-- Ambient Radiant Glow Orbs (Ref 1 & 2) --}}
+            <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#56bbf1]/20 rounded-full blur-[100px] pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-[#0d52a1]/30 rounded-full blur-[90px] pointer-events-none"></div>
+
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                {{-- KIRI: Judul, Intro, Chips & Dual CTA Buttons --}}
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/15 text-xs font-bold transition-all shadow-sm">
+                            <i class="ph-bold ph-arrow-left text-sky-400"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-400"></span>
+                            </span>
+                            Portal Penerimaan Siswa Baru
+                        </div>
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-4 leading-tight">
-                        Manajemen <br>
-                        <span class="text-elevate-dark">PPDB Online</span> 
+
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-snug sm:leading-snug md:leading-normal text-white">
+                        <span class="block text-slate-100">Manajemen &</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">PPDB Online Terpadu</span>
                     </h1>
-                    <p class="text-elevate-dark/80 text-sm md:text-base max-w-xl leading-relaxed mb-8 font-medium">
-                        Kelola data calon siswa, verifikasi berkas, dan atur jadwal pengumuman hasil seleksi secara terpusat.
+                    <p class="text-slate-300 text-sm sm:text-base font-medium leading-relaxed max-w-xl">
+                        Kelola data calon siswa, verifikasi kelengkapan berkas administrasi, dan jadwalkan publikasi pengumuman hasil seleksi secara terpusat.
                     </p>
-                    <div class="flex flex-wrap gap-3">
-                        <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-elevate-dark hover:bg-elevate-primary text-white text-sm font-bold rounded-xl transition-all shadow-md flex items-center gap-2">
-                            <i class="ph-bold ph-squares-four"></i> Dashboard Utama
+
+                    {{-- Feature Highlight Chips (Ref 1 & 2) --}}
+                    <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="ph-bold ph-check text-sky-400"></i> Verifikasi Berkas Online
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="ph-bold ph-check text-sky-400"></i> Jalur Prestasi & Zonasi
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="ph-bold ph-check text-sky-400"></i> Pengumuman Real-time
+                        </div>
+                    </div>
+
+                    {{-- Dual Action Buttons (Ref 2) --}}
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <button onclick="window.scrollTo({top: 550, behavior: 'smooth'})" class="group bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white shadow-lg shadow-sky-600/25 border border-white/20 px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                            <i class="ph-bold ph-users-three text-lg"></i>
+                            <span>Daftar Pendaftar</span>
+                            <i class="ph-bold ph-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                        </button>
+                        <a href="{{ route('ppdb.create') }}" target="_blank" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-sky-400/40 text-white px-5 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                            <i class="ph-bold ph-globe text-lg text-sky-400"></i>
+                            <span>Portal Publik PPDB</span>
+                            <i class="ph-bold ph-arrow-up-right text-xs"></i>
                         </a>
                     </div>
                 </div>
 
-                {{-- WIDGET JADWAL --}}
-                <div class="bg-white/40 backdrop-blur-md p-6 sm:p-8 rounded-[1.5rem] border border-white/50 shadow-sm relative overflow-hidden">
-                    <h3 class="text-xl font-black text-elevate-dark mb-2 flex items-center gap-2 relative z-10">
-                        <i class="ph-duotone ph-clock text-elevate-primary"></i> Jadwal Pengumuman
-                    </h3>
-                    <p class="text-elevate-dark/80 text-sm font-medium mb-6 relative z-10">Atur kapan hasil seleksi dapat dilihat publik.</p>
-                    
-                    <div class="mb-6 p-4 rounded-xl bg-white/60 border border-white/60 relative z-10 shadow-sm">
-                        @if($isSet)
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border {{ $isPast ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-elevate-soft text-elevate-primary border-elevate-accent/30' }}">
-                                    {{ $isPast ? '● Sudah Dibuka' : '● Terjadwal' }}
-                                </span>
-                            </div>
-                            <p class="text-elevate-dark text-lg font-bold tracking-wide font-mono">
-                                {{ $announcementTime->translatedFormat('d M Y, H:i') }} WIB
-                            </p>
-                        @else
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border bg-amber-100 text-amber-700 border-amber-200">● Belum Diatur</span>
-                            </div>
-                            <p class="text-elevate-dark/70 text-sm">Siswa belum dapat melihat hasil.</p>
-                        @endif
+                {{-- KANAN: Luminous Showcase & Widget Jadwal (Ref 1 & 2) --}}
+                <div class="lg:col-span-5 relative">
+                    {{-- Pulse Glow Rings behind card --}}
+                    <div class="absolute -top-6 -right-6 w-56 h-56 rounded-full border border-[#56bbf1]/20 animate-pulse pointer-events-none"></div>
+                    <div class="absolute -bottom-6 -left-6 w-48 h-48 rounded-full border border-sky-400/15 pointer-events-none"></div>
+
+                    {{-- Floating Status Bubbles (Ref 1) --}}
+                    <div class="absolute -top-3 right-4 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                        <i class="ph-bold ph-users text-sky-400"></i>
+                        <span>{{ $stats['total'] ?? 0 }} Pendaftar</span>
                     </div>
 
-                    <form action="{{ route('admin.ppdb.set_schedule') }}" method="POST" class="space-y-2 relative z-10">
-                        @csrf
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="datetime-local" name="announcement_date" required 
-                                   value="{{ $isSet ? $announcementTime->format('Y-m-d\TH:i') : '' }}"
-                                   class="block w-full px-4 py-3 rounded-xl border-white/60 bg-white/70 focus:bg-white text-elevate-dark text-sm font-bold shadow-sm focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all cursor-pointer">
-                            <button type="submit" class="px-6 py-3 bg-elevate-primary hover:bg-elevate-dark text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-                                <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan
-                            </button>
+                    <div class="absolute -bottom-3 left-4 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                        <i class="ph-bold ph-check-circle text-emerald-400"></i>
+                        <span>{{ $stats['accepted'] ?? 0 }} Diterima</span>
+                    </div>
+
+                    {{-- Specular Frosted Schedule Card --}}
+                    <div class="bg-[#031d3d]/90 backdrop-blur-2xl p-6 sm:p-7 rounded-[2rem] border border-white/20 shadow-2xl relative overflow-hidden">
+                        {{-- Top rim light --}}
+                        <div class="absolute inset-0 rounded-[2rem] pointer-events-none border-t border-l border-white/25"></div>
+
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-400 to-[#0d52a1] flex items-center justify-center text-white shadow-md shadow-sky-400/30 border border-white/20">
+                                <i class="ph-duotone ph-clock text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-black text-white leading-tight">Jadwal Pengumuman</h3>
+                                <p class="text-slate-300 text-xs font-medium">Kapan hasil seleksi dapat dilihat publik.</p>
+                            </div>
                         </div>
-                    </form>
+                        
+                        <div class="my-4 p-4 rounded-2xl bg-[#021124]/80 border border-white/15 relative z-10 shadow-inner">
+                            @if($isSet)
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border {{ $isPast ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' : 'bg-sky-500/20 text-sky-300 border-sky-400/30' }}">
+                                        {{ $isPast ? '● Pengumuman Dibuka' : '● Terjadwal Otomatis' }}
+                                    </span>
+                                    <i class="ph-bold ph-calendar-check text-sky-400"></i>
+                                </div>
+                                <p class="text-white text-base sm:text-lg font-black tracking-wide font-mono">
+                                    {{ $announcementTime->translatedFormat('d M Y, H:i') }} WIB
+                                </p>
+                            @else
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border bg-amber-500/20 text-amber-300 border-amber-400/30">
+                                        ● Belum Diatur
+                                    </span>
+                                    <i class="ph-bold ph-warning-circle text-amber-400"></i>
+                                </div>
+                                <p class="text-slate-300 text-xs font-medium">Publik belum dapat melihat hasil seleksi.</p>
+                            @endif
+                        </div>
+
+                        <form action="{{ route('admin.ppdb.set_schedule') }}" method="POST" class="space-y-2 relative z-10">
+                            @csrf
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="datetime-local" name="announcement_date" required 
+                                       value="{{ $isSet ? $announcementTime->format('Y-m-d\TH:i') : '' }}"
+                                       class="block w-full px-3.5 py-2.5 rounded-xl border-white/20 bg-[#021124]/90 focus:bg-[#021124] text-white text-xs font-bold shadow-inner focus:ring-2 focus:ring-[#56bbf1] focus:border-[#56bbf1] transition-all cursor-pointer">
+                                <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-[#0d52a1] hover:from-sky-400 hover:to-[#0d52a1] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap text-xs border border-white/20 active:scale-95">
+                                    <i class="ph-bold ph-floppy-disk text-sm"></i> Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

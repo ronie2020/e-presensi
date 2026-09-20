@@ -28,39 +28,54 @@
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
         
-        {{-- HERO SECTION (ELEVATED THEME) --}}
-         <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-2xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none group-hover:bg-white/60 transition-all duration-700 animate-float"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    <div class="max-w-2xl">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/50 hover:bg-white/80 text-elevate-primary px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
-                            <i class="ph-bold ph-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard Utama</span>
-                        </a>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-soft/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm animate-pulse">
-                            <i class="ph-fill ph-books"></i> Sistem Perpustakaan Digital
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-elevate-dark">Dashboard Pustaka</h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Pusat kontrol manajemen buku, sirkulasi peminjaman, dan statistik kunjungan siswa secara real-time.
-                        </p>
+        {{-- HERO SECTION --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
+            <x-hero-section
+                badge="PERPUSTAKAAN DIGITAL"
+                badgeIcon="ph-fill ph-books"
+                showcaseIcon="ph-duotone ph-books"
+                showcaseTitle="Dashboard Pustaka"
+                showcaseSubtitle="Sirkulasi & Kunjungan">
+                <x-slot:title>
+                    <span class="block text-slate-100">Pusat Kendali</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Perpustakaan Digital
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Pusat kontrol manajemen koleksi buku, sirkulasi peminjaman, dan statistik kunjungan siswa secara real-time.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-book-open text-sky-400"></i> Sirkulasi Terpadu
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-qr-code text-emerald-400"></i> Kios Mandiri
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-chart-line text-cyan-400"></i> Analisis Tren
+                    </span>
+                </x-slot:chips>
+                <x-slot:cta>
+                    <a href="{{ route('dashboard') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                        <i class="ph-bold ph-arrow-left"></i>
+                        <span>Kembali ke Dashboard</span>
+                    </a>
+                </x-slot:cta>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-book-bookmark text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Buku:</span>
+                        <span class="text-sm font-black text-white font-mono count-up" data-target="{{ $totalBooks }}">{{ $totalBooks }}</span>
                     </div>
-                    
-                    <div class="w-full md:w-auto grid grid-cols-2 gap-4">
-                        <div class="bg-white/60 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/80 shadow-sm hover:bg-white transition-all hover:scale-105 duration-300">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-primary">Koleksi Buku</span>
-                            <span class="block text-3xl font-black text-shimmer count-up" data-target="{{ $totalBooks }}">0</span>
-                        </div>
-                        <div class="bg-elevate-peach/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-elevate-peach/30 shadow-sm hover:bg-elevate-peach/30 transition-all hover:scale-105 duration-300">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-peach-dark">Pengunjung</span>
-                            <span class="block text-3xl font-black text-elevate-dark count-up" data-target="{{ $todayVisits }}">0</span>
-                        </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                        <i class="ph-fill ph-users text-emerald-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Pengunjung:</span>
+                        <span class="text-sm font-black text-emerald-400 font-mono count-up" data-target="{{ $todayVisits }}">{{ $todayVisits }}</span>
                     </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

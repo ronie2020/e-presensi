@@ -1,3 +1,423 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ==========================================================
+   ELEVATE DARK DESIGN SYSTEM & GLASSMORPHISM LAYER
+   ========================================================== */
+:root {
+    color-scheme: dark;
+}
+
+body {
+    background-color: #021124;
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Master Elevate Surface & Canvas on Dark */
+.bg-elevate-surface,
+main .bg-slate-50.min-h-screen,
+main .bg-slate-100.min-h-screen,
+main .bg-slate-50:not([class*="p-"]):not([class*="rounded-"]),
+main div[class*="min-h-screen"].bg-slate-50 {
+    background-color: transparent !important;
+}
+
+/* Hero Banners: Elevate Dark Gradient (Containers Only) */
+.bg-elevate-gradient-main,
+div[class*="from-[#56bbf1]"][class*="to-[#f4d1c0]"],
+div[class*="from-[#56bbf1]"][class*="to-[#f9a282]"] {
+    background: linear-gradient(135deg, #031d3d 0%, #0d52a1 50%, #021124 100%) !important;
+    border-color: rgba(86, 187, 241, 0.25) !important;
+    color: #ffffff !important;
+    box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
+.bg-elevate-gradient-main h1,
+.bg-elevate-gradient-main h2,
+.bg-elevate-gradient-main h3,
+.bg-elevate-gradient-main p {
+    color: #ffffff !important;
+}
+
+/* Ensure text gradient clips are never overridden by background or box-shadow rules */
+.bg-clip-text {
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Glassmorphism Cards across all content views */
+.bg-elevate-surface .bg-white,
+.bg-elevate-surface .bg-white\/90,
+.bg-elevate-surface .bg-white\/80,
+main .bg-white:not([class*="rounded-full"]):not([class*="w-"]):not([class*="h-"]):not(button):not(input):not(th),
+main .fluent-card,
+main .bg-white\/90,
+main .bg-white\/80 {
+    background-color: rgba(3, 29, 61, 0.85) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Frosted Semi-Transparent White Elements -> Converted to Dark Glass */
+.bg-white\/70,
+.bg-white\/60,
+.bg-white\/50,
+.bg-white\/40,
+.bg-white\/30,
+.bg-white\/20,
+.bg-white\/10 {
+    background-color: rgba(2, 17, 36, 0.65) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+/* Card Inner Sections / Panels */
+.bg-elevate-surface .bg-slate-50,
+.bg-elevate-surface .bg-slate-100,
+.bg-elevate-surface .bg-elevate-soft,
+.bg-elevate-surface .bg-elevate-soft\/30,
+.bg-elevate-surface .bg-elevate-soft\/50,
+main .bg-slate-50:not(.min-h-screen),
+main .bg-slate-100,
+main .bg-elevate-soft,
+main [class*="bg-rose-50/50"],
+main [class*="bg-purple-50/50"],
+main [class*="bg-teal-50/50"],
+main [class*="bg-amber-50/50"],
+main [class*="bg-slate-50/50"] {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #cbd5e1;
+}
+
+/* High Contrast Headings and Text */
+.bg-elevate-surface .text-elevate-dark,
+.bg-elevate-surface .text-slate-800,
+.bg-elevate-surface .text-slate-900,
+.bg-elevate-surface .text-slate-700,
+main .text-elevate-dark,
+main .text-slate-800,
+main .text-slate-900,
+main .text-slate-700,
+main .text-\[\#2c3f61\],
+main .text-\[\#0d52a1\] {
+    color: #ffffff !important;
+}
+
+.bg-elevate-surface .text-slate-600,
+.bg-elevate-surface .text-slate-500,
+main .text-slate-600,
+main .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+.bg-elevate-surface .border-slate-100,
+.bg-elevate-surface .border-slate-200,
+.bg-elevate-surface .border-slate-300,
+.bg-elevate-surface .divide-slate-100,
+.bg-elevate-surface .divide-slate-200,
+main .border-slate-100,
+main .border-slate-200,
+main .border-rose-100,
+main .border-purple-100,
+main .border-teal-100,
+main .divide-slate-50,
+main .divide-slate-100,
+main .divide-slate-200 {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Table Header & Row Styling in Dark Mode */
+main table thead,
+main table thead th,
+main table thead th.bg-white,
+.bg-elevate-surface table thead th {
+    background-color: #031d3d !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+main table tbody tr:hover,
+main table tbody tr:hover td {
+    background-color: rgba(86, 187, 241, 0.05) !important;
+}
+
+/* Form Inputs, Selects & Textareas inside content areas */
+.bg-elevate-surface input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+.bg-elevate-surface select,
+.bg-elevate-surface textarea,
+main input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+main select,
+main textarea {
+    background-color: rgba(2, 17, 36, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.bg-elevate-surface input:focus,
+.bg-elevate-surface select:focus,
+.bg-elevate-surface textarea:focus,
+main input:focus,
+main select:focus,
+main textarea:focus {
+    border-color: #56bbf1 !important;
+    box-shadow: 0 0 0 2px rgba(86, 187, 241, 0.25) !important;
+}
+
+/* Native Date / Time picker icons visible in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/* Ensure native select popups and options render dark with high contrast text */
+select {
+    color-scheme: dark;
+}
+
+select option,
+.bg-elevate-surface select option,
+main select option {
+    background-color: #031d3d !important;
+    color: #ffffff !important;
+    padding: 8px 12px;
+}
+
+select optgroup,
+.bg-elevate-surface select optgroup,
+main select optgroup {
+    background-color: #021124 !important;
+    color: #56bbf1 !important;
+}
+
+/* Translucent Neon Badges */
+main .bg-emerald-100, main .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.18) !important;
+    color: #34d399 !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+main .bg-rose-100, main .bg-rose-50 {
+    background-color: rgba(244, 63, 94, 0.18) !important;
+    color: #fb7185 !important;
+    border-color: rgba(244, 63, 94, 0.3) !important;
+}
+main .bg-amber-100, main .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+main .bg-purple-100, main .bg-purple-50 {
+    background-color: rgba(168, 85, 247, 0.18) !important;
+    color: #c084fc !important;
+    border-color: rgba(168, 85, 247, 0.3) !important;
+}
+main .bg-teal-100, main .bg-teal-50 {
+    background-color: rgba(20, 184, 166, 0.18) !important;
+    color: #2dd4bf !important;
+    border-color: rgba(20, 184, 166, 0.3) !important;
+}
+main .bg-blue-100, main .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.18) !important;
+    color: #60a5fa !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Quill Editor Dark Theme Support */
+.bg-elevate-surface .ql-toolbar.ql-snow,
+main .ql-toolbar.ql-snow {
+    background-color: rgba(2, 17, 36, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.bg-elevate-surface .ql-toolbar.ql-snow .ql-stroke,
+main .ql-toolbar.ql-snow .ql-stroke {
+    stroke: #cbd5e1 !important;
+}
+.bg-elevate-surface .ql-toolbar.ql-snow .ql-fill,
+main .ql-toolbar.ql-snow .ql-fill {
+    fill: #cbd5e1 !important;
+}
+.bg-elevate-surface .ql-toolbar.ql-snow .ql-picker,
+main .ql-toolbar.ql-snow .ql-picker {
+    color: #cbd5e1 !important;
+}
+.bg-elevate-surface .ql-container.ql-snow,
+main .ql-container.ql-snow {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    background-color: rgba(2, 17, 36, 0.6) !important;
+}
+.bg-elevate-surface .ql-editor.ql-blank::before,
+main .ql-editor.ql-blank::before {
+    color: #64748b !important;
+}
+
+/* White Buttons & Solid Action Buttons: High Contrast Dark Navy Text */
+main button.bg-white,
+main a.bg-white,
+main button[class*="bg-white"]:not([class*="bg-white/"]):not([class*="w-"]):not([class*="h-"]),
+main a[class*="bg-white"]:not([class*="bg-white/"]):not([class*="w-"]):not([class*="h-"]) {
+    background-color: #ffffff !important;
+    color: #021124 !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+main button.bg-white *,
+main a.bg-white * {
+    color: #021124 !important;
+}
+
+main button.bg-white:hover,
+main a.bg-white:hover {
+    background-color: #e2e8f0 !important;
+    color: #0d52a1 !important;
+}
+
+main button.bg-white:hover *,
+main a.bg-white:hover * {
+    color: #0d52a1 !important;
+}
+
+/* Action filter buttons (blue-50, rose-50, violet-50, etc) */
+main button[class*="bg-blue-50"],
+main a[class*="bg-blue-50"] {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #60a5fa !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+main button[class*="bg-rose-50"],
+main a[class*="bg-rose-50"] {
+    background-color: rgba(244, 63, 94, 0.15) !important;
+    color: #fb7185 !important;
+    border-color: rgba(244, 63, 94, 0.3) !important;
+}
+main button[class*="bg-violet-50"],
+main a[class*="bg-violet-50"] {
+    background-color: rgba(139, 92, 246, 0.15) !important;
+    color: #a78bfa !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+}
+main button[class*="bg-emerald-50"],
+main a[class*="bg-emerald-50"] {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #34d399 !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Table action buttons (Edit, Print, OSIS Card) */
+main table a[class*="w-9"],
+main table button[class*="w-9"],
+main table a[class*="w-8"],
+main table button[class*="w-8"],
+main table a[class*="w-10"],
+main table button[class*="w-10"] {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #cbd5e1 !important;
+}
+
+main table a[class*="w-9"]:hover,
+main table button[class*="w-9"]:hover,
+main table a[class*="w-8"]:hover,
+main table button[class*="w-8"]:hover,
+main table a[class*="w-10"]:hover,
+main table button[class*="w-10"]:hover {
+    background-color: rgba(86, 187, 241, 0.2) !important;
+    border-color: #56bbf1 !important;
+    color: #56bbf1 !important;
+}
+
+/* High contrast secondary and muted text */
+main [class*="text-elevate-dark/"],
+.bg-elevate-surface [class*="text-elevate-dark/"] {
+    color: #cbd5e1 !important;
+}
+
+main .text-slate-400,
+.bg-elevate-surface .text-slate-400 {
+    color: #94a3b8 !important;
+}
+
+main .text-slate-300,
+.bg-elevate-surface .text-slate-300 {
+    color: #cbd5e1 !important;
+}
+
+main input::placeholder,
+main textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* SweetAlert2 & Modals Dark Glass Theme */
+.swal2-popup {
+    background-color: #031d3d !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 1.5rem !important;
+}
+.swal2-title,
+.swal2-html-container {
+    color: #ffffff !important;
+}
+.swal2-input,
+.swal2-select,
+.swal2-textarea {
+    background-color: rgba(2, 17, 36, 0.8) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Custom Elevate Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #56bbf1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0d52a1;
+}
+
+/* Laravel Pagination Dark Glass Theme */
+nav[role="navigation"] {
+    color: #cbd5e1 !important;
+}
+nav[role="navigation"] span[aria-current="page"] > span {
+    background-color: #0d52a1 !important;
+    border-color: #56bbf1 !important;
+    color: #ffffff !important;
+}
+nav[role="navigation"] a {
+    background-color: rgba(2, 17, 36, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #cbd5e1 !important;
+}
+nav[role="navigation"] a:hover {
+    background-color: rgba(86, 187, 241, 0.2) !important;
+    color: #56bbf1 !important;
+}
+nav[role="navigation"] span {
+    background-color: rgba(2, 17, 36, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #94a3b8 !important;
+}
+nav[role="navigation"] p {
+    color: #94a3b8 !important;
+}
+nav[role="navigation"] p .font-medium {
+    color: #ffffff !important;
+}

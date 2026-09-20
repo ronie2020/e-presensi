@@ -1,99 +1,68 @@
-<div class="rounded-[2.5rem] shadow-2xl overflow-hidden mb-10 border border-white/60 relative min-h-[500px] md:min-h-[600px] flex items-center justify-center text-center group transition-all duration-700 bg-elevate-gradient-main"
-     :class="{
-        'shadow-elevate-primary/20': mode === 'portal',
-        'shadow-elevate-accent/20': mode === 'lms',
-        'shadow-elevate-peach/20': mode === 'cbt'
-     }">
+<div class="rounded-[2.5rem] bg-[#031d3d]/90 backdrop-blur-2xl border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden group p-6 sm:p-10 md:p-12 mb-8 transition-all duration-500">
     
-    <!-- Abstract Shapes Ornaments (Elevate Style) -->
-    <div class="absolute inset-0 z-0 transition-opacity duration-700 overflow-hidden pointer-events-none">
-        <div class="absolute -top-20 -left-10 w-64 h-64 bg-white/40 rounded-[3rem] rotate-12 backdrop-blur-3xl shadow-sm transition-all duration-700"
-             :class="mode === 'cbt' ? 'bg-elevate-peach/30' : 'bg-white/40'"></div>
-             
-        <div class="absolute top-1/4 right-10 w-32 h-32 bg-elevate-accent/20 rounded-3xl -rotate-12 backdrop-blur-xl transition-all duration-700"
-             :class="mode === 'lms' ? 'bg-elevate-primary/20 scale-125' : 'bg-elevate-accent/20'"></div>
-             
-        <div class="absolute -bottom-32 left-1/4 w-80 h-80 bg-elevate-peach/20 rounded-[4rem] rotate-45 backdrop-blur-2xl transition-all duration-700"
-             :class="mode === 'cbt' ? 'bg-rose-400/20 scale-110' : 'bg-elevate-peach/20'"></div>
-             
-        <!-- Pattern Overlay -->
-        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#2c3f61 1px, transparent 1px); background-size: 40px 40px;"></div>
-    </div>
+    <!-- Top Glowing Accent Line -->
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-elevate-accent to-transparent opacity-80"></div>
+
+    <!-- Ambient Glowing Orbs Inside Card -->
+    <div class="absolute -top-20 -right-20 w-60 h-60 bg-elevate-accent/15 rounded-full blur-3xl pointer-events-none transition-transform duration-700 group-hover:scale-125"></div>
+    <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-elevate-primary/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <!-- Konten Utama -->
-    <div class="relative z-10 w-full max-w-3xl px-6 py-12 flex flex-col items-center">
+    <div class="relative z-10 w-full max-w-3xl mx-auto flex flex-col items-center text-center">
         
-        <!-- LOGO SEKOLAH (Menggunakan Gambar Elevate Star) -->
-        <div class="mb-8 w-24 h-24 md:w-28 md:h-28 rounded-3xl flex items-center justify-center shadow-xl border-2 border-white backdrop-blur-md transition-all duration-500 overflow-hidden"
-             :class="{
-                'bg-white shadow-elevate-dark/10': mode === 'portal',
-                'bg-elevate-soft shadow-elevate-primary/30': mode === 'lms',
-                'bg-elevate-peach-light/30 shadow-elevate-peach/30': mode === 'cbt'
-             }" data-aos="fade-down">
-            
-             <!-- Tag Image untuk memanggil gambar yang Anda upload -->
-             <img src="{{ asset('images/logo.png') }}" 
-                  alt="Logo Sekolah" 
-                  class="w-full h-full object-contain p-3 transition-transform duration-500"
-                  :class="{
-                      'scale-100': mode === 'portal',
-                      'scale-110': mode === 'lms' || mode === 'cbt'
-                  }">
+        <!-- LOGO SEKOLAH (3D Floater) -->
+        <div class="mb-6 w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-elevate-primary via-elevate-accent to-sky-300 p-[2px] shadow-[0_0_30px_rgba(86,187,241,0.35)] animate-float-portal">
+            <div class="w-full h-full bg-[#021124] rounded-[22px] flex items-center justify-center p-3">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo SMPN 3 Lakbok" class="w-full h-full object-contain" onerror="this.src='/images/logo.png'">
+            </div>
         </div>
 
         <!-- Judul & Deskripsi -->
-        <div class="mb-10 transition-all duration-500" data-aos="fade-down" data-aos-delay="100">
+        <div class="mb-8">
             <!-- Label Badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 shadow-sm transition-all duration-300"
-                 :class="{
-                    'bg-white/60 border-white text-elevate-dark': mode === 'portal',
-                    'bg-elevate-soft border-elevate-accent/30 text-elevate-primary': mode === 'lms',
-                    'bg-elevate-peach-light/50 border-elevate-peach/30 text-elevate-peach-dark': mode === 'cbt'
-                 }">
-                <span x-text="mode === 'portal' ? 'Portal Publik' : (mode === 'lms' ? 'Area Siswa' : 'Area Ujian')"></span>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-elevate-accent text-[11px] sm:text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md shadow-sm">
+                <i class="ph-duotone ph-sparkle text-sm text-elevate-accent"></i>
+                <span x-text="mode === 'portal' ? 'Portal Publik • Data Akademik' : (mode === 'lms' ? 'Area Siswa • Ruang Belajar' : 'Area Siswa • Ruang Ujian')"></span>
             </div>
 
             <!-- Main Title -->
-            <h1 class="text-3xl sm:text-4xl md:text-6xl font-black text-elevate-dark tracking-tight leading-tight mb-4 min-h-[4rem] md:min-h-[5rem]">
-                <span x-show="mode === 'portal'" x-transition:enter.duration.500ms>
-                    Pusat Informasi <br> <span class="text-elevate-primary">Data Akademik</span>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4 min-h-[3.5rem]">
+                <span x-show="mode === 'portal'" x-transition:enter.duration.400ms>
+                    Pusat Informasi &amp; <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-accent via-[#72cbfa] to-white drop-shadow-md">Rapor Digital Siswa</span>
                 </span>
-                <span x-show="mode === 'lms'" x-cloak x-transition:enter.duration.500ms>
-                    Ruang Belajar <br> <span class="text-elevate-primary">Digital Siswa</span>
+                <span x-show="mode === 'lms'" x-cloak x-transition:enter.duration.400ms>
+                    Ruang Belajar <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-white drop-shadow-md">Digital Interaktif (LMS)</span>
                 </span>
-                <span x-show="mode === 'cbt'" x-cloak x-transition:enter.duration.500ms>
-                    Sistem Ujian <br> <span class="text-elevate-peach-dark">Berbasis Komputer</span>
+                <span x-show="mode === 'cbt'" x-cloak x-transition:enter.duration.400ms>
+                    Sistem Ujian <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-amber-400 to-white drop-shadow-md">Berbasis Komputer (CBT)</span>
                 </span>
             </h1>
             
             <!-- Subtitle -->
-            <p class="text-sm md:text-lg text-elevate-dark/70 font-medium leading-relaxed max-w-xl mx-auto min-h-[3rem] md:min-h-[3.5rem] transition-all duration-300 px-2">
+            <p class="text-xs sm:text-sm md:text-base text-slate-300 font-normal leading-relaxed max-w-xl mx-auto min-h-[2.5rem]">
                 <span x-show="mode === 'portal'" x-transition.opacity>
-                    Cek data kehadiran, pelanggaran, nilai, dan informasi siswa lainnya secara publik.
+                    Layanan resmi keterbukaan informasi SMPN 3 Lakbok. Orang Tua dapat memantau presensi GPS pintar, rekap nilai akademik, poin kedisiplinan, dan prestasi secara langsung.
                 </span>
                 <span x-show="mode === 'lms'" x-cloak x-transition.opacity>
-                    Login untuk mengakses materi pelajaran, mengumpulkan tugas, dan berdiskusi dengan guru.
+                    Akses materi modul Kurikulum Merdeka, modul digital guru, kuis interaktif, dan pengumpulan tugas kelas secara online.
                 </span>
                 <span x-show="mode === 'cbt'" x-cloak x-transition.opacity>
-                    Login khusus untuk mengikuti Penilaian Tengah Semester (PTS), PAS, dan Ujian Sekolah.
+                    Ruang ujian terpadu untuk mengikuti Penilaian Tengah Semester (PTS), PAS, Asesmen Sekolah, dan ujian berbasis komputer lainnya.
                 </span>
             </p>
         </div>
 
         <!-- TAB SWITCHER & FORM CARD -->
-        <div class="bg-white/40 backdrop-blur-xl border border-white/80 p-3 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative w-full max-w-2xl mx-auto transition-all duration-500 transform hover:scale-[1.01]" 
-             :class="{
-                'shadow-elevate-dark/10': mode === 'portal',
-                'shadow-elevate-primary/20': mode === 'lms',
-                'shadow-elevate-peach/20': mode === 'cbt'
-             }"
-             data-aos="fade-up" data-aos-delay="200">
+        <div class="w-full max-w-2xl mx-auto">
             
             <!-- 3 Tab Buttons -->
             @include('students.portal.partials.home-switcher')
 
             <!-- FORM CONTAINER -->
-            <div class="relative bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 transition-colors duration-300 ring-1 ring-slate-100 shadow-sm">
+            <div class="relative bg-white/[0.03] backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/15 shadow-inner">
                 
                 @if(Auth::guard('student')->check())
                     {{-- STATE 1: SUDAH LOGIN --}}
@@ -108,16 +77,76 @@
 
         <!-- Error Message -->
         @if(session('error') || $errors->any())
-            <div class="mt-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 flex items-center justify-center gap-3 animate-pulse shadow-md max-w-lg mx-auto" role="alert">
-                <div class="bg-rose-100 rounded-full p-1.5"><i class="ph-bold ph-warning text-rose-600"></i></div>
-                <span class="font-bold text-sm">{{ session('error') ?? $errors->first() }}</span>
+            <div class="mt-6 p-4 bg-rose-500/20 border border-rose-500/30 rounded-2xl text-rose-200 flex items-center justify-center gap-3 backdrop-blur-md shadow-lg max-w-lg mx-auto" role="alert">
+                <div class="bg-rose-500/30 rounded-full p-1.5"><i class="ph-bold ph-warning text-rose-300"></i></div>
+                <span class="font-bold text-xs sm:text-sm">{{ session('error') ?? $errors->first() }}</span>
             </div>
         @endif
 
     </div>
+</div>
+
+<!-- 3 KARTU LAYANAN TERPADU (PEMISAHAN PERSONA & AKSES CEPAT) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-10">
     
-    <!-- Copyright -->
-    <div class="absolute bottom-0 w-full text-center pb-6 text-elevate-dark/40 text-xs font-medium z-10 pointer-events-none">
-        &copy; {{ date('Y') }} Sistem Informasi Sekolah Terpadu.
+    <!-- 1. Card Ruang Belajar LMS -->
+    <div class="p-6 rounded-[2rem] bg-[#031d3d]/70 backdrop-blur-xl border border-white/15 shadow-lg hover:border-sky-400/40 hover:-translate-y-1 transition-all group flex flex-col justify-between">
+        <div>
+            <div class="w-12 h-12 rounded-2xl bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="ph-bold ph-books"></i>
+            </div>
+            <h3 class="text-white font-black text-lg tracking-tight mb-2 flex items-center gap-2">
+                <span>Ruang Belajar (LMS)</span>
+                <i class="ph-bold ph-arrow-up-right text-xs text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </h3>
+            <p class="text-slate-300 text-xs leading-relaxed mb-5 font-normal">
+                Modul Kurikulum Merdeka, materi interaktif guru, pengumpulan tugas, dan bahan ajar digital.
+            </p>
+        </div>
+        <a href="{{ route('student.login.learning') }}" class="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-sky-500 hover:text-[#021124] text-white text-xs font-black transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm">
+            <span>Buka Ruang Belajar</span>
+            <i class="ph-bold ph-arrow-right"></i>
+        </a>
     </div>
+
+    <!-- 2. Card Ujian Online CBT -->
+    <div class="p-6 rounded-[2rem] bg-[#031d3d]/70 backdrop-blur-xl border border-white/15 shadow-lg hover:border-rose-400/40 hover:-translate-y-1 transition-all group flex flex-col justify-between">
+        <div>
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="ph-bold ph-monitor-play"></i>
+            </div>
+            <h3 class="text-white font-black text-lg tracking-tight mb-2 flex items-center gap-2">
+                <span>Ujian Online (CBT)</span>
+                <i class="ph-bold ph-arrow-up-right text-xs text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </h3>
+            <p class="text-slate-300 text-xs leading-relaxed mb-5 font-normal">
+                Sesi ujian online, asesmen tengah semester (PTS), PAS, serta kuis terjadwal berbasis komputer.
+            </p>
+        </div>
+        <a href="{{ route('student.login.cbt') }}" class="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-rose-500 hover:text-white text-white text-xs font-black transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm">
+            <span>Masuk Ruang Ujian</span>
+            <i class="ph-bold ph-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- 3. Card Login Guru & Staff -->
+    <div class="p-6 rounded-[2rem] bg-[#031d3d]/70 backdrop-blur-xl border border-white/15 shadow-lg hover:border-elevate-accent/40 hover:-translate-y-1 transition-all group flex flex-col justify-between">
+        <div>
+            <div class="w-12 h-12 rounded-2xl bg-elevate-accent/20 text-elevate-accent border border-elevate-accent/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                <i class="ph-bold ph-user-gear"></i>
+            </div>
+            <h3 class="text-white font-black text-lg tracking-tight mb-2 flex items-center gap-2">
+                <span>Portal Guru &amp; Staff</span>
+                <i class="ph-bold ph-arrow-up-right text-xs text-elevate-accent opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </h3>
+            <p class="text-slate-300 text-xs leading-relaxed mb-5 font-normal">
+                Presensi GPS pintar guru, e-jurnal KBM, penginputan nilai rapor, dan manajemen administrasi.
+            </p>
+        </div>
+        <a href="{{ route('login') }}" class="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-elevate-accent hover:text-elevate-dark text-white text-xs font-black transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm">
+            <span>Login Staff Resmi</span>
+            <i class="ph-bold ph-arrow-right"></i>
+        </a>
+    </div>
+
 </div>

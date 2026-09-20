@@ -71,55 +71,58 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-           {{-- Hero Section (Elevate Theme) --}}
-            <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                
-                {{-- Background Texture & Dekorasi Elevate --}}
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute top-0 right-0 w-80 h-80 bg-white/40 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-white/60 transition-all duration-700"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/30 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-2xl bg-white/50 backdrop-blur-md flex items-center justify-center border border-white/60 shadow-sm shrink-0 text-elevate-primary">
-                        <i class="ph-duotone ph-chart-polar text-4xl"></i>
-                    </div>
-                    <div>
-                        {{-- Multi Role dan Jabatan --}}
-                        @php
-                            $managedUser = $targetUser ?? auth()->user();
-                            
-                            $userRoles = is_string($managedUser->role) ? json_decode($managedUser->role, true) : $managedUser->role;
-                            if (!is_array($userRoles)) {
-                                $userRoles = is_string($managedUser->role) ? explode(',', $managedUser->role) : [$managedUser->role];
-                            }
-                            $userRoles = array_filter(array_map('trim', $userRoles));
-                        @endphp
-
-                        <div class="flex flex-wrap gap-2 mb-2">
-                            @foreach($userRoles as $role)
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
-                                    <i class="ph-bold ph-check-circle text-elevate-primary"></i> {{ $role }}
-                                </span>
-                            @endforeach
-                            
-                            @if(!empty($managedUser->position) && $managedUser->position !== '-')
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-elevate-soft/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
-                                    <i class="ph-bold ph-briefcase"></i> {{ $managedUser->position }}
-                                </span>
-                            @endif
+            {{-- HERO SECTION --}}
+            @php
+                $managedUser = $targetUser ?? auth()->user();
+                $userRoles = is_string($managedUser->role) ? json_decode($managedUser->role, true) : $managedUser->role;
+                if (!is_array($userRoles)) {
+                    $userRoles = is_string($managedUser->role) ? explode(',', $managedUser->role) : [$managedUser->role];
+                }
+                $userRoles = array_filter(array_map('trim', $userRoles));
+            @endphp
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="PORTOFOLIO GURU & GTK"
+                    badgeIcon="ph-fill ph-chart-polar"
+                    showcaseIcon="ph-duotone ph-briefcase"
+                    showcaseTitle="Portofolio GTK"
+                    showcaseSubtitle="Karya & Rekam Jejak">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Kelola Portofolio</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            {{ isset($targetUser) && $targetUser->id !== auth()->id() ? $targetUser->name : 'Pendidik & GTK' }}
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Tambahkan karya, materi ajar, sertifikasi, dan rekam jejak profesional untuk ditampilkan pada direktori guru publik.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        @foreach($userRoles as $role)
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                                <i class="ph-bold ph-check-circle text-sky-400"></i> {{ $role }}
+                            </span>
+                        @endforeach
+                        @if(!empty($managedUser->position) && $managedUser->position !== '-')
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                                <i class="ph-bold ph-briefcase text-emerald-400"></i> {{ $managedUser->position }}
+                            </span>
+                        @endif
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('teachers.show', request('user_id') ?? auth()->id()) }}" target="_blank"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="ph-bold ph-eye text-lg"></i>
+                            <span>Lihat Profil Publik</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-user-circle text-sky-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Akun:</span>
+                            <span class="text-xs font-black text-white truncate max-w-[120px]">{{ $managedUser->name }}</span>
                         </div>
-
-                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-elevate-dark">
-                            Kelola Portofolio {{ isset($targetUser) && $targetUser->id !== auth()->id() ? '- ' . $targetUser->name : '' }}
-                        </h2>
-                        <p class="text-elevate-dark/80 text-sm mt-1 font-semibold">Tambahkan karya, materi, dan pengalaman untuk ditampilkan di direktori publik.</p>
-                    </div>
-                </div>
-                <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full md:w-auto">
-                    <a href="{{ route('teachers.show', request('user_id') ?? auth()->id()) }}" target="_blank" class="w-full md:w-auto justify-center px-6 py-3.5 bg-elevate-dark border border-transparent text-white font-bold rounded-xl hover:bg-elevate-primary transition-all flex items-center gap-2 shadow-lg shadow-elevate-dark/30 active:scale-95">
-                        <i class="ph-bold ph-eye text-lg"></i> Lihat Profil Publik
-                    </a>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- Toast Success --}}

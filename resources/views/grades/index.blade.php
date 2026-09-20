@@ -81,35 +81,40 @@
          
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             
-            {{-- 1. HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 mb-10 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <h1 class="text-4xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            Akademik & E-Rapor
-                        </h1>
-                        <p class="text-[#2c3f61]/80 text-sm font-medium leading-relaxed max-w-lg">
-                            Pusat pengelolaan nilai siswa, rapor semester, dan arsip akademik sekolah secara terpadu.
-                        </p>
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <div class="bg-white/70 backdrop-blur-md px-5 py-3 rounded-2xl border border-white text-center shadow-sm">
-                            <span class="block text-2xl font-black text-[#2c3f61]">{{ count($classes) }}</span>
-                            <span class="text-[10px] uppercase font-bold text-[#2c3f61]/60 tracking-wider">Kelas</span>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Sistem Rapor Digital"
+                badgeIcon="ph-pencil-line"
+                title="Akademik & E-Rapor"
+                titleHighlight="Sekolah Terpadu"
+                description="Pusat pengelolaan nilai siswa, asesmen capaian pembelajaran, rapor semester, dan arsip akademik sekolah terpadu."
+                :chips="[
+                    ['icon' => 'ph-chalkboard', 'label' => count($classes) . ' Rombel Kelas'],
+                    ['icon' => 'ph-book-bookmark', 'label' => count($subjects) . ' Mata Pelajaran'],
+                    ['icon' => 'ph-file-xls', 'label' => 'Import/Export Excel']
+                ]"
+                heroIcon="ph-pencil-line"
+                :showcaseNumber="count($classes)"
+                showcaseLabel="Total Rombel"
+                statusOrb="Semester Aktif"
+                statusColor="sky"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            >
+                <x-slot:showcaseStats>
+                    <div class="grid grid-cols-2 gap-3 w-full text-center">
+                        <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15">
+                            <span class="block text-xl sm:text-2xl font-black text-white leading-tight">{{ count($classes) }}</span>
+                            <span class="text-[9px] uppercase font-bold text-sky-200 tracking-wider">Kelas</span>
                         </div>
-                        <div class="bg-white/70 backdrop-blur-md px-5 py-3 rounded-2xl border border-white text-center shadow-sm">
-                            <span class="block text-2xl font-black text-[#2c3f61]">{{ count($subjects) }}</span>
-                            <span class="text-[10px] uppercase font-bold text-[#2c3f61]/60 tracking-wider">Mapel</span>
+                        <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15">
+                            <span class="block text-xl sm:text-2xl font-black text-[#56bbf1] leading-tight">{{ count($subjects) }}</span>
+                            <span class="text-[9px] uppercase font-bold text-sky-200 tracking-wider">Mapel</span>
                         </div>
                     </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
 
             {{-- ALERT NOTIFIKASI --}}
             @if(session('success'))

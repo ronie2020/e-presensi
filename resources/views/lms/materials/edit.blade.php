@@ -26,21 +26,25 @@
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER ELEVATE --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group animate-enter">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight text-elevate-dark">Edit Materi Pelajaran</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">Perbarui informasi, file, atau lampiran materi ini.</p>
-                    </div>
-                    <a href="{{ route('lms.materials.index') }}" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 btn-cancel-confirm shadow-sm active:scale-95 shrink-0">
-                        <i class="ph-bold ph-arrow-left text-lg"></i> Batal
-                    </a>
-                </div>
-            </div>
+            {{-- HERO HEADER --}}
+            <x-hero-section
+                badge="LMS Pembelajaran"
+                badgeIcon="ph-book-open"
+                title="Edit Materi"
+                titleHighlight="Pembaruan Bahan Ajar"
+                description="Perbarui informasi, file modul, atau lampiran materi pembelajaran untuk siswa."
+                :chips="[
+                    ['icon' => 'ph-note-pencil', 'label' => 'Revisi Materi'],
+                    ['icon' => 'ph-folder-notch-open', 'label' => 'Bab Pembelajaran'],
+                    ['icon' => 'ph-check-circle', 'label' => 'Auto-Update']
+                ]"
+                heroIcon="ph-books"
+                statusOrb="Mode Edit"
+                statusColor="amber"
+                ctaPrimaryText="Kembali ke Materi"
+                ctaPrimaryHref="{{ route('lms.materials.index') }}"
+                ctaPrimaryIcon="ph-arrow-left"
+            />
 
             {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) DITAMBAHKAN DI SINI --}}
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">

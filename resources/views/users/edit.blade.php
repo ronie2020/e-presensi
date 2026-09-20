@@ -40,39 +40,39 @@
             <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
                 {{-- Card Header --}}
-                <div class="bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 text-elevate-dark relative overflow-hidden border-b border-white/60">
+                <div class="bg-gradient-to-r from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 md:p-10 text-white relative overflow-hidden border-b border-white/10">
                     <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                    <div class="absolute -right-6 -top-6 text-white/40 text-9xl pointer-events-none">
+                    <div class="absolute -right-6 -top-6 text-white/10 text-9xl pointer-events-none">
                         <i class="ph-fill {{ $isOwnProfile ? 'ph-user-circle' : 'ph-user-gear' }}"></i>
                     </div>
                     
                     {{-- Profile Preview di Header --}}
                     <div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
                         <div class="shrink-0 relative group">
-                            <div class="w-24 h-24 rounded-[1.5rem] overflow-hidden border-4 border-white/60 shadow-lg bg-white relative">
+                            <div class="w-24 h-24 rounded-[1.5rem] overflow-hidden border-4 border-white/20 shadow-xl bg-[#021124] relative">
                                 @if($user->photo_path)
                                     <img src="{{ asset('storage/' . $user->photo_path) }}" class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full bg-elevate-dark flex items-center justify-center text-white text-3xl font-black">
+                                    <div class="w-full h-full bg-[#031d3d] flex items-center justify-center text-[#56bbf1] text-3xl font-black">
                                         {{ substr($user->name, 0, 2) }}
                                     </div>
                                 @endif
                             </div>
                         </div>
                         <div class="text-center md:text-left">
-                            <h2 class="text-2xl md:text-3xl font-black tracking-tight text-elevate-dark">{{ $isOwnProfile ? 'Profil Saya' : $user->name }}</h2>
-                            <p class="text-elevate-dark/80 text-sm font-bold mt-1">{{ $user->email }}</p>
+                            <h2 class="text-2xl md:text-3xl font-black tracking-tight text-white">{{ $isOwnProfile ? 'Profil Saya' : $user->name }}</h2>
+                            <p class="text-slate-300 text-sm font-semibold mt-1">{{ $user->email }}</p>
                             
                             {{-- Tampilkan Role sebagai Badge menggunakan Spatie --}}
                             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
                                 @foreach($user->roles as $role)
-                                    <span class="inline-flex px-3 py-1.5 rounded-lg bg-white/40 text-elevate-dark text-[10px] font-black uppercase tracking-wider border border-white/50 backdrop-blur-sm shadow-sm">
+                                    <span class="inline-flex px-3 py-1.5 rounded-lg bg-white/10 text-slate-200 text-[10px] font-black uppercase tracking-wider border border-white/15 backdrop-blur-sm shadow-sm">
                                         {{ $role->name }}
                                     </span>
                                 @endforeach
 
                                 @if($user->nip)
-                                    <span class="inline-flex px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-200 backdrop-blur-sm shadow-sm">
+                                    <span class="inline-flex px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30 backdrop-blur-sm shadow-sm">
                                         NIP. {{ $user->nip }}
                                     </span>
                                 @endif

@@ -50,7 +50,7 @@
     </style>
     @endpush
 
-    <div class="py-8 sm:py-10 relative min-h-screen font-sans text-elevate-dark pb-32 overflow-hidden">
+    <div class="py-8 sm:py-10 relative min-h-screen font-sans text-white bg-elevate-surface pb-32 overflow-hidden">
         
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
@@ -68,52 +68,93 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8 relative z-10">
             
-            {{-- HERO SECTION (ELEVATED THEME) --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-elevate-gradient-main p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/60">
+            {{-- HERO SECTION (UNIFIED ELEVATE DARK GLASS - AQUALIFE & E-LEARNING) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 md:p-10 mb-8 text-white shadow-2xl shadow-[#0d52a1]/25 border border-white/20 backdrop-blur-2xl overflow-hidden group">
                 
+                {{-- Specular Top Rim Light (Ref 2) --}}
+                <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
                 <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
+
+                {{-- Ambient Radiant Glow Orbs (Ref 1 & 2) --}}
+                <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#56bbf1]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-[#0d52a1]/30 rounded-full blur-[90px] pointer-events-none"></div>
 
                 <div class="relative z-10 flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
                     
-                    {{-- KIRI: Judul & Intro --}}
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full lg:w-auto">
-                        <div class="w-16 h-16 rounded-2xl bg-white/50 backdrop-blur-md flex items-center justify-center border border-white/60 shadow-sm shrink-0 text-elevate-primary">
-                            <i class="ph-duotone ph-shield-check text-4xl"></i>
-                        </div>
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevate-soft/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm shadow-sm">
+                    {{-- KIRI: Judul, Intro, Chips & Navigasi --}}
+                    <div class="space-y-4 max-w-2xl">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
                                 <span class="relative flex h-2 w-2">
                                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                   <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
-                                Sistem Monitoring Realtime
+                                Pos Piket Digital
                             </div>
-                            <h1 class="text-3xl md:text-4xl font-extrabold text-elevate-dark tracking-tight leading-none mb-2">
-                                Pos Guru Piket
-                            </h1>
-                            <p class="text-elevate-dark/80 text-sm max-w-md font-medium">
-                                Kelola izin keluar masuk siswa dengan cepat dan akurat.
-                            </p>
+                            <nav class="flex items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/15">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-500/30 text-sky-200 border border-sky-400/40 shadow-sm flex items-center gap-1.5">
+                                    <i class="ph-bold ph-shield-check"></i> Pos Piket
+                                </span>
+                                <a href="{{ route('permit.history') }}" class="px-3 py-1 rounded-full text-xs font-bold text-slate-300 hover:text-white hover:bg-white/15 transition-all flex items-center gap-1.5">
+                                    <i class="ph-bold ph-clock-counter-clockwise text-sky-400"></i> Riwayat
+                                </a>
+                                <a href="{{ route('permit.analytics') }}" class="px-3 py-1 rounded-full text-xs font-bold text-slate-300 hover:text-white hover:bg-white/15 transition-all flex items-center gap-1.5">
+                                    <i class="ph-bold ph-chart-polar text-amber-400"></i> Analitik
+                                </a>
+                            </nav>
+                        </div>
+                        
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-snug sm:leading-snug md:leading-normal">
+                            <span class="block text-slate-100">Pelayanan Izin &</span>
+                            <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">Pos Guru Piket</span>
+                        </h1>
+                        <p class="text-slate-300 text-sm md:text-base font-medium leading-relaxed">
+                            Kelola izin keluar-masuk siswa dengan cepat dan akurat. Terverifikasi barcode scanner kamera, RFID fisik, dan otomatis tercatat ke riwayat.
+                        </p>
+
+                        {{-- Feature Highlight Chips (Ref 1 & 2) --}}
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Scanner Kamera & RFID
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Timer Durasi Otomatis
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Monitoring Realtime
+                            </div>
                         </div>
                     </div>
 
-                    {{-- KANAN: WIDGET JAM --}}
-                    <div class="bg-white/60 backdrop-blur-md border border-white/80 p-6 rounded-[2rem] relative overflow-hidden flex items-center justify-between gap-6 w-full lg:w-auto shrink-0 mt-4 lg:mt-0 shadow-sm hover:bg-white transition-colors">
-                        <div class="absolute top-0 right-0 p-4 opacity-5 text-elevate-dark pointer-events-none">
-                            <i class="ph-fill ph-clock text-7xl"></i>
+                    {{-- KANAN: GLOWING FOCAL SHOWCASE + WIDGET JAM (Ref 1 Glowing Ring & Floating Bubbles) --}}
+                    <div class="relative flex items-center justify-center shrink-0 w-full lg:w-auto mt-4 lg:mt-0">
+                        {{-- Multi-Layer Luminous Outer Ring --}}
+                        <div class="absolute w-64 h-64 rounded-full border border-sky-400/20 bg-sky-500/5 blur-sm pointer-events-none"></div>
+                        <div class="absolute w-56 h-56 rounded-full border border-sky-300/30 shadow-[0_0_40px_rgba(86,187,241,0.2)] pointer-events-none"></div>
+
+                        {{-- Floating Micro Bubbles (Ref 1) --}}
+                        <div class="absolute -top-3 -right-2 z-20 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sky-300 text-[10px] font-bold shadow-lg flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Live Scanner
+                        </div>
+                        <div class="absolute -bottom-2 -left-3 z-20 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-slate-300 text-[10px] font-bold shadow-lg flex items-center gap-1.5">
+                            <i class="ph-bold ph-barcode text-sky-400"></i>
+                            RFID Ready
                         </div>
 
-                        <div>
-                            <h3 class="text-xs font-bold text-elevate-dark uppercase tracking-widest mb-1 flex items-center gap-2 relative z-10">
-                                <i class="ph-bold ph-calendar-blank text-elevate-primary"></i> Waktu Sekarang
-                            </h3>
-                            <div id="clockDate" class="text-elevate-dark text-sm font-bold relative z-10 opacity-80">...</div>
-                        </div>
+                        {{-- Core Clock Card --}}
+                        <div class="relative z-10 bg-[#031d3d]/90 backdrop-blur-xl border border-white/20 p-6 sm:p-7 rounded-[2.5rem] shadow-2xl flex items-center justify-between gap-6 min-w-[280px] group-hover:border-sky-400/40 transition-all">
+                            <div>
+                                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1 flex items-center gap-2">
+                                    <i class="ph-bold ph-calendar-blank text-sky-400"></i> Waktu Sekarang
+                                </h3>
+                                <div id="clockDate" class="text-white text-sm font-bold">...</div>
+                            </div>
 
-                        <div class="text-right relative z-10 bg-white/80 px-5 py-3 rounded-2xl border border-slate-100 shrink-0 shadow-sm">
-                            <div id="clockTime" class="text-3xl sm:text-4xl font-black text-elevate-dark digital-clock tracking-tight leading-none">00:00:00</div>
-                            <div class="text-[10px] font-black text-elevate-primary mt-1.5 uppercase tracking-widest text-right">WIB / GMT+7</div>
+                            <div class="text-right bg-[#021124]/90 px-5 py-3.5 rounded-2xl border border-white/15 shrink-0 shadow-sm">
+                                <div id="clockTime" class="text-3xl sm:text-4xl font-black text-white digital-clock tracking-tight leading-none">00:00:00</div>
+                                <div class="text-[10px] font-black text-sky-400 mt-1.5 uppercase tracking-widest text-right">WIB / GMT+7</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -126,22 +167,22 @@
                 <div class="lg:col-span-5 space-y-6 md:space-y-8 lg:sticky lg:top-6">
                     
                     {{-- SCANNER CARD --}}
-                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden animate-enter delay-100 group">
+                    <div class="bg-[#031d3d]/90 backdrop-blur-md p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-white/10 relative overflow-hidden animate-enter delay-100 group">
                         
                         <div class="flex justify-between items-center mb-8">
-                            <h3 class="font-black text-elevate-dark flex items-center gap-3 text-lg">
-                                <div class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/20 flex items-center justify-center">
+                            <h3 class="font-black text-white flex items-center gap-3 text-lg">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 text-sky-400 border border-white/15 flex items-center justify-center">
                                     <i class="ph-bold ph-qr-code text-xl"></i>
                                 </div>
                                 Scan / Input
                             </h3>
                             
                             {{-- SWITCH MODE --}}
-                            <div class="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 shadow-inner" title="Auto Focus RFID">
+                            <div class="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 shadow-inner" title="Auto Focus RFID">
                                 <label class="flex items-center cursor-pointer relative">
                                     <input type="checkbox" id="kioskModeToggle" class="sr-only peer" checked>
-                                    <div class="w-8 h-4.5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-elevate-primary shadow-inner"></div>
-                                    <span class="ml-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">RFID Mode</span>
+                                    <div class="w-8 h-4.5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-sky-500 shadow-inner"></div>
+                                    <span class="ml-3 text-[10px] font-black text-slate-300 uppercase tracking-widest">RFID Mode</span>
                                 </label>
                             </div>
                         </div>
@@ -151,7 +192,7 @@
                             <div id="cameraContainer" class="hidden mb-4 relative bg-slate-900 rounded-2xl overflow-hidden shadow-inner border-4 border-slate-900 ring-1 ring-white/20">
                                 <div id="reader" class="w-full bg-black"></div>
                                 <div class="absolute bottom-4 left-0 right-0 text-center pointer-events-none z-10">
-                                    <span class="bg-elevate-dark/80 text-white text-xs px-4 py-2 rounded-xl backdrop-blur-md border border-white/10 font-bold shadow-sm inline-block">
+                                    <span class="bg-[#021124]/90 text-white text-xs px-4 py-2 rounded-xl backdrop-blur-md border border-white/10 font-bold shadow-sm inline-block">
                                         Arahkan QR Code ke Kamera
                                     </span>
                                 </div>
@@ -162,28 +203,28 @@
                             {{-- INPUT FIELD --}}
                             <div class="relative group/input">
                                 <input type="text" id="scannerInput" 
-                                    class="w-full pl-14 pr-16 py-4 md:py-5 rounded-2xl border-2 border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-mono text-lg md:text-xl font-bold text-elevate-dark transition-all placeholder:text-slate-400 placeholder:font-sans placeholder:font-medium shadow-sm group-hover/input:border-elevate-accent/50 outline-none" 
+                                    class="w-full pl-14 pr-16 py-4 md:py-5 rounded-2xl border-2 border-white/15 bg-[#021124]/90 focus:bg-[#021124] focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-mono text-lg md:text-xl font-bold text-white transition-all placeholder:text-slate-500 placeholder:font-sans placeholder:font-medium shadow-sm group-hover/input:border-elevate-accent/50 outline-none" 
                                     placeholder="Tempel Kartu / NIS..." autofocus autocomplete="off">
                                 
-                                <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/input:text-elevate-primary transition-colors">
+                                <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/input:text-sky-400 transition-colors">
                                     <i class="ph-duotone ph-barcode text-2xl"></i>
                                 </div>
                                 
-                                <div id="inputSpinner" class="hidden absolute right-5 top-1/2 -translate-y-1/2 text-elevate-primary">
+                                <div id="inputSpinner" class="hidden absolute right-5 top-1/2 -translate-y-1/2 text-sky-400">
                                     <i class="ph-bold ph-spinner animate-spin text-2xl"></i>
                                 </div>
                                 
-                                <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-200 text-elevate-primary p-2 md:p-3 rounded-xl hover:bg-elevate-soft hover:border-elevate-accent transition cursor-pointer active:scale-95">
+                                <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-sky-600 shadow-sm border border-sky-500 text-white p-2 md:p-3 rounded-xl hover:bg-sky-500 transition cursor-pointer active:scale-95">
                                     <i class="ph-bold ph-arrow-right text-lg"></i>
                                 </button>
                             </div>
 
                             {{-- ACTION BUTTONS --}}
                             <div class="grid grid-cols-2 gap-3 mt-4">
-                                <button onclick="PiketApp.toggleCamera()" id="btnCamera" class="col-span-1 text-xs font-bold px-4 py-4 bg-white hover:bg-elevate-soft text-elevate-dark hover:text-elevate-primary hover:border-elevate-accent/50 rounded-2xl transition-all flex items-center justify-center gap-2 border border-slate-200 shadow-sm active:scale-95">
+                                <button onclick="PiketApp.toggleCamera()" id="btnCamera" class="col-span-1 text-xs font-bold px-4 py-4 bg-white/10 hover:bg-white/20 text-white hover:text-sky-300 hover:border-sky-400/50 rounded-2xl transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm active:scale-95">
                                     <i class="ph-bold ph-camera text-xl"></i> <span id="cameraText">Buka Kamera</span>
                                 </button>
-                                <button onclick="PiketApp.openModalManual()" class="col-span-1 text-xs font-bold px-4 py-4 bg-elevate-soft hover:bg-elevate-primary hover:text-white text-elevate-primary border border-elevate-accent/30 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95">
+                                <button onclick="PiketApp.openModalManual()" class="col-span-1 text-xs font-bold px-4 py-4 bg-sky-600 hover:bg-sky-500 text-white border border-sky-400/30 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95">
                                     <i class="ph-bold ph-keyboard text-xl"></i> Input Manual
                                 </button>
                             </div>
@@ -240,29 +281,29 @@
 
                 {{-- KOLOM KANAN: LIVE MONITORING (Cards) --}}
                 <div class="lg:col-span-7 animate-enter delay-200 h-full flex flex-col">
-                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col min-h-[500px] lg:h-full relative overflow-hidden">
+                    <div class="bg-[#031d3d]/90 backdrop-blur-md rounded-[2.5rem] shadow-xl border border-white/10 flex flex-col min-h-[500px] lg:h-full relative overflow-hidden">
                         
                         {{-- HEADER MONITORING --}}
-                        <div class="p-6 md:p-8 border-b border-slate-100 bg-white/90 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
+                        <div class="p-6 md:p-8 border-b border-white/10 bg-[#031d3d]/95 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
                             <div>
-                                <h3 class="font-black text-elevate-dark text-lg sm:text-xl flex items-center gap-3">
+                                <h3 class="font-black text-white text-lg sm:text-xl flex items-center gap-3">
                                     <span class="relative flex h-3 w-3">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-peach-dark opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-3 w-3 bg-elevate-peach-dark"></span>
+                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+                                      <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
                                     </span>
                                     Sedang Di Luar
                                 </h3>
-                                <p class="text-xs text-elevate-dark/60 font-medium mt-1.5 ml-6">Siswa yang belum kembali ke kelas.</p>
+                                <p class="text-xs text-slate-400 font-medium mt-1.5 ml-6">Siswa yang belum kembali ke kelas.</p>
                             </div>
                             
-                            <div id="activeCountBadge" class="bg-elevate-dark text-white px-5 sm:px-6 py-3 rounded-2xl shadow-lg shadow-elevate-dark/30 text-center min-w-[80px] sm:min-w-[90px] shrink-0 border border-transparent">
+                            <div id="activeCountBadge" class="bg-sky-600 text-white px-5 sm:px-6 py-3 rounded-2xl shadow-lg text-center min-w-[80px] sm:min-w-[90px] shrink-0 border border-sky-400/30">
                                 <span class="block text-2xl sm:text-3xl font-black leading-none">{{ collect($activePermits ?? [])->count() }}</span>
-                                <span class="text-[9px] font-black uppercase tracking-widest text-elevate-accent mt-1 block">Siswa</span>
+                                <span class="text-[9px] font-black uppercase tracking-widest text-sky-200 mt-1 block">Siswa</span>
                             </div>
                         </div>
                         
                         {{-- GRID CARD --}}
-                        <div id="activePermitsContainer" class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 bg-slate-50/50">
+                        <div id="activePermitsContainer" class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 bg-transparent">
                             @if(collect($activePermits ?? [])->count() > 0)
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     @foreach($activePermits as $permit)

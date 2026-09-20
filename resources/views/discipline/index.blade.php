@@ -34,40 +34,33 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION MICROSOFT ELEVATE THEME (Classic Style) --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                
-                {{-- Abstract Shapes Ornaments ala Elevate --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute top-10 right-32 w-28 h-28 bg-white/40 rounded-[2rem] rotate-45 pointer-events-none shadow-sm backdrop-blur-md border border-white/50"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
-                    <div class="text-center md:text-left">
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 flex items-center justify-center md:justify-start gap-3 text-elevate-dark">
-                            <div class="w-12 h-12 rounded-xl bg-white/40 text-elevate-dark flex items-center justify-center shrink-0 shadow-sm backdrop-blur-sm">
-                                <i class="ph-bold ph-clipboard-text text-2xl"></i>
-                            </div>
-                            Catatan Kedisiplinan
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold leading-relaxed max-w-lg ml-0 md:ml-16">
-                            Kelola poin siswa, pantau klasemen pelanggaran, dan lihat rekapitulasi per kelas dalam satu dashboard yang terintegrasi.
-                        </p>
-                    </div>
-                    <div class="flex flex-wrap justify-center md:justify-end gap-3 w-full md:w-auto mt-2 md:mt-0">
-                        {{-- TOMBOL ANALITIK (Elevate Dark) --}}
-                        <a href="{{ route('discipline.analytics') }}" class="w-full md:w-auto text-center px-5 py-3.5 bg-elevate-dark text-white rounded-xl font-bold hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 active:scale-95 flex items-center justify-center gap-2">
-                            <i class="ph-bold ph-chart-line-up text-lg"></i>
-                            <span>Statistik & Analitik</span>
-                        </a>
-                        {{-- TOMBOL PENGATURAN (Elevate Light) --}}
-                        <a href="{{ route('discipline-types.index') }}" class="w-full md:w-auto text-center px-5 py-3.5 bg-white text-elevate-dark rounded-xl font-bold hover:bg-elevate-peach-light transition-all shadow-sm border border-slate-100 active:scale-95 flex items-center justify-center gap-2">
-                            <i class="ph-bold ph-gear text-lg text-elevate-primary"></i>
-                            <span>Atur Poin</span>
-                        </a>
-                    </div>                    
-                </div>
-            </div>
+            <x-hero-section
+                badge="Kesiswaan & Tata Tertib"
+                badgeIcon="warning-circle"
+                title="Monitoring &"
+                titleHighlight="Catatan Kedisiplinan"
+                description="Kelola poin siswa, pantau klasemen pelanggaran, dan lihat rekapitulasi per kelas dalam satu dashboard terpadu."
+                :chips="['Pencatatan Poin Pelanggaran', 'Pantauan Siswa Berisiko', 'Amnesti & Pembinaan']"
+                :showcaseIcon="'shield-check'"
+                showcaseLabel="Sistem Tata Tertib"
+                showcaseStatus="Aktif Terpantau"
+                :showcaseBubbles="[
+                    ['icon' => 'warning', 'label' => 'Real-time Log', 'pos' => '-top-2 -right-2'],
+                    ['icon' => 'scales', 'label' => 'Aturan Poin', 'pos' => '-bottom-2 -left-2']
+                ]"
+            >
+                <x-slot:actions>
+                    <a href="{{ route('discipline.analytics') }}" class="group bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white shadow-lg shadow-sky-600/25 border border-white/20 px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                        <i class="ph-bold ph-chart-line-up text-base"></i>
+                        <span>Statistik & Analitik</span>
+                        <i class="ph-bold ph-arrow-up-right group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                    </a>
+                    <a href="{{ route('discipline-types.index') }}" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-sky-400/40 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                        <i class="ph-bold ph-gear text-base text-sky-400"></i>
+                        <span>Atur Poin Pelanggaran</span>
+                    </a>
+                </x-slot:actions>
+            </x-hero-section>
 
             {{-- Pesan Flash Sukses --}}
             @if (session('success'))

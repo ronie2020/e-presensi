@@ -40,53 +40,30 @@
                 </div>
             @endif
 
-            {{-- HEADER DASHBOARD ELEVATE --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                
-                {{-- Kartu Hari Ini (Elevate Gradient) --}}
-                <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 animate-enter group">
-                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
-                    <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500 text-white pointer-events-none">
-                        <i class="ph-fill ph-calendar-check text-[10rem]"></i>
-                    </div>
-                    
-                    <div class="relative z-10 h-full flex flex-col justify-between">
-                        <a href="{{ route('dashboard') }}" class="group/btn bg-white/40 hover:bg-white text-elevate-dark px-4 py-2.5 rounded-xl font-bold text-xs backdrop-blur-sm border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 active:scale-95">
-                            <i class="ph-bold ph-arrow-left group-hover/btn:-translate-x-1 transition-transform"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <div>
-                            <p class="text-elevate-dark/80 font-black text-sm mb-1 flex items-center gap-2 uppercase tracking-wider"><i class="ph-bold ph-calendar-blank"></i> Hari Ini</p>
-                            <h3 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }}</h3>
-                        </div>
-                        <div class="mt-6">
-                            <span class="bg-white/60 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/50 shadow-sm inline-flex items-center gap-2 text-elevate-dark">
-                                <span class="bg-[#107C10] w-2.5 h-2.5 rounded-full animate-pulse"></span>
-                                {{ count($groupedSchedules ?? []) }} Pertemuan Kelas
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                {{-- Kartu Welcome --}}
-                <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex items-center justify-between relative overflow-hidden animate-enter" style="animation-delay: 100ms">
-                    <div class="relative z-10 max-w-lg">
-                        <h3 class="font-black text-elevate-dark text-3xl mb-3 flex items-center gap-2">
-                            Halo, {{ Auth::user()->name }}! <span class="animate-wave origin-bottom-right inline-block">👋</span>
-                        </h3>
-                        <p class="text-elevate-dark/70 leading-relaxed font-semibold text-sm">
-                            Sudah siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan baik.
-                        </p>
-                    </div>
-                    
-                    <div class="hidden md:block relative z-10">
-                        <div class="w-24 h-24 bg-elevate-peach-light rounded-[2rem] flex items-center justify-center text-elevate-peach-dark shadow-sm border border-elevate-peach rotate-3 hover:rotate-6 transition-transform">
-                            <i class="ph-duotone ph-chalkboard-teacher text-5xl"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Jurnal Mengajar Guru"
+                badgeIcon="ph-chalkboard-teacher"
+                title="Agenda Kelas"
+                titleHighlight="Hari Ini"
+                description="Halo, {{ Auth::user()->name }}! Siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan akurat."
+                :chips="[
+                    ['icon' => 'ph-calendar-blank', 'label' => \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y')],
+                    ['icon' => 'ph-chalkboard-teacher', 'label' => count($groupedSchedules ?? []) . ' Pertemuan Kelas'],
+                    ['icon' => 'ph-check-circle', 'label' => 'Jurnal & Presensi']
+                ]"
+                heroIcon="ph-chalkboard-teacher"
+                :showcaseNumber="count($groupedSchedules ?? [])"
+                showcaseLabel="Pertemuan Hari Ini"
+                statusOrb="Aktif Mengajar"
+                statusColor="emerald"
+                ctaPrimaryText="Riwayat Mengajar"
+                ctaPrimaryHref="{{ route('teaching.history') }}"
+                ctaPrimaryIcon="ph-clock-counter-clockwise"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            />
 
             {{-- LIST JADWAL --}}
             <div class="flex items-center justify-between mb-6 animate-enter" style="animation-delay: 200ms">

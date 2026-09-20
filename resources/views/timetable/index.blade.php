@@ -5,33 +5,40 @@
 
         {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
-            <div class="relative rounded-[2rem] sm:rounded-[2.5rem] bg-elevate-gradient-main p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8">
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-magic-wand"></i> Generator Cerdas & Manual
-                        </div>
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Penyusun Jadwal Pelajaran
-                        </h1>
-                        <p class="text-elevate-dark/80 text-xs sm:text-sm md:text-base font-semibold leading-relaxed max-w-lg">
-                            Otomatisasi penyusunan jadwal dengan algoritma cerdas, atau gunakan fitur *Drag and Drop* untuk menyusun secara manual.
-                        </p>
+            <x-hero-section
+                badge="GENERATOR CERDAS & MANUAL"
+                badgeIcon="ph-fill ph-magic-wand"
+                showcaseIcon="ph-duotone ph-calendar-blank"
+                showcaseTitle="Penyusun Jadwal"
+                showcaseSubtitle="Timetable Master">
+                <x-slot:title>
+                    <span class="block text-slate-100">Penyusun & Generator</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Jadwal Pelajaran
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Otomatisasi penyusunan jadwal dengan algoritma cerdas anti-bentrok, atau gunakan fitur drag & drop interaktif secara manual.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-lightning text-amber-400"></i> Auto-Generate
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-hand-grabbing text-sky-400"></i> Drag & Drop Manual
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-shield-check text-emerald-400"></i> Validasi Bentrok
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-chalkboard-teacher text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Total Beban:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $totalTeachingLoads }} JP</span>
                     </div>
-                    
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        <div class="bg-white/60 backdrop-blur-md px-5 py-4 sm:px-6 sm:py-5 rounded-2xl border border-white/80 flex-1 md:flex-none min-w-[140px] text-center md:text-left shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-chalkboard-teacher text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Beban</span>
-                            </div>
-                            <span class="block text-2xl sm:text-3xl font-black text-elevate-dark tracking-tight">{{ $totalTeachingLoads }} <span class="text-sm font-bold text-elevate-dark/50">JP</span></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

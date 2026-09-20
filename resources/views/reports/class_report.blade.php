@@ -27,22 +27,31 @@
         <div class="max-w-[95%] mx-auto px-2 sm:px-6 lg:px-8 relative z-10">
             
             {{-- HERO SECTION --}}
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8 no-print">
-                <div class="animate-enter lg:col-span-1 rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 md:p-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 relative flex flex-col justify-center min-h-[160px]">
-                     <div class="absolute -top-10 -left-10 w-40 h-40 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                     <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
-                     
-                     <div class="relative z-10">
-                         <a href="{{ route('reports.class') }}" class="group bg-white/40 hover:bg-white text-elevate-dark px-4 py-2.5 rounded-xl font-bold text-sm backdrop-blur-sm border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit mb-4">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Kembali</span>
-                        </a>
-                        <h1 class="text-2xl font-black mb-1 tracking-tight text-elevate-dark flex items-center gap-2">Laporan Harian</h1>
-                        <p class="text-elevate-dark/80 text-xs font-semibold">Detail absensi per tanggal.</p>
-                    </div>
-                </div>
+            <div class="mb-8 no-print">
+                <x-hero-section
+                    badge="Laporan Presensi Rombel"
+                    badgeIcon="ph-chalkboard-teacher"
+                    title="Laporan Harian"
+                    titleHighlight="Per Kelas"
+                    description="Detail rekaman presensi siswa per tanggal dan kelas dengan kalkulasi otomatis status Hadir, Izin, Sakit, dan Alpha."
+                    :chips="[
+                        ['icon' => 'ph-chalkboard', 'label' => 'Analisis Rombel'],
+                        ['icon' => 'ph-calendar-blank', 'label' => 'Rekap Per Tanggal'],
+                        ['icon' => 'ph-printer', 'label' => 'Siap Cetak']
+                    ]"
+                    heroIcon="ph-chalkboard-teacher"
+                    statusOrb="Aktif"
+                    statusColor="sky"
+                    ctaPrimaryText="Rekap Semua Kelas"
+                    ctaPrimaryHref="{{ route('reports.class') }}"
+                    ctaPrimaryIcon="ph-arrow-left"
+                    ctaSecondaryText="Dashboard Utama"
+                    ctaSecondaryHref="{{ route('dashboard') }}"
+                    ctaSecondaryIcon="ph-squares-four"
+                />
+            </div>
 
-                <div class="animate-enter lg:col-span-3 bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 shadow-xl shadow-slate-200/40 relative overflow-hidden flex items-center" style="animation-delay: 100ms">
+            <div class="animate-enter bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 shadow-xl shadow-slate-200/40 relative overflow-hidden flex items-center mb-8 no-print" style="animation-delay: 100ms">
                      
                      {{-- Form Filter --}}
                      <form action="{{ route('reports.class.detail') }}" method="GET" class="w-full flex flex-col md:flex-row gap-5 items-end md:items-center" @submit="loading = true">

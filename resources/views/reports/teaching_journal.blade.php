@@ -6,29 +6,28 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION ELEVATE --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center justify-center md:justify-start gap-3">
-                            <span class="text-4xl text-elevate-primary">📊</span> Monitoring Jurnal
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold leading-relaxed max-w-lg">
-                            Rekapitulasi aktivitas belajar mengajar (KBM) guru beserta kehadiran siswa secara terperinci.
-                        </p>
-                    </div>
-                    
-                    {{-- TOMBOL CETAK DIPERBARUI --}}
-                    {{-- Tombol ini sekarang mengirim parameter &print=true ke controller untuk membuka versi PDF --}}
-                    <a href="{{ route('reports.teaching_journal', array_merge(request()->all(), ['print' => 'true'])) }}" target="_blank" class="group bg-white/60 border border-white/50 backdrop-blur-md text-elevate-dark hover:bg-white px-6 py-3.5 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center gap-2 transform active:scale-95">
-                        <i class="ph-bold ph-printer text-xl group-hover:scale-110 transition-transform"></i>
-                        <span>Cetak Laporan / PDF</span>
-                    </a>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Rekapitulasi KBM"
+                badgeIcon="ph-chart-bar"
+                title="Monitoring Jurnal"
+                titleHighlight="KBM Guru"
+                description="Rekapitulasi aktivitas belajar mengajar (KBM) guru beserta kehadiran siswa secara terperinci dan real-time."
+                :chips="[
+                    ['icon' => 'ph-calendar-blank', 'label' => 'Periode Terpilih'],
+                    ['icon' => 'ph-users', 'label' => count($teachers ?? []) . ' Tenaga Pendidik'],
+                    ['icon' => 'ph-file-pdf', 'label' => 'Siap Cetak PDF']
+                ]"
+                heroIcon="ph-chart-bar"
+                statusOrb="Data Valid"
+                statusColor="emerald"
+                ctaPrimaryText="Cetak Laporan / PDF"
+                ctaPrimaryHref="{{ route('reports.teaching_journal', array_merge(request()->all(), ['print' => 'true'])) }}"
+                ctaPrimaryIcon="ph-printer"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            />
 
             {{-- FILTER CARD --}}
             <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 mb-8 relative overflow-hidden">

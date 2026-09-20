@@ -1,112 +1,170 @@
 <x-app-layout>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <div class="py-8 bg-slate-50 min-h-screen font-sans relative">
+    <div class="py-8 bg-elevate-surface min-h-screen font-sans relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Header Panel --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 md:p-10 mb-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/20 overflow-hidden border border-white/60">
+            {{-- HERO SECTION (UNIFIED ELEVATE DARK GLASS - AQUALIFE & E-LEARNING) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 md:p-10 mb-8 text-white shadow-2xl shadow-[#0d52a1]/25 border border-white/20 backdrop-blur-2xl overflow-hidden group">
+                {{-- Specular Top Rim Light (Ref 2) --}}
+                <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+
+                {{-- Ambient Radiant Glow Orbs (Ref 1 & 2) --}}
+                <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#56bbf1]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-[#0d52a1]/30 rounded-full blur-[90px] pointer-events-none"></div>
                 
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md text-xs font-bold uppercase tracking-widest text-[#0d52a1] border border-white/50 mb-4 shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher text-lg"></i> Dashboard Wali Kelas
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2 text-[#0d52a1]">Kelas {{ $class->name ?? 'IX-A' }}</h1>
-                        <p class="font-medium text-sm md:text-base max-w-2xl text-[#2c3f61]/80">Pantau statistik kedisiplinan, literasi, pembiasaan, dan kehadiran anak didik Anda secara komprehensif.</p>
-                    </div>
-                                        
-                    <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                        
-                        {{-- ============================================ --}}
-                        {{-- FORM FILTER: HARIAN, BULAN, & SEMESTER --}}
-                        {{-- ============================================ --}}
-                        <form action="{{ route('homeroom.dashboard') }}" method="GET" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
-                            @if(request('class_id'))
-                                <input type="hidden" name="class_id" value="{{ request('class_id') }}">
-                            @endif
-                            
-                            {{-- Input Kalender (Harian) --}}
-                            <div class="relative w-full sm:w-auto flex items-center">
-                                <input type="date" 
-                                       name="filter_date" 
-                                       value="{{ request('filter_date') }}" 
-                                       onchange="this.form.submit()" 
-                                       class="w-full sm:w-[150px] px-4 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm"
-                                       title="Pilih Tanggal Spesifik">
-                                
-                                {{-- Tombol X (Hapus Filter Tanggal) akan muncul jika tanggal diisi --}}
-                                @if(request('filter_date'))
-                                    <a href="{{ route('homeroom.dashboard', ['class_id' => request('class_id')]) }}" 
-                                       class="absolute right-12 w-8 h-8 bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-200 flex items-center justify-center transition-colors shadow-sm" 
-                                       title="Hapus Filter Tanggal">
-                                        <i class="ph-bold ph-x"></i>
-                                    </a>
-                                @endif
+                <div class="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
+                    
+                    {{-- KIRI: Judul, Intro, Chips & Dual CTA Buttons --}}
+                    <div class="space-y-4 max-w-2xl">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/15 text-xs font-bold transition-all shadow-sm">
+                                <i class="ph-bold ph-arrow-left text-sky-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                                <i class="ph-fill ph-chalkboard-teacher text-sky-400"></i> Dashboard Wali Kelas
                             </div>
+                        </div>
 
-                            <span class="hidden sm:block text-sm font-bold text-[#2c3f61]/60">atau</span>
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-snug sm:leading-snug md:leading-normal text-white">
+                            <span class="block text-slate-100">Monitoring &</span>
+                            <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">Performa Kelas {{ $class->name ?? 'IX-A' }}</span>
+                        </h1>
+                        <p class="text-slate-300 text-sm sm:text-base font-medium leading-relaxed">
+                            Pantau statistik kedisiplinan, literasi harian, pembiasaan ibadah, dan kehadiran anak didik Anda secara komprehensif dan terintegrasi.
+                        </p>
 
-                            {{-- Dropdown Periode (Dengan opsi Hari Ini) --}}
-                            <div class="relative w-full sm:w-auto">
-                                <select name="period" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm">
-                                    {{-- Tampilkan Opsi ini otomatis kepilih jika user sedang memakai kalender harian --}}
-                                    <option value="" class="hidden text-slate-400" {{ request('filter_date') ? 'selected' : '' }} disabled>-- Filter Tanggal Aktif --</option>
-                                    
-                                    <option value="today" {{ request('period') == 'today' && !request('filter_date') ? 'selected' : '' }} class="text-slate-800 font-semibold">Hari Ini</option>
-                                    <option value="this_month" {{ request('period', 'this_month') == 'this_month' && !request('filter_date') ? 'selected' : '' }} class="text-slate-800 font-semibold">Bulan Ini</option>
-                                    <option value="last_month" {{ request('period') == 'last_month' && !request('filter_date') ? 'selected' : '' }} class="text-slate-800 font-semibold">Bulan Lalu</option>
-                                    <option value="semester_1" {{ request('period') == 'semester_1' && !request('filter_date') ? 'selected' : '' }} class="text-slate-800 font-semibold">Semester Ganjil</option>
-                                    <option value="semester_2" {{ request('period') == 'semester_2' && !request('filter_date') ? 'selected' : '' }} class="text-slate-800 font-semibold">Semester Genap</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#0d52a1]">
-                                    <i class="ph-bold ph-calendar-blank text-lg"></i>
+                        {{-- Feature Highlight Chips (Ref 1 & 2) --}}
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Absensi Real-time
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Jurnal Karakter & Poin
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Rekap Otomatis
+                            </div>
+                        </div>
+
+                        {{-- Dual Export Action Buttons (Ref 2) --}}
+                        <div class="flex flex-wrap items-center gap-3 pt-2">
+                            <a href="{{ route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')]) }}" target="_blank" class="group bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white shadow-lg shadow-sky-600/25 border border-white/20 px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                                <i class="ph-bold ph-printer text-base"></i>
+                                <span>Cetak Laporan PDF</span>
+                                <i class="ph-bold ph-arrow-up-right group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+                            </a>
+
+                            <a href="{{ route('homeroom.export', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')]) }}" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-emerald-400/40 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                                <i class="ph-bold ph-file-xls text-base text-emerald-400"></i>
+                                <span>Export Excel</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- KANAN: Luminous Showcase & Filter Controls (Ref 1 & 2) --}}
+                    <div class="flex flex-col items-center xl:items-end gap-5 w-full xl:w-auto">
+                        {{-- Circular Luminous Focal Showcase (Ref 1) --}}
+                        <div class="relative flex items-center justify-center shrink-0 w-full sm:w-auto">
+                            {{-- Pulse Rings --}}
+                            <div class="absolute w-56 h-56 rounded-full border border-[#56bbf1]/30 animate-pulse pointer-events-none"></div>
+                            <div class="absolute w-64 h-64 rounded-full border border-sky-400/15 pointer-events-none"></div>
+
+                            {{-- Core Glowing Card --}}
+                            <div class="relative z-10 w-48 h-48 rounded-full bg-gradient-to-br from-[#0d52a1]/80 via-[#031d3d]/90 to-[#021124] p-1 border-2 border-[#56bbf1]/50 shadow-2xl shadow-sky-500/30 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0d52a1] flex items-center justify-center text-white shadow-lg shadow-sky-400/40 mb-1.5 border border-white/20">
+                                    <i class="ph-bold ph-chalkboard-teacher text-xl"></i>
+                                </div>
+                                <span class="text-2xl sm:text-3xl font-black tracking-tight text-white leading-none">
+                                    {{ $class->name ?? 'IX-A' }}
+                                </span>
+                                <span class="text-[10px] font-bold text-sky-300 uppercase tracking-widest mt-1">
+                                    {{ $stats['total_students'] ?? 0 }} Siswa
+                                </span>
+                                <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                                    <i class="ph-fill ph-check-circle"></i> Terpantau
                                 </div>
                             </div>
-                        </form>
-                        {{-- ============================================ --}}
 
-                         @if(isset($isAdminOrKepsek) && $isAdminOrKepsek && isset($allClasses))
-                            <form action="{{ route('homeroom.dashboard') }}" method="GET" class="relative w-full sm:w-auto">
-                                @if(request('period'))
-                                    <input type="hidden" name="period" value="{{ request('period') }}">
-                                @endif
-                                @if(request('filter_date'))
-                                    <input type="hidden" name="filter_date" value="{{ request('filter_date') }}">
-                                @endif
+                            {{-- Floating Action Orbs / Bubbles (Ref 1) --}}
+                            <div class="absolute -top-2 -right-2 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                                <i class="ph-bold ph-star text-amber-400"></i>
+                                <span>{{ $stats['total_merits'] ?? 0 }} Poin</span>
+                            </div>
 
-                                <select name="class_id" onchange="this.form.submit()" class="w-full pl-5 pr-12 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-md text-[#0d52a1] border border-white/50 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-sm transition-all text-sm">
-                                    @foreach($allClasses as $c)
-                                        <option value="{{ $c->id }}" {{ isset($class) && $class->id == $c->id ? 'selected' : '' }} class="text-slate-800 font-semibold">
-                                            Pantau Kelas {{ $c->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#0d52a1]">
-                                    <i class="ph-bold ph-caret-down text-lg"></i>
+                            <div class="absolute -bottom-2 -left-2 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                                <i class="ph-bold ph-calendar-check text-sky-400"></i>
+                                <span>{{ request('filter_date') ? 'Harian' : (request('period') ? ucfirst(str_replace('_', ' ', request('period'))) : 'Bulan Ini') }}</span>
+                            </div>
+                        </div>
+
+                        {{-- Dark Glass Filter Bar Dock --}}
+                        <div class="w-full bg-[#021124]/80 backdrop-blur-xl p-3 rounded-2xl border border-white/15 shadow-xl flex flex-col sm:flex-row flex-wrap items-center gap-2">
+                            <form action="{{ route('homeroom.dashboard') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                @if(request('class_id'))
+                                    <input type="hidden" name="class_id" value="{{ request('class_id') }}">
+                                @endif
+                                
+                                {{-- Input Kalender (Harian) --}}
+                                <div class="relative w-full sm:w-auto flex items-center">
+                                    <input type="date" 
+                                           name="filter_date" 
+                                           value="{{ request('filter_date') }}" 
+                                           onchange="this.form.submit()" 
+                                           class="w-full sm:w-[145px] px-3 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-inner transition-all text-xs"
+                                           title="Pilih Tanggal Spesifik">
+                                    
+                                    @if(request('filter_date'))
+                                        <a href="{{ route('homeroom.dashboard', ['class_id' => request('class_id')]) }}" 
+                                           class="ml-1 w-7 h-7 bg-rose-500/20 text-rose-300 border border-rose-400/30 rounded-lg hover:bg-rose-500/40 flex items-center justify-center transition-colors shadow-sm shrink-0" 
+                                           title="Hapus Filter Tanggal">
+                                            <i class="ph-bold ph-x text-xs"></i>
+                                        </a>
+                                    @endif
+                                </div>
+
+                                <span class="hidden sm:inline text-xs font-bold text-slate-400">/</span>
+
+                                {{-- Dropdown Periode --}}
+                                <div class="relative w-full sm:w-auto">
+                                    <select name="period" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/20 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-inner transition-all text-xs">
+                                        <option value="" class="hidden text-slate-400" {{ request('filter_date') ? 'selected' : '' }} disabled>Filter Tanggal Aktif</option>
+                                        <option value="today" {{ request('period') == 'today' && !request('filter_date') ? 'selected' : '' }} class="bg-[#031d3d] text-white">Hari Ini</option>
+                                        <option value="this_month" {{ request('period', 'this_month') == 'this_month' && !request('filter_date') ? 'selected' : '' }} class="bg-[#031d3d] text-white">Bulan Ini</option>
+                                        <option value="last_month" {{ request('period') == 'last_month' && !request('filter_date') ? 'selected' : '' }} class="bg-[#031d3d] text-white">Bulan Lalu</option>
+                                        <option value="semester_1" {{ request('period') == 'semester_1' && !request('filter_date') ? 'selected' : '' }} class="bg-[#031d3d] text-white">Semester Ganjil</option>
+                                        <option value="semester_2" {{ request('period') == 'semester_2' && !request('filter_date') ? 'selected' : '' }} class="bg-[#031d3d] text-white">Semester Genap</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-sky-400">
+                                        <i class="ph-bold ph-calendar-blank text-xs"></i>
+                                    </div>
                                 </div>
                             </form>
-                        @endif
 
-                        {{-- CONTAINER TOMBOL EXPORT (PDF & EXCEL) --}}
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <!-- Tombol PDF Lama -->
-                            <a href="{{ route('homeroom.print', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')]) }}" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-[#0d52a1] text-white font-bold rounded-xl hover:bg-[#0a4282] transition-all shadow-lg shadow-[#0d52a1]/20 flex items-center justify-center gap-2 group active:scale-95 border border-[#0d52a1]/20 text-sm">
-                                <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> PDF
-                            </a>
+                            @if(isset($isAdminOrKepsek) && $isAdminOrKepsek && isset($allClasses))
+                                <form action="{{ route('homeroom.dashboard') }}" method="GET" class="relative w-full sm:w-auto">
+                                    @if(request('period'))
+                                        <input type="hidden" name="period" value="{{ request('period') }}">
+                                    @endif
+                                    @if(request('filter_date'))
+                                        <input type="hidden" name="filter_date" value="{{ request('filter_date') }}">
+                                    @endif
 
-                            <!-- Tombol EXCEL Baru -->
-                            <a href="{{ route('homeroom.export', ['class_id' => $class->id ?? '', 'period' => request('period', 'this_month'), 'filter_date' => request('filter_date')]) }}" class="w-full sm:w-auto px-5 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 group active:scale-95 border border-emerald-600/20 text-sm">
-                                <i class="ph-bold ph-file-xls group-hover:scale-110 transition-transform"></i> Excel
-                            </a>
+                                    <select name="class_id" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/20 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#56bbf1] cursor-pointer font-bold shadow-inner transition-all text-xs">
+                                        @foreach($allClasses as $c)
+                                            <option value="{{ $c->id }}" {{ isset($class) && $class->id == $c->id ? 'selected' : '' }} class="bg-[#031d3d] text-white">
+                                                Pantau Kelas {{ $c->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-sky-400">
+                                        <i class="ph-bold ph-caret-down text-xs"></i>
+                                    </div>
+                                </form>
+                            @endif
                         </div>
                     </div>
+
                 </div>
             </div>
 

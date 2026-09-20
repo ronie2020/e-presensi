@@ -120,58 +120,24 @@
                     <div class="absolute inset-0 rounded-full bg-elevate-accent/25 blur-3xl pointer-events-none"></div>
 
                     {{-- Glowing Circular Portal Ring Utama --}}
-                    <div class="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-[3.5px] border-elevate-accent shadow-[0_0_55px_rgba(86,187,241,0.65)] ring-8 ring-elevate-accent/20 bg-gradient-to-br from-[#021124] via-[#0d52a1] to-[#2c3f61] overflow-hidden flex items-center justify-center animate-portal-pulse">
+                    <div class="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full border-[3.5px] border-elevate-accent shadow-[0_0_55px_rgba(86,187,241,0.65)] ring-8 ring-elevate-accent/20 bg-gradient-to-br from-[#021124] via-[#0d52a1] to-[#2c3f61] overflow-hidden flex items-center justify-center animate-portal-pulse group">
                         
                         {{-- Latar Langit Digital di Dalam Lingkaran --}}
-                        <div class="absolute inset-0 bg-radial-at-c from-elevate-accent/30 via-transparent to-black/60 pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-radial-at-c from-elevate-accent/30 via-transparent to-black/60 pointer-events-none z-10"></div>
 
-                        {{-- Ilustrasi Siswa Modern Berheadphone dan Tablet (SVG Vektor Khusus) --}}
-                        <svg viewBox="0 0 200 200" class="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Background Aura -->
-                            <circle cx="100" cy="95" r="70" fill="url(#portalAvatarGrad)" opacity="0.35"/>
-                            <defs>
-                                <radialGradient id="portalAvatarGrad" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" stop-color="#56bbf1"/>
-                                    <stop offset="100%" stop-color="#021124" stop-opacity="0"/>
-                                </radialGradient>
-                            </defs>
-                            
-                            <!-- Badges Cahaya di Belakang -->
-                            <circle cx="100" cy="85" r="48" fill="#1a2e4d" opacity="0.8"/>
+                        {{-- Gambar Karakter / Avatar Siswa (Dapat diganti dengan file gambar apapun di public/images/portal-student.png) --}}
+                        <img src="{{ asset('images/digital2.jpg') }}" 
+                             alt="Siswa Digital SMPN 3 Lakbok" 
+                             class="w-full h-full object-cover object-center relative z-0 transition-transform duration-700 group-hover:scale-105 filter drop-shadow-2xl"
+                             onerror="this.onerror=null; this.src='{{ asset('images/netila.jpg') }}';">
 
-                            <!-- Leher & Baju Siswa -->
-                            <path d="M78 140 L122 140 L126 195 L74 195 Z" fill="#0284c7"/>
-                            <path d="M60 165 C60 148 78 142 100 142 C122 142 140 148 140 165 L145 200 L55 200 Z" fill="#0d52a1"/>
-                            <path d="M88 142 L100 158 L112 142 Z" fill="#f8fafc"/>
-                            
-                            <!-- Wajah Karakter -->
-                            <path d="M88 128 L88 144 L112 144 L112 128 Z" fill="#fdba74"/>
-                            <ellipse cx="100" cy="102" rx="30" ry="34" fill="#fed7aa"/>
-                            
-                            <!-- Mata & Senyum Ceria -->
-                            <ellipse cx="90" cy="102" rx="3.2" ry="4" fill="#0f172a"/>
-                            <ellipse cx="110" cy="102" rx="3.2" ry="4" fill="#0f172a"/>
-                            <circle cx="91.5" cy="100.5" r="1.2" fill="#ffffff"/>
-                            <circle cx="111.5" cy="100.5" r="1.2" fill="#ffffff"/>
-                            <path d="M94 116 Q100 123 106 116" stroke="#ea580c" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-                            
-                            <!-- Rambut Modern -->
-                            <path d="M70 96 C70 68 85 64 100 64 C116 64 130 68 130 96 C130 84 125 74 115 72 C105 70 95 72 85 76 C76 80 72 88 70 96 Z" fill="#1e293b"/>
-                            <path d="M72 88 Q88 72 108 76 Q125 80 128 92" stroke="#334155" stroke-width="3" fill="none"/>
-
-                            <!-- Headphone Ungu-Biru Premium -->
-                            <path d="M66 92 C66 70 80 56 100 56 C120 56 134 70 134 92" stroke="#6366f1" stroke-width="6" stroke-linecap="round" fill="none"/>
-                            <rect x="62" y="90" width="10" height="24" rx="5" fill="#4338ca"/>
-                            <rect x="128" y="90" width="10" height="24" rx="5" fill="#4338ca"/>
-                            <circle cx="67" cy="102" r="2.5" fill="#a5b4fc"/>
-                            <circle cx="133" cy="102" r="2.5" fill="#a5b4fc"/>
-
-                            <!-- Tablet Digital di Tangan Siswa -->
-                            <rect x="68" y="160" width="64" height="42" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-                            <rect x="73" y="165" width="54" height="32" rx="3" fill="#0369a1"/>
-                            <path d="M78 174 L90 174 M78 180 L102 180 M78 186 L96 186" stroke="#e0f2fe" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="116" cy="180" r="5" fill="#38bdf8" opacity="0.8"/>
-                        </svg>
+                        {{-- Subtle bottom gradient for badge --}}
+                        <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#021124]/90 via-[#021124]/40 to-transparent z-10 pointer-events-none"></div>
+                        <div class="absolute bottom-3 text-center z-20">
+                            <span class="text-[9px] font-black uppercase tracking-widest text-elevate-accent bg-[#021124]/80 backdrop-blur-md px-3 py-1 rounded-full border border-elevate-accent/40 shadow-sm">
+                                Portal Pembelajaran
+                            </span>
+                        </div>
                     </div>
 
                     {{-- 6 BUBBLE BADGES IKONIK MENGORBIT (Persis Mockup Gambar) --}}

@@ -97,88 +97,85 @@
         setScore(value) { this.currentScore = value; }
     }" class="page-container p-4 md:p-8 space-y-6 md:space-y-8 min-h-screen bg-slate-50 font-jakarta print-container">
         
-       {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
-       <div class="animate-enter relative rounded-[2rem] md:rounded-[3rem] bg-elevate-gradient-main p-8 md:p-12 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/40 no-print">
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none no-print z-0"></div>
-            
-            <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-white/30 rounded-full blur-[100px] group-hover:opacity-60 transition-opacity duration-1000 hero-decoration z-0"></div>
-            <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-white/20 rounded-full blur-[80px] hero-decoration z-0"></div>
-            
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                <div class="flex-1 min-w-0">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-sm">
-                        <i class="ph-fill ph-moon-stars"></i> Program Ramadhan
+        {{-- HERO SECTION --}}
+        <div class="no-print">
+            <x-hero-section
+                badge="Program Ramadhan"
+                badgeIcon="ph-moon-stars"
+                title="Rekap Mutabaah"
+                titleHighlight="Ibadah Siswa"
+                description="Monitoring ibadah harian, shalat fardhu, tilawah Qur'an, dan pembiasaan Ramadhan siswa secara menyeluruh."
+                :chips="[
+                    ['icon' => 'ph-calendar-blank', 'label' => \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y')],
+                    ['icon' => 'ph-chalkboard-teacher', 'label' => ($selectedClass ? 'Kelas Terpilih' : 'Semua Kelas')],
+                    ['icon' => 'ph-trophy', 'label' => 'Leaderboard Terintegrasi']
+                ]"
+                heroIcon="ph-moon-stars"
+                statusOrb="Aktif"
+                statusColor="amber"
+                ctaPrimaryText="Leaderboard Ramadhan"
+                ctaPrimaryHref="{{ route('admin.ramadan.leaderboard') }}"
+                ctaPrimaryIcon="ph-trophy"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            />
+        </div>
+
+        {{-- FILTER & EXPORT BAR --}}
+        <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 no-print animate-enter">
+            <form action="{{ route('admin.ramadan.reports') }}" method="GET" class="flex flex-col lg:flex-row items-end gap-4 justify-between">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1 w-full">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 block">Tanggal</label>
+                        <div class="relative group">
+                            <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
+                            <input type="date" name="date" value="{{ $date }}" onchange="this.form.submit()" 
+                                class="block w-full pl-11 pr-4 py-3 bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all shadow-sm">
+                        </div>
                     </div>
-                    <h1 class="text-4xl md:text-5xl font-black text-elevate-dark tracking-tighter mb-4 leading-none">
-                        Rekap <span class="text-elevate-dark">Mutabaah</span> Siswa
-                    </h1>
-                    <p class="text-elevate-dark/80 text-sm md:text-lg max-w-xl leading-relaxed font-medium">
-                        Monitoring ibadah harian dan kegiatan Ramadhan.
-                        <br><span class="text-elevate-dark font-black">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
-                    </p>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 block">Kelas</label>
+                        <div class="relative group">
+                            <i class="ph-bold ph-chalkboard absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
+                            <select name="class_id" onchange="this.form.submit()" 
+                                class="block w-full pl-11 pr-10 py-3 bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all appearance-none shadow-sm cursor-pointer">
+                                <option value="">Semua Kelas</option>
+                                @foreach($classes as $c)
+                                    <option value="{{ $c->id }}" {{ $selectedClass == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 block">Cari Siswa</label>
+                        <div class="relative group flex items-center gap-2">
+                            <div class="relative w-full">
+                                <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
+                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama siswa..." 
+                                    class="block w-full pl-11 pr-4 py-3 bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all shadow-sm placeholder:font-medium placeholder-slate-400">
+                            </div>
+                            <button type="submit" class="p-3 rounded-2xl bg-elevate-primary text-white hover:bg-elevate-dark transition shadow-md"><i class="ph-bold ph-caret-right"></i></button>
+                        </div>
+                    </div>
                 </div>
 
-                {{-- FILTER FORM --}}
-                <div class="w-full lg:w-[450px] xl:w-[500px] shrink-0 flex flex-col gap-4">
-                    <form action="{{ route('admin.ramadan.reports') }}" method="GET" class="bg-white/30 backdrop-blur-md p-6 rounded-[2rem] border border-white/40 shadow-sm flex flex-col gap-5">
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Tanggal</label>
-                                <div class="relative group">
-                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
-                                    <input type="date" name="date" value="{{ $date }}" onchange="this.form.submit()" 
-                                        class="block w-full pl-11 pr-4 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all uppercase shadow-sm">
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Kelas</label>
-                                <div class="relative group">
-                                    <i class="ph-bold ph-chalkboard absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
-                                    <select name="class_id" onchange="this.form.submit()" 
-                                        class="block w-full pl-11 pr-10 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all appearance-none shadow-sm cursor-pointer">
-                                        <option value="">Semua Kelas</option>
-                                        @foreach($classes as $c)
-                                            <option value="{{ $c->id }}" {{ $selectedClass == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2 sm:col-span-2">
-                                <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Cari Siswa</label>
-                                <div class="relative group flex items-center gap-2">
-                                    <div class="relative w-full">
-                                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
-                                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama siswa..." 
-                                            class="block w-full pl-11 pr-4 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all shadow-sm placeholder:font-medium placeholder-elevate-dark/50">
-                                    </div>
-                                    <button type="submit" class="p-3 rounded-2xl bg-elevate-primary text-white hover:bg-elevate-dark transition shadow-md"><i class="ph-bold ph-caret-right"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    {{-- Tombol Export --}}
-                    @if($selectedClass)
-                        <div class="flex items-center gap-2 mt-2">
-                            <button onclick="window.print()" class="flex-1 py-3 bg-white hover:bg-slate-50 text-elevate-dark rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-slate-200">
-                                <i class="ph-bold ph-printer text-xl"></i>
-                                <span class="uppercase tracking-wider text-[9px]">Cetak Harian</span>
-                            </button>
-                            <a href="{{ route('admin.ramadan.exportPdf', ['class_id' => $selectedClass]) }}" target="_blank" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-transparent">
-                                <i class="ph-bold ph-file-pdf text-xl"></i>
-                                <span class="uppercase tracking-wider text-[9px]">Rekap Full PDF</span>
-                            </a>
-                            <a href="{{ route('admin.ramadan.exportExcel', ['class_id' => $selectedClass]) }}" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-transparent">
-                                <i class="ph-bold ph-file-csv text-xl"></i>
-                                <span class="uppercase tracking-wider text-[9px]">Export Excel</span>
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
+                @if($selectedClass)
+                    <div class="flex items-center gap-2 w-full lg:w-auto shrink-0">
+                        <button type="button" onclick="window.print()" class="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-elevate-dark rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                            <i class="ph-bold ph-printer text-base"></i> Cetak
+                        </button>
+                        <a href="{{ route('admin.ramadan.exportPdf', ['class_id' => $selectedClass]) }}" target="_blank" class="px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                            <i class="ph-bold ph-file-pdf text-base"></i> PDF
+                        </a>
+                        <a href="{{ route('admin.ramadan.exportExcel', ['class_id' => $selectedClass]) }}" class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                            <i class="ph-bold ph-file-csv text-base"></i> Excel
+                        </a>
+                    </div>
+                @endif
+            </form>
         </div>
 
         {{-- BENTO GRID STATS --}}

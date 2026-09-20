@@ -71,68 +71,42 @@
             </div>
 
             {{-- 2. HEADER SESI KELAS ELEVATE --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 mb-8 overflow-hidden group border border-white/60">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                    <div class="space-y-3 w-full">
-                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="bg-elevate-dark shadow-sm text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border border-transparent">
-                                <!-- Ganti $session->schoolClass menjadi: -->
-                                {{ $session->timetable->studentClass->name ?? 'Kelas' }}
-                            </span>
-                            @if(isset($session->timetable->timeslot->name))
-                                <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                    <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ $session->timetable->timeslot->name }}
-                                </span>
-                            @endif
-                            <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($session->timetable->timeslot->end_time)->format('H:i') }}
-                            </span>
-
-                            @if(!$isOpen)
-                                <span class="bg-slate-100/90 backdrop-blur text-slate-500 text-xs font-bold px-4 py-2 rounded-xl uppercase border border-slate-200 flex items-center gap-1.5 shadow-sm">
-                                    <i class="ph-fill ph-lock-key"></i> Selesai
-                                </span>
-                            @else
-                                <span class="bg-[#107C10]/90 backdrop-blur text-white text-xs font-bold px-4 py-2 rounded-xl uppercase border border-[#B7DFB9] flex items-center gap-1.5 shadow-sm">
-                                    <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> Live Session
-                                </span>
-                            @endif
-                        </div>
-                         <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-elevate-dark break-words">
-                            <!-- Ganti $session->subject menjadi: -->
-                            {{ $session->timetable->subject->name ?? 'Mata Pelajaran' }}
-                        </h1>
-                    </div>
-                    
-                    @if($isOpen)
-                        <form id="close-session-form" action="{{ route('teaching.close', $session->id) }}" method="POST" class="w-full md:w-auto">
-                            @csrf
-                            <button type="button" onclick="confirmCloseClass()" class="w-full md:w-auto group/btn relative overflow-hidden bg-white hover:bg-[#FDE7E9] text-[#D13438] pl-4 pr-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center md:justify-start gap-3 border border-white/60">
-                                <div class="bg-[#FDE7E9] p-2.5 rounded-xl group-hover/btn:bg-[#F4C3C9] transition-colors border border-[#F4C3C9]">
-                                    <i class="ph-bold ph-power text-xl"></i>
-                                </div>
-                                <div class="text-left">
-                                    <div class="text-[10px] uppercase opacity-80 font-black tracking-widest text-[#D13438]">Selesai</div>
-                                    <div class="text-sm font-black">Tutup Kelas</div>
-                                </div>
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('teaching.edit', $session->id) }}" class="w-full md:w-auto group/btn relative overflow-hidden bg-elevate-dark hover:bg-elevate-primary text-white pl-4 pr-6 py-3 rounded-2xl font-bold shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 flex items-center justify-center md:justify-start gap-3 border border-transparent">
-                            <div class="bg-white/20 p-2.5 rounded-xl group-hover/btn:bg-white/30 transition-colors">
-                                <i class="ph-bold ph-pencil-simple text-xl"></i>
-                            </div>
-                            <div class="text-left">
-                                <div class="text-[10px] uppercase opacity-90 font-black tracking-widest text-white">Ada Kesalahan?</div>
-                                <div class="text-sm font-black">Edit Data</div>
-                            </div>
+            {{-- 2. HEADER SESI KELAS ELEVATE --}}
+            <x-hero-section
+                badge="{{ $session->timetable->studentClass->name ?? 'Kelas' }}"
+                badgeIcon="ph-chalkboard-teacher"
+                title="{{ $session->timetable->subject->name ?? 'Mata Pelajaran' }}"
+                titleHighlight="Jurnal Pembelajaran"
+                description="Sesi pembelajaran tatap muka dan monitoring absensi siswa di kelas."
+                :chips="[
+                    ['icon' => 'ph-calendar-check', 'label' => ($session->timetable->timeslot->name ?? 'Sesi Pelajaran')],
+                    ['icon' => 'ph-clock', 'label' => \Carbon\Carbon::parse($session->timetable->timeslot->start_time)->format('H:i') . ' - ' . \Carbon\Carbon::parse($session->timetable->timeslot->end_time)->format('H:i')],
+                    ['icon' => ($isOpen ? 'ph-broadcast' : 'ph-lock-key'), 'label' => ($isOpen ? 'Live Session' : 'Sesi Selesai')]
+                ]"
+                heroIcon="ph-chalkboard-teacher"
+                statusOrb="{{ $isOpen ? 'Aktif' : 'Selesai' }}"
+                statusColor="{{ $isOpen ? 'emerald' : 'slate' }}"
+            >
+                <x-slot name="cta">
+                    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                        <a href="{{ route('teaching.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-200 text-xs font-bold transition-all backdrop-blur-md shadow-sm active:scale-95">
+                            <i class="ph-bold ph-arrow-left"></i> Kembali
                         </a>
-                    @endif
-                </div>
-            </div>
+                        @if($isOpen)
+                            <form id="close-session-form" action="{{ route('teaching.close', $session->id) }}" method="POST" class="w-full sm:w-auto">
+                                @csrf
+                                <button type="button" onclick="confirmCloseClass()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-lg shadow-rose-600/30 active:scale-95 border border-rose-400/30">
+                                    <i class="ph-bold ph-power text-base"></i> Tutup Kelas
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('teaching.edit', $session->id) }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] text-white text-xs font-bold transition-all shadow-lg shadow-cyan-500/25 active:scale-95 border border-cyan-300/30">
+                                <i class="ph-bold ph-pencil-simple text-base"></i> Edit Data
+                            </a>
+                        @endif
+                    </div>
+                </x-slot>
+            </x-hero-section>
 
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8">
                 

@@ -4,23 +4,54 @@
     <div class="py-8 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HEADER DASHBOARD --}}
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <div>
-                    <h1 class="text-3xl font-black text-elevate-dark tracking-tight flex items-center gap-3">
-                        <i class="ph-duotone ph-chart-pie-slice text-elevate-primary"></i>
-                        Analitik Kedisiplinan & BK
-                    </h1>
-                    <p class="text-slate-500 font-medium">Visualisasi tren perilaku siswa untuk mendukung pengambilan kebijakan sekolah.</p>
-                </div>
-                <div class="flex gap-2">
-                    <a href="{{ route('discipline.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
-                        <i class="ph-bold ph-arrow-left"></i> Kembali ke Log
-                    </a>
-                    <a href="{{ route('recovery.index') }}" class="px-5 py-2.5 bg-elevate-primary rounded-2xl text-white font-bold hover:bg-elevate-dark transition-all flex items-center gap-2 shadow-lg shadow-elevate-primary/20">
-                        <i class="ph-bold ph-plus-circle"></i> Halaman Recovery
-                    </a>
-                </div>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="ANALITIK PERILAKU & BK"
+                    badgeIcon="ph-fill ph-chart-pie-slice"
+                    showcaseIcon="ph-duotone ph-chart-polar"
+                    showcaseTitle="Tren Kedisiplinan"
+                    showcaseSubtitle="Evaluasi Bimbingan Konseling">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Analisis & Statistik</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Kedisiplinan & BK
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Visualisasi komprehensif tren perilaku siswa, poin pelanggaran vs prestasi, dan status konseling untuk mendukung kebijakan sekolah.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-warning-circle text-rose-400"></i> Pelanggaran & Poin
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-medal text-amber-400"></i> Prestasi (Merit)
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-heart text-emerald-400"></i> Sesi Bimbingan BK
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('discipline.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Kembali ke Log</span>
+                        </a>
+                        <a href="{{ route('recovery.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 transition-all duration-300">
+                            <i class="ph-bold ph-sparkle"></i>
+                            <span>Halaman Recovery</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-amber-500/30 backdrop-blur-md">
+                            <i class="ph-fill ph-chats text-amber-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">BK Pending:</span>
+                            <span class="text-sm font-black text-amber-400 font-mono">{{ \App\Models\BkSession::where('status', 'pending')->count() }}</span>
+                        </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- 1. STATS OVERVIEW --}}

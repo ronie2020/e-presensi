@@ -2,8 +2,43 @@
     <div class="py-6 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col sm:flex-row items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
+            <x-hero-section
+                badge="MATRIKS JADWAL GURU"
+                badgeIcon="ph-fill ph-chalkboard-teacher"
+                showcaseIcon="ph-duotone ph-calendar-check"
+                showcaseTitle="Jadwal Per Guru"
+                showcaseSubtitle="Plotting Matriks Mingguan">
+                <x-slot:title>
+                    <span class="block text-slate-100">Matriks Jadwal</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Per Tenaga Pendidik
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Isi dan sesuaikan matriks jadwal mengajar mingguan untuk setiap guru secara spesifik dan terstruktur.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-user-circle text-sky-400"></i> Pilih Guru
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-table text-emerald-400"></i> Matriks Senin-Jumat
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-floppy-disk text-cyan-400"></i> Auto Save
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-users text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Total Guru:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $teachers->count() }}</span>
+                    </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 mb-6 flex flex-col sm:flex-row items-center gap-4">
                 <div class="w-full sm:w-1/3">
                     <label class="block text-xs font-bold text-elevate-primary uppercase mb-2">Pilih Guru untuk Diisi Jadwalnya</label>
                     <select onchange="window.location.href='?teacher_id=' + this.value" class="w-full rounded-xl border-slate-300 bg-slate-50 text-sm font-bold text-elevate-dark py-2.5">

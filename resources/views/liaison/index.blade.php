@@ -18,40 +18,59 @@
     {{-- TAMBAHAN: x-init="init()" --}}
     <div class="font-jakarta p-4 md:p-8 space-y-8 min-h-screen bg-slate-50" x-data="liaisonHandler()" x-init="init()">
         
-        {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-        <div class="animate-enter relative rounded-[3rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 md:p-12 text-[#2c3f61] shadow-2xl shadow-[#56bbf1]/10 overflow-hidden group border border-white/60">
-            {{-- Abstract Shapes Ornaments --}}
-            <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl group-hover:rotate-[15deg] transition-transform duration-1000"></div>
-            <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl group-hover:-rotate-[15deg] transition-transform duration-1000"></div>
-            <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-            
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                <div class="max-w-2xl">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="inline-flex bg-white/60 backdrop-blur-md rounded-2xl p-1.5 border border-white shadow-sm">
-                            <button @click="mode = 'note'" 
-                                    :class="mode === 'note' ? 'bg-white text-[#0d52a1] shadow-md border border-white' : 'text-[#2c3f61]/70 hover:text-[#2c3f61]'"
-                                    class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2">
-                                <i class="ph-fill ph-book-open"></i> Buku Penghubung
-                            </button>
-                            <button @click="mode = 'chat'; fetchChatContacts()" 
-                                    :class="mode === 'chat' ? 'bg-white text-[#0d52a1] shadow-md border border-white' : 'text-[#2c3f61]/70 hover:text-[#2c3f61]'"
-                                    class="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2 relative">
-                                <i class="ph-fill ph-chats-circle"></i> Diskusi Ortu
-                                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white"></span>
-                            </button>
-                        </div>
+        {{-- HERO SECTION --}}
+        <div class="mb-8 relative z-10">
+            <x-hero-section
+                badge="KOMUNIKASI DUA ARAH"
+                badgeIcon="ph-fill ph-chats"
+                showcaseIcon="ph-duotone ph-notebook"
+                showcaseTitle="Buku Penghubung"
+                showcaseSubtitle="Kolaborasi Guru & Wali">
+                <x-slot:title>
+                    <span class="block text-slate-100" x-text="mode === 'note' ? 'Buku Penghubung' : 'Ruang Diskusi'"></span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Wali Murid & Sekolah
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Pantau kedisiplinan, catatan perkembangan karakter, serta jalin komunikasi dua arah yang intensif dengan orang tua siswa.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-book-open text-sky-400"></i> Catatan Harian
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-chats-circle text-emerald-400"></i> Chat Interaktif
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-bell-ringing text-amber-400"></i> Notifikasi Instan
+                    </span>
+                </x-slot:chips>
+                <x-slot:cta>
+                    <div class="inline-flex p-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <button @click="mode = 'note'" 
+                                :class="mode === 'note' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25' : 'text-slate-400 hover:text-slate-200'"
+                                class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                            <i class="ph-fill ph-book-open text-sm"></i>
+                            <span>Buku Penghubung</span>
+                        </button>
+                        <button @click="mode = 'chat'; fetchChatContacts()" 
+                                :class="mode === 'chat' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25' : 'text-slate-400 hover:text-slate-200'"
+                                class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 relative">
+                            <i class="ph-fill ph-chats-circle text-sm"></i>
+                            <span>Diskusi Ortu</span>
+                            <span class="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+                        </button>
                     </div>
-
-                    <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-4 leading-none text-[#2c3f61]">
-                        <span x-text="mode === 'note' ? 'Pusat Catatan' : 'Pesan Masuk'"></span>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0d52a1] to-[#56bbf1]">Sekolah</span>
-                    </h1>
-                    <p class="text-[#2c3f61]/80 text-sm md:text-lg font-medium leading-relaxed max-w-lg">
-                        Pantau kedisiplinan dan jalin komunikasi dua arah yang efektif dengan orang tua siswa setiap saat.
-                    </p>
-                </div>
-            </div>
+                </x-slot:cta>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-activity text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Modul:</span>
+                        <span class="text-xs font-black text-emerald-400 uppercase tracking-wider" x-text="mode === 'note' ? 'Jurnal Catatan' : 'Chat Aktif'"></span>
+                    </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         {{-- MAIN CONTENT --}}

@@ -138,9 +138,9 @@
 
                                     <!-- TOOLTIP (Desktop Only) -->
                                     <div x-show="!sidebarExpanded"
-                                         class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-2 bg-white text-elevate-dark text-xs font-bold rounded-xl shadow-xl shadow-elevate-accent/20 border border-slate-100 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[100] translate-x-[-10px] group-hover:translate-x-0">
+                                         class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-2 bg-[#031d3d] text-white text-xs font-bold rounded-xl shadow-2xl shadow-black/80 border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-[100] translate-x-[-10px] group-hover:translate-x-0">
                                         {{ $item['name'] }}
-                                        <div class="absolute top-1/2 -left-1 -mt-1 w-2 h-2 bg-white border-l border-b border-slate-100 transform rotate-45"></div>
+                                        <div class="absolute top-1/2 -left-1 -mt-1 w-2 h-2 bg-[#031d3d] border-l border-b border-white/20 transform rotate-45"></div>
                                     </div>
                                 </a>
                             </li>

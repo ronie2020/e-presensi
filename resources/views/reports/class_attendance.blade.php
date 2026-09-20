@@ -6,55 +6,53 @@
 
         {{-- HEADER & FILTER --}}
        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 md:p-10 flex flex-col xl:flex-row items-center justify-between gap-6 overflow-hidden border border-white/60 shadow-xl shadow-elevate-accent/20 group">
-                
-                {{-- Bentuk Dekoratif Elevated --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute top-10 right-10 w-28 h-28 bg-white/40 rounded-[2rem] rotate-45 pointer-events-none shadow-sm backdrop-blur-md border border-white/50"></div>
+            <x-hero-section
+                badge="Rekapitulasi Presensi"
+                badgeIcon="ph-chart-bar"
+                title="Rekapitulasi Kehadiran"
+                titleHighlight="Per Rombel Kelas"
+                description="Analisis komposisi kehadiran (Hadir, Telat, Sakit, Izin, Alpha) dan monitoring harian seluruh rombel kelas."
+                :chips="[
+                    ['icon' => 'ph-calendar', 'label' => \Carbon\Carbon::parse($startDate)->format('d M') . ' - ' . \Carbon\Carbon::parse($endDate)->format('d M Y')],
+                    ['icon' => 'ph-chalkboard-teacher', 'label' => count($classes ?? []) . ' Rombel Aktif'],
+                    ['icon' => 'ph-file-xls', 'label' => 'Excel & Print Support']
+                ]"
+                heroIcon="ph-chart-bar"
+                :showcaseNumber="count($classes ?? [])"
+                showcaseLabel="Total Rombel"
+                statusOrb="Data Sinkron"
+                statusColor="emerald"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <form action="{{ route('reports.class') }}" method="GET" class="flex flex-wrap items-center gap-2 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/15">
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg border border-white/15">
+                                <span class="text-[10px] font-bold text-sky-200 uppercase">Dari</span>
+                                <input type="date" name="start_date" value="{{ $startDate }}" class="border-none p-0 text-xs font-bold text-white focus:ring-0 cursor-pointer bg-transparent">
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg border border-white/15">
+                                <span class="text-[10px] font-bold text-sky-200 uppercase">Sampai</span>
+                                <input type="date" name="end_date" value="{{ $endDate }}" class="border-none p-0 text-xs font-bold text-white focus:ring-0 cursor-pointer bg-transparent">
+                            </div>
+                            <button type="submit" class="bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] text-white px-3.5 py-2 rounded-lg font-bold text-xs transition shadow-md flex items-center justify-center gap-1 active:scale-95 border border-white/20">
+                                <i class="ph-bold ph-funnel"></i>
+                            </button>
+                        </form>
 
-                {{-- Judul & Navigasi --}}
-                <div class="relative z-10 w-full xl:w-auto text-center xl:text-left">
-                     <a href="{{ route('dashboard') }}" class="group bg-white/60 hover:bg-white text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-sm border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
-                        <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                        <span>Kembali ke Dashboard</span>
-                    </a>
-                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-elevate-dark flex items-center justify-center xl:justify-start gap-3">
-                        <i class="ph-duotone ph-chart-bar text-elevate-primary"></i> Rekapitulasi Per Kelas
-                    </h1>
-                    <p class="text-elevate-dark/80 text-sm mt-3 font-semibold max-w-lg mx-auto xl:mx-0 leading-relaxed">
-                        Analisis komposisi kehadiran (Hadir, Telat, Alpha) dan monitoring harian.
-                    </p>
-                </div>
-
-               {{-- Filter & Actions --}}
-                <div class="relative z-10 flex flex-wrap gap-3 w-full xl:w-auto items-center justify-center xl:justify-end">
-                    <form action="{{ route('reports.class') }}" method="GET" class="flex flex-col sm:flex-row gap-2 bg-white/60 backdrop-blur-md p-2.5 rounded-2xl border border-white/60 w-full sm:w-auto shadow-sm">
-                        <div class="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-elevate-soft shadow-sm w-full sm:w-auto">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Dari</span>
-                            <input type="date" name="start_date" value="{{ $startDate }}" class="border-none p-0 text-sm font-bold text-elevate-dark focus:ring-0 cursor-pointer w-full sm:w-32 bg-transparent">
+                        <div class="flex gap-2">
+                            <a href="{{ route('reports.class.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/30 flex items-center gap-1.5 border border-white/20 active:scale-95">
+                                <i class="ph-bold ph-microsoft-excel-logo text-base"></i> <span>Excel</span>
+                            </a>
+                            <a href="{{ route('reports.class.print', request()->all()) }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider backdrop-blur-md border border-white/20 flex items-center gap-1.5 active:scale-95">
+                                <i class="ph-bold ph-printer text-base"></i> <span>Print</span>
+                            </a>
                         </div>
-                        <div class="hidden sm:flex items-center text-elevate-dark/50"><i class="ph-bold ph-arrow-right"></i></div>
-                        <div class="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-elevate-soft shadow-sm w-full sm:w-auto">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase">Sampai</span>
-                            <input type="date" name="end_date" value="{{ $endDate }}" class="border-none p-0 text-sm font-bold text-elevate-dark focus:ring-0 cursor-pointer w-full sm:w-32 bg-transparent">
-                        </div>
-                        <button type="submit" class="bg-elevate-dark hover:bg-elevate-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 w-full sm:w-auto active:scale-95">
-                            <i class="ph-bold ph-funnel"></i>
-                        </button>
-                    </form>
-                   
-                   {{-- Export Buttons --}}
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <a href="{{ route('reports.class.excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="bg-white hover:bg-[#DFF6DD] text-[#107C10] border border-white/60 px-4 py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm flex-1 sm:flex-none" title="Download Excel">
-                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span>Excel</span>
-                        </a>
-                        <a href="{{ route('reports.class.print', request()->all()) }}" target="_blank" class="bg-white hover:bg-[#FDE7E9] text-[#D13438] border border-white/60 px-4 py-3.5 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm flex-1 sm:flex-none" title="Cetak PDF">
-                            <i class="ph-bold ph-printer text-lg"></i> <span>Print</span>
-                        </a>
                     </div>
-                </div>
-            </div>
+                </x-slot:cta>
+            </x-hero-section>
         </div>
 
         {{-- MAIN CONTENT --}}

@@ -108,8 +108,8 @@
 
         <!-- BACKGROUND KHUSUS MOBILE (Mode Gelap Transparan) -->
         <div class="md:hidden absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
-            <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/95 via-[#021124]/90 to-[#021124] backdrop-blur-md"></div>
+            <div class="absolute inset-0 bg-cover bg-center opacity-15 filter blur-[12px] scale-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/95 via-[#021124]/90 to-[#021124]"></div>
         </div>
 
         <main class="flex w-full min-h-screen relative z-10 flex-col md:flex-row">
@@ -117,12 +117,12 @@
             <!-- ================= BAGIAN KIRI (KONSEP MOCKUP: PORTAL & INFORMASI) ================= -->
             <section class="hidden md:flex md:w-1/2 lg:w-3/5 p-12 lg:p-16 text-white flex-col justify-between relative shadow-[20px_0_40px_rgba(0,0,0,0.4)] z-20 rounded-br-[4rem] min-h-screen overflow-hidden group border-r border-white/10">
                 
-                <!-- Background Image & Gelombang -->
-                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105" 
+                <!-- Background Image & Gelombang: Halus dan Tidak Menyilaukan -->
+                <div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110 opacity-15 filter blur-[10px] scale-105" 
                      style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
                 
                 <!-- Overlay Gradien -->
-                <div class="absolute inset-0 bg-gradient-to-r from-[#021124]/95 via-[#021124]/88 to-[#021124]/70 z-0"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-[#021124]/95 via-[#021124]/90 to-[#021124]/75 z-0"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-[#021124] via-transparent to-transparent opacity-80 z-0"></div>
 
                 <!-- Konten Atas -->

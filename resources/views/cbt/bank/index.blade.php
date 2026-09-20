@@ -30,38 +30,40 @@
                 <div id="flash-success" data-message="{{ session('success') }}"></div>
             @endif
 
-            {{-- HERO SECTION GRID (DISESUAIKAN DENGAN TEMA CBT) --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                
-                {{-- Kartu Info Utama (Span 2 Kolom) - Classic Style with Stronger Elevate Colors --}}
-                <div class="md:col-span-2 relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                    
-                    {{-- Bentuk Dekoratif --}}
-                    <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                    <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                    <div class="absolute top-10 right-10 w-28 h-28 bg-white/40 rounded-[2rem] rotate-45 pointer-events-none shadow-sm backdrop-blur-md border border-white/50"></div>
-                    
-                    <div class="relative z-10 flex flex-col justify-center h-full">
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 text-elevate-dark">Gudang Bank Soal</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">
-                            Kelola arsip soal berdasarkan folder tahun ajaran atau jenis asesmen agar tertata rapi.
-                        </p>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Gudang Soal CBT"
+                badgeIcon="ph-stack"
+                title="Bank Soal"
+                titleHighlight="Sekolah Terpadu"
+                description="Kelola arsip butir soal dan kisi-kisi berdasarkan folder tahun ajaran atau jenis asesmen agar tertata rapi."
+                :chips="[
+                    ['icon' => 'ph-folder-notch-open', 'label' => count($categories ?? []) . ' Folder Tersimpan'],
+                    ['icon' => 'ph-check-circle', 'label' => 'Validasi Otomatis'],
+                    ['icon' => 'ph-lock-key', 'label' => 'Aman & Terenkripsi']
+                ]"
+                heroIcon="ph-stack"
+                :showcaseNumber="count($categories ?? [])"
+                showcaseLabel="Total Folder"
+                statusOrb="Arsip Aktif"
+                statusColor="sky"
+            >
+                <x-slot:cta>
+                    <div class="flex flex-wrap gap-3">
+                        <button @click="openModal = true" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-[#56bbf1]/30 hover:shadow-[#56bbf1]/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 border border-white/20">
+                            <i class="ph-bold ph-folder-plus text-base"></i>
+                            <span>Buat Folder Baru</span>
+                        </button>
+                        <a href="{{ route('cbt.index') }}" class="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs tracking-wide border border-white/15 backdrop-blur-md transition-all flex items-center gap-2">
+                            <i class="ph-bold ph-desktop text-base"></i>
+                            <span>Menu Ujian CBT</span>
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="px-4 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs tracking-wide border border-white/10 transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-arrow-left text-sm"></i> Dashboard
+                        </a>
                     </div>
-                </div>
-
-                {{-- Kartu Aksi / Tombol Tambah (Span 1 Kolom) --}}
-                <div class="bg-white rounded-[2rem] border border-slate-100 p-8 flex flex-col items-center justify-center text-center shadow-xl shadow-slate-200/50 relative overflow-hidden group">
-                    <div class="w-16 h-16 bg-elevate-peach-light text-elevate-primary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm border border-elevate-peach">
-                        <i class="ph-bold ph-folder-plus text-3xl"></i>
-                    </div>
-                    <h3 class="text-lg font-black text-elevate-dark mb-1">Folder Baru</h3>
-                    <p class="text-xs text-elevate-dark/70 font-medium mb-5">Buat kategori penyimpanan soal.</p>
-                    
-                    <button @click="openModal = true" class="w-full px-5 py-3.5 bg-elevate-dark text-white rounded-xl font-bold hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 active:scale-95">
-                        Buat Folder
-                    </button>
-                </div>
-            </div>
+                </x-slot:cta>
+            </x-hero-section>
 
             {{-- HEADER LIST & FILTER --}}
             <h3 class="font-bold text-elevate-dark text-xl flex items-center gap-3 mb-6">

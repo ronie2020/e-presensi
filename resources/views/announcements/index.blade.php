@@ -42,59 +42,47 @@
 
         {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
-            <div class="relative rounded-[2.5rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                
-                {{-- Abstract Shapes Ornaments ala Elevate --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute top-10 right-32 w-28 h-28 bg-white/40 rounded-[2rem] rotate-45 pointer-events-none shadow-sm backdrop-blur-md border border-white/50"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
-                    {{-- Text Content --}}
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 border border-white/60 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-broadcast text-elevate-primary"></i> Portal Komunikasi
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Pusat Informasi Sekolah
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-bold leading-relaxed max-w-lg">
-                            Kelola pengumuman website, jadwalkan agenda kegiatan, dan kirim notifikasi WhatsApp massal dalam satu dashboard terintegrasi.
-                        </p>
+            <x-hero-section
+                badge="PORTAL KOMUNIKASI"
+                badgeIcon="ph-fill ph-broadcast"
+                showcaseIcon="ph-duotone ph-newspaper-clipping"
+                showcaseTitle="Pusat Informasi"
+                showcaseSubtitle="Gateway & Pengumuman">
+                <x-slot:title>
+                    <span class="block text-slate-100">Pusat Informasi</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Agenda & Pengumuman
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Kelola pengumuman website, jadwalkan agenda kegiatan, dan kirim notifikasi WhatsApp massal dalam satu dashboard terintegrasi.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-newspaper text-sky-400"></i> Broadcast Web
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-whatsapp-logo text-emerald-400"></i> WA Blast
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-calendar-check text-cyan-400"></i> Agenda Sekolah
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-newspaper-clipping text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Postingan:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $announcements->count() }}</span>
                     </div>
-                    
-                    {{-- Stats Cards (Glassmorphism) --}}
-                    <div class="w-full md:w-auto mt-4 md:mt-0">
-                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                            {{-- Stat 1: Pengumuman --}}
-                            <div class="bg-white/40 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/60 text-center md:text-left shadow-sm hover:bg-white/60 transition-colors group/card">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                    <i class="ph-duotone ph-newspaper-clipping text-2xl md:text-xl lg:text-2xl group-hover/card:scale-110 transition-transform"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-dark/70">Postingan</span>
-                                </div>
-                                <span class="block text-3xl font-black text-elevate-dark tracking-tight mt-1">{{ $announcements->count() }}</span>
-                            </div>
-
-                            {{-- Stat 2: WA Gateway Status --}}
-                            <div class="bg-emerald-50/60 backdrop-blur-md px-5 py-5 rounded-2xl border border-emerald-200/60 text-center md:text-left shadow-sm hover:bg-emerald-100/60 transition-colors">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-emerald-600">
-                                    <i class="ph-duotone ph-whatsapp-logo text-2xl md:text-xl lg:text-2xl"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Gateway</span>
-                                </div>
-                                <div class="flex items-center justify-center md:justify-start gap-2 mt-2 md:mt-1 lg:mt-2">
-                                    <span class="relative flex h-3 w-3">
-                                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-                                    </span>
-                                    <span class="text-sm font-black text-emerald-700 tracking-tight">Online</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-black text-emerald-400">WA Gateway Ready</span>
                     </div>
-
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         {{-- Main Content --}}

@@ -90,47 +90,35 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
             
-            {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                
-                {{-- Abstract Shapes Ornaments ala Elevate --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto text-center md:text-left">
-                        <div class="w-20 h-20 rounded-[1.5rem] bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm shrink-0">
-                            <i class="ph-duotone ph-scan text-5xl text-elevate-primary"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
-                                    <span class="px-3 py-1 rounded-full bg-rose-500 text-white border border-rose-600 text-[10px] font-bold uppercase tracking-wider shadow-sm">Libur: {{ $scheduleConfig['description'] }}</span>
-                                @else
-                                    <span class="px-3 py-1 rounded-full bg-white/60 text-elevate-dark border border-white/50 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
-                                        {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
-                                    </span>
-                                @endif
-                            </div>
-                            <h2 class="text-3xl md:text-4xl font-black tracking-tight leading-tight text-elevate-dark">
-                                Mesin Kiosk <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-primary to-elevate-dark">Absensi</span>
-                            </h2>
-                            <p class="text-elevate-dark/80 text-sm mt-1 font-bold">Monitoring kehadiran, makan siang, dan ibadah terintegrasi.</p>
-                        </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="{{ (isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)) ? 'Libur: ' . $scheduleConfig['description'] : 'Mesin Kiosk Aktif' }}"
+                badgeIcon="ph-scan"
+                title="Kiosk Scanner"
+                titleHighlight="Presensi Siswa"
+                description="Monitoring kehadiran masuk, kepulangan, makan siang, dan ibadah terintegrasi secara real-time."
+                :chips="[
+                    ['icon' => 'ph-calendar', 'label' => \Carbon\Carbon::now()->translatedFormat('l, d F Y')],
+                    ['icon' => 'ph-lightning', 'label' => 'Auto-Detect QR & RFID'],
+                    ['icon' => 'ph-clock', 'label' => 'Waktu Server WIB']
+                ]"
+                heroIcon="ph-scan"
+                statusOrb="Server Online"
+                statusColor="emerald"
+                ctaPrimaryText="Dashboard Utama"
+                ctaPrimaryHref="{{ route('dashboard') }}"
+                ctaPrimaryIcon="ph-arrow-left"
+                ctaSecondaryText="Rekap Harian"
+                ctaSecondaryHref="{{ route('reports.daily') }}"
+                ctaSecondaryIcon="ph-chart-bar"
+            >
+                <x-slot:showcaseStats>
+                    <div class="text-center">
+                        <div id="clock" class="text-2xl sm:text-3xl font-black text-white font-mono tracking-widest leading-none drop-shadow">00:00:00</div>
+                        <span class="text-[9px] font-bold uppercase tracking-widest text-[#56bbf1] mt-1.5 block">Waktu Server (WIB)</span>
                     </div>
-                    
-                    {{-- CLOCK WIDGET --}}
-                    <div class="bg-white/60 backdrop-blur-md border border-white/50 px-6 py-4 rounded-[1.5rem] flex items-center gap-5 shadow-sm w-full md:w-auto justify-between md:justify-start">
-                        <div class="text-right">
-                            <p class="text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-1">Waktu Server</p>
-                            <div id="clock" class="text-3xl font-black text-elevate-dark font-mono leading-none tracking-widest">00:00:00</div>
-                        </div>
-                        <div class="w-12 h-12 rounded-xl bg-elevate-dark flex items-center justify-center text-elevate-peach-light shadow-inner animate-pulse shrink-0">
-                            <i class="ph-bold ph-clock text-2xl"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 

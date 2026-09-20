@@ -16,23 +16,28 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl group-hover:rotate-0 transition-transform duration-700"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight">Struktur Materi (Bab)</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-xl leading-relaxed">
-                            Buat dan kelola Pokok Bahasan/Bab untuk setiap mata pelajaran. Bab ini akan menjadi wadah urutan belajar siswa (Learning Player).
-                        </p>
-                    </div>
-                    <a href="{{ route('lms.materials.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-all duration-300 text-elevate-dark border border-white/60 shadow-sm hover:shadow-md active:scale-95 shrink-0">
-                        <i class="ph-bold ph-arrow-left"></i> Kembali ke Materi
-                    </a>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Kurikulum & Silabus"
+                badgeIcon="ph-list-dashes"
+                title="Pokok Bahasan"
+                titleHighlight="Bab & Topik"
+                description="Buat dan kelola bab materi pembelajaran untuk setiap mata pelajaran sebagai alur urutan belajar siswa (Learning Player)."
+                :chips="[
+                    ['icon' => 'ph-books', 'label' => 'Struktur Kurikulum'],
+                    ['icon' => 'ph-play-circle', 'label' => 'Learning Player Ready'],
+                    ['icon' => 'ph-tree-structure', 'label' => 'Modul Terstruktur']
+                ]"
+                heroIcon="ph-list-dashes"
+                statusOrb="Sistem Aktif"
+                statusColor="sky"
+                ctaPrimaryText="Kembali ke Materi"
+                ctaPrimaryHref="{{ route('lms.materials.index') }}"
+                ctaPrimaryIcon="ph-arrow-left"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-squares-four"
+            />
 
             {{-- ERROR & SUCCESS MESSAGE --}}
             @if ($errors->any())

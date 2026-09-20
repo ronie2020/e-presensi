@@ -4,34 +4,52 @@
     <div class="py-8 font-sans text-elevate-dark">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- HERO --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-500 p-8 mb-8 shadow-xl overflow-hidden border border-white/20">
-                <div class="absolute -top-16 -right-16 w-56 h-56 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/20 hover:bg-white/40 rounded-lg text-xs font-bold text-white transition flex items-center gap-1 border border-white/30">
-                                <i class="ph-bold ph-arrow-left"></i> Dashboard
-                            </a>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="LAYANAN SIRKULASI BUKU"
+                    badgeIcon="ph-fill ph-clock-countdown"
+                    showcaseIcon="ph-duotone ph-clipboard-text"
+                    showcaseTitle="Reservasi Buku"
+                    showcaseSubtitle="Antrean & Notifikasi">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Antrean &</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Reservasi Buku
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Daftar siswa yang mengantre buku ketika stok habis. Notifikasi otomatis dikirim saat buku telah dikembalikan dan siap diambil.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-hourglass-high text-sky-400"></i> Antrean FIFO
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-bell text-emerald-400"></i> Auto Notif
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-calendar-check text-cyan-400"></i> Batas Pengambilan
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('library.dashboard') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Dashboard Pustaka</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Antre:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $stats['total_waiting'] }}</span>
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight text-white flex items-center gap-3">
-                            <span class="text-4xl">📋</span> Antrean Reservasi Buku
-                        </h1>
-                        <p class="text-white/80 text-sm font-semibold mt-1">Siswa yang mengantre buku ketika stok habis. Notifikasi otomatis dikirim saat buku dikembalikan.</p>
-                    </div>
-                    <div class="hidden md:flex flex-col items-center gap-2">
-                        <div class="flex gap-3">
-                            <div class="text-center px-4 py-3 bg-white/20 rounded-2xl border border-white/30">
-                                <p class="text-2xl font-black text-white">{{ $stats['total_waiting'] }}</p>
-                                <p class="text-xs font-bold text-white/70">Mengantre</p>
-                            </div>
-                            <div class="text-center px-4 py-3 bg-white/20 rounded-2xl border border-white/30">
-                                <p class="text-2xl font-black text-emerald-300">{{ $stats['total_ready'] }}</p>
-                                <p class="text-xs font-bold text-white/70">Siap Ambil</p>
-                            </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Siap:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">{{ $stats['total_ready'] }}</span>
                         </div>
-                    </div>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- TABEL --}}

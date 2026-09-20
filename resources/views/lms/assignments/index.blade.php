@@ -17,38 +17,28 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-6 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                {{-- Dekorasi Background --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div class="text-center md:text-left">
-                        <a href="{{ route('dashboard') }}" class="group/btn bg-white/60 hover:bg-white text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0 active:scale-95">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover/btn:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard</span>
-                        </a>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-3 backdrop-blur-md shadow-sm">
-                            <i class="ph-bold ph-chalkboard-teacher"></i> Area Guru
-                        </div>
-                        <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3 text-elevate-dark">
-                            Manajemen Latihan
-                        </h2>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">
-                            Buat tugas, latihan soal, kuis online, atau ulangan dan pantau hasil pengerjaan siswa secara real-time.
-                        </p>
-                    </div>
-                    
-                    {{-- Tombol Buat Tugas --}}
-                    <a href="{{ route('lms.assignments.create') }}" class="w-full md:w-auto group/add bg-elevate-dark text-white px-7 py-4 rounded-2xl font-bold text-sm shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 border border-transparent">
-                        <div class="bg-white/20 text-white w-8 h-8 rounded-xl flex items-center justify-center group-hover/add:bg-white group-hover/add:text-elevate-primary transition-colors">
-                            <i class="ph-bold ph-plus"></i>
-                        </div>
-                        <span>Buat Latihan Baru</span>
-                    </a>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Asesmen & Tugas Mandiri"
+                badgeIcon="ph-pencil-simple"
+                title="Tugas & Latihan"
+                titleHighlight="Siswa Terpadu"
+                description="Buat tugas, latihan soal, kuis interaktif, serta pantau hasil penyerahan dan penilaian siswa secara real-time."
+                :chips="[
+                    ['icon' => 'ph-clipboard-text', 'label' => 'Kuis & Tugas Online'],
+                    ['icon' => 'ph-clock', 'label' => 'Batas Waktu Fleksibel'],
+                    ['icon' => 'ph-check-circle', 'label' => 'Koreksi & Nilai Terpadu']
+                ]"
+                heroIcon="ph-pencil-simple"
+                statusOrb="Sistem Aktif"
+                statusColor="emerald"
+                ctaPrimaryText="Buat Latihan Baru"
+                ctaPrimaryHref="{{ route('lms.assignments.create') }}"
+                ctaPrimaryIcon="ph-plus"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            />
 
             {{-- UPDATE: INFO ALUR BELAJAR (PRO-TIP UNTUK GURU) --}}
             <div class="animate-enter mb-10 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">

@@ -8,37 +8,76 @@
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
-        {{-- HERO SECTION (ELEVATED THEME) --}}
+        {{-- HERO SECTION (UNIFIED ELEVATE DARK GLASS - AQUALIFE & E-LEARNING) --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 relative z-10">
-            <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                
-                {{-- Background Decorations --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 sm:p-10 text-white shadow-2xl shadow-[#0d52a1]/25 border border-white/20 backdrop-blur-2xl overflow-hidden group">
+                {{-- Specular Top Rim Light (Ref 2) --}}
+                <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
                 <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none group-hover:bg-white/60 transition-all duration-700"></div>
+
+                {{-- Ambient Radiant Glow Orbs (Ref 1 & 2) --}}
+                <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#56bbf1]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-[#0d52a1]/30 rounded-full blur-[90px] pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     
-                    {{-- Text Content --}}
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher"></i> Data Akademik
+                    {{-- KIRI: Judul, Deskripsi, Chips --}}
+                    <div class="space-y-4 max-w-2xl">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/15 text-xs font-bold transition-all shadow-sm">
+                                <i class="ph-bold ph-arrow-left text-sky-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                                <i class="ph-fill ph-chalkboard-teacher text-sky-400"></i> Data Akademik & Rombel
+                            </div>
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Manajemen Kelas
+
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-snug sm:leading-snug md:leading-normal text-white">
+                            <span class="block text-slate-100">Struktur Rombel &</span>
+                            <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">Manajemen Kelas</span>
                         </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-semibold leading-relaxed max-w-lg">
-                            Kelola daftar rombongan belajar (rombel) dan penugasan wali kelas.
+                        <p class="text-slate-300 text-sm sm:text-base font-medium leading-relaxed max-w-lg">
+                            Kelola daftar rombongan belajar (rombel), penugasan wali kelas, serta distribusi kapasitas siswa per tingkat kelas secara terpadu.
                         </p>
+
+                        {{-- Feature Highlight Chips (Ref 1 & 2) --}}
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Wali Kelas Terverifikasi
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Manajemen Kuota Siswa
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Terhubung Presensi
+                            </div>
+                        </div>
                     </div>
                     
-                    {{-- Stats Cards --}}
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/80 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white transition-colors shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-student text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Rombel</span>
+                    {{-- KANAN: Luminous Circular Showcase (Ref 1 & 2) --}}
+                    <div class="relative flex items-center justify-center shrink-0 w-full md:w-auto mt-4 md:mt-0">
+                        <div class="absolute w-52 h-52 rounded-full border border-[#56bbf1]/30 animate-pulse pointer-events-none"></div>
+                        <div class="absolute w-60 h-60 rounded-full border border-sky-400/15 pointer-events-none"></div>
+
+                        {{-- Core Glowing Card --}}
+                        <div class="relative z-10 w-44 h-44 rounded-full bg-gradient-to-br from-[#0d52a1]/80 via-[#031d3d]/90 to-[#021124] p-1 border-2 border-[#56bbf1]/50 shadow-2xl shadow-sky-500/30 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0d52a1] flex items-center justify-center text-white shadow-lg shadow-sky-400/40 mb-1 border border-white/20">
+                                <i class="ph-bold ph-chalkboard text-xl"></i>
                             </div>
-                            <span class="block text-3xl font-black text-elevate-dark tracking-tight">{{ $classes->count() }}</span>
+                            <span class="text-3xl font-black tracking-tight text-white leading-none">
+                                {{ $classes->count() }}
+                            </span>
+                            <span class="text-[10px] font-bold text-sky-300 uppercase tracking-widest mt-1">Total Rombel</span>
+                            <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                                <i class="ph-fill ph-check-circle"></i> Aktif
+                            </div>
+                        </div>
+
+                        {{-- Floating Status Bubbles (Ref 1) --}}
+                        <div class="absolute -top-2 -right-2 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                            <i class="ph-bold ph-users-three text-sky-400"></i>
+                            <span>Semua Tingkat</span>
                         </div>
                     </div>
 

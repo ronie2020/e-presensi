@@ -29,20 +29,24 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
             {{-- HERO HEADER --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group animate-enter">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <h1 class="text-3xl md:text-4xl font-black mb-2 tracking-tight text-elevate-dark">Upload Materi</h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">Bagikan bahan ajar, dokumen, atau video pembelajaran untuk siswa.</p>
-                    </div>
-                    <a href="{{ route('lms.materials.index') }}" class="w-full md:w-auto inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/60 hover:bg-white rounded-xl text-sm font-bold backdrop-blur-md transition-colors text-elevate-dark border border-white/60 shadow-sm active:scale-95 btn-cancel-confirm shrink-0">
-                        <i class="ph-bold ph-arrow-left"></i> Kembali
-                    </a>
-                </div>
-            </div>
+            <x-hero-section
+                badge="LMS Pembelajaran"
+                badgeIcon="ph-book-open"
+                title="Upload Materi"
+                titleHighlight="Bahan Ajar Baru"
+                description="Bagikan bahan ajar, dokumen, modul, atau video pembelajaran interaktif untuk siswa."
+                :chips="[
+                    ['icon' => 'ph-file-arrow-up', 'label' => 'Materi Digital'],
+                    ['icon' => 'ph-folder-notch-open', 'label' => 'Terintegrasi Bab'],
+                    ['icon' => 'ph-sparkle', 'label' => 'Akses Siswa']
+                ]"
+                heroIcon="ph-books"
+                statusOrb="Mode Upload"
+                statusColor="sky"
+                ctaPrimaryText="Kembali ke Materi"
+                ctaPrimaryHref="{{ route('lms.materials.index') }}"
+                ctaPrimaryIcon="ph-arrow-left"
+            />
 
             {{-- INFO ALUR BELAJAR (PRO-TIP) --}}
             <div class="animate-enter mb-8 bg-blue-50 border border-blue-200 p-5 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center gap-4 shadow-sm" style="animation-delay: 50ms">
@@ -131,9 +135,9 @@
                                     <label class="block text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-2 ml-1">Mata Pelajaran <span class="text-[#D13438]">*</span></label>
                                     <div class="relative group">
                                         <select name="subject_id" x-model="selectedSubject" @change="fetchTopics()" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none cursor-pointer focus:bg-white transition-colors shadow-sm">
-                                            <option value="">-- Pilih Mapel --</option>
+                                            <option value="" class="bg-[#031d3d] text-white">-- Pilih Mapel --</option>
                                             @foreach($subjects as $subject)
-                                                <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                                <option value="{{ $subject->id }}" class="bg-[#031d3d] text-white">{{ $subject->name }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary transition-colors"><i class="ph-bold ph-caret-down text-lg"></i></div>
@@ -148,9 +152,9 @@
                                     </label>
                                     <div class="relative group">
                                         <select name="topic_id" x-model="selectedTopic" :disabled="topics.length === 0" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 appearance-none transition-colors cursor-pointer shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                            <option value="">-- Pilih Bab Terlebih Dahulu --</option>
+                                            <option value="" class="bg-[#031d3d] text-white">-- Pilih Bab Terlebih Dahulu --</option>
                                             <template x-for="topic in topics" :key="topic.id">
-                                                <option :value="topic.id" x-text="topic.title" :selected="topic.id == selectedTopic"></option>
+                                                <option :value="topic.id" x-text="topic.title" :selected="topic.id == selectedTopic" class="bg-[#031d3d] text-white"></option>
                                             </template>
                                         </select>
                                         <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-elevate-primary"><i class="ph-bold ph-caret-down text-lg"></i></div>
@@ -248,17 +252,17 @@
                                 <div>
                                     <div x-show="targetType === 'class'">
                                         <select name="class_id" :required="targetType === 'class'" :disabled="targetType !== 'class'" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 shadow-sm text-elevate-dark transition-colors">
-                                            <option value="">-- Pilih Kelas --</option>
+                                            <option value="" class="bg-[#031d3d] text-white">-- Pilih Kelas --</option>
                                             @foreach($classes as $class)
-                                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }} class="bg-[#031d3d] text-white">{{ $class->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div x-show="targetType === 'grade'" style="display: none;">
                                         <select name="target_grade" :required="targetType === 'grade'" :disabled="targetType !== 'grade'" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 shadow-sm text-elevate-dark transition-colors">
-                                            <option value="7">Kelas 7</option>
-                                            <option value="8">Kelas 8</option>
-                                            <option value="9">Kelas 9</option>
+                                            <option value="7" class="bg-[#031d3d] text-white">Kelas 7</option>
+                                            <option value="8" class="bg-[#031d3d] text-white">Kelas 8</option>
+                                            <option value="9" class="bg-[#031d3d] text-white">Kelas 9</option>
                                         </select>
                                     </div>
                                 </div>

@@ -32,31 +32,41 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- HERO SECTION --}}
-            <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div class="relative z-10 flex items-center justify-between">
-                    <div>
-                        <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/50 hover:bg-white/80 rounded-lg text-xs font-bold text-elevate-primary transition flex items-center gap-2 border border-white/60 backdrop-blur-sm shadow-sm">
-                                <i class="ph-bold ph-arrow-left"></i> Dashboard
-                            </a>
-                            <span class="text-elevate-dark/50 text-xs font-bold uppercase tracking-wider">Alat Admin</span>
-                        </div>
-                        <h1 class="text-3xl font-black tracking-tight flex items-center gap-3 mt-2">
-                            <span class="text-4xl">🖨️</span> Pusat Cetak & Laporan
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-semibold mt-2 max-w-lg leading-relaxed">
-                            Kelola kebutuhan administrasi fisik perpustakaan, cetak kartu anggota, label buku, dan laporan sirkulasi.
-                        </p>
-                    </div>
-                    <div class="hidden md:block">
-                        <div class="w-16 h-16 rounded-2xl bg-white/50 backdrop-blur-md flex items-center justify-center border border-white/60 shadow-sm shrink-0 text-elevate-primary">
-                            <i class="ph-duotone ph-printer text-4xl"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="mb-8 sm:mb-10 relative z-10">
+                <x-hero-section
+                    badge="ALAT ADMINISTRASI PUSTAKA"
+                    badgeIcon="ph-fill ph-printer"
+                    showcaseIcon="ph-duotone ph-printer"
+                    showcaseTitle="Pusat Dokumen"
+                    showcaseSubtitle="Cetak & Barcode">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Pusat Cetak &</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Laporan Pustaka
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Kelola kebutuhan administrasi fisik perpustakaan, cetak kartu anggota barcode, label barcode buku, dan laporan sirkulasi.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-identification-card text-sky-400"></i> Kartu Anggota
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-barcode text-emerald-400"></i> Label Barcode
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-file-text text-cyan-400"></i> Bebas Pustaka
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('library.dashboard') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Dashboard Pustaka</span>
+                        </a>
+                    </x-slot:cta>
+                </x-hero-section>
             </div>
 
             {{-- GRID MENU --}}

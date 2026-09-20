@@ -23,22 +23,22 @@
         to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
     
-    /* Efek glass untuk container konten (Mode Terang) */
+    /* Efek glass untuk container konten */
     .content-glass-wrapper {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border-radius: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 0 10px 40px -10px rgba(6, 182, 212, 0.15); 
+        background: rgba(3, 29, 61, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 1.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5); 
         transition: all 0.5s ease;
+        color: #ffffff;
     }
 
-    /* Efek glass untuk container konten (MODE GELAP) */
     html.dark .content-glass-wrapper {
-        background: rgba(15, 23, 42, 0.75); /* Slate 900 transparan */
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5); 
+        background: rgba(3, 29, 61, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6); 
     }
 </style>
 
@@ -93,15 +93,21 @@
         }
      }">
     
-    {{-- Latar Belakang Dekoratif Tambahan (Mendukung Dark Mode) --}}
-    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-slate-50/50 dark:bg-slate-950 transition-colors duration-700">
+    {{-- Latar Belakang Fixed Elevate Dark --}}
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-[#021124]">
+        {{-- Foto Gedung Sekolah Soft-Blur Ambient --}}
+        <div class="absolute inset-0 bg-cover bg-center opacity-10 filter blur-[14px] scale-110 contrast-125 saturate-50" 
+             style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.85)_50%,_#021124_100%)]"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#021124] via-[#021124]/95 to-[#0d52a1]/25"></div>
+        
         <!-- Ambient Globs -->
-        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-cyan-400/20 dark:bg-cyan-600/10 rounded-full blur-[120px] animate-blob transition-colors duration-700"></div>
-        <div class="absolute top-1/2 -left-40 w-[600px] h-[600px] bg-blue-600/15 dark:bg-blue-800/10 rounded-full blur-[150px] animate-blob animation-delay-2000 transition-colors duration-700"></div>
-        <div class="absolute -bottom-40 right-20 w-[400px] h-[400px] bg-indigo-900/15 dark:bg-indigo-500/10 rounded-full blur-[120px] animate-blob animation-delay-4000 transition-colors duration-700"></div>
+        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-elevate-accent/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/2 -left-40 w-[600px] h-[600px] bg-elevate-primary/20 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute -bottom-40 right-20 w-[400px] h-[400px] bg-elevate-accent/10 rounded-full blur-[130px] pointer-events-none"></div>
         
         <!-- Texture Overlay (Cubes) -->
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] dark:opacity-[0.05] mix-blend-overlay transition-opacity duration-700"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.04] mix-blend-overlay"></div>
     </div>
 
     {{-- 1. HEADER PROFIL --}}

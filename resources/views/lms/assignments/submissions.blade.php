@@ -23,48 +23,25 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2 mb-4">
-                            <span class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-white/60 border border-white/60 text-elevate-dark backdrop-blur-md shadow-sm">
-                                <i class="ph-bold ph-tag mr-1.5"></i>
-                                {{ str_replace('_', ' ', $assignment->assignment_type) }}
-                            </span>
-                            <span class="inline-flex items-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-white/60 border border-white/60 text-elevate-dark backdrop-blur-md shadow-sm">
-                                <i class="ph-bold ph-users-three mr-1.5"></i>
-                                @if($assignment->is_bulk)
-                                    Semua Kelas {{ $assignment->target_grade }}
-                                @else
-                                    {{ $assignment->schoolClass->name ?? 'Semua Kelas' }}
-                                @endif
-                            </span>
-                        </div>
-
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-elevate-dark leading-tight">
-                            {{ $assignment->title }}
-                        </h1>
-                        
-                        <div class="flex flex-wrap items-center gap-4 text-elevate-dark/80 text-sm font-bold">
-                            <span class="flex items-center gap-1.5 bg-white/40 backdrop-blur px-4 py-2 rounded-xl border border-white/50 shadow-sm">
-                                <i class="ph-bold ph-book-open text-elevate-dark"></i> {{ $assignment->subject->name }}
-                            </span>
-                            <span class="flex items-center gap-1.5 bg-[#FDE7E9]/90 backdrop-blur px-4 py-2 rounded-xl border border-[#F4C3C9] text-[#D13438] shadow-sm">
-                                <i class="ph-bold ph-clock"></i> Deadline: {{ $assignment->deadline->format('d M Y, H:i') }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <a href="{{ route('lms.assignments.index') }}" class="group/btn shrink-0 bg-white/60 hover:bg-white text-elevate-dark px-6 py-3.5 rounded-xl font-bold text-sm backdrop-blur-md border border-white/60 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-bold ph-arrow-left text-lg group-hover/btn:-translate-x-1 transition-transform"></i>
-                        <span>Kembali</span>
-                    </a>
-                </div>
-            </div>
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="{{ str_replace('_', ' ', $assignment->assignment_type) }}"
+                badgeIcon="ph-tag"
+                title="{{ $assignment->title }}"
+                titleHighlight="{{ $assignment->subject->name }}"
+                description="Monitoring pengumpulan tugas, tinjau berkas jawaban siswa, dan berikan evaluasi nilai serta umpan balik secara terstruktur."
+                :chips="[
+                    ['icon' => 'ph-users-three', 'label' => ($assignment->is_bulk ? 'Semua Kelas ' . $assignment->target_grade : ($assignment->schoolClass->name ?? 'Semua Kelas'))],
+                    ['icon' => 'ph-clock', 'label' => 'Deadline: ' . $assignment->deadline->format('d M Y, H:i')],
+                    ['icon' => 'ph-check-circle', 'label' => 'Penilaian Terintegrasi']
+                ]"
+                heroIcon="ph-tray"
+                statusOrb="Pengumpulan"
+                statusColor="sky"
+                ctaPrimaryText="Kembali ke Daftar Tugas"
+                ctaPrimaryHref="{{ route('lms.assignments.index') }}"
+                ctaPrimaryIcon="ph-arrow-left"
+            />
 
             {{-- TABEL SISWA --}}
             <div class="animate-enter bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden min-h-[600px] flex flex-col" style="animation-delay: 100ms">

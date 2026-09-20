@@ -5,58 +5,60 @@
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-          {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-10 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-                
-                {{-- Content Container --}}
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-
-                    {{-- Left Text --}}
-                    <div class="max-w-2xl">
-                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-widest mb-3 shadow-sm backdrop-blur-sm">
-                            <i class="ph-fill ph-star text-elevate-primary"></i> Modul Kesiswaan
+            {{-- HERO SECTION --}}
+            <div class="mb-8 sm:mb-10 relative z-10">
+                <x-hero-section
+                    badge="MODUL KESISWAAN"
+                    badgeIcon="ph-fill ph-star"
+                    showcaseIcon="ph-duotone ph-sparkle"
+                    showcaseTitle="Ekstrakurikuler"
+                    showcaseSubtitle="Bakat & Minat Siswa">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Manajemen</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Ekstrakurikuler
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Wadahi bakat dan minat siswa. Kelola jadwal latihan, pantau keanggotaan, dan rekap kehadiran kegiatan dalam satu panel.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-calendar text-sky-400"></i> Jadwal Mingguan
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-users-three text-emerald-400"></i> Keanggotaan
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-clipboard-text text-cyan-400"></i> Presensi Khusus
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <button @click="addModalOpen = true"
+                                class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="ph-bold ph-plus-circle text-lg"></i>
+                            <span>Tambah Ekskul</span>
+                        </button>
+                        <a href="{{ route('extracurriculars.reports') }}"
+                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-file-text text-lg text-sky-400"></i>
+                            <span>Laporan Absensi</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        @php $totalMembers = $extracurriculars->sum('members_count'); @endphp
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-star text-amber-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Kegiatan:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $extracurriculars->count() }}</span>
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Manajemen Ekstrakurikuler
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Wadahi bakat dan minat siswa. Kelola jadwal latihan, pantau keanggotaan, dan rekap kehadiran kegiatan dalam satu panel.
-                        </p>
-
-                         {{-- Action Button --}}
-                        <div class="mt-8 flex flex-wrap gap-3">
-                            <button @click="addModalOpen = true" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
-                                <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-plus text-sm"></i>
-                                </div>
-                                <span>Tambah Ekskul</span>
-                            </button>
-                            <a href="{{ route('extracurriculars.reports') }}" class="group bg-white/60 backdrop-blur-md hover:bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm border border-white transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                                <i class="ph-bold ph-files text-lg text-elevate-primary group-hover:rotate-12 transition-transform"></i>
-                                <span>Laporan Absensi</span>
-                            </a>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                            <i class="ph-fill ph-users text-emerald-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Siswa Aktif:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">{{ $totalMembers }}</span>
                         </div>
-                    </div>
-                    
-                    {{-- Right Stats Cards --}}
-                    <div class="w-full md:w-auto mt-2 md:mt-0 flex gap-3">
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center flex-1 md:flex-none min-w-[140px]">
-                            <span class="block text-3xl font-black text-elevate-dark mb-1">{{ $extracurriculars->count() }}</span>
-                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">Total Kegiatan</span>
-                        </div>
-                        @php
-                            $totalMembers = $extracurriculars->sum('members_count');
-                        @endphp
-                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center flex-1 md:flex-none min-w-[140px] hidden sm:block">
-                            <span class="block text-3xl font-black text-elevate-primary mb-1">{{ $totalMembers }}</span>
-                            <span class="text-[10px] text-elevate-dark/70 uppercase font-bold tracking-wider">Siswa Aktif</span>
-                        </div>
-                    </div>
-
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
         </div>
 

@@ -1,23 +1,55 @@
-﻿<x-app-layout>
+<x-app-layout>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- Header --}}
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <a href="{{ route('sppd.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-3 transition-colors group">
-                        <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
-                    </a>
-                    <h1 class="text-3xl font-extrabold text-elevate-dark flex items-center gap-3">
-                        <span class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center">
-                            <i class="ph-bold ph-chart-bar text-xl"></i>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="ANALITIK PERJALANAN DINAS"
+                    badgeIcon="ph-fill ph-chart-bar"
+                    showcaseIcon="ph-duotone ph-airplane-takeoff"
+                    showcaseTitle="Dashboard SPPD"
+                    showcaseSubtitle="Statistik & Anggaran {{ date('Y') }}">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Dashboard & Statistik</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Perjalanan Dinas
                         </span>
-                        Dashboard Perjalanan Dinas
-                    </h1>
-                    <p class="text-slate-500 text-sm mt-1 ml-13">Ringkasan & statistik SPPD tahun {{ date('Y') }}</p>
-                </div>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Ringkasan komprehensif statistik penugasan dinas, frekuensi bulanan, dan total realisasi anggaran sekolah.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-chart-line-up text-sky-400"></i> Tren 12 Bulan
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-wallet text-emerald-400"></i> Realisasi Biaya
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-clock text-cyan-400"></i> Hari Dinas
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <a href="{{ route('sppd.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Kembali ke Daftar</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Total:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $stats['total_sppd'] }}</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                            <span class="text-xs font-bold text-slate-300">Biaya:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">Rp {{ number_format($stats['total_biaya'],0,',','.') }}</span>
+                        </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- Stat Cards --}}

@@ -4,46 +4,46 @@
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         {{-- HERO SECTION --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-            <div class="relative rounded-[2rem] sm:rounded-[2.5rem] bg-elevate-gradient-main p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none group-hover:bg-white/60 transition-all duration-700"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 sm:gap-8">
-                    <div class="max-w-xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher"></i> Plotting Jadwal
-                        </div>
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Beban Mengajar
-                        </h1>
-                        <p class="text-elevate-dark/80 text-xs sm:text-sm font-semibold leading-relaxed">
-                            Atur jam pelajaran masing-masing guru per kelas sebelum melakukan generate jadwal otomatis.
-                        </p>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
+            <x-hero-section
+                badge="PLOTTING JADWAL"
+                badgeIcon="ph-fill ph-chalkboard-teacher"
+                showcaseIcon="ph-duotone ph-briefcase"
+                showcaseTitle="Beban Mengajar"
+                showcaseSubtitle="Distribusi JP Guru">
+                <x-slot:title>
+                    <span class="block text-slate-100">Distribusi & Plotting</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Beban Mengajar Guru
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Atur alokasi jam pelajaran masing-masing guru per rombel/kelas sebelum melakukan generate jadwal otomatis.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-hourglass-high text-sky-400"></i> Jam Per Minggu (JP)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-user-check text-emerald-400"></i> Validasi Guru
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-cpu text-cyan-400"></i> Generator Ready
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-users text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Guru:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $totalTeachers ?? $teachingLoads->unique('teacher_id')->count() }}</span>
                     </div>
-
-                    <div class="flex flex-row gap-3 w-full md:w-auto">
-                        <div class="bg-white/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/80 flex-1 md:flex-none text-center md:text-left shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-1.5 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-users text-lg"></i>
-                                <span class="text-[9px] font-bold uppercase tracking-wider">Guru Di-plot</span>
-                            </div>
-                            <span class="block text-2xl font-black text-elevate-dark tracking-tight">
-                                {{ $totalTeachers ?? $teachingLoads->unique('teacher_id')->count() }}
-                            </span>
-                        </div>
-                        <div class="bg-white/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/80 flex-1 md:flex-none text-center md:text-left shadow-sm">
-                            <div class="flex items-center justify-center md:justify-start gap-1.5 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-clock text-lg"></i>
-                                <span class="text-[9px] font-bold uppercase tracking-wider">Total JP</span>
-                            </div>
-                            <span class="block text-2xl font-black text-elevate-dark tracking-tight">
-                                {{ $totalHours ?? $teachingLoads->sum('hours_per_week') }} <span class="text-xs font-bold text-elevate-dark/50">Jam</span>
-                            </span>
-                        </div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                        <i class="ph-fill ph-clock text-emerald-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Total:</span>
+                        <span class="text-sm font-black text-emerald-400 font-mono">{{ $totalHours ?? $teachingLoads->sum('hours_per_week') }} JP</span>
                     </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

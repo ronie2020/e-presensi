@@ -20,52 +20,43 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO SECTION ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                {{-- Dekorasi Latar --}}
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/60 hover:bg-white text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0 active:scale-95">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard</span>
-                        </a>
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-3 backdrop-blur-md shadow-sm">
-                            <i class="ph-fill ph-chalkboard-teacher"></i> Area Guru
+            {{-- HERO SECTION --}}
+            <x-hero-section
+                badge="Buku Nilai Digital"
+                badgeIcon="ph-chart-bar"
+                title="Rekap Nilai"
+                titleHighlight="LMS & Tugas"
+                description="Pantau perkembangan nilai tugas, kuis, dan ulangan harian siswa berdasarkan tingkat atau kelas secara terpadu."
+                :chips="[
+                    ['icon' => 'ph-chart-line-up', 'label' => 'Analisis Ketuntasan'],
+                    ['icon' => 'ph-chalkboard-teacher', 'label' => 'Per Tingkat & Kelas'],
+                    ['icon' => 'ph-file-xls', 'label' => 'Export Excel & Cetak PDF']
+                ]"
+                heroIcon="ph-chart-bar"
+                statusOrb="Nilai Terkini"
+                statusColor="sky"
+                ctaSecondaryText="Dashboard Utama"
+                ctaSecondaryHref="{{ route('dashboard') }}"
+                ctaSecondaryIcon="ph-arrow-left"
+            >
+                @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty())
+                    <x-slot:cta>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" class="btn-export px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:to-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                                <i class="ph-bold ph-microsoft-excel-logo text-base"></i>
+                                <span>Export Excel</span>
+                            </a>
+                            <a href="{{ route('lms.grades.print', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-print px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm border border-white/20 backdrop-blur-md transition-all flex items-center gap-2 active:scale-95">
+                                <i class="ph-bold ph-printer text-base"></i>
+                                <span>Cetak PDF</span>
+                            </a>
+                            <a href="{{ route('dashboard') }}" class="px-4 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-bold text-xs rounded-xl border border-white/10 transition-all flex items-center gap-1.5">
+                                <i class="ph-bold ph-arrow-left text-sm"></i> Dashboard
+                            </a>
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 flex items-center justify-center md:justify-start gap-3">
-                            <i class="ph-fill ph-chart-bar text-elevate-primary drop-shadow-sm"></i> Rekap Nilai
-                        </h2>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-semibold max-w-lg leading-relaxed">
-                            Pantau perkembangan nilai tugas, kuis, dan ulangan harian siswa berdasarkan tingkat atau kelas secara terpadu.
-                        </p>
-                    </div>
-
-                    {{-- Tombol Aksi (Export/Print) --}}
-                    @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty())
-                        <div class="flex flex-col items-center md:items-end gap-2 w-full md:w-auto shrink-0">
-                            <div class="flex flex-col sm:flex-row w-full justify-center gap-3">
-                                <a href="{{ route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" class="btn-export px-6 py-3.5 bg-[#107C10] hover:bg-[#0c5c0c] text-white text-sm font-bold rounded-2xl shadow-lg shadow-[#107C10]/30 transition-all flex items-center justify-center gap-2 group border border-transparent active:scale-95">
-                                    <i class="ph-bold ph-microsoft-excel-logo text-xl"></i>
-                                    <span>Export Excel</span>
-                                </a>
-                                <a href="{{ route('lms.grades.print', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-print px-6 py-3.5 bg-white hover:bg-elevate-soft text-elevate-dark text-sm font-bold rounded-2xl shadow-sm border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95">
-                                    <i class="ph-bold ph-printer text-xl"></i>
-                                    <span>Cetak PDF</span>
-                                </a>
-                            </div>
-                            {{-- Notifikasi peringatan limit PDF --}}
-                            @if($assignments->count() > 10)
-                                <span class="text-[10px] text-[#D83B01] mt-2 flex items-center justify-center md:justify-start gap-1.5 font-bold bg-[#FFEFD6] px-3 py-1.5 rounded-lg border border-[#FFD8A8]">
-                                    <i class="ph-bold ph-info"></i> PDF dibatasi 10 tugas pertama
-                                </span>
-                            @endif
-                        </div>
-                    @endif
-                </div>
-            </div>
+                    </x-slot:cta>
+                @endif
+            </x-hero-section>
 
             {{-- CARD FILTER DENGAN ALPINE.JS --}}
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 mb-8 relative overflow-hidden" style="animation-delay: 100ms">

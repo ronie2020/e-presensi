@@ -18,36 +18,47 @@
 
     <div class="p-6 md:p-10 space-y-8 min-h-screen bg-slate-50 font-sans text-elevate-dark">
         
-        {{-- HEADER (Microsoft Elevate Theme) --}}
-        <div class="relative rounded-[2rem] md:rounded-[3rem] bg-elevate-gradient-main p-8 md:p-12 text-elevate-dark shadow-xl shadow-elevate-accent/30 overflow-hidden border border-white/40">
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none z-0"></div>
-            
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-[400px] h-[400px] bg-white/30 rounded-full blur-[80px] z-0"></div>
-            <div class="absolute -top-10 -right-10 opacity-10 rotate-12 z-0 pointer-events-none">
-                <i class="ph-fill ph-trophy text-[200px] text-elevate-dark"></i>
-            </div>            
-            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="text-center md:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                        <i class="ph-fill ph-star text-elevate-peach-dark"></i> Fastabiqul Khairat
+        {{-- HERO SECTION --}}
+        <div class="relative z-10">
+            <x-hero-section
+                badge="FASTABIQUL KHAIRAT"
+                badgeIcon="ph-fill ph-star"
+                showcaseIcon="ph-duotone ph-trophy"
+                showcaseTitle="Papan Peringkat"
+                showcaseSubtitle="Inspirasi Ibadah Ramadhan">
+                <x-slot:title>
+                    <span class="block text-slate-100">Papan Peringkat</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Kebaikan Ramadhan
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Daftar siswa paling aktif yang menginspirasi dalam menjalankan ibadah harian selama bulan suci Ramadhan.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-moon-stars text-amber-400"></i> Amaliyah Ramadhan
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-trophy text-yellow-400"></i> Top Santri
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-sparkle text-emerald-400"></i> Poin Kebaikan
+                    </span>
+                </x-slot:chips>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <i class="ph-fill ph-users text-sky-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Peserta:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $topStudents->count() }}</span>
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-black mb-4 tracking-tight text-elevate-dark">Papan Peringkat Kebaikan</h1>
-                    <p class="text-elevate-dark/80 max-w-xl text-sm md:text-base font-medium leading-relaxed">
-                        Daftar siswa paling aktif yang menginspirasi dalam menjalankan ibadah harian selama bulan suci Ramadhan.
-                    </p>
-                </div>
-                
-                <div class="flex items-center gap-4">
-                    <div class="bg-white/40 backdrop-blur-md p-5 rounded-3xl border border-white/50 text-center min-w-[130px] shadow-sm">
-                        <div class="text-3xl font-black text-elevate-dark">{{ $topStudents->count() }}</div>
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-elevate-dark/70 mt-1">Peserta Aktif</div>
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-amber-500/30 backdrop-blur-md">
+                        <i class="ph-fill ph-star text-amber-400 text-sm"></i>
+                        <span class="text-xs font-bold text-slate-300">Total Poin:</span>
+                        <span class="text-sm font-black text-amber-400 font-mono">{{ number_format($topStudents->sum('points'), 0, ',', '.') }}</span>
                     </div>
-                    <div class="bg-white/40 backdrop-blur-md p-5 rounded-3xl border border-white/50 text-center min-w-[130px] shadow-sm">
-                        <div class="text-3xl font-black text-elevate-dark">{{ number_format($topStudents->sum('points'), 0, ',', '.') }}</div>
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-elevate-dark/70 mt-1">Total Poin</div>
-                    </div>
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         {{-- TOP 3 PODIUM --}}

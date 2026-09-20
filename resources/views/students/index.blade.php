@@ -1,8 +1,5 @@
 <x-app-layout>
-    {{-- TAMBAHAN WAJIB: Kumpulan CDN Script agar semua fitur UI, Modal, dan Ikon berfungsi --}}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Scripts penunjang flatpickr & qrious --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
@@ -10,39 +7,109 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
+    <div class="py-8 sm:py-10 font-sans text-white bg-elevate-surface min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
+            {{-- HERO SECTION (UNIFIED ELEVATE DARK GLASS - AQUALIFE & E-LEARNING) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-8 md:p-10 mb-8 text-white shadow-2xl shadow-[#0d52a1]/25 border border-white/20 backdrop-blur-2xl overflow-hidden group">
+                {{-- Specular Top Rim Light (Ref 2) --}}
+                <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/30"></div>
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+
+                {{-- Ambient Radiant Glow Orbs (Ref 1 & 2) --}}
+                <div class="absolute -top-16 -right-16 w-80 h-80 bg-[#56bbf1]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-72 h-72 bg-[#0d52a1]/30 rounded-full blur-[90px] pointer-events-none"></div>
                 
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
-                    <div class="text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider bg-white/50 px-3 py-1 rounded-full border border-white/60 backdrop-blur-sm shadow-sm">Master Data</span>
-                        </div>
-                        <h1 class="text-3xl font-extrabold tracking-tight leading-none mb-2 text-elevate-dark flex items-center justify-center md:justify-start gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center shrink-0">
-                                <i class="ph-bold ph-users-three text-xl"></i>
-                            </div>
-                            Daftar Induk Siswa
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm font-medium ml-0 md:ml-12">Kelola data profil, kelas, dan akun akses siswa secara terpusat.</p>
-                    </div>
+                <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
                     
-                    {{-- Action Buttons --}}
-                    <div class="flex flex-wrap justify-center gap-3">
-                        <button onclick="document.getElementById('input_student_id').focus(); document.getElementById('input_student_id').scrollIntoView({behavior: 'smooth', block: 'center'});" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
-                            <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <i class="ph-bold ph-plus text-sm"></i>
+                    {{-- KIRI: Badge, Headline, Subtitle, Chips, Action Buttons --}}
+                    <div class="space-y-4 max-w-2xl">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/15 text-xs font-bold transition-all shadow-sm">
+                                <i class="ph-bold ph-arrow-left text-sky-400"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-sky-400"></span>
+                                </span>
+                                Master Data Kesiswaan
                             </div>
-                            <span>Tambah Siswa</span>
-                        </button>
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-snug sm:leading-snug md:leading-normal text-white">
+                            <span class="block text-slate-100">Daftar Induk &</span>
+                            <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">Profil Siswa Terpadu</span>
+                        </h1>
+                        <p class="text-slate-300 text-sm sm:text-base font-medium leading-relaxed">
+                            Kelola data pokok siswa, sinkronisasi tag RFID & kartu pelajar, penetapan rombel, serta pencetakan buku induk secara komprehensif.
+                        </p>
+
+                        {{-- Feature Highlight Chips (Ref 1 & 2) --}}
+                        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Basis Data Terpusat
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Integrasi RFID & Kartu OSIS
+                            </div>
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                                <i class="ph-bold ph-check text-sky-400"></i> Validasi Identitas Otomatis
+                            </div>
+                        </div>
+
+                        {{-- ACTION BUTTONS (Ref 2 Dual Button Style) --}}
+                        <div class="flex flex-wrap items-center gap-3 pt-2">
+                            <button onclick="document.getElementById('input_student_id').focus(); document.getElementById('input_student_id').scrollIntoView({behavior: 'smooth', block: 'center'});" class="group bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white shadow-lg shadow-sky-600/25 border border-white/20 px-6 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                                <i class="ph-bold ph-user-plus text-lg"></i>
+                                <span>Registrasi Siswa</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </button>
+                            <a href="{{ route('students.export') }}" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-sky-400/40 text-white px-5 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                                <i class="ph-bold ph-microsoft-excel-logo text-lg text-emerald-400"></i>
+                                <span>Export Excel</span>
+                            </a>
+                        </div>
                     </div>
+
+                    {{-- KANAN: Luminous Circular Showcase (Ref 1 & 2) --}}
+                    <div class="relative flex items-center justify-center shrink-0 w-full lg:w-auto mt-4 lg:mt-0">
+                        {{-- Outer Pulse Ring --}}
+                        <div class="absolute w-60 h-60 rounded-full border border-[#56bbf1]/30 animate-pulse pointer-events-none"></div>
+                        <div class="absolute w-72 h-72 rounded-full border border-sky-400/15 pointer-events-none"></div>
+                        
+                        {{-- Core Floating Card inside luminous ring --}}
+                        <div class="relative z-10 w-52 h-52 rounded-full bg-gradient-to-br from-[#0d52a1]/80 via-[#031d3d]/90 to-[#021124] p-1 border-2 border-[#56bbf1]/50 shadow-2xl shadow-sky-500/30 backdrop-blur-xl flex flex-col items-center justify-center text-center">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-400 to-[#0d52a1] flex items-center justify-center text-white shadow-lg shadow-sky-400/40 mb-2 border border-white/20">
+                                <i class="ph-bold ph-users-three text-2xl"></i>
+                            </div>
+                            <span class="text-3xl font-black tracking-tight text-white leading-none">
+                                {{ number_format($students->total() ?? 0) }}
+                            </span>
+                            <span class="text-[11px] font-bold text-sky-300 uppercase tracking-widest mt-1">Total Siswa</span>
+                            <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                                <i class="ph-fill ph-check-circle"></i> Terdaftar
+                            </div>
+                        </div>
+
+                        {{-- Floating Status Orbs / Bubbles (Ref 1) --}}
+                        <div class="absolute -top-3 -right-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+                            <i class="ph-bold ph-identification-card text-sky-400"></i>
+                            <span>RFID Sync</span>
+                        </div>
+
+                        <div class="absolute -bottom-3 -left-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#031d3d]/90 border border-white/20 text-white text-[11px] font-bold shadow-xl backdrop-blur-md">
+                            <i class="ph-bold ph-chalkboard-teacher text-emerald-400"></i>
+                            <span>{{ $classes->count() }} Rombel</span>
+                        </div>
+
+                        <div class="absolute top-1/2 -left-6 -translate-y-1/2 z-20 hidden sm:flex items-center justify-center w-9 h-9 rounded-full bg-[#0d52a1]/80 border border-white/30 text-white shadow-lg backdrop-blur-md" title="Master Data Terintegrasi">
+                            <i class="ph-bold ph-database text-sm text-sky-300"></i>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

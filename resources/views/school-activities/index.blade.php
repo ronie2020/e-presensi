@@ -30,54 +30,49 @@
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-10 pointer-events-none -z-10 blur-3xl"></div>
 
-        {{-- HERO SECTION (ELEVATE THEME) --}}
+        {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
-            <div class="relative rounded-[2.5rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group fluent-card">
-                
-                {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl group-hover:scale-105 transition-transform duration-700"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
-                    {{-- Text Content --}}
-                    <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-image text-elevate-primary"></i> Dokumentasi Sekolah
-                        </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
-                            Galeri Kegiatan
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-bold leading-relaxed max-w-lg">
-                            Abadikan dan publikasikan momen terbaik sekolah. Kelola foto dan video kegiatan untuk ditampilkan di halaman depan.
-                        </p>
+            <x-hero-section
+                badge="DOKUMENTASI SEKOLAH"
+                badgeIcon="ph-fill ph-images-square"
+                showcaseIcon="ph-duotone ph-camera"
+                showcaseTitle="Total Dokumentasi"
+                showcaseSubtitle="Arsip Aktif Sekolah">
+                <x-slot:title>
+                    <span class="block text-slate-100">Galeri & Dokumentasi</span>
+                    <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                        Kegiatan Sekolah
+                    </span>
+                </x-slot:title>
+                <x-slot:description>
+                    Abadikan dan publikasikan momen terbaik sekolah. Kelola foto dan video kegiatan untuk ditampilkan secara interaktif pada portal.
+                </x-slot:description>
+                <x-slot:chips>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-image text-sky-400"></i> Multi Foto
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-video-camera text-cyan-400"></i> Video Terintegrasi
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <i class="ph-bold ph-eye text-emerald-400"></i> Publikasi Online
+                    </span>
+                </x-slot:chips>
+                <x-slot:cta>
+                    <a href="{{ url('/activities') }}" target="_blank"
+                       class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                        <i class="ph-bold ph-arrow-square-out text-lg"></i>
+                        <span>Lihat Web Publik</span>
+                    </a>
+                </x-slot:cta>
+                <x-slot:showcaseStats>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md shadow-inner">
+                        <i class="ph-fill ph-folders text-sky-400 text-base"></i>
+                        <span class="text-xs font-bold text-slate-300 tracking-wide">Album:</span>
+                        <span class="text-sm font-black text-white font-mono">{{ $activities->total() ?? 0 }}</span>
                     </div>
-                    
-                    {{-- Stats Cards --}}
-                    <div class="w-full md:w-auto mt-4 md:mt-0 flex gap-4">
-                        <div class="bg-white/40 backdrop-blur-md px-6 py-5 rounded-[1.5rem] border border-white/50 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/60 transition-colors shadow-sm group/stat">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
-                                <i class="ph-duotone ph-images-square text-2xl group-hover/stat:scale-110 transition-transform"></i>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-elevate-dark/70">Total Album</span>
-                            </div>
-                            <span class="block text-3xl md:text-4xl font-black text-elevate-dark tracking-tight mt-1">{{ $activities->total() ?? 0 }}</span>
-                        </div>
-
-                        <a href="{{ url('/activities') }}" target="_blank" class="bg-elevate-dark px-6 py-5 rounded-[1.5rem] border border-elevate-dark text-center md:text-left hover:bg-elevate-primary transition-all duration-300 group/link cursor-pointer shadow-xl shadow-elevate-dark/30 flex flex-col justify-center hover:-translate-y-1">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-accent">
-                                <i class="ph-duotone ph-eye text-2xl"></i>
-                                <span class="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Preview</span>
-                            </div>
-                            <div class="flex items-center justify-center md:justify-start gap-1.5 text-white font-black text-sm mt-1">
-                                <span>Lihat Web</span>
-                                <i class="ph-bold ph-arrow-right group-hover/link:translate-x-1 transition-transform"></i>
-                            </div>
-                        </a>
-                    </div>
-
-                </div>
-            </div>
+                </x-slot:showcaseStats>
+            </x-hero-section>
         </div>
 
         {{-- Main Content --}}

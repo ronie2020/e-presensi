@@ -2,33 +2,32 @@
     <div class="py-8 sm:py-10 font-sans text-elevate-text">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <a href="{{ route('discipline.index') }}" class="text-xs font-bold text-elevate-primary hover:text-elevate-dark transition flex items-center gap-1 bg-white/60 px-3 py-1 rounded-full border border-white backdrop-blur-sm shadow-sm">
-                                <i class="ph-bold ph-arrow-left"></i> Kembali
-                            </a>
-                            <span class="text-elevate-dark/30 text-xs">•</span>
-                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider">Konfigurasi</span>
+            <x-hero-section
+                badge="Konfigurasi Aturan Poin"
+                badgeIcon="gear"
+                title="Master Data &"
+                titleHighlight="Kategori Disiplin Siswa"
+                description="Kelola daftar jenis pelanggaran, tingkatan konsekuensi, serta poin penghargaan karakter positif secara terpusat."
+                :chips="['Katalog Pelanggaran Ringan-Berat', 'Standar Poin Konsekuensi', 'Bobot Poin Penghargaan']"
+                :showcaseIcon="'list-checks'"
+                showcaseLabel="Katalog Poin"
+                showcaseStatus="Terverifikasi"
+                :showcaseBubbles="[
+                    ['icon' => 'warning', 'label' => 'Kategori Poin', 'pos' => '-top-2 -right-2']
+                ]"
+            >
+                <x-slot:headerNav>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="{{ route('discipline.index') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white border border-white/15 text-xs font-bold transition-all shadow-sm">
+                            <i class="ph-bold ph-arrow-left text-sky-400"></i>
+                            <span>Kembali ke Disiplin</span>
+                        </a>
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                            <i class="ph-fill ph-gear text-sky-400"></i> Konfigurasi Master
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight leading-none mb-1 text-elevate-dark">Master Data Disiplin</h1>
-                        <p class="text-elevate-dark/80 text-sm font-medium">Atur jenis pelanggaran dan poin penghargaan.</p>
                     </div>
-                    
-                    <div class="hidden md:block">
-                        <div class="w-14 h-14 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl border border-white shadow-sm">
-                            <i class="ph-duotone ph-list-checks text-elevate-primary"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </x-slot:headerNav>
+            </x-hero-section>
 
             {{-- Flash Messages --}}
             @if (session('success'))

@@ -2,40 +2,47 @@
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO HEADER MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
-                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-users-three"></i> Database Alumni
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="DATABASE ALUMNI"
+                    badgeIcon="ph-fill ph-users-three"
+                    showcaseIcon="ph-duotone ph-graduation-cap"
+                    showcaseTitle="Tracer Study"
+                    showcaseSubtitle="Sebaran Lulusan">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Tracer Study</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Alumni & Kelulusan
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Pantau rekam jejak dan sebaran lulusan ke SMA, SMK, MA, Pesantren, maupun aktivitas lanjutan lainnya secara terstruktur.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-chart-pie-slice text-sky-400"></i> Sebaran Jalur
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-buildings text-emerald-400"></i> SMA/SMK/MA/Ponpes
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-calendar text-cyan-400"></i> Lintas Angkatan
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-users text-sky-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Total:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ isset($stats['total']) ? $stats['total'] : $alumni->total() }}</span>
                         </div>
-                        <h1 class="text-3xl font-black text-elevate-dark tracking-tight mb-2">Tracer Study SMP</h1>
-                        <p class="text-elevate-dark/80 text-sm max-w-xl font-medium">
-                            Pantau sebaran lulusan ke SMA, SMK, MA, atau Pesantren.
-                        </p>
-                    </div>
-
-                    {{-- Mini Stats --}}
-                    <div class="flex gap-4">
-                        <div class="text-center px-6 py-4 bg-white/60 rounded-2xl border border-white backdrop-blur-md shadow-sm">
-                            <span class="block text-3xl font-black text-elevate-dark mb-1">
-                                {{ isset($stats['total']) ? $stats['total'] : $alumni->total() }}
-                            </span>
-                            <span class="text-[10px] text-elevate-primary uppercase font-bold tracking-wider">Total Alumni</span>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                            <i class="ph-fill ph-check-circle text-emerald-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Lanjut:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">{{ $stats['lanjut_sekolah'] ?? 0 }}</span>
                         </div>
-                        <div class="text-center px-6 py-4 bg-white/60 rounded-2xl border border-white backdrop-blur-md shadow-sm hidden sm:block">
-                            <span class="block text-3xl font-black text-elevate-primary mb-1">
-                                {{ $stats['lanjut_sekolah'] ?? 0 }}
-                            </span>
-                            <span class="text-[10px] text-elevate-dark/70 uppercase font-bold tracking-wider">Lanjut Sekolah</span>
-                        </div>
-                    </div>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- TOOLBAR --}}

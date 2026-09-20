@@ -16,39 +16,25 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- HERO HEADER ELEVATE --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row items-start justify-between gap-6">
-                    <div>
-                        <a href="{{ route('teaching.show', $session->id) }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/60 border border-white/60 text-elevate-dark text-xs font-bold hover:bg-white transition-all mb-4 shadow-sm backdrop-blur-sm active:scale-95">
-                            <i class="ph-bold ph-arrow-left"></i> Batal & Kembali
-                        </a>
-                        {{-- MENGGUNAKAN RELASI TIMETABLE YANG BARU --}}
-                        <h1 class="text-3xl md:text-4xl font-black text-elevate-dark tracking-tight">Edit Jurnal: {{ $session->timetable->subject->name ?? 'Pelajaran' }}</h1>
-                        <div class="flex items-center gap-3 mt-3">
-                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
-                                <i class="ph-bold ph-users-three text-elevate-primary"></i> Kelas {{ $session->timetable->studentClass->name ?? '-' }}
-                            </span>
-                            @if(isset($session->timetable->timeslot->name))
-                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
-                                <i class="ph-bold ph-calendar-check text-elevate-primary"></i> {{ $session->timetable->timeslot->name }}
-                            </span>
-                            @endif
-                            <span class="px-3 py-1 bg-white/60 border border-white/60 rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">
-                                <i class="ph-bold ph-clock text-elevate-primary"></i> 
-                                {{ \Carbon\Carbon::parse($session->timetable->timeslot->start_time ?? now())->format('H:i') }} - 
-                                {{ \Carbon\Carbon::parse($session->timetable->timeslot->end_time ?? now())->format('H:i') }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="px-5 py-3 bg-[#FFEFD6] text-[#D83B01] rounded-xl border border-[#FFD8A8] font-bold text-xs flex items-center gap-2 shadow-sm shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-[#D83B01] animate-pulse"></span> Mode Edit
-                    </div>
-                </div>
-            </div>
+            {{-- HERO HEADER --}}
+            <x-hero-section
+                badge="{{ $session->timetable->studentClass->name ?? 'Kelas' }}"
+                badgeIcon="ph-chalkboard-teacher"
+                title="Edit Jurnal"
+                titleHighlight="{{ $session->timetable->subject->name ?? 'Pelajaran' }}"
+                description="Perbarui materi pembahasan, catatan jurnal kelas, kendala, atau data kehadiran siswa pada sesi ini."
+                :chips="[
+                    ['icon' => 'ph-calendar-check', 'label' => ($session->timetable->timeslot->name ?? 'Sesi Pelajaran')],
+                    ['icon' => 'ph-clock', 'label' => \Carbon\Carbon::parse($session->timetable->timeslot->start_time ?? now())->format('H:i') . ' - ' . \Carbon\Carbon::parse($session->timetable->timeslot->end_time ?? now())->format('H:i')],
+                    ['icon' => 'ph-pencil-simple', 'label' => 'Revisi Sesi']
+                ]"
+                heroIcon="ph-chalkboard-teacher"
+                statusOrb="Mode Edit"
+                statusColor="amber"
+                ctaPrimaryText="Batal & Kembali"
+                ctaPrimaryHref="{{ route('teaching.show', $session->id) }}"
+                ctaPrimaryIcon="ph-arrow-left"
+            />
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                 

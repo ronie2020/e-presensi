@@ -26,36 +26,51 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 py-6 md:py-8">
 
             {{-- HERO SECTION --}}
-            <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main overflow-hidden p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 group border border-white/60">
-                
-                {{-- Background Pattern --}}
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] pointer-events-none group-hover:opacity-70 transition-opacity"></div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
-                            <i class="ph-fill ph-chart-bar text-elevate-primary"></i> Pusat Data & Laporan
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="PUSAT DATA PPDB"
+                    badgeIcon="ph-fill ph-chart-bar"
+                    showcaseIcon="ph-duotone ph-file-arrow-down"
+                    showcaseTitle="Laporan PPDB"
+                    showcaseSubtitle="Arsip & Statistik">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Laporan & Unduhan</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Data PPDB Online
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data pendaftar untuk keperluan arsip sekolah.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-chart-pie text-sky-400"></i> Statistik Real-time
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-file-xls text-emerald-400"></i> Rekap Excel
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-calendar text-cyan-400"></i> Lintas Periode
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        <form method="GET" class="flex items-center gap-2.5 bg-slate-900/80 backdrop-blur-md border border-slate-700/80 rounded-2xl p-2 shadow-inner">
+                            <label class="text-xs font-bold text-slate-300 whitespace-nowrap pl-2">Tahun Ajaran:</label>
+                            <select name="year" onchange="this.form.submit()" class="px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white focus:ring-sky-500 focus:border-sky-500 outline-none cursor-pointer">
+                                @foreach($availableYears as $yr)
+                                    <option value="{{ $yr }}" {{ $yr == $year ? 'selected' : '' }}>{{ $yr }}/{{ $yr + 1 }}</option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                            <i class="ph-fill ph-calendar-check text-sky-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Periode:</span>
+                            <span class="text-sm font-black text-white font-mono">{{ $year }}/{{ $year + 1 }}</span>
                         </div>
-                        <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-3">
-                            Laporan & Unduhan
-                        </h1>
-                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                            Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data untuk keperluan arsip sekolah.
-                        </p>
-                    </div>
-
-                    {{-- FIX BUG 9: Filter Tahun agar admin bisa lihat laporan historis --}}
-                    <form method="GET" class="flex items-center gap-2 bg-white/40 backdrop-blur-sm border border-white/50 rounded-2xl p-3 shadow-sm">
-                        <label class="text-xs font-bold text-elevate-dark/80 whitespace-nowrap">Tahun Ajaran:</label>
-                        <select name="year" onchange="this.form.submit()" class="px-3 py-2 bg-white/80 border border-white/60 rounded-xl text-sm font-bold text-elevate-dark focus:ring-elevate-accent/30 focus:border-elevate-accent outline-none cursor-pointer shadow-sm">
-                            @foreach($availableYears as $yr)
-                                <option value="{{ $yr }}" {{ $yr == $year ? 'selected' : '' }}>{{ $yr }}/{{ $yr + 1 }}</option>
-                            @endforeach
-                        </select>
-                        <span class="text-xs text-elevate-dark/60 font-bold">Data: <strong>{{ $year }}</strong></span>
-                    </form>
-                </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- 1. STATISTIK VISUAL --}}

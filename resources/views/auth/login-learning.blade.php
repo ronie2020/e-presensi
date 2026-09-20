@@ -7,6 +7,13 @@
 
     <title>Login Ruang Belajar (E-Learning) - {{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
 
+    <!-- PWA META TAGS -->
+    <link rel="manifest" href="{{ asset('manifest-siswa.json') }}">
+    <meta name="theme-color" content="#021124">
+    <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-siswa-192x192.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800,900&display=swap" rel="stylesheet" />
@@ -19,112 +26,125 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         [x-cloak] { display: none !important; }
 
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -40px) scale(1.08); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
-            100% { transform: translate(0px, 0px) scale(1); }
+        .bg-grid-dark {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
         }
-        .animate-blob { animation: blob 8s infinite ease-in-out; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
         }
+        .animate-float { animation: floatSlow 4s ease-in-out infinite; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-900 text-slate-800 relative overflow-x-hidden flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen bg-[#021124] text-white relative overflow-x-hidden flex flex-col justify-between selection:bg-elevate-accent selection:text-[#021124]">
 
-    <!-- AMBIENT BACKGROUND WITH MODERN GRADIENT -->
-    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-slate-950">
-        <!-- Background Grid Pattern -->
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    <!-- GLOBAL FIXED BACKGROUND (Elegan, Tenang & Tidak Mengganggu) -->
+    <div class="fixed inset-0 z-0 w-full h-full pointer-events-none overflow-hidden">
+        {{-- Base Solid Canvas --}}
+        <div class="absolute inset-0 bg-[#021124]"></div>
 
-        <!-- Dynamic Vibrant Glowing Blobs (Blue / Cyan / Indigo) -->
-        <div class="absolute -top-32 -left-20 w-[550px] h-[550px] bg-blue-600/30 rounded-full blur-[130px] animate-blob"></div>
-        <div class="absolute top-1/3 -right-32 w-[500px] h-[500px] bg-cyan-500/25 rounded-full blur-[130px] animate-blob animation-delay-2000"></div>
-        <div class="absolute -bottom-32 left-1/3 w-[600px] h-[600px] bg-indigo-700/25 rounded-full blur-[150px] animate-blob animation-delay-4000"></div>
+        {{-- Foto Gedung Sekolah Soft-Blur Ambient --}}
+        <div class="absolute inset-0 bg-cover bg-center opacity-10 filter blur-[14px] scale-110 contrast-125 saturate-50" 
+             style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        
+        {{-- Radial Vignette & Dark Gradient Overlay --}}
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.85)_50%,_#021124_100%)]"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#021124] via-[#021124]/95 to-[#0d52a1]/25"></div>
+        
+        {{-- Subtle Grid Texture --}}
+        <div class="absolute inset-0 bg-grid-dark opacity-35"></div>
 
-        <!-- Pattern Overlay -->
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
+        {{-- Ambient Glow Orbs (Cyan & Brand Blue) --}}
+        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-elevate-accent/15 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute top-1/3 right-1/4 w-[550px] h-[550px] bg-elevate-primary/25 rounded-full blur-[180px] pointer-events-none"></div>
+        <div class="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-elevate-accent/10 rounded-full blur-[150px] pointer-events-none"></div>
     </div>
 
     <!-- TOP NAVIGATION BAR -->
-    <header class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between relative z-20">
+    <header class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between relative z-20">
         <a href="{{ url('/') }}" class="inline-flex items-center gap-3 group text-slate-300 hover:text-white transition-colors">
-            <div class="w-10 h-10 rounded-xl bg-white/10 group-hover:bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/15 transition-all">
+            <div class="w-10 h-10 rounded-2xl bg-white/10 group-hover:bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/15 transition-all text-elevate-accent shadow-[0_0_15px_rgba(86,187,241,0.2)]">
                 <i class="ph-bold ph-arrow-left text-lg"></i>
             </div>
-            <span class="text-sm font-semibold hidden sm:inline">Kembali ke Beranda</span>
+            <div class="flex flex-col leading-tight">
+                <span class="font-black text-white text-sm sm:text-base tracking-tight">SMPN 3 LAKBOK</span>
+                <span class="text-[9px] font-bold text-elevate-accent uppercase tracking-widest hidden sm:inline">Kembali ke Beranda</span>
+            </div>
         </a>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <a href="{{ route('portal.index') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 backdrop-blur-md text-xs font-bold text-slate-200 hover:text-white border border-white/15 transition-all flex items-center gap-2">
-                <i class="ph-bold ph-identification-card text-base text-cyan-400"></i>
-                <span class="hidden md:inline">Portal Publik</span>
+            <a href="{{ route('portal.index') }}" class="px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-xs font-bold text-white border border-white/15 transition-all flex items-center gap-2">
+                <i class="ph-bold ph-newspaper text-elevate-accent"></i>
+                <span class="hidden sm:inline">Portal Publik</span>
             </a>
-            <a href="{{ route('student.login.cbt') }}" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 backdrop-blur-md text-xs font-bold text-rose-200 hover:text-white border border-rose-500/30 transition-all flex items-center gap-2">
-                <i class="ph-bold ph-desktop text-base text-rose-400"></i>
+            <a href="{{ route('student.login.cbt') }}" class="px-4 py-2 rounded-full bg-rose-500/20 hover:bg-rose-500/30 backdrop-blur-sm text-xs font-bold text-rose-300 hover:text-white border border-rose-500/30 transition-all flex items-center gap-2">
+                <i class="ph-bold ph-desktop text-rose-400"></i>
                 <span>Ruang Ujian (CBT)</span>
             </a>
         </div>
     </header>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 relative z-20">
+    <main class="flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10 relative z-20">
         <div class="w-full max-w-md">
 
-            <!-- BRANDING & ICON -->
-            <div class="text-center mb-8">
-                <div class="relative inline-block mb-4">
-                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-indigo-500 p-[2px] shadow-2xl shadow-blue-500/30">
-                        <div class="w-full h-full bg-slate-900 rounded-[22px] flex items-center justify-center p-3">
-                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://ui-avatars.com/api/?name=SMP3&background=0284c7&color=fff&size=128'; this.onerror=null;">
+            <!-- BRANDING & BADGE -->
+            <div class="text-center mb-6">
+                <div class="relative inline-block mb-3">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-elevate-primary via-elevate-accent to-sky-300 p-[2px] shadow-[0_0_30px_rgba(86,187,241,0.35)] animate-float">
+                        <div class="w-full h-full bg-[#021124] rounded-[22px] flex items-center justify-center p-3">
+                            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-contain" onerror="this.src='/images/logo.png'">
                         </div>
                     </div>
-                    <span class="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-base shadow-lg shadow-blue-600/40 border-2 border-slate-900">
-                        <i class="ph-bold ph-books"></i>
+                    <span class="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-elevate-primary text-white flex items-center justify-center text-base shadow-lg shadow-elevate-primary/50 border-2 border-[#021124]">
+                        <i class="ph-bold ph-books text-elevate-accent"></i>
                     </span>
                 </div>
 
                 <!-- BADGE -->
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                    <span>Ruang Belajar Siswa</span>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/15 text-elevate-accent text-[11px] font-bold uppercase tracking-widest mb-3 backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-elevate-accent animate-ping"></span>
+                    <span>Ruang Belajar Siswa &bull; LMS</span>
                 </div>
 
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
                     Pembelajaran Digital
                 </h1>
-                <p class="text-sm text-slate-400 mt-2 max-w-sm mx-auto font-medium leading-relaxed">
-                    Masuk untuk mengakses materi belajar interaktif, modul digital, dan tugas online kelas Anda.
+                <p class="text-xs sm:text-sm text-slate-300 mt-2 max-w-sm mx-auto font-normal leading-relaxed">
+                    Masuk untuk mengakses materi belajar interaktif, modul digital kurikulum merdeka, dan tugas kelas Anda.
                 </p>
             </div>
 
-            <!-- LOGIN CARD -->
-            <div class="glass-card rounded-[2rem] p-7 sm:p-9 shadow-2xl shadow-black/40 relative">
+            <!-- LOGIN CARD (Dark Glassmorphism) -->
+            <div class="w-full bg-[#031d3d]/90 backdrop-blur-2xl rounded-[2.5rem] p-7 sm:p-9 border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+                
+                <!-- Glowing Accent Line -->
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-elevate-accent to-transparent opacity-80"></div>
+                
+                <!-- Ambient Blur Inside Card -->
+                <div class="absolute -top-16 -right-16 w-36 h-36 bg-elevate-accent/15 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-elevate-primary/20 rounded-full blur-2xl pointer-events-none"></div>
 
                 <!-- Alert Error / Notification -->
                 @if (session('error'))
-                    <div class="mb-5 bg-rose-50 text-rose-600 px-4 py-3.5 rounded-2xl text-sm font-medium border border-rose-200 flex items-start gap-3 shadow-sm animate-shake">
-                        <i class="ph-fill ph-warning-circle text-xl text-rose-500 shrink-0 mt-0.5"></i>
+                    <div class="mb-5 bg-rose-500/20 text-rose-200 px-4 py-3 rounded-2xl text-xs sm:text-sm font-semibold border border-rose-500/30 flex items-start gap-3 backdrop-blur-md">
+                        <i class="ph-fill ph-warning-circle text-lg text-rose-400 shrink-0 mt-0.5"></i>
                         <span>{{ session('error') }}</span>
                     </div>
                 @endif
 
                 @error('student_id')
-                    <div class="mb-5 bg-amber-50 text-amber-800 px-4 py-3.5 rounded-2xl text-xs font-semibold border border-amber-200 flex items-start gap-3 shadow-sm">
-                        <i class="ph-fill ph-clock-countdown text-xl text-amber-600 shrink-0 mt-0.5"></i>
+                    <div class="mb-5 bg-amber-500/20 text-amber-200 px-4 py-3 rounded-2xl text-xs font-semibold border border-amber-500/30 flex items-start gap-3 backdrop-blur-md">
+                        <i class="ph-fill ph-clock-countdown text-lg text-amber-400 shrink-0 mt-0.5"></i>
                         <span>Terlalu banyak percobaan login. Silakan tunggu 1 menit sebelum mencoba lagi.</span>
                     </div>
                 @enderror
 
                 <!-- LOGIN FORM -->
-                <form method="POST" action="{{ route('student.login.post') }}" class="space-y-5"
+                <form method="POST" action="{{ route('student.login.post') }}" class="space-y-5 relative z-10"
                       x-data="{ isLoggingIn: false }" @submit="isLoggingIn = true">
                     @csrf
 
@@ -133,11 +153,11 @@
 
                     <!-- Input NISN -->
                     <div class="space-y-1.5">
-                        <label for="student_id" class="block text-xs font-bold uppercase tracking-wider text-slate-600 ml-1">
+                        <label for="student_id" class="block text-xs font-bold uppercase tracking-wider text-slate-300 ml-1">
                             NISN / Nomor Induk Siswa
                         </label>
                         <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-accent transition-colors">
                                 <i class="ph-bold ph-identification-card text-xl"></i>
                             </div>
                             <input type="text"
@@ -148,20 +168,20 @@
                                    autofocus
                                    autocomplete="off"
                                    placeholder="Ketik 10 digit NISN Anda"
-                                   class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 text-slate-900 font-bold placeholder-slate-400 text-base transition-all outline-none">
+                                   class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#021124]/70 border border-white/15 focus:border-elevate-accent focus:bg-[#021124]/90 focus:ring-4 focus:ring-elevate-accent/20 text-white font-bold placeholder-slate-500 text-sm sm:text-base transition-all outline-none">
                         </div>
-                        <p class="text-[11px] text-slate-500 ml-1 font-medium">
-                            <i class="ph-bold ph-info text-blue-500"></i> Cukup gunakan NISN untuk langsung masuk ke kelas.
+                        <p class="text-[11px] text-slate-400 ml-1 font-medium flex items-center gap-1">
+                            <i class="ph-bold ph-info text-elevate-accent"></i> Cukup gunakan NISN untuk langsung masuk ke materi kelas.
                         </p>
                     </div>
 
                     <!-- SUBMIT BUTTON -->
                     <button type="submit"
                             :disabled="isLoggingIn"
-                            class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-500 text-white font-black text-sm sm:text-base tracking-wide shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-75 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group">
+                            class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-elevate-primary via-[#0d52a1] to-elevate-accent hover:brightness-110 active:scale-[0.99] text-white font-black text-sm sm:text-base tracking-wide shadow-[0_4px_20px_rgba(86,187,241,0.3)] hover:shadow-[0_6px_25px_rgba(86,187,241,0.45)] disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group">
                         <template x-if="!isLoggingIn">
                             <span class="flex items-center gap-2">
-                                <span>Masuk Ruang Belajar</span>
+                                <span>MASUK RUANG BELAJAR</span>
                                 <i class="ph-bold ph-arrow-right text-lg group-hover:translate-x-1 transition-transform"></i>
                             </span>
                         </template>
@@ -178,19 +198,19 @@
                 </form>
 
                 <!-- CARD FOOTER HELPER -->
-                <div class="mt-6 pt-5 border-t border-slate-200/80 text-center">
-                    <p class="text-xs text-slate-500 font-medium">
+                <div class="mt-6 pt-5 border-t border-white/10 text-center relative z-10">
+                    <p class="text-xs text-slate-400 font-medium">
                         Lupa NISN atau butuh bantuan? 
-                        <span class="font-bold text-slate-700">Hubungi Wali Kelas</span>
+                        <span class="font-bold text-elevate-accent">Hubungi Wali Kelas</span>
                     </p>
                 </div>
             </div>
 
             <!-- ALTERNATIVE LOGIN SWITCHER -->
-            <div class="mt-6 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-between text-xs">
+            <div class="mt-5 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2 text-slate-300">
                     <i class="ph-bold ph-desktop text-rose-400 text-lg"></i>
-                    <span>Sedang jadwal ujian?</span>
+                    <span>Sedang ada jadwal ujian?</span>
                 </div>
                 <a href="{{ route('student.login.cbt') }}" class="font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1 transition-colors">
                     <span>Masuk CBT</span>
@@ -201,9 +221,17 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="w-full py-5 text-center text-xs text-slate-500 relative z-20 font-medium">
-        &copy; {{ date('Y') }} {{ config('app.name', 'SMP Negeri 3 Lakbok') }} &bull; E-Learning & Manajemen Terpadu
+    <!-- FOOTER & 4-DOTS INDICATOR -->
+    <footer class="w-full relative z-20 pb-6 px-4 sm:px-8 max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10 pt-5 text-xs text-slate-400">
+        <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+            <span class="w-6 h-2 rounded-full bg-elevate-accent shadow-[0_0_10px_rgba(86,187,241,0.7)]"></span>
+            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+        </div>
+        <p class="font-medium">
+            &copy; {{ date('Y') }} {{ config('app.name', 'SMP Negeri 3 Lakbok') }} &bull; E-Learning &amp; Modul Digital Siswa
+        </p>
     </footer>
 
 </body>

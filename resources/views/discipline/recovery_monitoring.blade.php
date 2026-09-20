@@ -2,55 +2,86 @@
     <div class="py-8 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HEADER --}}
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                <div>
-                    <h1 class="text-3xl font-black text-elevate-dark flex items-center gap-3">
-                        <i class="ph-duotone ph-leaf text-elevate-primary"></i>
-                        Program Pemulihan Siswa
-                    </h1>
-                    <p class="text-slate-500 font-medium">Log amnesti poin dan monitoring penyusutan poin otomatis (Point Decay).</p>
-                </div>
-                
-               <div class="flex gap-2">
-                    {{-- TOMBOL SIMULASI DECAY OTOMATIS MENGGUNAKAN SWEETALERT2 --}}
-                    <form action="{{ route('recovery.trigger_decay') }}" method="POST" 
-                          onsubmit="event.preventDefault(); 
-                                    const form = this;
-                                    Swal.fire({
-                                        title: 'Jalankan Point Decay?',
-                                        text: 'Sistem akan mengecek dan memulihkan poin siswa yang berhak secara otomatis. Lanjutkan?',
-                                        icon: 'question',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#3b5889', /* elevate-primary */
-                                        cancelButtonColor: '#94a3b8',
-                                        confirmButtonText: 'Ya, Jalankan!',
-                                        cancelButtonText: 'Batal',
-                                        reverseButtons: true,
-                                        customClass: {
-                                            popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                                            confirmButton: 'bg-elevate-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-dark transition-colors mx-2 shadow-lg shadow-elevate-primary/20',
-                                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
-                                        },
-                                        buttonsStyling: false
-                                    }).then((result) => {
-                                        if (result.isConfirmed) form.submit();
-                                    });">
-                        @csrf
-                        <button type="submit" class="px-5 py-2.5 bg-elevate-dark rounded-2xl text-white font-bold hover:bg-elevate-primary transition-all flex items-center gap-2 shadow-lg shadow-elevate-dark/20 active:scale-95">
-                            <i class="ph-bold ph-robot text-xl"></i> Cek Poin Kebaikan 
-                        </button>
-                    </form>
+            {{-- HERO SECTION --}}
+            <div class="mb-8 relative z-10">
+                <x-hero-section
+                    badge="PROGRAM RESTORASI SISWA"
+                    badgeIcon="ph-fill ph-leaf"
+                    showcaseIcon="ph-duotone ph-heartbeat"
+                    showcaseTitle="Pemulihan Karakter"
+                    showcaseSubtitle="Amnesti & Point Decay">
+                    <x-slot:title>
+                        <span class="block text-slate-100">Program Restorasi &</span>
+                        <span class="block mt-1 sm:mt-1.5 text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] via-sky-200 to-[#38bdf8]">
+                            Pemulihan Poin Siswa
+                        </span>
+                    </x-slot:title>
+                    <x-slot:description>
+                        Log amnesti poin positif, monitoring penyusutan poin pelanggaran secara otomatis (Point Decay), dan rekonsiliasi perilaku siswa.
+                    </x-slot:description>
+                    <x-slot:chips>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-robot text-sky-400"></i> Auto Point Decay
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-sparkle text-emerald-400"></i> Tugas Positif
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                            <i class="ph-bold ph-shield-check text-cyan-400"></i> Rekonsiliasi Perilaku
+                        </span>
+                    </x-slot:chips>
+                    <x-slot:cta>
+                        {{-- TOMBOL SIMULASI DECAY OTOMATIS --}}
+                        <form action="{{ route('recovery.trigger_decay') }}" method="POST" 
+                              onsubmit="event.preventDefault(); 
+                                        const form = this;
+                                        Swal.fire({
+                                            title: 'Jalankan Point Decay?',
+                                            text: 'Sistem akan mengecek dan memulihkan poin siswa yang berhak secara otomatis. Lanjutkan?',
+                                            icon: 'question',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#0284c7',
+                                            cancelButtonColor: '#94a3b8',
+                                            confirmButtonText: 'Ya, Jalankan!',
+                                            cancelButtonText: 'Batal',
+                                            reverseButtons: true,
+                                            customClass: {
+                                                popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                                                confirmButton: 'bg-sky-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-sky-700 transition-colors mx-2 shadow-lg shadow-sky-500/20',
+                                                cancelButton: 'bg-slate-100 text-slate-600 px-5 py-2.5 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                                            },
+                                            buttonsStyling: false
+                                        }).then((result) => {
+                                            if (result.isConfirmed) form.submit();
+                                        });">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                                <i class="ph-bold ph-robot text-base text-sky-400"></i>
+                                <span>Cek Poin Kebaikan</span>
+                            </button>
+                        </form>
 
-                    {{-- TOMBOL INPUT TUGAS POSITIF (MANUAL) - Tetap Emerald karena bernilai positif --}}
-                    <button onclick="document.getElementById('modalAmnesti').classList.remove('hidden')" class="px-5 py-2.5 bg-emerald-600 rounded-2xl text-white font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-200 active:scale-95">
-                        <i class="ph-bold ph-plus-circle text-xl"></i> Input Manual Tugas Positif
-                    </button>
-                    
-                    <a href="{{ route('discipline.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-bold ph-arrow-left text-xl"></i> Catatan Disiplin
-                    </a>
-                </div>
+                        {{-- TOMBOL INPUT TUGAS POSITIF (MANUAL) --}}
+                        <button onclick="document.getElementById('modalAmnesti').classList.remove('hidden')"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all duration-300">
+                            <i class="ph-bold ph-plus-circle text-base"></i>
+                            <span>Input Tugas Positif</span>
+                        </button>
+                        
+                        <a href="{{ route('discipline.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs border border-slate-700 transition-all duration-300">
+                            <i class="ph-bold ph-arrow-left"></i>
+                            <span>Catatan Disiplin</span>
+                        </a>
+                    </x-slot:cta>
+                    <x-slot:showcaseStats>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-emerald-500/30 backdrop-blur-md">
+                            <i class="ph-fill ph-leaf text-emerald-400 text-sm"></i>
+                            <span class="text-xs font-bold text-slate-300">Terpulihkan:</span>
+                            <span class="text-sm font-black text-emerald-400 font-mono">{{ number_format($totalRecovered) }} Poin</span>
+                        </div>
+                    </x-slot:showcaseStats>
+                </x-hero-section>
             </div>
 
             {{-- STATS CARDS --}}
