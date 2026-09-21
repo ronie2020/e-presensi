@@ -16,7 +16,7 @@
     </style>
 
     {{-- TAMBAHAN: x-init="init()" --}}
-    <div class="font-jakarta p-4 md:p-8 space-y-8 min-h-screen bg-slate-50" x-data="liaisonHandler()" x-init="init()">
+    <div class="font-jakarta p-4 md:p-8 space-y-8 min-h-screen bg-[#020b18] text-slate-100" x-data="liaisonHandler()" x-init="init()">
         
         {{-- HERO SECTION --}}
         <div class="mb-8 relative z-10">
@@ -78,17 +78,17 @@
             
             {{-- MODE 1: CATATAN (NOTE) --}}
             <div x-show="mode === 'note'" x-transition class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {{-- Form Input (Sama seperti sebelumnya) --}}
+                {{-- Form Input --}}
                 <div class="lg:col-span-7">
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden h-full hover:shadow-[#56bbf1]/5 transition-all">
+                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden h-full">
                         <div class="p-8 md:p-10">
                             <div class="flex items-center gap-4 mb-10">
-                                <div class="w-16 h-16 bg-[#e5eff5] text-[#0d52a1] rounded-[1.5rem] flex items-center justify-center text-3xl shadow-inner">
+                                <div class="w-16 h-16 bg-white/10 text-[#56bbf1] border border-white/10 rounded-[1.5rem] flex items-center justify-center text-3xl shadow-inner">
                                     <i class="ph-duotone ph-pencil-line"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-2xl font-black text-[#2c3f61] tracking-tight">Kirim Catatan Baru</h3>
-                                    <p class="text-[10px] font-black text-[#2c3f61]/50 uppercase tracking-widest mt-1">Sampaikan informasi resmi kepada wali murid</p>
+                                    <h3 class="text-2xl font-black text-white tracking-tight">Kirim Catatan Baru</h3>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Sampaikan informasi resmi kepada wali murid</p>
                                 </div>
                             </div>
 
@@ -96,45 +96,45 @@
                                 @csrf
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-3">
-                                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pilih Target Kelas</label>
-                                        <select x-model="selectedClass" @change="fetchStudents()" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-[#2c3f61] py-4 px-5 transition-all appearance-none">
-                                            <option value="">-- Pilih Kelas --</option>
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Target Kelas</label>
+                                        <select x-model="selectedClass" @change="fetchStudents()" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-white py-4 px-5 transition-all appearance-none">
+                                            <option value="" class="bg-[#021124] text-slate-300">-- Pilih Kelas --</option>
                                             @foreach($classes as $class)
-                                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                <option value="{{ $class->id }}" class="bg-[#021124] text-white">{{ $class->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="space-y-3">
-                                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pilih Nama Siswa</label>
-                                        <select name="student_id" :disabled="!selectedClass || isLoading" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-[#2c3f61] py-4 px-5 transition-all disabled:opacity-40">
-                                            <option value="">-- Pilih Siswa --</option>
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Pilih Nama Siswa</label>
+                                        <select name="student_id" :disabled="!selectedClass || isLoading" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-white py-4 px-5 transition-all disabled:opacity-40">
+                                            <option value="" class="bg-[#021124] text-slate-300">-- Pilih Siswa --</option>
                                             <template x-for="student in students" :key="student.id">
-                                                <option :value="student.id" x-text="student.name"></option>
+                                                <option :value="student.id" x-text="student.name" class="bg-[#021124] text-white"></option>
                                             </template>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div class="md:col-span-2 space-y-3">
-                                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subjek / Judul</label>
-                                        <input type="text" name="title" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-[#2c3f61] py-4 px-5 placeholder:font-medium" placeholder="Misal: Apresiasi Prestasi Siswa" required>
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subjek / Judul</label>
+                                        <input type="text" name="title" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-white py-4 px-5 placeholder:text-slate-500 placeholder:font-medium" placeholder="Misal: Apresiasi Prestasi Siswa" required>
                                     </div>
                                     <div class="space-y-3">
-                                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Kategori</label>
-                                        <select name="type" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-[#2c3f61] py-4 px-5">
-                                            <option value="info">📢 Informasi</option>
-                                            <option value="warning">⚠️ Peringatan</option>
-                                            <option value="achievement">🏆 Prestasi</option>
-                                            <option value="call">📞 Panggilan</option>
+                                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori</label>
+                                        <select name="type" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 font-bold text-white py-4 px-5">
+                                            <option value="info" class="bg-[#021124] text-white">📢 Informasi</option>
+                                            <option value="warning" class="bg-[#021124] text-white">⚠️ Peringatan</option>
+                                            <option value="achievement" class="bg-[#021124] text-white">🏆 Prestasi</option>
+                                            <option value="call" class="bg-[#021124] text-white">📞 Panggilan</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="space-y-3">
-                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Isi Detail Pesan</label>
-                                    <textarea name="message" rows="5" class="w-full rounded-[2rem] border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 text-sm p-6 text-[#2c3f61] font-medium placeholder:text-slate-400 leading-relaxed" placeholder="Tulis rincian catatan untuk disampaikan ke orang tua..." required></textarea>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Isi Detail Pesan</label>
+                                    <textarea name="message" rows="5" class="w-full rounded-[2rem] border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 text-sm p-6 text-white font-medium placeholder:text-slate-500 leading-relaxed" placeholder="Tulis rincian catatan untuk disampaikan ke orang tua..." required></textarea>
                                 </div>
                                 <div class="flex justify-end pt-4">
-                                    <button type="submit" class="w-full md:w-auto py-5 px-12 bg-[#2c3f61] text-white font-black rounded-2xl hover:bg-[#1c2940] transition-all shadow-xl shadow-[#2c3f61]/20 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 group">
+                                    <button type="submit" class="w-full md:w-auto py-5 px-12 bg-gradient-to-r from-[#56bbf1] to-[#3b82f6] text-white font-black rounded-2xl hover:brightness-110 transition-all shadow-xl shadow-[#56bbf1]/20 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-95 group">
                                         <i class="ph-bold ph-paper-plane-right text-xl transition-transform group-hover:translate-x-1"></i>
                                         Publikasikan Catatan
                                     </button>
@@ -146,35 +146,35 @@
 
                 <div x-show="mode === 'note'" class="lg:col-span-5 h-full">
                     {{-- Riwayat Catatan --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[650px] hover:shadow-[#56bbf1]/5 transition-all">
-                        <div class="p-8 border-b border-slate-50 flex items-center justify-between">
-                            <h3 class="text-xl font-black text-[#2c3f61] flex items-center gap-3">
-                                <i class="ph-bold ph-clock-counter-clockwise text-[#0d52a1]"></i> Riwayat
+                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col h-[650px]">
+                        <div class="p-8 border-b border-white/10 flex items-center justify-between">
+                            <h3 class="text-xl font-black text-white flex items-center gap-3">
+                                <i class="ph-bold ph-clock-counter-clockwise text-[#56bbf1]"></i> Riwayat
                             </h3>
-                            <span class="bg-[#56bbf1]/10 text-[10px] font-black px-4 py-1.5 rounded-full text-[#0d52a1] uppercase tracking-widest">{{ $messages->total() }} Data</span>
+                            <span class="bg-[#56bbf1]/10 text-[10px] font-black px-4 py-1.5 rounded-full text-[#56bbf1] border border-[#56bbf1]/20 uppercase tracking-widest">{{ $messages->total() }} Data</span>
                         </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 bg-slate-50/30">
+                        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 bg-white/5">
                             @forelse($messages as $msg)
-                                <div class="p-6 bg-white rounded-[2rem] border border-slate-100 hover:border-[#56bbf1]/40 transition-all group shadow-sm">
+                                <div class="p-6 bg-white/5 rounded-[2rem] border border-white/10 hover:border-[#56bbf1]/40 transition-all group shadow-sm">
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[10px] uppercase">
+                                            <div class="w-10 h-10 rounded-xl bg-[#021124] border border-white/10 flex items-center justify-center text-[#56bbf1] font-black text-[10px] uppercase">
                                                 {{ substr($msg->student->name ?? 'S', 0, 1) }}
                                             </div>
                                             <div>
-                                                <p class="text-xs font-black text-[#2c3f61]">{{ $msg->student->name ?? 'Siswa' }}</p>
+                                                <p class="text-xs font-black text-white">{{ $msg->student->name ?? 'Siswa' }}</p>
                                                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{ $msg->student->schoolClass->name ?? '-' }}</p>
                                             </div>
                                         </div>
                                         <span class="text-[9px] font-bold text-slate-400">{{ $msg->created_at->diffForHumans() }}</span>
                                     </div>
-                                    <h4 class="font-black text-[#2c3f61] text-sm mb-2 group-hover:text-[#0d52a1] transition-colors uppercase tracking-tight">{{ $msg->title }}</h4>
-                                    <p class="text-[11px] text-slate-500 line-clamp-2 italic leading-relaxed">"{{ $msg->message }}"</p>
+                                    <h4 class="font-black text-white text-sm mb-2 group-hover:text-[#56bbf1] transition-colors uppercase tracking-tight">{{ $msg->title }}</h4>
+                                    <p class="text-[11px] text-slate-300 line-clamp-2 italic leading-relaxed">"{{ $msg->message }}"</p>
                                 </div>
                             @empty
-                                <div class="text-center py-20 opacity-30">
-                                    <i class="ph-duotone ph-notebook text-5xl mb-4 text-[#2c3f61]"></i>
-                                    <p class="text-xs font-black uppercase tracking-widest text-[#2c3f61]">Kosong</p>
+                                <div class="text-center py-20 opacity-40">
+                                    <i class="ph-duotone ph-notebook text-5xl mb-4 text-[#56bbf1]"></i>
+                                    <p class="text-xs font-black uppercase tracking-widest text-slate-300">Kosong</p>
                                 </div>
                             @endforelse
                         </div>
@@ -184,37 +184,37 @@
 
             {{-- MODE 2: CHAT INTERFACE --}}
             <div x-show="mode === 'chat'" x-cloak x-transition>
-                <div class="bg-white rounded-[3rem] shadow-2xl shadow-[#2c3f61]/5 border border-slate-100 overflow-hidden h-[75vh] flex relative">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden h-[75vh] flex relative">
                     
                     {{-- SIDEBAR CONTACTS --}}
-                    <div class="w-full md:w-80 border-r border-slate-50 flex flex-col bg-[#e5eff5]/30" :class="activeContact ? 'hidden md:flex' : 'flex'">
-                        <div class="p-8 border-b border-slate-50 bg-white">
-                            <h3 class="text-sm font-black text-[#2c3f61] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <i class="ph-fill ph-users-three text-[#0d52a1]"></i> Daftar Ortu
+                    <div class="w-full md:w-80 border-r border-white/10 flex flex-col bg-white/5" :class="activeContact ? 'hidden md:flex' : 'flex'">
+                        <div class="p-8 border-b border-white/10 bg-white/5">
+                            <h3 class="text-sm font-black text-white uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                <i class="ph-fill ph-users-three text-[#56bbf1]"></i> Daftar Ortu
                             </h3>
                             <div class="relative group">
                                 <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#56bbf1] transition-colors"></i>
-                                <input x-model="chatSearch" @input.debounce.500ms="fetchChatContacts()" type="text" placeholder="Cari nama siswa..." class="w-full pl-11 pr-4 py-3.5 bg-slate-100 border-transparent focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 rounded-2xl text-xs font-bold transition-all text-[#2c3f61]">
+                                <input x-model="chatSearch" @input.debounce.500ms="fetchChatContacts()" type="text" placeholder="Cari nama siswa..." class="w-full pl-11 pr-4 py-3.5 bg-[#021124]/90 border border-white/15 focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 rounded-2xl text-xs font-bold transition-all text-white placeholder:text-slate-400">
                             </div>
                         </div>
                         
                         <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
                             <template x-for="contact in chatContacts" :key="contact.id">
                                 <button @click="selectContact(contact)" 
-                                    :class="activeContact && activeContact.id === contact.id ? 'bg-white border-[#56bbf1]/40 shadow-md ring-1 ring-[#56bbf1]/20' : 'hover:bg-white/60'"
+                                    :class="activeContact && activeContact.id === contact.id ? 'bg-white/10 border-[#56bbf1]/40 shadow-md ring-1 ring-[#56bbf1]/30' : 'hover:bg-white/5'"
                                     class="w-full p-5 flex items-start gap-4 rounded-[1.8rem] border border-transparent transition-all text-left group">
-                                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 shrink-0 font-black shadow-sm group-hover:bg-[#2c3f61] group-hover:text-white group-hover:border-[#2c3f61] transition-all">
+                                    <div class="w-12 h-12 rounded-2xl bg-[#021124] border border-white/10 flex items-center justify-center text-[#56bbf1] shrink-0 font-black shadow-sm group-hover:bg-[#56bbf1] group-hover:text-white transition-all">
                                         <span x-text="getInitials(contact.name)"></span>
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex justify-between items-center mb-1">
-                                            <h4 class="font-black text-[#2c3f61] text-xs truncate uppercase tracking-tight" x-text="contact.name"></h4>
+                                            <h4 class="font-black text-white text-xs truncate uppercase tracking-tight" x-text="contact.name"></h4>
                                             <span class="text-[8px] font-black text-slate-400" x-text="formatTime(contact.last_message_time)"></span>
                                         </div>
-                                        <p class="text-[9px] font-black text-[#0d52a1] uppercase tracking-widest mb-1" x-text="getClassName(contact)"></p>
+                                        <p class="text-[9px] font-black text-[#56bbf1] uppercase tracking-widest mb-1" x-text="getClassName(contact)"></p>
                                         
                                         <p class="text-[11px] text-slate-400 truncate font-medium" 
-                                           :class="contact.unread_count > 0 ? 'font-black text-[#2c3f61]' : ''"
+                                           :class="contact.unread_count > 0 ? 'font-black text-white' : ''"
                                            x-text="contact.last_message ? contact.last_message : 'Mulai obrolan baru'"></p>
                                     </div>
                                 </button>
@@ -223,59 +223,59 @@
                     </div>
 
                     {{-- CHAT BOX --}}
-                    <div class="flex-1 flex flex-col bg-white relative" :class="activeContact ? 'flex' : 'hidden md:flex'">
-                        <div x-show="!activeContact" class="flex-1 flex flex-col items-center justify-center text-center p-12 bg-slate-50/30">
-                            <div class="w-24 h-24 bg-white rounded-[2.5rem] shadow-xl shadow-[#56bbf1]/10 flex items-center justify-center mb-10 animate-bounce-slow border border-slate-50">
+                    <div class="flex-1 flex flex-col bg-[#020b18]/60 relative" :class="activeContact ? 'flex' : 'hidden md:flex'">
+                        <div x-show="!activeContact" class="flex-1 flex flex-col items-center justify-center text-center p-12">
+                            <div class="w-24 h-24 bg-white/5 rounded-[2.5rem] shadow-xl flex items-center justify-center mb-10 animate-bounce-slow border border-white/10">
                                 <i class="ph-duotone ph-chats-circle text-5xl text-[#56bbf1]"></i>
                             </div>
-                            <h3 class="text-3xl font-black text-[#2c3f61] tracking-tight">Pilih Kontak</h3>
-                            <p class="text-[#2c3f61]/60 max-w-xs font-medium text-sm mt-2">Silakan pilih salah satu orang tua siswa untuk memulai diskusi dua arah.</p>
+                            <h3 class="text-3xl font-black text-white tracking-tight">Pilih Kontak</h3>
+                            <p class="text-slate-400 max-w-xs font-medium text-sm mt-2">Silakan pilih salah satu orang tua siswa untuk memulai diskusi dua arah.</p>
                         </div>
 
                         <div x-show="activeContact" class="flex-1 flex flex-col h-full" x-transition>
-                            <div class="bg-white border-b border-slate-50 p-6 flex items-center justify-between shadow-sm z-10">
+                            <div class="bg-white/5 border-b border-white/10 p-6 flex items-center justify-between shadow-sm z-10">
                                 <div class="flex items-center gap-4">
-                                    <button @click="activeContact = null" class="md:hidden p-2 text-slate-400 hover:text-[#0d52a1]"><i class="ph-bold ph-arrow-left text-2xl"></i></button>
-                                    <div class="w-12 h-12 rounded-2xl bg-[#0d52a1] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#0d52a1]/20">
+                                    <button @click="activeContact = null" class="md:hidden p-2 text-slate-400 hover:text-[#56bbf1]"><i class="ph-bold ph-arrow-left text-2xl"></i></button>
+                                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-[#56bbf1] to-[#3b82f6] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#56bbf1]/20">
                                         <span x-text="getInitials(activeContact?.name)"></span>
                                     </div>
                                     <div>
-                                        <h3 class="font-black text-[#2c3f61] text-base uppercase tracking-tight" x-text="activeContact?.name"></h3>
+                                        <h3 class="font-black text-white text-base uppercase tracking-tight" x-text="activeContact?.name"></h3>
                                         
                                         <div class="flex items-center gap-2 mt-0.5">
-                                            <p class="text-[10px] font-black text-[#2c3f61]/60 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-wide" 
+                                            <p class="text-[10px] font-black text-slate-300 bg-white/10 px-2 py-0.5 rounded-md uppercase tracking-wide" 
                                                x-text="getClassName(activeContact)"></p>
                                             
-                                            <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest flex items-center gap-1.5">
-                                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                                            <p class="text-[10px] text-emerald-400 font-black uppercase tracking-widest flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50 space-y-6 custom-scrollbar scroll-smooth" x-ref="chatBox">
+                            <div class="flex-1 overflow-y-auto p-8 bg-[#020b18]/80 space-y-6 custom-scrollbar scroll-smooth" x-ref="chatBox">
                                 <template x-for="msg in chatMessages" :key="msg.id">
                                     <div class="flex w-full" :class="msg.sender_type === 'teacher' ? 'justify-end' : 'justify-start'">
                                         <div class="max-w-[80%] md:max-w-[65%]">
                                             <div class="p-5 rounded-[2rem] text-[13px] font-medium leading-relaxed shadow-sm transition-all"
                                                  :class="msg.sender_type === 'teacher' 
-                                                    ? 'bg-[#2c3f61] text-white rounded-br-none shadow-[#2c3f61]/10' 
-                                                    : 'bg-white text-[#2c3f61] border border-slate-100 rounded-bl-none shadow-slate-100/50'">
+                                                    ? 'bg-gradient-to-r from-[#56bbf1] to-[#3b82f6] text-white rounded-br-none shadow-[#56bbf1]/20' 
+                                                    : 'bg-[#021124] text-white border border-white/10 rounded-bl-none shadow-black/20'">
                                                 <p x-text="msg.message" class="whitespace-pre-wrap"></p>
                                             </div>
-                                            <p class="text-[9px] font-black text-[#2c3f61]/40 mt-2 uppercase tracking-widest px-2"
+                                            <p class="text-[9px] font-black text-slate-400 mt-2 uppercase tracking-widest px-2"
                                                :class="msg.sender_type === 'teacher' ? 'text-right' : 'text-left'"
                                                x-text="formatTime(msg.created_at, true)"></p>
                                         </div>
                                     </div>
                                 </template>
                             </div>
-                            <div class="bg-white p-6 border-t border-slate-50">
+                            <div class="bg-white/5 p-6 border-t border-white/10">
                                 <form @submit.prevent="sendMessage()" class="flex items-center gap-4">
-                                    <div class="flex-1 bg-[#e5eff5]/50 rounded-2xl flex items-center px-6 border-2 border-transparent focus-within:bg-white focus-within:border-[#56bbf1] focus-within:ring-4 focus-within:ring-[#56bbf1]/20 transition-all">
-                                        <input x-model="newMessage" type="text" placeholder="Tulis pesan anda di sini..." class="w-full bg-transparent border-none focus:ring-0 py-4 text-sm font-bold text-[#2c3f61]">
+                                    <div class="flex-1 bg-[#021124]/90 rounded-2xl flex items-center px-6 border border-white/15 focus-within:border-[#56bbf1] focus-within:ring-4 focus-within:ring-[#56bbf1]/20 transition-all">
+                                        <input x-model="newMessage" type="text" placeholder="Tulis pesan anda di sini..." class="w-full bg-transparent border-none focus:ring-0 py-4 text-sm font-bold text-white placeholder:text-slate-400">
                                     </div>
-                                    <button type="submit" :disabled="!newMessage.trim()" class="w-14 h-14 rounded-2xl bg-[#2c3f61] text-white hover:bg-[#1c2940] shadow-xl flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-[#2c3f61]/20">
+                                    <button type="submit" :disabled="!newMessage.trim()" class="w-14 h-14 rounded-2xl bg-gradient-to-r from-[#56bbf1] to-[#3b82f6] text-white hover:brightness-110 shadow-xl flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-[#56bbf1]/20 disabled:opacity-40">
                                         <i class="ph-bold ph-paper-plane-right text-2xl"></i>
                                     </button>
                                 </form>

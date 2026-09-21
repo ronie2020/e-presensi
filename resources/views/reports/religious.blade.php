@@ -82,22 +82,22 @@
                             {{-- Input Tanggal/Periode --}}
                             <div>
                                 <div x-show="reportType === 'daily'">
-                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors">
+                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-white transition-colors [color-scheme:dark]">
                                 </div>
                                 <div x-show="reportType === 'weekly'" style="display: none;">
-                                    <input type="week" name="week" value="{{ request('week', date('Y-\WW')) }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors">
+                                    <input type="week" name="week" value="{{ request('week', date('Y-\WW')) }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-white transition-colors [color-scheme:dark]">
                                 </div>
                                 <div x-show="reportType === 'monthly'" style="display: none;">
-                                    <input type="month" name="month" value="{{ request('month', date('Y-m')) }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors">
+                                    <input type="month" name="month" value="{{ request('month', date('Y-m')) }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-white transition-colors [color-scheme:dark]">
                                 </div>
                             </div>
 
                             {{-- Filter Kelas --}}
                             <div>
-                                <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm px-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
-                                    <option value="">Semua Kelas</option>
+                                <select name="class_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 shadow-sm text-white transition-colors [color-scheme:dark]">
+                                    <option value="" class="bg-slate-900 text-white">Semua Kelas</option>
                                     @foreach($allClasses ?? [] as $c)
-                                        <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>
+                                        <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">
                                             {{ $c->name }}
                                         </option>
                                     @endforeach
@@ -107,7 +107,7 @@
                             {{-- Filter Pencarian Siswa --}}
                             <div class="relative">
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / NISN..."
-                                       class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold h-12 text-sm pl-11 pr-4 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent shadow-sm text-elevate-dark transition-colors">
+                                       class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold h-12 text-sm pl-11 pr-4 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 shadow-sm text-white placeholder-slate-500 transition-colors">
                                 <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 text-lg pointer-events-none"></i>
                             </div>
                         </div>

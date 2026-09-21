@@ -1,27 +1,27 @@
 @extends('layouts.kiosk-layout')
 
 @section('content')
-<div class="h-screen w-full flex relative overflow-hidden font-sans selection:bg-elevate-primary selection:text-white bg-elevate-dark">
+<div class="h-screen w-full flex relative overflow-hidden font-sans selection:bg-sky-500 selection:text-white bg-[#020b18]">
     
     <!-- BACKGROUND IMAGE & OVERLAY (ELEVATE NAVY TINT) -->
     <div class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70 filter brightness-85 contrast-110" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
-    <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/75 via-[#021124]/50 to-[#021124]/80 backdrop-blur-[1px]"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.55)_60%,_#021124_100%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/85 via-[#021124]/70 to-[#020b18]/90 backdrop-blur-[2px]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(13,82,161,0.25)_0%,_rgba(2,17,36,0.75)_60%,_#020b18_100%)]"></div>
 
     <!-- OVERLAY START (Untuk Audio Context Browser) -->
-    <div id="start-overlay" class="fixed inset-0 z-[100] bg-[#021124]/95 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden">
+    <div id="start-overlay" class="fixed inset-0 z-[100] bg-[#020b18]/95 backdrop-blur-xl flex flex-col items-center justify-center transition-opacity duration-500 overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center opacity-65 filter brightness-80 contrast-110 pointer-events-none" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/80 via-[#021124]/55 to-[#021124]/85 pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#021124]/90 via-[#021124]/75 to-[#020b18]/95 pointer-events-none"></div>
         <div class="text-center space-y-8 animate-enter">
             <div class="relative inline-block">
-                <div class="absolute inset-0 bg-elevate-primary blur-3xl opacity-30 animate-pulse"></div>
-                <i class="ph-duotone ph-desktop-tower text-9xl text-elevate-accent relative z-10"></i>
+                <div class="absolute inset-0 bg-sky-500 blur-3xl opacity-30 animate-pulse"></div>
+                <i class="ph-duotone ph-desktop-tower text-9xl text-sky-400 relative z-10"></i>
             </div>
             <div>
                 <h1 class="text-4xl font-black text-white tracking-tight">KIOSK PERPUSTAKAAN</h1>
-                <p class="text-elevate-soft mt-2 font-medium">Klik tombol di bawah untuk mengaktifkan sistem suara & scanner.</p>
+                <p class="text-slate-300 mt-2 font-medium">Klik tombol di bawah untuk mengaktifkan sistem suara & scanner.</p>
             </div>
-            <button onclick="startKiosk()" class="group relative px-8 py-4 bg-elevate-primary hover:bg-elevate-accent text-white font-bold rounded-2xl text-xl shadow-lg shadow-elevate-primary/30 transition-all hover:scale-105 active:scale-95 overflow-hidden">
+            <button onclick="startKiosk()" class="group relative px-8 py-4 bg-[#0d52a1] hover:bg-sky-600 text-white font-bold rounded-2xl text-xl shadow-lg shadow-sky-950/50 transition-all hover:scale-105 active:scale-95 overflow-hidden border border-sky-400/30">
                 <span class="relative z-10 flex items-center gap-3">
                     <i class="ph-bold ph-power"></i> AKTIFKAN SISTEM
                 </span>
@@ -30,11 +30,11 @@
     </div>
 
    <!-- Background FX (Gradient dari tema) -->
-    <div class="absolute top-0 left-0 w-full h-1.5 bg-elevate-gradient-main z-50 shadow-[0_0_15px_rgba(86,187,241,0.6)]"></div>
-    <div class="absolute -top-[20%] -left-[10%] w-[800px] h-[800px] bg-elevate-primary/20 rounded-full blur-[150px] animate-pulse pointer-events-none"></div>
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 z-50 shadow-[0_0_15px_rgba(86,187,241,0.6)]"></div>
+    <div class="absolute -top-[20%] -left-[10%] w-[800px] h-[800px] bg-sky-600/10 rounded-full blur-[150px] animate-pulse pointer-events-none"></div>
 
     <!-- Tombol Kembali (Di atas background gelap) -->
-    <a href="{{ route('library.dashboard') }}" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all border border-white/20 shadow-lg group backdrop-blur-md">
+    <a href="{{ route('library.dashboard') }}" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-slate-900/60 hover:bg-slate-900 text-white rounded-full transition-all border border-white/10 shadow-lg group backdrop-blur-md">
         <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-bold text-xs uppercase tracking-wider">Dashboard</span>
     </a>
@@ -47,7 +47,7 @@
             
             <!-- Header -->
             <div class="text-center mb-6 w-full flex flex-col items-center shrink-0">
-                <div class="inline-flex items-center justify-center p-3 mb-4 bg-white/10 rounded-2xl border border-white/20 shadow-lg backdrop-blur-md">
+                <div class="inline-flex items-center justify-center p-3 mb-4 bg-slate-900/60 rounded-2xl border border-white/10 shadow-lg backdrop-blur-md">
                     <img src="{{ asset('img/logo_sekolah.png') }}" onerror="this.style.display='none';" alt="Logo" class="w-14 h-14 object-contain">
                 </div>
                 
@@ -56,53 +56,53 @@
                 </h1>
                 
                 <!-- Jam Digital -->
-                <div class="mt-4 px-6 py-2 rounded-full bg-white/20 border border-white/30 shadow-lg backdrop-blur-xl">
+                <div class="mt-4 px-6 py-2 rounded-full bg-slate-900/80 border border-white/10 shadow-lg backdrop-blur-xl">
                     <span id="kiosk-clock" class="text-3xl font-black text-white font-mono tracking-widest drop-shadow-md">00:00:00</span>
                 </div>
             </div>
 
             <!-- MODE SWITCHER -->
-            <div class="flex bg-elevate-dark/40 p-1.5 rounded-2xl border border-white/20 mb-6 backdrop-blur-xl shadow-lg">
-                <button onclick="setMode('attendance')" id="btn-mode-attendance" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-elevate-primary text-white shadow-md shadow-elevate-primary/30 interactive-btn">
+            <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 mb-6 backdrop-blur-xl shadow-lg">
+                <button onclick="setMode('attendance')" id="btn-mode-attendance" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#0d52a1] text-white shadow-md shadow-sky-950/50 interactive-btn border border-sky-400/30">
                     <i class="ph-bold ph-user-check"></i> Absensi Masuk
                 </button>
-                <button onclick="setMode('check')" id="btn-mode-check" class="px-6 py-2.5 rounded-xl font-bold text-sm text-white/70 hover:text-white transition-all flex items-center gap-2 interactive-btn bg-transparent">
+                <button onclick="setMode('check')" id="btn-mode-check" class="px-6 py-2.5 rounded-xl font-bold text-sm text-slate-300 hover:text-white transition-all flex items-center gap-2 interactive-btn bg-transparent">
                     <i class="ph-bold ph-info"></i> Cek Status
                 </button>
             </div>
 
-            <!-- BOX SCANNER (Warna Putih menonjol di atas navy) -->
-            <div id="status-box" class="w-full max-w-2xl aspect-[16/7] bg-white/95 backdrop-blur-xl rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-elevate-soft hover:border-elevate-accent/50 shadow-2xl">
+            <!-- BOX SCANNER (Warna Dark Glass) -->
+            <div id="status-box" class="w-full max-w-2xl aspect-[16/7] bg-gradient-to-b from-[#031d3d]/95 via-[#021124]/95 to-[#020b18] backdrop-blur-xl rounded-[2.5rem] flex flex-col items-center justify-center relative transition-all duration-500 group overflow-visible border border-white/15 hover:border-sky-500/50 shadow-2xl">
                 
                 <!-- Laser Animation -->
-                <div id="scan-laser" class="absolute top-0 left-8 right-8 h-1.5 bg-gradient-to-r from-transparent via-elevate-accent to-transparent shadow-[0_0_20px_theme(colors.elevate.accent)] z-20 animate-scan-y opacity-80"></div>
+                <div id="scan-laser" class="absolute top-0 left-8 right-8 h-1.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_20px_#56bbf1] z-20 animate-scan-y opacity-80"></div>
 
                 <!-- State: Standby -->
                 <div id="state-standby" class="flex flex-col items-center z-10 transition-transform duration-300 group-hover:scale-105">
                     <div class="relative mb-4">
-                         <div class="absolute inset-0 bg-elevate-primary/10 blur-2xl rounded-full animate-pulse"></div>
-                         <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center relative z-10 border-4 border-white shadow-inner">
-                             <i class="ph-bold ph-scan text-5xl text-elevate-primary drop-shadow-md"></i>
+                         <div class="absolute inset-0 bg-sky-500/20 blur-2xl rounded-full animate-pulse"></div>
+                         <div class="w-24 h-24 bg-slate-900/90 rounded-full flex items-center justify-center relative z-10 border-4 border-white/10 shadow-inner text-sky-400">
+                             <i class="ph-bold ph-scan text-5xl drop-shadow-md"></i>
                          </div>
                     </div>
-                    <p class="text-3xl font-black text-elevate-dark tracking-wide">TEMPEL KARTU</p>
-                    <p class="text-elevate-primary mt-1 font-bold text-sm tracking-widest uppercase" id="instruction-text">Untuk Absensi Perpustakaan</p>
+                    <p class="text-3xl font-black text-white tracking-wide">TEMPEL KARTU</p>
+                    <p class="text-sky-400 mt-1 font-bold text-sm tracking-widest uppercase" id="instruction-text">Untuk Absensi Perpustakaan</p>
                 </div>
 
                 <!-- State: Result -->
-                <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full bg-elevate-surface rounded-[2.5rem] flex-col items-center justify-center border border-elevate-soft overflow-hidden p-6 text-center shadow-inner">
+                <div id="state-result" class="hidden absolute inset-0 z-30 w-full h-full bg-[#021124] rounded-[2.5rem] flex-col items-center justify-center border border-white/10 overflow-hidden p-6 text-center shadow-inner">
                     <!-- Injected via JS -->
                 </div>
             </div>
             
             <!-- OVERDUE ALERT BANNER -->
-            <div id="overdue-alert" class="hidden mt-6 w-full max-w-2xl bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center gap-4 animate-bounce-in shadow-lg">
+            <div id="overdue-alert" class="hidden mt-6 w-full max-w-2xl bg-rose-950/60 border border-rose-500/30 rounded-2xl p-4 flex items-center gap-4 animate-bounce-in shadow-lg text-white">
                 <div class="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shrink-0 animate-pulse shadow-md shadow-rose-500/30">
                     <i class="ph-bold ph-warning text-white text-xl"></i>
                 </div>
                 <div class="text-left">
-                    <h4 class="text-rose-600 font-bold text-sm uppercase">Peringatan Keterlambatan</h4>
-                    <p class="text-rose-800 text-xs mt-0.5 font-medium">Harap segera kembalikan buku: <span id="overdue-titles" class="font-bold"></span></p>
+                    <h4 class="text-rose-400 font-bold text-sm uppercase">Peringatan Keterlambatan</h4>
+                    <p class="text-rose-200 text-xs mt-0.5 font-medium">Harap segera kembalikan buku: <span id="overdue-titles" class="font-bold text-white"></span></p>
                 </div>
             </div>
 
@@ -112,10 +112,10 @@
         <div class="hidden lg:flex w-[380px] h-full flex-col gap-6 shrink-0">
             
             <!-- 1. List Pengunjung -->
-            <div class="flex-1 bg-white/95 backdrop-blur-xl border border-elevate-soft shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col relative z-20">
-                <div class="p-6 bg-elevate-soft/50 border-b border-elevate-soft flex justify-between items-center">
-                    <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2">
-                        <i class="ph-fill ph-users-three text-elevate-primary"></i> Pengunjung
+            <div class="flex-1 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col relative z-20">
+                <div class="p-6 bg-slate-900/60 border-b border-white/10 flex justify-between items-center">
+                    <h2 class="text-lg font-black text-white flex items-center gap-2">
+                        <i class="ph-fill ph-users-three text-sky-400"></i> Pengunjung
                     </h2>
                     <div class="flex h-2.5 w-2.5 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -125,26 +125,26 @@
                 <div class="flex-1 overflow-y-auto p-5 custom-scrollbar relative">
                     <ul id="scan-log-list" class="space-y-3 pb-10">
                         <li id="empty-log" class="flex flex-col items-center justify-center py-20 opacity-60">
-                            <i class="ph-duotone ph-ghost text-5xl text-elevate-primary/30 mb-2"></i>
-                            <p class="text-elevate-dark/40 text-xs font-bold uppercase">Belum ada data</p>
+                            <i class="ph-duotone ph-ghost text-5xl text-sky-400/30 mb-2"></i>
+                            <p class="text-slate-400 text-xs font-bold uppercase">Belum ada data</p>
                         </li>
                     </ul>
                 </div>
             </div>
 
             <!-- 2. Rekomendasi Buku -->
-            <div class="h-1/3 bg-white/95 backdrop-blur-xl border border-elevate-soft shadow-2xl rounded-[2.5rem] p-6 relative overflow-hidden group">
+            <div class="h-1/3 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2.5rem] p-6 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i class="ph-duotone ph-books text-6xl text-elevate-primary"></i>
+                    <i class="ph-duotone ph-books text-6xl text-sky-400"></i>
                 </div>
-                <h3 class="text-sm font-bold text-elevate-primary uppercase tracking-wider mb-4">Rekomendasi Hari Ini</h3>                
+                <h3 class="text-sm font-bold text-sky-400 uppercase tracking-wider mb-4">Rekomendasi Hari Ini</h3>                
                 <div class="relative h-full overflow-hidden" id="book-slider">
                     @forelse($recommendations as $index => $book)
                     <div class="book-slide absolute inset-0 transition-opacity duration-1000 {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' }}">
                         <div class="flex gap-4 items-start">
                             
                             <!-- LOGIC GAMBAR BUKU CERDAS -->
-                            <div class="w-16 h-24 bg-elevate-soft rounded-lg shadow-sm shrink-0 overflow-hidden relative border border-elevate-primary/10">
+                            <div class="w-16 h-24 bg-slate-900 rounded-lg shadow-sm shrink-0 overflow-hidden relative border border-white/10">
                                 @php
                                     $imageSrc = null;
                                     if (!empty($book->cover_path)) {
@@ -162,28 +162,28 @@
                                          alt="{{ $book->title }}"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     
-                                    <div class="w-full h-full bg-gradient-to-br from-elevate-soft to-white hidden flex-col items-center justify-center p-1 text-center absolute inset-0">
-                                        <i class="ph-duotone ph-book-open text-elevate-primary/50 text-xl mb-1"></i>
-                                        <span class="text-[8px] text-elevate-dark/60 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
+                                    <div class="w-full h-full bg-slate-900 hidden flex-col items-center justify-center p-1 text-center absolute inset-0">
+                                        <i class="ph-duotone ph-book-open text-sky-400/50 text-xl mb-1"></i>
+                                        <span class="text-[8px] text-slate-300 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
                                     </div>
                                 @else
-                                    <div class="w-full h-full bg-gradient-to-br from-elevate-soft to-white flex flex-col items-center justify-center p-1 text-center">
-                                        <i class="ph-duotone ph-book-open text-elevate-primary/50 text-xl mb-1"></i>
-                                        <span class="text-[8px] text-elevate-dark/60 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
+                                    <div class="w-full h-full bg-slate-900 flex flex-col items-center justify-center p-1 text-center">
+                                        <i class="ph-duotone ph-book-open text-sky-400/50 text-xl mb-1"></i>
+                                        <span class="text-[8px] text-slate-300 font-bold leading-tight">{{ substr($book->title, 0, 15) }}...</span>
                                     </div>
                                 @endif
                             </div>
                             
                             <div>
-                                <h4 class="text-elevate-dark font-bold text-sm line-clamp-2 leading-tight">{{ $book->title }}</h4>
-                                <p class="text-slate-500 text-xs mt-1 font-medium">{{ $book->author }}</p>
+                                <h4 class="text-white font-bold text-sm line-clamp-2 leading-tight">{{ $book->title }}</h4>
+                                <p class="text-slate-400 text-xs mt-1 font-medium">{{ $book->author }}</p>
                                 <div class="flex flex-wrap gap-1.5 mt-2">
-                                    <span class="px-2 py-0.5 bg-elevate-soft text-elevate-primary text-[10px] font-bold rounded border border-elevate-primary/10">
+                                    <span class="px-2 py-0.5 bg-sky-500/20 text-sky-300 text-[10px] font-bold rounded border border-sky-500/30">
                                         {{ $book->category->name ?? 'Umum' }}
                                     </span>
                                    
                                     @if(!empty($book->location))
-                                        <span class="px-2 py-0.5 bg-white text-slate-500 text-[10px] font-bold rounded border border-slate-200">
+                                        <span class="px-2 py-0.5 bg-slate-900 text-slate-400 text-[10px] font-bold rounded border border-white/10">
                                             Rak: {{ $book->location }}
                                         </span>
                                     @endif
@@ -194,8 +194,8 @@
                     @empty
                     <!-- EMPTY STATE REKOMENDASI -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center opacity-80">
-                        <i class="ph-duotone ph-books text-5xl text-elevate-primary/30 mb-3"></i>
-                        <p class="text-elevate-dark/50 text-xs font-bold uppercase text-center tracking-widest">Belum ada rekomendasi<br>buku hari ini</p>
+                        <i class="ph-duotone ph-books text-5xl text-sky-400/30 mb-3"></i>
+                        <p class="text-slate-400 text-xs font-bold uppercase text-center tracking-widest">Belum ada rekomendasi<br>buku hari ini</p>
                     </div>
                     @endforelse
                 </div>

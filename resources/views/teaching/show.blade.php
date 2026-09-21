@@ -272,25 +272,25 @@
                                     {{-- Container filter --}}
                                     <div class="flex flex-wrap items-center gap-2 py-1 w-full">
                                         <button @click="filterTab = 'all'" 
-                                                :class="filterTab === 'all' ? 'bg-elevate-dark text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" 
+                                                :class="filterTab === 'all' ? 'bg-gradient-to-r from-[#0d52a1] to-sky-600 text-white border-sky-400/40 shadow-lg' : 'bg-slate-900/80 text-slate-400 border-white/10 hover:bg-slate-800 hover:text-white'" 
                                                 class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border">
                                             Semua Siswa
                                         </button>
                                         
                                         <button @click="filterTab = 'unmarked'" 
-                                                :class="filterTab === 'unmarked' ? 'bg-slate-500 text-white border-transparent shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'" 
+                                                :class="filterTab === 'unmarked' ? 'bg-slate-700 text-white border-white/20 shadow-lg' : 'bg-slate-900/80 text-slate-400 border-white/10 hover:bg-slate-800 hover:text-white'" 
                                                 class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
-                                            <span class="w-2 h-2 rounded-full" :class="filterTab === 'unmarked' ? 'bg-white' : 'bg-slate-300'"></span> Belum Absen
+                                            <span class="w-2 h-2 rounded-full" :class="filterTab === 'unmarked' ? 'bg-white' : 'bg-slate-500'"></span> Belum Absen
                                         </button>
                                         
                                         <button @click="filterTab = 'present'" 
-                                                :class="filterTab === 'present' ? 'bg-[#107C10] text-white border-transparent shadow-md' : 'bg-white text-[#107C10] border-[#B7DFB9] hover:bg-[#DFF6DD]/50'" 
+                                                :class="filterTab === 'present' ? 'bg-emerald-600 text-white border-emerald-400/40 shadow-lg' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'" 
                                                 class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
                                             <i class="ph-bold ph-check"></i> Hadir
                                         </button>
                                         
                                         <button @click="filterTab = 'alpha'" 
-                                                :class="filterTab === 'alpha' ? 'bg-[#D13438] text-white border-transparent shadow-md' : 'bg-white text-[#D13438] border-[#F4C3C9] hover:bg-[#FDE7E9]/50'" 
+                                                :class="filterTab === 'alpha' ? 'bg-rose-600 text-white border-rose-400/40 shadow-lg' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'" 
                                                 class="shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all border flex items-center gap-2">
                                             <i class="ph-bold ph-x"></i> Alpha
                                         </button>
@@ -299,7 +299,7 @@
                                     @if($isOpen)
                                         {{-- Tombol Bulk Alpha diletakkan di samping/bawah filter --}}
                                         <button @click="markRestAsAlpha()" type="button" 
-                                                class="shrink-0 w-full xl:w-auto px-4 py-2 bg-[#FDE7E9] text-[#D13438] hover:bg-[#F4C3C9] font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-[#F4C3C9] transition-colors shadow-sm active:scale-95 whitespace-nowrap">
+                                                class="shrink-0 w-full xl:w-auto px-4 py-2 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-rose-500/30 transition-colors shadow-sm active:scale-95 whitespace-nowrap">
                                             <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
                                         </button>
                                     @endif

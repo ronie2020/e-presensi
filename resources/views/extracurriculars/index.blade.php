@@ -2,7 +2,7 @@
     {{-- Load SweetAlert --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
+    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
             {{-- HERO SECTION --}}
@@ -35,13 +35,13 @@
                     </x-slot:chips>
                     <x-slot:cta>
                         <button @click="addModalOpen = true"
-                                class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:brightness-110 text-white font-bold text-sm shadow-lg shadow-sky-950/50 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                             <i class="ph-bold ph-plus-circle text-lg"></i>
                             <span>Tambah Ekskul</span>
                         </button>
                         <a href="{{ route('extracurriculars.reports') }}"
                            class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 transition-all duration-300">
-                            <i class="ph-bold ph-file-text text-lg text-sky-400"></i>
+                            <i class="ph-bold ph-file-text text-lg text-[#56bbf1]"></i>
                             <span>Laporan Absensi</span>
                         </a>
                     </x-slot:cta>
@@ -73,181 +73,175 @@
                         timer: 3000,
                         showConfirmButton: false,
                         toast: true,
-                        position: 'top-end'
+                        position: 'top-end',
+                        background: '#031d3d',
+                        color: '#ffffff'
                     });
                 });
             </script>
         @endif
 
         {{-- Grid Card Layout --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-0">
-            @forelse($extracurriculars as $ekskul)
-                <div class="bg-white rounded-[2rem] border border-slate-100 p-6 hover:shadow-2xl hover:shadow-blue-900/10 hover:border-blue-200 transition-all duration-300 group flex flex-col h-full relative overflow-hidden">
-                    
-                    {{-- Dekorasi Background Card --}}
-                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-blue-50 to-slate-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
-                    <div class="absolute top-6 right-6 opacity-0 group-hover:opacity-10 transition-opacity duration-300 transform translate-x-4 group-hover:translate-x-0">
-                        <i class="ph-fill ph-basketball text-6xl text-blue-900"></i>
-                    </div>
-
-                    {{-- Header Card --}}
-                    <div class="flex items-start justify-between mb-6 relative z-10">
-                        {{-- Icon Wrapper with shrink-0 (FIXED) --}}
-                        <div class="w-16 h-16 shrink-0 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-900 text-3xl shadow-sm group-hover:shadow-md group-hover:bg-blue-900 group-hover:text-white transition-all duration-300">
-                            @if(Str::startsWith($ekskul->icon, 'storage/'))
-                                <img src="{{ asset($ekskul->icon) }}" class="w-full h-full object-cover rounded-2xl">
-                            @elseif(Str::startsWith($ekskul->icon, 'http'))
-                                <img src="{{ $ekskul->icon }}" class="w-full h-full object-cover rounded-2xl">
-                            @else
-                                <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
-                            @endif
-                        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse($extracurriculars as $ekskul)
+                    <div class="bg-gradient-to-br from-[#031d3d]/90 via-[#021124]/95 to-[#031d3d]/90 backdrop-blur-xl rounded-[2rem] border border-white/10 p-6 hover:shadow-2xl hover:border-[#56bbf1]/30 transition-all duration-300 group flex flex-col h-full relative overflow-hidden">
                         
-                        {{-- Dropdown Actions --}}
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" @click.away="open = false" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
-                                <i class="ph-bold ph-dots-three-vertical text-xl"></i>
-                            </button>
-                            <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-20 py-2 ring-1 ring-black/5" style="display: none;" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100">
-                                
-                                {{-- Tombol Edit dengan JSON Safe (FIXED) --}}
-                                <button @click="
-                                    editModalOpen = true; 
-                                    editData = JSON.parse('{{ json_encode($ekskul, JSON_HEX_APOS | JSON_HEX_QUOT) }}');
-                                    open = false;
-                                    setTimeout(() => setupEditForm(editData), 50);
-                                " class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors">
-                                    <i class="ph-bold ph-pencil-simple text-base"></i> Edit Data
-                                </button>
-                                
-                                <div class="border-t border-slate-100 my-1"></div>
-
-                                {{-- Form Hapus --}}
-                                <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" class="delete-form">
-                                    @csrf @method('DELETE')
-                                    <button type="button" class="btn-delete w-full text-left px-4 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 flex items-center gap-2 transition-colors">
-                                        <i class="ph-bold ph-trash text-base"></i> Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Content --}}
-                    <div class="flex-1 relative z-10">
-                        <h3 class="text-xl font-black text-slate-800 mb-1 group-hover:text-blue-900 transition-colors line-clamp-2">{{ $ekskul->name }}</h3>
-                        <div class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-6 uppercase tracking-wide">
-                            <i class="ph-bold ph-user-circle text-blue-500 text-lg"></i>
-                            <span class="truncate">{{ $ekskul->coach_name ?? 'Belum ada pembina' }}</span>
-                        </div>
-
-                        <div class="space-y-3">
-                            {{-- Jadwal Row --}}
-                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">Jadwal</span>
-                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5 text-right">
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
-                                    <span class="truncate max-w-[120px]">{{ $ekskul->schedule ?? '-' }}</span>
-                                </span>
+                        {{-- Header Card --}}
+                        <div class="flex items-start justify-between mb-6 relative z-10">
+                            <div class="w-16 h-16 shrink-0 rounded-2xl bg-[#56bbf1]/10 border border-[#56bbf1]/20 flex items-center justify-center text-[#56bbf1] text-3xl shadow-sm group-hover:shadow-md group-hover:bg-gradient-to-r group-hover:from-[#0d52a1] group-hover:to-[#56bbf1] group-hover:text-white transition-all duration-300">
+                                @if(Str::startsWith($ekskul->icon, 'storage/'))
+                                    <img src="{{ asset($ekskul->icon) }}" class="w-full h-full object-cover rounded-2xl">
+                                @elseif(Str::startsWith($ekskul->icon, 'http'))
+                                    <img src="{{ $ekskul->icon }}" class="w-full h-full object-cover rounded-2xl">
+                                @else
+                                    <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
+                                @endif
                             </div>
                             
-                            {{-- Anggota Row --}}
-                            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">Partisipan</span>
-                                <div class="flex items-center -space-x-2">
-                                    {{-- Fake Avatars --}}
-                                    <div class="w-6 h-6 rounded-full border-2 border-white bg-blue-200"></div>
-                                    <div class="w-6 h-6 rounded-full border-2 border-white bg-pink-200"></div>
-                                    <div class="w-6 h-6 rounded-full border-2 border-white bg-slate-200 flex items-center justify-center text-[8px] font-bold text-slate-600">
-                                        +{{ $ekskul->members_count }}
+                            {{-- Dropdown Actions --}}
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" @click.away="open = false" class="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:bg-white/10 hover:text-white transition-colors">
+                                    <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                                </button>
+                                <div x-show="open" class="absolute right-0 mt-2 w-48 bg-[#031d3d] rounded-2xl shadow-2xl border border-white/15 z-20 py-2" style="display: none;" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100">
+                                    
+                                    <button @click="
+                                        editModalOpen = true; 
+                                        editData = JSON.parse('{{ json_encode($ekskul, JSON_HEX_APOS | JSON_HEX_QUOT) }}');
+                                        open = false;
+                                        setTimeout(() => setupEditForm(editData), 50);
+                                    " class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-[#56bbf1] flex items-center gap-2 transition-colors">
+                                        <i class="ph-bold ph-pencil-simple text-base"></i> Edit Data
+                                    </button>
+                                    
+                                    <div class="border-t border-white/10 my-1"></div>
+
+                                    <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" class="delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="btn-delete w-full text-left px-4 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
+                                            <i class="ph-bold ph-trash text-base"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="flex-1 relative z-10">
+                            <h3 class="text-xl font-black text-white mb-1 group-hover:text-[#56bbf1] transition-colors line-clamp-2">{{ $ekskul->name }}</h3>
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-6 uppercase tracking-wide">
+                                <i class="ph-bold ph-user-circle text-[#56bbf1] text-lg"></i>
+                                <span class="truncate">{{ $ekskul->coach_name ?? 'Belum ada pembina' }}</span>
+                            </div>
+
+                            <div class="space-y-3">
+                                {{-- Jadwal Row --}}
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-[#021124]/80 border border-white/10">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Jadwal</span>
+                                    <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5 text-right">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                        <span class="truncate max-w-[120px]">{{ $ekskul->schedule ?? '-' }}</span>
+                                    </span>
+                                </div>
+                                
+                                {{-- Anggota Row --}}
+                                <div class="flex items-center justify-between p-3 rounded-xl bg-[#021124]/80 border border-white/10">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Partisipan</span>
+                                    <div class="flex items-center -space-x-2">
+                                        <div class="w-6 h-6 rounded-full border-2 border-[#021124] bg-sky-500/40"></div>
+                                        <div class="w-6 h-6 rounded-full border-2 border-[#021124] bg-indigo-500/40"></div>
+                                        <div class="w-6 h-6 rounded-full border-2 border-[#021124] bg-white/10 flex items-center justify-center text-[8px] font-bold text-white">
+                                            +{{ $ekskul->members_count }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Footer Link --}}
-                    <div class="mt-6 pt-4 relative z-10">
-                        <a href="{{ route('extracurriculars.members', ['ekskul_id' => $ekskul->id]) }}" class="w-full py-3 rounded-xl bg-blue-50 text-blue-900 font-bold text-sm flex items-center justify-center gap-2 group-hover:bg-blue-900 group-hover:text-white transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-blue-900/30">
-                            <span>Kelola Anggota</span>
-                            <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </a>
+                        {{-- Footer Link --}}
+                        <div class="mt-6 pt-4 relative z-10">
+                            <a href="{{ route('extracurriculars.members', ['ekskul_id' => $ekskul->id]) }}" class="w-full py-3 rounded-xl bg-[#56bbf1]/10 border border-[#56bbf1]/20 text-[#56bbf1] font-bold text-sm flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-[#0d52a1] group-hover:to-[#56bbf1] group-hover:text-white transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-sky-950/50">
+                                <span>Kelola Anggota</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            @empty
-                <div class="col-span-full py-20 text-center bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
-                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                        <i class="ph-duotone ph-puzzle-piece text-5xl text-slate-300"></i>
+                @empty
+                    <div class="col-span-full py-20 text-center bg-gradient-to-br from-[#031d3d]/90 via-[#021124]/95 to-[#031d3d]/90 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl">
+                        <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-white/10">
+                            <i class="ph-duotone ph-puzzle-piece text-5xl text-slate-400"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-white mb-2">Belum ada Ekstrakurikuler</h3>
+                        <p class="text-slate-400 text-sm max-w-xs mx-auto">Tambahkan kegiatan baru untuk memulai manajemen bakat siswa.</p>
+                        <button @click="addModalOpen = true" class="mt-6 px-6 py-2.5 bg-gradient-to-r from-[#0d52a1] to-[#56bbf1] text-white rounded-xl font-bold text-sm hover:brightness-110 transition shadow-lg shadow-sky-950/50">
+                            + Tambah Data
+                        </button>
                     </div>
-                    <h3 class="text-xl font-black text-slate-700 mb-2">Belum ada Ekstrakurikuler</h3>
-                    <p class="text-slate-400 text-sm max-w-xs mx-auto">Tambahkan kegiatan baru untuk memulai manajemen bakat siswa.</p>
-                    <button @click="addModalOpen = true" class="mt-6 px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-sm hover:bg-blue-800 transition shadow-lg shadow-blue-900/20">
-                        + Tambah Data
-                    </button>
-                </div>
-            @endforelse
+                @endforelse
+            </div>
         </div>
 
         {{-- MODAL TAMBAH --}}
         <div x-show="addModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-blue-950/60 backdrop-blur-sm transition-opacity" @click="addModalOpen = false"></div>
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" @click="addModalOpen = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/20">
-                    <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-6 flex justify-between items-center">
+                <div class="bg-[#031d3d] rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/15 text-white">
+                    <div class="bg-gradient-to-r from-[#0d52a1] to-[#56bbf1] p-6 flex justify-between items-center">
                         <h3 class="text-lg font-black text-white flex items-center gap-2">
-                            <i class="ph-bold ph-plus-circle text-blue-300"></i> Tambah Ekskul Baru
+                            <i class="ph-bold ph-plus-circle text-white"></i> Tambah Ekskul Baru
                         </h3>
                         <button @click="addModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"><i class="ph-bold ph-x"></i></button>
                     </div>
-                    <form action="{{ route('extracurriculars.store') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-5">
+                    <form action="{{ route('extracurriculars.store') }}" method="POST" enctype="multipart/form-data" class="p-6 md:p-8 space-y-5">
                         @csrf
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nama Ekskul <span class="text-rose-500">*</span></label>
-                            <input type="text" name="name" required placeholder="Contoh: Basket Putra" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Ekskul <span class="text-rose-400">*</span></label>
+                            <input type="text" name="name" required placeholder="Contoh: Basket Putra" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all placeholder:text-slate-500">
                         </div>
                         <div class="grid grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nama Pembina</label>
-                                <input type="text" name="coach_name" placeholder="Bpk/Ibu..." class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pembina</label>
+                                <input type="text" name="coach_name" placeholder="Bpk/Ibu..." class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all placeholder:text-slate-500">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Jadwal Latihan</label>
-                                <input type="text" name="schedule" placeholder="Senin, 15:00" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jadwal Latihan</label>
+                                <input type="text" name="schedule" placeholder="Senin, 15:00" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all placeholder:text-slate-500">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Ikon / Logo</label>
-                            <div x-data="{ type: 'upload' }" class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Ikon / Logo</label>
+                            <div x-data="{ type: 'upload' }" class="p-4 bg-[#021124]/80 rounded-2xl border border-white/10">
                                 <div class="flex gap-4 mb-4">
                                     <label class="flex items-center gap-2 cursor-pointer group">
-                                        <div class="w-4 h-4 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-500 transition-colors">
-                                            <div class="w-2 h-2 rounded-full bg-blue-600 opacity-0" :class="{'opacity-100': type === 'upload'}"></div>
+                                        <div class="w-4 h-4 rounded-full border-2 border-white/20 flex items-center justify-center group-hover:border-[#56bbf1] transition-colors">
+                                            <div class="w-2 h-2 rounded-full bg-[#56bbf1] opacity-0" :class="{'opacity-100': type === 'upload'}"></div>
                                         </div>
                                         <input type="radio" x-model="type" value="upload" class="hidden">
-                                        <span class="text-xs font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Upload Gambar</span>
+                                        <span class="text-xs font-bold text-slate-300 group-hover:text-[#56bbf1] transition-colors">Upload Gambar</span>
                                     </label>
                                     <label class="flex items-center gap-2 cursor-pointer group">
-                                        <div class="w-4 h-4 rounded-full border-2 border-slate-300 flex items-center justify-center group-hover:border-blue-500 transition-colors">
-                                            <div class="w-2 h-2 rounded-full bg-blue-600 opacity-0" :class="{'opacity-100': type === 'icon'}"></div>
+                                        <div class="w-4 h-4 rounded-full border-2 border-white/20 flex items-center justify-center group-hover:border-[#56bbf1] transition-colors">
+                                            <div class="w-2 h-2 rounded-full bg-[#56bbf1] opacity-0" :class="{'opacity-100': type === 'icon'}"></div>
                                         </div>
                                         <input type="radio" x-model="type" value="icon" class="hidden">
-                                        <span class="text-xs font-bold text-slate-600 group-hover:text-blue-600 transition-colors">Phosphor Icon</span>
+                                        <span class="text-xs font-bold text-slate-300 group-hover:text-[#56bbf1] transition-colors">Phosphor Icon</span>
                                     </label>
                                 </div>
                                 <div x-show="type === 'upload'">
-                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-colors cursor-pointer"/>
+                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#56bbf1]/10 file:text-[#56bbf1] hover:file:bg-[#56bbf1]/20 transition-colors cursor-pointer"/>
                                 </div>
                                 <div x-show="type === 'icon'" style="display: none;">
                                     <div class="relative">
                                         <i class="ph-bold ph-code absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="icon_text" placeholder="Contoh: ph-fill ph-basketball" class="w-full rounded-xl border-slate-300 pl-9 text-sm py-2.5 bg-white focus:border-blue-600 focus:ring-blue-600 font-mono text-slate-600">
+                                        <input type="text" name="icon_text" placeholder="Contoh: ph-fill ph-basketball" class="w-full rounded-xl border-white/15 pl-9 text-sm py-2.5 bg-[#021124] focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] font-mono text-white placeholder:text-slate-500">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="pt-2 flex gap-3">
-                            <button type="button" @click="addModalOpen = false" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-blue-900 text-white text-sm font-bold hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition-all transform active:scale-95">Simpan Data</button>
+                            <button type="button" @click="addModalOpen = false" class="flex-1 py-3.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/10 hover:text-white transition-colors">Batal</button>
+                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] text-white text-sm font-bold hover:brightness-110 shadow-lg shadow-sky-950/50 transition-all transform active:scale-95">Simpan Data</button>
                         </div>
                     </form>
                 </div>
@@ -256,53 +250,53 @@
 
          {{-- MODAL EDIT --}}
         <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
+            <div class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div x-show="editModalOpen" x-transition.scale.95 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20">
-                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 flex justify-between items-center">
+                <div x-show="editModalOpen" x-transition.scale.95 class="bg-[#031d3d] rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/15 text-white">
+                    <div class="bg-gradient-to-r from-[#0d52a1] to-[#56bbf1] p-6 flex justify-between items-center">
                         <h3 class="text-lg font-black text-white flex items-center gap-2">
-                            <i class="ph-bold ph-pencil-simple text-elevate-accent"></i> Edit Ekstrakurikuler
+                            <i class="ph-bold ph-pencil-simple text-white"></i> Edit Ekstrakurikuler
                         </h3>
                         <button @click="editModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors focus:outline-none"><i class="ph-bold ph-x"></i></button>
                     </div>
-                   <form id="editForm" method="POST" enctype="multipart/form-data" class="p-8 space-y-5">
+                   <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6 md:p-8 space-y-5">
                         @csrf @method('PUT')
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Ekskul</label>
-                            <input type="text" name="name" id="edit_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
+                            <input type="text" name="name" id="edit_name" required class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all">
                         </div>
                         <div class="grid grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pembina</label>
-                                <input type="text" name="coach_name" id="edit_coach" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
+                                <input type="text" name="coach_name" id="edit_coach" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jadwal</label>
-                                <input type="text" name="schedule" id="edit_schedule" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
+                                <input type="text" name="schedule" id="edit_schedule" class="w-full rounded-2xl border-white/15 bg-[#021124]/90 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm py-3 px-4 font-bold text-white transition-all">
                             </div>
                         </div>
                         <div>
                              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Update Tampilan</label>
-                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                            <div class="p-4 bg-[#021124]/80 rounded-2xl border border-white/10">
                                 <div class="mb-4">
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ganti Gambar (Opsional)</label>
-                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-accent/10 file:text-elevate-primary hover:file:bg-elevate-accent/20 transition-colors cursor-pointer border border-dashed border-slate-300 bg-white"/>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Ganti Gambar (Opsional)</label>
+                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#56bbf1]/10 file:text-[#56bbf1] hover:file:bg-[#56bbf1]/20 transition-colors cursor-pointer border border-dashed border-white/15 bg-[#021124]"/>
                                 </div>
-                                <div class="border-t border-slate-200 my-4 relative">
-                                    <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 px-2 text-[10px] font-bold text-slate-400">ATAU</span>
+                                <div class="border-t border-white/10 my-4 relative">
+                                    <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#021124] px-2 text-[10px] font-bold text-slate-400">ATAU</span>
                                 </div>
                                 <div>
-                                   <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ganti Kode Ikon</label>
+                                   <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Ganti Kode Ikon</label>
                                     <div class="relative">
                                         <i class="ph-bold ph-code absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="icon_text" id="edit_icon_text" placeholder="Contoh: ph-fill ph-trophy" class="w-full rounded-xl border-slate-300 pl-9 text-sm py-2.5 bg-white focus:border-elevate-primary focus:ring-elevate-primary font-mono text-elevate-dark shadow-sm">
+                                        <input type="text" name="icon_text" id="edit_icon_text" placeholder="Contoh: ph-fill ph-trophy" class="w-full rounded-xl border-white/15 pl-9 text-sm py-2.5 bg-[#021124] focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] font-mono text-white shadow-sm placeholder:text-slate-500">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="pt-2 flex gap-3">
-                            <button type="button" @click="editModalOpen = false" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-elevate-dark text-white text-sm font-bold hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95">Update Data</button>
+                            <button type="button" @click="editModalOpen = false" class="flex-1 py-3.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-bold text-sm hover:bg-white/10 hover:text-white transition-colors">Batal</button>
+                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] text-white text-sm font-bold hover:brightness-110 shadow-lg shadow-sky-950/50 transition-all transform active:scale-95">Update Data</button>
                         </div>
                     </form>
                 </div>
@@ -346,10 +340,12 @@
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal',
                         reverseButtons: true,
+                        background: '#031d3d',
+                        color: '#ffffff',
                         customClass: {
-                            popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                            popup: 'rounded-[2.5rem] font-sans border border-white/10 shadow-2xl',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-950/50',
+                            cancelButton: 'bg-white/10 text-slate-300 px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors mx-2'
                         },
                         buttonsStyling: false
                     }).then((result) => {

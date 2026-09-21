@@ -11,12 +11,12 @@
         @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-10px, -15px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         
-        /* Shimmer Effect Dark (Diadaptasi untuk latar terang Elevate) */
+        /* Shimmer Effect Dark */
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         .text-shimmer {
-            background: linear-gradient(to right, #2c3f61 0%, #0d52a1 20%, #2c3f61 40%, #2c3f61 100%);
+            background: linear-gradient(to right, #38bdf8 0%, #56bbf1 20%, #e0f2fe 40%, #38bdf8 100%);
             background-size: 200% auto;
-            color: #2c3f61;
+            color: #38bdf8;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -24,9 +24,9 @@
         }
     </style>
 
-    <div class="py-6 sm:py-8 font-sans text-elevate-dark relative overflow-hidden">
+    <div class="py-6 sm:py-8 font-sans text-slate-100 bg-[#020b18] min-h-screen relative overflow-hidden">
         {{-- Efek Latar Belakang Halus --}}
-        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-sky-600/10 pointer-events-none -z-10 blur-3xl"></div>
         
         {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
@@ -85,64 +85,64 @@
                 <div class="lg:col-span-2 space-y-8">
 
                     <!-- Menu Akses Cepat -->
-                    <div class="animate-enter delay-100 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
-                        <h2 class="text-lg font-black text-elevate-dark mb-6 flex items-center gap-2">
-                            <i class="ph-fill ph-lightning text-amber-500 text-xl"></i> Akses Cepat
+                    <div class="animate-enter delay-100 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2.5rem] shadow-2xl border border-white/10 relative overflow-hidden">
+                        <h2 class="text-lg font-black text-white mb-6 flex items-center gap-2">
+                            <i class="ph-fill ph-lightning text-amber-400 text-xl"></i> Akses Cepat
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-arrows-left-right text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
+                            <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-slate-900/80 hover:bg-[#56bbf1]/20 border border-white/10 hover:border-[#56bbf1]/50 rounded-[2rem] transition-all duration-300 shadow-lg group">
+                                <i class="ph-duotone ph-arrows-left-right text-3xl text-sky-400 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-300 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
                             </a>
-                            <button onclick="searchMemberPopup()" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-user-focus text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
+                            <button onclick="searchMemberPopup()" class="flex flex-col items-center justify-center p-4 bg-slate-900/80 hover:bg-[#56bbf1]/20 border border-white/10 hover:border-[#56bbf1]/50 rounded-[2rem] transition-all duration-300 shadow-lg group">
+                                <i class="ph-duotone ph-user-focus text-3xl text-sky-400 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-300 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
                             </button>
-                            <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-plus-circle text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Input Buku</span>
+                            <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-slate-900/80 hover:bg-[#56bbf1]/20 border border-white/10 hover:border-[#56bbf1]/50 rounded-[2rem] transition-all duration-300 shadow-lg group">
+                                <i class="ph-duotone ph-plus-circle text-3xl text-sky-400 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-300 text-xs group-hover:text-white transition-colors">Input Buku</span>
                             </a>
-                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-elevate-peach-light/40 hover:bg-elevate-peach border border-slate-100 hover:border-elevate-peach rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-desktop text-3xl text-elevate-peach-dark group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
+                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400/50 rounded-[2rem] transition-all duration-300 shadow-lg group">
+                                <i class="ph-duotone ph-desktop text-3xl text-amber-400 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-300 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
                             </a>
                         </div>   
                     </div>     
 
                     <!-- E-Book Stats -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-enter delay-100">
-                        <div class="bg-elevate-dark rounded-[2rem] p-6 text-white shadow-xl shadow-elevate-dark/20 relative overflow-hidden">
+                        <div class="bg-gradient-to-br from-[#031d3d] to-[#021124] rounded-[2rem] p-6 border border-white/10 text-white shadow-2xl relative overflow-hidden">
                             <div class="absolute -right-4 -bottom-4 text-white/5 text-[8rem] pointer-events-none">
                                 <i class="ph-fill ph-book-bookmark"></i>
                             </div>
                             <div class="relative z-10">
-                                <div class="flex items-center gap-2 mb-2 text-elevate-accent">
+                                <div class="flex items-center gap-2 mb-2 text-sky-400">
                                     <i class="ph-fill ph-read-cv-logo"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Literasi Digital</span>
                                 </div>
-                                <h2 class="text-4xl font-black mb-1 count-up" data-target="{{ $ebookReadsThisMonth ?? 0 }}">0</h2>
-                                <p class="text-xs text-white/70">Total baca E-Book bulan ini</p>
+                                <h2 class="text-4xl font-black mb-1 count-up text-white" data-target="{{ $ebookReadsThisMonth ?? 0 }}">0</h2>
+                                <p class="text-xs text-slate-400">Total baca E-Book bulan ini</p>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-2 bg-elevate-gradient-card rounded-[2rem] border border-slate-200 shadow-sm p-6">
-                            <h3 class="font-bold text-elevate-dark text-sm mb-3 flex items-center gap-2">
-                                <i class="ph-fill ph-crown text-amber-500"></i> Top E-Book
+                        <div class="lg:col-span-2 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] border border-white/10 shadow-2xl p-6">
+                            <h3 class="font-bold text-white text-sm mb-3 flex items-center gap-2">
+                                <i class="ph-fill ph-crown text-amber-400"></i> Top E-Book
                             </h3>
                             @if(isset($popularEbooks) && count($popularEbooks) > 0)
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     @foreach($popularEbooks as $index => $book)
-                                        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-default border border-transparent hover:border-slate-100">
-                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-elevate-soft rounded text-elevate-primary">{{ $index + 1 }}</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors cursor-default border border-transparent hover:border-white/10">
+                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-sky-500/20 rounded text-sky-400 border border-sky-500/30">{{ $index + 1 }}</div>
                                             <div class="flex-1 min-w-0">
-                                                <h4 class="font-bold text-elevate-dark text-xs truncate">{{ $book->title }}</h4>
-                                                <span class="text-[10px] text-elevate-dark/60">{{ $book->ebook_reads_count }}x Baca</span>
+                                                <h4 class="font-bold text-slate-200 text-xs truncate">{{ $book->title }}</h4>
+                                                <span class="text-[10px] text-slate-400">{{ $book->ebook_reads_count }}x Baca</span>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-xs text-elevate-dark/50 text-center py-4">Belum ada data bacaan digital.</p>
+                                <p class="text-xs text-slate-400 text-center py-4">Belum ada data bacaan digital.</p>
                             @endif
                         </div>
                     </div>  
@@ -151,16 +151,16 @@
                     <div class="grid grid-cols-1 gap-6 animate-enter delay-200">
                         
                         <!-- Grafik Tren Aktivitas -->
-                        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                        <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2.5rem] shadow-2xl border border-white/10">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2">
-                                        <i class="ph-fill ph-chart-line-up text-elevate-primary"></i> Tren Aktivitas
+                                    <h2 class="text-lg font-black text-white flex items-center gap-2">
+                                        <i class="ph-fill ph-chart-line-up text-sky-400"></i> Tren Aktivitas
                                     </h2>
-                                    <p class="text-xs text-elevate-dark/50 font-bold mt-1 uppercase">7 Hari Terakhir</p>
+                                    <p class="text-xs text-slate-400 font-bold mt-1 uppercase">7 Hari Terakhir</p>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button onclick="downloadChart('mainChart')" class="p-2 text-slate-400 hover:text-elevate-primary transition" title="Download Gambar"><i class="ph-bold ph-download-simple"></i></button>
+                                    <button onclick="downloadChart('mainChart')" class="p-2 text-slate-400 hover:text-sky-400 transition" title="Download Gambar"><i class="ph-bold ph-download-simple"></i></button>
                                 </div>
                             </div>
                             <div class="h-64 w-full relative">
@@ -169,9 +169,9 @@
                         </div>
 
                         <!-- Grafik Jam Sibuk -->
-                        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                            <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2 mb-4">
-                                <i class="ph-fill ph-clock text-elevate-peach-dark"></i> Analitik Jam Sibuk
+                        <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2.5rem] shadow-2xl border border-white/10">
+                            <h2 class="text-lg font-black text-white flex items-center gap-2 mb-4">
+                                <i class="ph-fill ph-clock text-amber-400"></i> Analitik Jam Sibuk
                             </h2>
                             <div class="h-48 w-full relative">
                                 <canvas id="busyHoursChart"></canvas>
@@ -186,77 +186,77 @@
                 <div class="lg:col-span-1 space-y-8">
                      
                      <!-- Status Sirkulasi -->
-                     <div class="animate-enter delay-300 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                        <h3 class="font-black text-elevate-dark text-lg mb-4">Status Sirkulasi</h3>
+                     <div class="animate-enter delay-300 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2.5rem] shadow-2xl border border-white/10">
+                        <h3 class="font-black text-white text-lg mb-4">Status Sirkulasi</h3>
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="p-4 bg-elevate-soft rounded-2xl text-center border border-slate-200">
-                                <i class="ph-duotone ph-book-open-text text-2xl text-elevate-primary mb-1 block"></i>
-                                <p class="text-2xl font-black text-elevate-dark count-up" data-target="{{ $borrowedBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-elevate-dark/60 uppercase">Dipinjam</p>
+                            <div class="p-4 bg-slate-900/80 rounded-2xl text-center border border-white/10">
+                                <i class="ph-duotone ph-book-open-text text-2xl text-sky-400 mb-1 block"></i>
+                                <p class="text-2xl font-black text-white count-up" data-target="{{ $borrowedBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Dipinjam</p>
                             </div>
-                            <div class="p-4 bg-rose-50 rounded-2xl text-center border border-rose-100">
-                                <i class="ph-duotone ph-warning-circle text-2xl text-rose-500 mb-1 block"></i>
-                                <p class="text-2xl font-black text-elevate-dark count-up" data-target="{{ $overdueBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-elevate-dark/60 uppercase">Terlambat</p>
+                            <div class="p-4 bg-rose-500/10 rounded-2xl text-center border border-rose-500/20">
+                                <i class="ph-duotone ph-warning-circle text-2xl text-rose-400 mb-1 block"></i>
+                                <p class="text-2xl font-black text-white count-up" data-target="{{ $overdueBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-rose-400 uppercase">Terlambat</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Widget Perlu Perhatian (Stok Habis) -->
-                    <div class="animate-enter delay-300 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                        <h3 class="font-black text-elevate-dark text-lg mb-4 flex items-center gap-2">
-                            <i class="ph-fill ph-warning text-amber-500"></i> Stok Menipis
+                    <div class="animate-enter delay-300 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2.5rem] shadow-2xl border border-white/10">
+                        <h3 class="font-black text-white text-lg mb-4 flex items-center gap-2">
+                            <i class="ph-fill ph-warning text-amber-400"></i> Stok Menipis
                         </h3>
                         @if(isset($attentionBooks) && $attentionBooks->count() > 0)
                             <div class="space-y-3">
                                 @foreach($attentionBooks as $book)
-                                <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
-                                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-500 shadow-sm">
+                                <div class="flex items-center gap-3 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 shadow-sm border border-amber-500/30">
                                         <i class="ph-bold ph-book"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-bold text-elevate-dark truncate">{{ $book->title }}</p>
-                                        <p class="text-[10px] text-amber-600 font-bold">Stok: {{ $book->stock }}</p>
+                                        <p class="text-xs font-bold text-slate-200 truncate">{{ $book->title }}</p>
+                                        <p class="text-[10px] text-amber-400 font-bold">Stok: {{ $book->stock }}</p>
                                     </div>
                                 </div>
                                 @endforeach
                             </div>
                         @else
-                            <div class="text-center py-4 text-elevate-dark/50 text-xs">Semua stok buku aman.</div>
+                            <div class="text-center py-4 text-slate-400 text-xs">Semua stok buku aman.</div>
                         @endif
                     </div>
 
                     <!-- Log Aktivitas -->
-                    <div class="animate-enter delay-400 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-[500px]">
-                        <div class="p-6 border-b border-slate-50 flex justify-between items-center">
-                            <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2">
-                                <i class="ph-fill ph-clock-counter-clockwise text-elevate-primary"></i> Log Aktivitas
+                    <div class="animate-enter delay-400 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 flex flex-col h-[500px]">
+                        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                            <h3 class="font-black text-white text-lg flex items-center gap-2">
+                                <i class="ph-fill ph-clock-counter-clockwise text-sky-400"></i> Log Aktivitas
                             </h3>
-                            <span class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-bold animate-pulse border border-emerald-200">Live</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold animate-pulse border border-emerald-500/30">Live</span>
                         </div>
                         <div class="overflow-y-auto flex-1 p-0 custom-scrollbar">
-                            <div class="divide-y divide-slate-50">
+                            <div class="divide-y divide-white/5">
                                 @forelse($recentActivities as $activity)
-                                    <div class="p-4 hover:bg-elevate-soft/50 transition-colors flex gap-3 items-start">
+                                    <div class="p-4 hover:bg-white/5 transition-colors flex gap-3 items-start">
                                         <div class="shrink-0 mt-1">
                                             @if($activity->type == 'visit')
-                                                <div class="w-8 h-8 rounded-xl bg-elevate-peach/20 text-elevate-peach-dark flex items-center justify-center text-sm border border-elevate-peach/30">
+                                                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm border border-amber-500/30">
                                                     <i class="ph-duotone ph-door-open"></i>
                                                 </div>
                                             @else
-                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm border {{ $activity->status == 'returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-elevate-soft text-elevate-primary border-slate-200' }}">
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm border {{ $activity->status == 'returned' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-sky-500/20 text-sky-400 border-sky-500/30' }}">
                                                     <i class="{{ $activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up' }}"></i>
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-bold text-elevate-dark truncate">{{ $activity->student->name ?? 'Siswa' }}</p>
-                                            <p class="text-[10px] text-elevate-dark/60 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-') }}</p>
-                                            <p class="text-[9px] font-bold text-elevate-dark/40 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
+                                            <p class="text-xs font-bold text-slate-200 truncate">{{ $activity->student->name ?? 'Siswa' }}</p>
+                                            <p class="text-[10px] text-slate-400 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-') }}</p>
+                                            <p class="text-[9px] font-bold text-slate-500 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center py-10 text-elevate-dark/50">
+                                    <div class="text-center py-10 text-slate-400">
                                         <p class="text-xs">Belum ada aktivitas.</p>
                                     </div>
                                 @endforelse
@@ -274,9 +274,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
                 {{-- Grafik Peminjaman per Kelas --}}
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-elevate-dark mb-4 flex items-center gap-2">
-                        <i class="ph-fill ph-chart-pie-slice text-elevate-accent"></i> Distribusi Kelas
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2rem] border border-white/10 shadow-2xl">
+                    <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-chart-pie-slice text-sky-400"></i> Distribusi Kelas
                     </h3>
                     <div class="h-64 w-full">
                         <canvas id="classChart"></canvas>
@@ -284,21 +284,21 @@
                 </div>
 
                 {{-- Buku Fisik Terpopuler --}}
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-elevate-dark mb-4 flex items-center gap-2">
-                        <i class="ph-fill ph-trophy text-amber-500"></i> Buku Fisik Terpopuler
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2rem] border border-white/10 shadow-2xl">
+                    <h3 class="font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-trophy text-amber-400"></i> Buku Fisik Terpopuler
                     </h3>
                     <div class="space-y-3">
                         @forelse($popularBooks as $index => $book)
-                            <div class="flex items-center gap-4 p-2 hover:bg-elevate-soft rounded-xl transition-colors">
-                                <span class="font-black text-slate-300 text-lg w-6 text-center">{{ $index + 1 }}</span>
+                            <div class="flex items-center gap-4 p-2 hover:bg-white/5 rounded-xl transition-colors">
+                                <span class="font-black text-slate-500 text-lg w-6 text-center">{{ $index + 1 }}</span>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-bold text-elevate-dark truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
-                                    <p class="text-xs text-elevate-dark/60">{{ $book->borrowings_count }}x Dipinjam</p>
+                                    <h4 class="text-sm font-bold text-slate-200 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
+                                    <p class="text-xs text-slate-400">{{ $book->borrowings_count }}x Dipinjam</p>
                                 </div>
                             </div>
                         @empty
-                            <div class="flex flex-col items-center justify-center h-40 text-elevate-dark/40">
+                            <div class="flex flex-col items-center justify-center h-40 text-slate-400">
                                 <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
                                 <p class="text-xs font-bold">Belum ada data peminjaman.</p>
                             </div>
@@ -309,18 +309,18 @@
             </div>
 
             {{-- SEARCH SISWA KIOSK --}}
-            <div class="bg-elevate-gradient-card rounded-[2rem] shadow-sm border border-slate-200 p-8 text-center flex flex-col justify-center relative overflow-hidden">
+            <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl border border-white/10 p-8 text-center flex flex-col justify-center relative overflow-hidden">
                 <div class="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <i class="ph-duotone ph-barcode text-5xl text-elevate-primary mb-4 block mx-auto relative z-10"></i>
-                <h3 class="text-xl font-black text-elevate-dark mb-2 relative z-10">Cek Status Siswa</h3>
-                <p class="text-elevate-dark/60 mb-6 text-sm max-w-xs mx-auto relative z-10">Scan kartu atau masukkan NISN untuk cek peminjaman aktif.</p>
+                <i class="ph-duotone ph-barcode text-5xl text-sky-400 mb-4 block mx-auto relative z-10"></i>
+                <h3 class="text-xl font-black text-white mb-2 relative z-10">Cek Status Siswa</h3>
+                <p class="text-slate-400 mb-6 text-sm max-w-xs mx-auto relative z-10">Scan kartu atau masukkan NISN untuk cek peminjaman aktif.</p>
                 
                 <div class="w-full relative group max-w-xl mx-auto z-10">
                     <input type="text" id="studentSearchInput" placeholder="Scan Barcode / NISN..." 
-                        class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-accent font-mono font-bold text-elevate-dark transition-all text-center shadow-sm">
-                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
+                        class="w-full pl-12 pr-4 py-3 bg-slate-900/80 border border-white/10 rounded-2xl focus:ring-2 focus:ring-[#56bbf1]/30 focus:border-[#56bbf1] font-mono font-bold text-white placeholder-slate-500 transition-all text-center shadow-sm">
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-400 transition-colors"></i>
                     <div id="loadingIndicator" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
-                        <i class="ph-bold ph-spinner animate-spin text-elevate-primary"></i>
+                        <i class="ph-bold ph-spinner animate-spin text-sky-400"></i>
                     </div>
                 </div>
             </div>
@@ -352,8 +352,8 @@
             // 2. MAIN CHART LOGIC (Time Series)
             const ctx = document.getElementById('mainChart').getContext('2d');
             const bgGradient = ctx.createLinearGradient(0, 0, 0, 300);
-            bgGradient.addColorStop(0, 'rgba(13, 82, 161, 0.2)'); // elevate-primary Opacity
-            bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            bgGradient.addColorStop(0, 'rgba(56, 189, 248, 0.2)'); 
+            bgGradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
 
             new Chart(ctx, {
                 type: 'line', 
@@ -364,7 +364,7 @@
                             label: 'Kunjungan',
                             data: @json($visitChartData ?? []),
                             backgroundColor: bgGradient,
-                            borderColor: '#0d52a1', // elevate-primary
+                            borderColor: '#38bdf8', 
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4,
@@ -374,7 +374,7 @@
                         {
                             label: 'Peminjaman',
                             data: @json($loanChartData ?? []),
-                            borderColor: '#56bbf1', // elevate-accent
+                            borderColor: '#56bbf1', 
                             borderWidth: 2,
                             borderDash: [5, 5],
                             fill: false,
@@ -386,10 +386,23 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: true, position: 'bottom' } },
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'bottom',
+                            labels: { color: '#94a3b8' }
+                        } 
+                    },
                     scales: {
-                        y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
-                        x: { grid: { display: false } }
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [2, 4] },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
                     }
                 }
             });
@@ -407,7 +420,7 @@
                         datasets: [{
                             label: 'Peminjaman',
                             data: classData,
-                            backgroundColor: '#2c3f61', // elevate-dark
+                            backgroundColor: '#38bdf8', 
                             borderRadius: 6,
                         }]
                     },
@@ -416,8 +429,15 @@
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { beginAtZero: true, grid: { display: false } },
-                            x: { grid: { display: false } }
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: 'rgba(255, 255, 255, 0.08)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: { 
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
                         }
                     }
                 });
@@ -436,7 +456,7 @@
                         datasets: [{
                             label: 'Kunjungan',
                             data: busyHoursData,
-                            backgroundColor: '#f9a282', // elevate-peach
+                            backgroundColor: '#f59e0b', 
                             borderRadius: 4
                         }]
                     },
@@ -446,7 +466,10 @@
                         plugins: { legend: { display: false } },
                         scales: {
                             y: { display: false },
-                            x: { grid: { display: false } }
+                            x: { 
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
                         }
                     }
                 });
@@ -483,27 +506,29 @@
                             text: `${s.student_id} - ${s.school_class ? s.school_class.name : ''}`,
                             icon: data.has_overdue ? 'warning' : 'success',
                             html: `
-                                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-left text-sm border border-slate-200">
+                                <div class="mt-2 p-3 bg-slate-900/80 rounded-lg text-left text-sm border border-white/10 text-slate-200">
                                     <div class="flex justify-between mb-1">
-                                        <span class="text-elevate-dark">Status:</span>
-                                        <span class="font-bold ${data.has_overdue ? 'text-rose-500' : 'text-emerald-500'}">
+                                        <span class="text-slate-400">Status:</span>
+                                        <span class="font-bold ${data.has_overdue ? 'text-rose-400' : 'text-emerald-400'}">
                                             ${data.has_overdue ? 'Terblokir (Denda)' : 'Aktif'}
                                         </span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span class="text-elevate-dark">Buku Dipinjam:</span>
-                                        <span class="font-bold text-elevate-primary">${data.active_loans} Buku</span>
+                                        <span class="text-slate-400">Buku Dipinjam:</span>
+                                        <span class="font-bold text-sky-400">${data.active_loans} Buku</span>
                                     </div>
                                 </div>
                             `,
-                            confirmButtonColor: '#2c3f61', // elevate-dark
+                            background: '#021124',
+                            color: '#fff',
+                            confirmButtonColor: '#0d52a1',
                             timer: 5000,
-                            customClass: { popup: 'rounded-[2rem]' }
+                            customClass: { popup: 'rounded-[2rem] border border-white/10 bg-[#021124] text-white' }
                         });
                         searchInput.value = '';
                     } else {
-                        searchInput.classList.add('ring-2', 'ring-rose-200', 'border-rose-500');
-                        setTimeout(() => searchInput.classList.remove('ring-2', 'ring-rose-200', 'border-rose-500'), 1000);
+                        searchInput.classList.add('ring-2', 'ring-rose-500/50', 'border-rose-500');
+                        setTimeout(() => searchInput.classList.remove('ring-2', 'ring-rose-500/50', 'border-rose-500'), 1000);
                     }
                 } catch (err) {
                     console.error(err);
@@ -532,9 +557,11 @@
                 title: 'Cari Siswa',
                 input: 'text',
                 inputPlaceholder: 'Nama atau NISN...',
-                confirmButtonColor: '#2c3f61', // elevate-dark
+                background: '#021124',
+                color: '#fff',
+                confirmButtonColor: '#0d52a1',
                 showCancelButton: true,
-                customClass: { popup: 'rounded-[2rem]' }
+                customClass: { popup: 'rounded-[2rem] border border-white/10 bg-[#021124] text-white' }
             });
             if (query) {
                 const searchInput = document.getElementById('studentSearchInput');

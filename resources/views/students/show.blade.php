@@ -99,30 +99,30 @@
         }
     </style>
 </head>
-<body class="min-h-screen py-8 text-elevate-text font-sans relative">
+<body class="min-h-screen py-8 text-slate-100 bg-[#020b18] font-sans relative overflow-x-hidden">
 
    <!-- DEKORASI BACKGROUND HANYA DI WEB -->
-    <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-elevate-primary/10 to-transparent pointer-events-none no-print -z-10"></div>
+    <div class="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-[#0d52a1]/20 via-[#031d3d]/10 to-transparent pointer-events-none no-print -z-10 blur-3xl"></div>
 
     <!-- TOOLBAR AKSI (TIDAK TERCETAK) -->
-    <div class="max-w-[210mm] mx-auto mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/60 sticky top-4 z-50">
+    <div class="max-w-[210mm] mx-auto mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 no-print bg-gradient-to-r from-[#031d3d]/90 via-[#021124]/95 to-[#031d3d]/90 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/10 sticky top-4 z-50">
         <div>
-            <h2 class="font-black text-elevate-dark flex items-center gap-2">
-                <i class="ph-bold ph-archive text-elevate-primary text-xl"></i> Lembar Buku Induk
+            <h2 class="font-black text-white flex items-center gap-2 text-base">
+                <i class="ph-bold ph-archive text-sky-400 text-xl"></i> Lembar Buku Induk
             </h2>
-            <p class="text-xs text-slate-500 font-bold ml-7">{{ $student->name }} ({{ $student->nis }})</p>
+            <p class="text-xs text-slate-400 font-bold ml-7">{{ $student->name }} ({{ $student->nis ?? '-' }})</p>
         </div>
 
         <div class="flex flex-wrap gap-3 items-center">
-            <button onclick="window.close()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 group">
-                <i class="ph-bold ph-x group-hover:-rotate-90 transition-transform"></i> Tutup
+            <button onclick="window.close()" class="px-4 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 flex items-center gap-2 group transition-all">
+                <i class="ph-bold ph-x group-hover:-rotate-90 transition-transform text-rose-400"></i> Tutup
             </button>
             
-            <a href="{{ route('students.edit', $student->id) }}" class="px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl text-xs font-bold hover:bg-elevate-accent/20 flex items-center gap-2">
-                <i class="ph-bold ph-pencil-simple text-sm"></i> Edit Data
+            <a href="{{ route('students.edit', $student->id) }}" class="px-4 py-2.5 bg-sky-500/10 border border-sky-400/30 text-sky-300 rounded-xl text-xs font-bold hover:bg-sky-500/20 flex items-center gap-2 transition-all">
+                <i class="ph-bold ph-pencil-simple text-sm text-sky-400"></i> Edit Data
             </a>
             
-            <button onclick="window.print()" class="px-5 py-2.5 bg-elevate-primary text-white font-bold rounded-xl hover:bg-elevate-dark shadow-lg shadow-elevate-primary/30 transition-transform active:scale-95 flex items-center gap-2 text-xs group">
+            <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white font-bold rounded-xl shadow-lg shadow-sky-950/40 transition-transform active:scale-95 flex items-center gap-2 text-xs group border border-sky-400/30">
                 <i class="ph-bold ph-printer text-sm group-hover:scale-110 transition-transform"></i> Cetak Dokumen
             </button>
         </div>

@@ -20,17 +20,22 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Customisasi TomSelect agar sesuai dengan tema Tailwind Elevate */
-        .ts-control { border-radius: 1rem !important; border: 1px solid #e2e8f0 !important; background-color: #f8fafc !important; padding: 0.875rem 1rem !important; font-size: 0.875rem !important; font-weight: 700 !important; color: #1e293b !important;}
-        .ts-control.focus { border-color: #f43f5e !important; box-shadow: none !important; background-color: white !important;} /* Merah untuk pelanggaran */
-        #student_select_merit-ts-control.focus { border-color: #10b981 !important; } /* Hijau untuk kebaikan */
-        .ts-dropdown { border-radius: 1rem !important; overflow: hidden !important; border: 1px solid #e2e8f0 !important; font-size: 0.875rem !important; font-weight: 500 !important;}
+        /* Customisasi TomSelect agar sesuai dengan Elevate Dark Glass Theme */
+        .ts-control { border-radius: 1rem !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; background-color: #0f172a !important; padding: 0.875rem 1rem !important; font-size: 0.875rem !important; font-weight: 700 !important; color: #ffffff !important;}
+        .ts-control.focus { border-color: #f43f5e !important; box-shadow: none !important; background-color: #0f172a !important;}
+        #student_select_merit-ts-control.focus { border-color: #10b981 !important; }
+        .ts-dropdown { border-radius: 1rem !important; overflow: hidden !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; font-size: 0.875rem !important; font-weight: 500 !important; background-color: #0f172a !important; color: #ffffff !important; }
+        .ts-dropdown .option { color: #f8fafc !important; }
+        .ts-dropdown .option.active, .ts-dropdown .option:hover { background-color: #1e293b !important; color: #ffffff !important; }
+        .ts-control input { color: #ffffff !important; }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-text min-h-screen relative overflow-hidden">
+    <div class="min-h-screen bg-[#020b18] text-slate-100 relative overflow-hidden py-8 sm:py-10 font-sans">
         
-        {{-- Efek Latar Belakang Halus --}}
-        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-10 pointer-events-none -z-10 blur-3xl"></div>
+        {{-- Efek Latar Belakang Glowing --}}
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/3 right-10 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-2/3 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
@@ -50,12 +55,12 @@
                 ]"
             >
                 <x-slot:actions>
-                    <a href="{{ route('discipline.analytics') }}" class="group bg-gradient-to-r from-[#0d52a1] via-sky-600 to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white shadow-lg shadow-sky-600/25 border border-white/20 px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                    <a href="{{ route('discipline.analytics') }}" class="group bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/25 border border-sky-400/30 px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 active:scale-95">
                         <i class="ph-bold ph-chart-line-up text-base"></i>
                         <span>Statistik & Analitik</span>
                         <i class="ph-bold ph-arrow-up-right group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
                     </a>
-                    <a href="{{ route('discipline-types.index') }}" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-sky-400/40 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                    <a href="{{ route('discipline-types.index') }}" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
                         <i class="ph-bold ph-gear text-base text-sky-400"></i>
                         <span>Atur Poin Pelanggaran</span>
                     </a>
@@ -64,30 +69,29 @@
 
             {{-- Pesan Flash Sukses --}}
             @if (session('success'))
-                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm animate-in slide-in-from-top-2">
+                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 rounded-2xl flex items-center justify-between shadow-sm animate-in slide-in-from-top-2 backdrop-blur-md">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="ph-bold ph-check"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30"><i class="ph-bold ph-check"></i></div>
                         <span class="font-bold text-sm">{{ session('success') }}</span>
                     </div>
-                    <button @click="show = false" class="p-2 hover:bg-emerald-100 rounded-lg transition"><i class="ph-bold ph-x"></i></button>
+                    <button @click="show = false" class="p-2 hover:bg-white/5 rounded-lg transition text-slate-400 hover:text-white"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
 
             <!-- BAGIAN 1: FORM INPUT (GRID 2 KOLOM) -->
-            <!-- Catatan: Tema warna Merah & Hijau dipertahankan (Warna Semantik UX) namun di-styling selaras Elevate -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                 
                 <!-- KIRI: Form Pelanggaran -->
-                <div class="bg-white rounded-[2rem] shadow-xl shadow-rose-900/5 border border-slate-100 overflow-visible relative group hover:border-rose-200 transition-all duration-300">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl border border-rose-500/30 overflow-visible relative group hover:border-rose-500/50 transition-all duration-300 backdrop-blur-xl">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-rose-500 rounded-t-[2rem]"></div>
                     <div class="p-8 relative z-10">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-rose-100 group-hover:scale-110 transition-transform duration-300">
+                            <div class="w-12 h-12 bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-rose-500/30 group-hover:scale-110 transition-transform duration-300">
                                 <i class="ph-duotone ph-warning-octagon"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-black text-elevate-dark">Input Pelanggaran</h3>
-                                <p class="text-xs font-bold text-rose-500 uppercase tracking-wider">Kurangi Poin (-)</p>
+                                <h3 class="text-xl font-black text-white">Input Pelanggaran</h3>
+                                <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Kurangi Poin (-)</p>
                             </div>
                         </div>
 
@@ -97,7 +101,7 @@
                             
                             {{-- PILIH SISWA --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
                                         <select name="student_id" id="student_select_violation" required placeholder="Ketik nama atau kelas siswa...">
@@ -114,7 +118,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-elevate-dark text-white w-[52px] h-[52px] rounded-xl hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20 flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-slate-900 border border-white/10 text-sky-400 w-[52px] h-[52px] rounded-xl hover:bg-slate-800 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -122,12 +126,12 @@
                             
                             {{-- JENIS PELANGGARAN --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Jenis Pelanggaran</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Pelanggaran</label>
                                 <div class="relative">
-                                    <select name="discipline_type_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-elevate-dark py-3.5 pl-4 pr-10 appearance-none cursor-pointer transition-all">
-                                        <option value="">-- Pilih Kategori --</option>
+                                    <select name="discipline_type_id" required class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-white py-3.5 pl-4 pr-10 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                        <option value="" class="bg-slate-900 text-slate-400">-- Pilih Kategori --</option>
                                         @foreach ($violationTypes as $type)
-                                            <option value="{{ $type->id }}">{{ $type->name }} (-{{ $type->point_value }} Poin)</option>
+                                            <option value="{{ $type->id }}" class="bg-slate-900 text-white">{{ $type->name }} (-{{ $type->point_value }} Poin)</option>
                                         @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
@@ -136,11 +140,11 @@
                             
                             {{-- CATATAN --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Kronologi / Catatan</label>
-                                <textarea name="notes" rows="2" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4 text-elevate-dark transition-all" placeholder="Jelaskan singkat kejadiannya..."></textarea>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kronologi / Catatan</label>
+                                <textarea name="notes" rows="2" class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4 text-white placeholder:text-slate-500 transition-all [color-scheme:dark]" placeholder="Jelaskan singkat kejadiannya..."></textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-3.5 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 mt-2 active:scale-95">
+                            <button type="submit" class="w-full py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 mt-2 active:scale-95 border border-rose-500/30">
                                 <i class="ph-bold ph-warning-circle text-lg"></i>
                                 Simpan Pelanggaran
                             </button>
@@ -149,16 +153,16 @@
                 </div>
 
                 <!-- KANAN: Form Kebaikan -->
-                <div class="bg-white rounded-[2rem] shadow-xl shadow-emerald-900/5 border border-slate-100 overflow-visible relative group hover:border-emerald-200 transition-all duration-300">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl border border-emerald-500/30 overflow-visible relative group hover:border-emerald-500/50 transition-all duration-300 backdrop-blur-xl">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 rounded-t-[2rem]"></div>
                     <div class="p-8 relative z-10">
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-emerald-100 group-hover:scale-110 transition-transform duration-300">
+                            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
                                 <i class="ph-duotone ph-medal"></i>
                             </div>
                             <div>
-                                <h3 class="text-xl font-black text-elevate-dark">Input Prestasi</h3>
-                                <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider">Tambah Poin (+)</p>
+                                <h3 class="text-xl font-black text-white">Input Prestasi</h3>
+                                <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Tambah Poin (+)</p>
                             </div>
                         </div>
 
@@ -168,7 +172,7 @@
                             
                             {{-- PILIH SISWA --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
                                         <select name="student_id" id="student_select_merit" required placeholder="Ketik nama atau kelas siswa...">
@@ -185,7 +189,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-elevate-dark text-white w-[52px] h-[52px] rounded-xl hover:bg-elevate-primary transition-colors shadow-lg shadow-elevate-dark/20 flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-slate-900 border border-white/10 text-sky-400 w-[52px] h-[52px] rounded-xl hover:bg-slate-800 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -193,12 +197,12 @@
                             
                             {{-- JENIS PRESTASI --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Jenis Kebaikan</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Kebaikan</label>
                                 <div class="relative">
-                                    <select name="discipline_type_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-elevate-dark py-3.5 pl-4 pr-10 appearance-none cursor-pointer transition-all">
-                                        <option value="">-- Pilih Kategori --</option>
+                                    <select name="discipline_type_id" required class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-white py-3.5 pl-4 pr-10 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                        <option value="" class="bg-slate-900 text-slate-400">-- Pilih Kategori --</option>
                                         @foreach ($meritTypes as $type)
-                                            <option value="{{ $type->id }}">{{ $type->name }} (+{{ $type->point_value }} Poin)</option>
+                                            <option value="{{ $type->id }}" class="bg-slate-900 text-white">{{ $type->name }} (+{{ $type->point_value }} Poin)</option>
                                         @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
@@ -207,11 +211,11 @@
                             
                             {{-- CATATAN --}}
                             <div>
-                                <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Detail Tambahan</label>
-                                <textarea name="notes" rows="2" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4 text-elevate-dark transition-all" placeholder="Keterangan prestasi..."></textarea>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Detail Tambahan</label>
+                                <textarea name="notes" rows="2" class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4 text-white placeholder:text-slate-500 transition-all [color-scheme:dark]" placeholder="Keterangan prestasi..."></textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 mt-2 active:scale-95">
+                            <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 mt-2 active:scale-95 border border-emerald-500/30">
                                 <i class="ph-bold ph-star text-lg"></i>
                                 Simpan Kebaikan
                             </button>
@@ -222,20 +226,20 @@
 
             <!-- BAGIAN 3: RIWAYAT / LOG -->
             @if(isset($historyRecords))
-            <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden mb-10">
-                <div class="p-6 border-b border-slate-100 bg-elevate-peach-light/20 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
+            <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl border border-white/10 backdrop-blur-xl overflow-hidden mb-10">
+                <div class="p-6 border-b border-white/10 bg-white/5 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5">
                     
                     {{-- Judul & Badge Jumlah Data --}}
                     <div class="shrink-0 flex items-center justify-between w-full xl:w-auto">
                         <div>
-                            <h3 class="text-xl font-black text-elevate-dark flex items-center gap-2">
-                                <div class="w-2 h-6 bg-elevate-accent rounded-full"></div>
+                            <h3 class="text-xl font-black text-white flex items-center gap-2">
+                                <div class="w-2 h-6 bg-[#56bbf1] rounded-full"></div>
                                 Log Aktivitas
-                                <span class="text-xs font-bold text-elevate-primary bg-white px-2.5 py-1 rounded-lg border border-elevate-peach shadow-sm ml-2">
+                                <span class="text-xs font-bold text-sky-400 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10 shadow-sm ml-2">
                                     {{ $historyRecords->total() }} Data
                                 </span>
                             </h3>
-                            <p class="text-sm font-medium text-elevate-text/60 mt-1">Riwayat input poin terbaru.</p>
+                            <p class="text-sm font-medium text-slate-400 mt-1">Riwayat input poin terbaru.</p>
                         </div>
                     </div>
                 
@@ -244,38 +248,38 @@
                         
                         {{-- Filter Tanggal --}}
                         <input type="date" name="filter_date" value="{{ request('filter_date') }}" title="Pilih Tanggal"
-                            class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
+                            class="h-[42px] rounded-xl border-white/10 bg-slate-900/90 text-sm px-3 text-white focus:ring-[#56bbf1] focus:border-[#56bbf1] w-full sm:w-auto shrink-0 font-medium cursor-pointer [color-scheme:dark]">
                         
                         {{-- Filter Kelas --}}
-                        <select name="filter_class" class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
-                            <option value="">Semua Kelas</option>
+                        <select name="filter_class" class="h-[42px] rounded-xl border-white/10 bg-slate-900/90 text-sm px-3 text-white focus:ring-[#56bbf1] focus:border-[#56bbf1] w-full sm:w-auto shrink-0 font-medium cursor-pointer [color-scheme:dark]">
+                            <option value="" class="bg-slate-900 text-slate-400">Semua Kelas</option>
                             @foreach($classes ?? [] as $cls)
-                                <option value="{{ $cls->id }}" {{ request('filter_class') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
+                                <option value="{{ $cls->id }}" class="bg-slate-900 text-white" {{ request('filter_class') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
                             @endforeach
                         </select>
 
                         {{-- Filter Jenis Kejadian --}}
-                        <select name="filter_type" class="h-[42px] rounded-xl border-slate-200 text-sm px-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-auto shrink-0 font-medium cursor-pointer bg-white">
-                            <option value="">Semua Jenis</option>
-                            <option value="Pelanggaran" {{ request('filter_type') == 'Pelanggaran' ? 'selected' : '' }}>🔴 Pelanggaran</option>
-                            <option value="Kebaikan" {{ request('filter_type') == 'Kebaikan' ? 'selected' : '' }}>🟢 Prestasi</option>
+                        <select name="filter_type" class="h-[42px] rounded-xl border-white/10 bg-slate-900/90 text-sm px-3 text-white focus:ring-[#56bbf1] focus:border-[#56bbf1] w-full sm:w-auto shrink-0 font-medium cursor-pointer [color-scheme:dark]">
+                            <option value="" class="bg-slate-900 text-slate-400">Semua Jenis</option>
+                            <option value="Pelanggaran" class="bg-slate-900 text-rose-300" {{ request('filter_type') == 'Pelanggaran' ? 'selected' : '' }}>🔴 Pelanggaran</option>
+                            <option value="Kebaikan" class="bg-slate-900 text-emerald-300" {{ request('filter_type') == 'Kebaikan' ? 'selected' : '' }}>🟢 Prestasi</option>
                         </select>
                         
                         {{-- Input Pencarian --}}
                         <div class="relative w-full sm:w-auto shrink-0 group">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
-                                class="h-[42px] rounded-xl border-slate-200 text-sm pl-9 pr-3 text-elevate-dark focus:ring-elevate-accent focus:border-elevate-accent w-full sm:w-[180px] font-medium bg-white">
-                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary"></i>
+                                class="h-[42px] rounded-xl border-white/10 bg-slate-900/90 text-sm pl-9 pr-3 text-white placeholder:text-slate-500 focus:ring-[#56bbf1] focus:border-[#56bbf1] w-full sm:w-[180px] font-medium [color-scheme:dark]">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-sky-400"></i>
                         </div>
                         
                         {{-- Grup Tombol Aksi --}}
                         <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                            <button type="submit" class="h-[42px] flex-1 sm:flex-none bg-elevate-dark hover:bg-elevate-primary text-white px-5 rounded-xl text-sm font-bold shadow-md shadow-elevate-dark/20 transition-all flex items-center justify-center gap-2">
+                            <button type="submit" class="h-[42px] flex-1 sm:flex-none bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white px-5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 border border-sky-400/30">
                                 Cari
                             </button>
                             
                             @if(request('search') || request('filter_date') || request('filter_class') || request('filter_type'))
-                                <a href="{{ route('discipline.index') }}" class="h-[42px] flex-1 sm:flex-none bg-elevate-peach-light hover:bg-elevate-peach text-elevate-primary px-5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center border border-elevate-peach">
+                                <a href="{{ route('discipline.index') }}" class="h-[42px] flex-1 sm:flex-none bg-white/5 hover:bg-white/10 text-slate-300 px-5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center border border-white/10">
                                     Reset
                                 </a>
                             @endif
@@ -284,55 +288,58 @@
                 </div>            
                 <div class="overflow-x-auto w-full custom-scrollbar">
                     <table class="w-full text-left border-collapse">
-                        <thead class="bg-elevate-peach-light/30 border-b border-slate-100">
+                        <thead class="bg-white/5 border-b border-white/10">
                             <tr>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider">Waktu</th>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider">Siswa</th>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider">Keterangan</th>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider text-center">Poin</th>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider text-right">Petugas</th>
-                                <th class="px-6 py-4 text-xs font-bold text-elevate-primary uppercase tracking-wider text-center">Aksi</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Waktu</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Siswa</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Keterangan</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Poin</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Petugas</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50">
+                        <tbody class="divide-y divide-white/5">
                             @forelse ($historyRecords as $record)
                                 @php
                                     $isViolation = optional($record->disciplineType)->type == 'Pelanggaran';
                                     $color = $isViolation ? 'rose' : 'emerald';
                                     $sign = $isViolation ? '-' : '+';
                                 @endphp
-                                <tr class="hover:bg-slate-50 transition-colors group">
+                                <tr class="hover:bg-white/5 transition-colors group">
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-elevate-dark">{{ $record->created_at->format('d/m H:i') }}</div>
-                                        <div class="text-[10px] font-bold text-slate-400">{{ $record->created_at->diffForHumans() }}</div>
+                                        <div class="text-sm font-bold text-white">{{ $record->created_at->format('d/m H:i') }}</div>
+                                        <div class="text-[10px] font-bold text-slate-500">{{ $record->created_at->diffForHumans() }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{-- NULL-SAFE OPERATORS APPLIED HERE --}}
-                                        <div class="text-sm font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">{{ $record->student?->name ?? '*Siswa Telah Dihapus*' }}</div>
-                                        <div class="text-xs text-elevate-text/70 font-medium">{{ $record->student?->schoolClass?->name ?? '-' }}</div>
+                                        <div class="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">{{ $record->student?->name ?? '*Siswa Telah Dihapus*' }}</div>
+                                        <div class="text-xs text-slate-400 font-medium">{{ $record->student?->schoolClass?->name ?? '-' }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{-- NULL-SAFE OPERATORS APPLIED HERE --}}
-                                        <div class="text-sm font-bold text-elevate-dark">{{ $record->disciplineType?->name ?? '*Kategori Dihapus*' }}</div>
+                                        <div class="text-sm font-bold text-white">{{ $record->disciplineType?->name ?? '*Kategori Dihapus*' }}</div>
                                         @if($record->notes) 
-                                            <div class="text-xs text-slate-500 italic mt-0.5 truncate max-w-xs">"{{ $record->notes }}"</div> 
+                                            <div class="text-xs text-slate-400 italic mt-0.5 truncate max-w-xs">"{{ $record->notes }}"</div> 
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-black bg-{{ $color }}-50 text-{{ $color }}-600 border border-{{ $color }}-200 shadow-sm">
-                                            {{ $sign }}{{ $record->disciplineType?->point_value ?? 0 }}
-                                        </span>
+                                        @if($isViolation)
+                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-black bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-sm">
+                                                -{{ $record->disciplineType?->point_value ?? 0 }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm">
+                                                +{{ $record->disciplineType?->point_value ?? 0 }}
+                                            </span>
+                                        @endif
                                     </td>
                                    
                                     <td class="px-6 py-4 text-right">
-                                        {{-- NULL-SAFE OPERATORS APPLIED HERE --}}
-                                        <span class="text-xs font-bold text-elevate-text/70">{{ $record->recorder?->name ?? 'Sistem' }}</span>
+                                        <span class="text-xs font-bold text-slate-400">{{ $record->recorder?->name ?? 'Sistem' }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-center">                                       
                                         <form action="{{ route('discipline.destroy', $record->id) }}" method="POST" class="form-delete-record">
                                             @csrf 
                                             @method('DELETE')
-                                            <button type="submit" class="text-slate-300 hover:text-rose-500 transition-colors p-2 rounded-lg hover:bg-rose-50" title="Hapus Riwayat">
+                                            <button type="submit" class="text-slate-500 hover:text-rose-400 transition-colors p-2 rounded-lg hover:bg-rose-500/10" title="Hapus Riwayat">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
                                         </form>
@@ -340,12 +347,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
                                         <div class="flex flex-col items-center">
-                                            <div class="w-16 h-16 bg-elevate-peach-light rounded-2xl flex items-center justify-center text-elevate-primary mb-3">
+                                            <div class="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-sky-400 mb-3">
                                                 <i class="ph-duotone ph-clipboard-text text-3xl"></i>
                                             </div>
-                                            <span class="font-bold text-elevate-text">Belum ada data aktivitas.</span>
+                                            <span class="font-bold text-slate-400">Belum ada data aktivitas.</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -353,7 +360,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-6 border-t border-slate-50 bg-slate-50/30">
+                <div class="p-6 border-t border-white/10 bg-white/5">
                     {{ $historyRecords->links() }}
                 </div>
             </div>
@@ -363,34 +370,34 @@
             @if(isset($classSummaries) && isset($topViolators) && isset($topMerits))
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {{-- A. REKAP PER KELAS --}}
-                <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50 xl:col-span-1">
-                    <div class="px-6 py-5 border-b border-slate-100 bg-elevate-peach-light/20 flex justify-between items-center">
-                        <h3 class="text-sm font-black text-elevate-dark uppercase tracking-wider flex items-center gap-2">
-                            <i class="ph-bold ph-chalkboard-teacher text-elevate-primary"></i> Rekap Per Kelas
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] border border-white/10 overflow-hidden shadow-2xl backdrop-blur-xl xl:col-span-1">
+                    <div class="px-6 py-5 border-b border-white/10 bg-white/5 flex justify-between items-center">
+                        <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph-bold ph-chalkboard-teacher text-sky-400"></i> Rekap Per Kelas
                         </h3>
                     </div>
                     <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                            <thead class="bg-slate-900/90 sticky top-0 z-10 border-b border-white/10">
                                 <tr>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase">Kelas</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase text-center">Minus</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase text-center">Plus</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase">Kelas</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase text-center">Minus</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase text-center">Plus</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody class="divide-y divide-white/5">
                                 @foreach ($classSummaries as $summary)
-                                    <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-4 py-3 font-bold text-elevate-dark text-sm">{{ $summary->class_name }}</td>
+                                    <tr class="hover:bg-white/5 transition-colors">
+                                        <td class="px-4 py-3 font-bold text-white text-sm">{{ $summary->class_name }}</td>
                                         <td class="px-4 py-3 text-center">
                                             @if($summary->total_violation > 0)
-                                                <span class="text-rose-600 text-xs font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">-{{ $summary->total_violation }}</span>
-                                            @else <span class="text-slate-300 text-xs">-</span> @endif
+                                                <span class="text-rose-300 text-xs font-bold bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/30">-{{ $summary->total_violation }}</span>
+                                            @else <span class="text-slate-600 text-xs">-</span> @endif
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             @if($summary->total_merit > 0)
-                                                <span class="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">+{{ $summary->total_merit }}</span>
-                                            @else <span class="text-slate-300 text-xs">-</span> @endif
+                                                <span class="text-emerald-300 text-xs font-bold bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">+{{ $summary->total_merit }}</span>
+                                            @else <span class="text-slate-600 text-xs">-</span> @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -400,31 +407,31 @@
                 </div>
 
                 {{-- B. TOP 10 PELANGGARAN --}}
-                <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50 xl:col-span-1">
-                    <div class="px-6 py-5 border-b border-rose-100 bg-rose-50/50 flex justify-between items-center">
-                        <h3 class="text-sm font-black text-rose-600 uppercase tracking-wider flex items-center gap-2">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] border border-rose-500/30 overflow-hidden shadow-2xl backdrop-blur-xl xl:col-span-1">
+                    <div class="px-6 py-5 border-b border-rose-500/30 bg-rose-950/20 flex justify-between items-center">
+                        <h3 class="text-sm font-black text-rose-400 uppercase tracking-wider flex items-center gap-2">
                             <i class="ph-bold ph-warning-octagon"></i> Top 10 Pelanggaran
                         </h3>
                     </div>
                     <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                            <thead class="bg-slate-900/90 sticky top-0 z-10 border-b border-white/10">
                                 <tr>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase w-8">#</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase">Siswa</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase text-center">Poin</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-8">#</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase">Siswa</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase text-center">Poin</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody class="divide-y divide-white/5">
                                 @foreach ($topViolators as $index => $summary)
-                                    <tr class="hover:bg-rose-50/30 transition-colors">
-                                        <td class="px-4 py-3 font-black text-rose-300 text-sm">{{ $loop->iteration }}</td>
+                                    <tr class="hover:bg-rose-500/10 transition-colors">
+                                        <td class="px-4 py-3 font-black text-rose-400 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-elevate-dark block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-elevate-text/60 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
+                                            <span class="font-bold text-white block text-sm">{{ $summary->name }}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span class="text-rose-600 font-black text-sm">-{{ $summary->total_violation }}</span>
+                                            <span class="text-rose-400 font-black text-sm">-{{ $summary->total_violation }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -434,31 +441,31 @@
                 </div>
 
                 {{-- C. TOP 10 PRESTASI --}}
-                <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50 xl:col-span-1">
-                    <div class="px-6 py-5 border-b border-emerald-100 bg-emerald-50/50 flex justify-between items-center">
-                        <h3 class="text-sm font-black text-emerald-600 uppercase tracking-wider flex items-center gap-2">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] border border-emerald-500/30 overflow-hidden shadow-2xl backdrop-blur-xl xl:col-span-1">
+                    <div class="px-6 py-5 border-b border-emerald-500/30 bg-emerald-950/20 flex justify-between items-center">
+                        <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider flex items-center gap-2">
                             <i class="ph-bold ph-medal"></i> Top 10 Prestasi
                         </h3>
                     </div>
                     <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead class="bg-white sticky top-0 z-10 shadow-sm">
+                            <thead class="bg-slate-900/90 sticky top-0 z-10 border-b border-white/10">
                                 <tr>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase w-8">#</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase">Siswa</th>
-                                    <th class="px-4 py-3 text-xs font-bold text-elevate-text/60 uppercase text-center">Poin</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase w-8">#</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase">Siswa</th>
+                                    <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase text-center">Poin</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody class="divide-y divide-white/5">
                                 @foreach ($topMerits as $index => $summary)
-                                    <tr class="hover:bg-emerald-50/30 transition-colors">
-                                        <td class="px-4 py-3 font-black text-emerald-300 text-sm">{{ $loop->iteration }}</td>
+                                    <tr class="hover:bg-emerald-500/10 transition-colors">
+                                        <td class="px-4 py-3 font-black text-emerald-400 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-elevate-dark block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-elevate-text/60 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
+                                            <span class="font-bold text-white block text-sm">{{ $summary->name }}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span class="text-emerald-600 font-black text-sm">+{{ $summary->total_merit }}</span>
+                                            <span class="text-emerald-400 font-black text-sm">+{{ $summary->total_merit }}</span>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -475,33 +482,33 @@
     {{-- MODAL SCANNER QR CODE --}}
     <div id="qrModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen p-4 text-center">
-            <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" onclick="closeScanner()"></div>
+            <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" onclick="closeScanner()"></div>
 
-            <div class="inline-block align-bottom bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:align-middle sm:max-w-md w-full relative border border-slate-100">
-                <div class="bg-white p-8">
+            <div class="inline-block align-bottom bg-[#031d3d] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:align-middle sm:max-w-md w-full relative border border-white/10 text-white">
+                <div class="p-8">
                     <div class="absolute top-0 right-0 pt-6 pr-6">
-                        <button onclick="closeScanner()" class="text-slate-400 hover:text-elevate-dark bg-slate-50 hover:bg-elevate-peach-light rounded-full p-2 transition">
+                        <button onclick="closeScanner()" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-2 transition border border-white/10">
                             <i class="ph-bold ph-x text-lg"></i>
                         </button>
                     </div>
                     <div class="text-center mt-2">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-elevate-peach-light border border-elevate-peach mb-4">
-                            <i class="ph-duotone ph-qr-code text-3xl text-elevate-primary"></i>
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-white/5 border border-white/10 text-sky-400 mb-4">
+                            <i class="ph-duotone ph-qr-code text-3xl"></i>
                         </div>
-                        <h3 class="text-xl font-black text-elevate-dark mb-2">Scan Kartu Siswa</h3>
+                        <h3 class="text-xl font-black text-white mb-2">Scan Kartu Siswa</h3>
                         
-                        <div class="relative w-full rounded-2xl overflow-hidden aspect-square bg-slate-900 border-4 border-slate-100 shadow-inner mt-4">
+                        <div class="relative w-full rounded-2xl overflow-hidden aspect-square bg-slate-950 border-4 border-white/10 shadow-inner mt-4">
                             <div id="reader" class="w-full h-full object-cover"></div>
-                            <div id="scanner-status" class="absolute inset-0 flex items-center justify-center text-white text-xs font-bold z-10 pointer-events-none bg-slate-900/50">
+                            <div id="scanner-status" class="absolute inset-0 flex items-center justify-center text-white text-xs font-bold z-10 pointer-events-none bg-slate-950/70">
                                 Menunggu Kamera...
                             </div>
                         </div>
 
-                        <div id="error-message" class="text-rose-500 text-xs font-bold mt-4 hidden bg-rose-50 p-3 rounded-xl border border-rose-100"></div>
+                        <div id="error-message" class="text-rose-400 text-xs font-bold mt-4 hidden bg-rose-950/40 p-3 rounded-xl border border-rose-500/30"></div>
                     </div>
                 </div>
-                <div class="bg-slate-50 px-8 py-5">
-                    <button type="button" class="w-full inline-flex justify-center rounded-xl border-2 border-slate-200 shadow-sm px-4 py-3 bg-white text-base font-bold text-elevate-text hover:bg-slate-50 transition-colors focus:outline-none sm:text-sm" onclick="closeScanner()">
+                <div class="bg-slate-900/90 px-8 py-5 border-t border-white/10">
+                    <button type="button" class="w-full inline-flex justify-center rounded-xl border border-white/10 shadow-sm px-4 py-3 bg-white/5 text-base font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-colors focus:outline-none sm:text-sm" onclick="closeScanner()">
                         Batal / Tutup Kamera
                     </button>
                 </div>
@@ -509,18 +516,18 @@
         </div>
     </div>
 
-    {{-- SCRIPT SCANNER & LOGIC (TIDAK ADA PERUBAHAN LOGIKA) --}}
+    {{-- SCRIPT SCANNER & LOGIC --}}
     <script>
         let html5QrcodeScanner = null;
         let currentTargetInput = null;
         
-       let tsViolation, tsMerit;
+        let tsViolation, tsMerit;
 
         document.addEventListener("DOMContentLoaded", function() {
             tsViolation = new TomSelect("#student_select_violation", { create: false, sortField: { field: "text", direction: "asc" }});
             tsMerit = new TomSelect("#student_select_merit", { create: false, sortField: { field: "text", direction: "asc" }});
             
-            // Optimasi SweetAlert Delete (Agar tidak mengulang script berkali-kali)
+            // SweetAlert Delete dengan Tema Gelap
             document.querySelectorAll('.form-delete-record').forEach(form => {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -530,14 +537,16 @@
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#e11d48',
-                        cancelButtonColor: '#94a3b8',
+                        cancelButtonColor: '#475569',
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal',
                         reverseButtons: true,
+                        background: '#0f172a',
+                        color: '#f8fafc',
                         customClass: {
-                            popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                            popup: 'rounded-[2rem] font-sans border border-white/10 shadow-2xl',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-500 transition-colors mx-2 shadow-lg shadow-rose-950/40',
+                            cancelButton: 'bg-slate-800 text-slate-300 px-6 py-3 rounded-xl font-bold hover:bg-slate-700 transition-colors mx-2'
                         },
                         buttonsStyling: false
                     }).then((result) => {
@@ -554,7 +563,7 @@
 
         function startScanner(targetInputId) {
             if (typeof Html5Qrcode === 'undefined') {
-                Swal.fire('Error', 'Library Scanner belum siap.', 'error');
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Library Scanner belum siap.', background: '#0f172a', color: '#f8fafc', customClass: { popup: 'rounded-[2rem] border border-white/10' } });
                 return;
             }
 
@@ -660,7 +669,9 @@
                     text: foundName, 
                     timer: 1500, 
                     showConfirmButton: false,
-                    customClass: { popup: 'rounded-[2rem]' }
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    customClass: { popup: 'rounded-[2rem] border border-white/10 shadow-2xl' }
                 });
             } else {
                 if (navigator.vibrate) navigator.vibrate(200);
@@ -671,12 +682,14 @@
                     icon: 'error', 
                     title: 'Tidak Ditemukan',
                     text: `Kode terbaca: [${scannedText}] tidak ada di data siswa.`,
-                    customClass: { popup: 'rounded-[2rem]' }
+                    background: '#0f172a',
+                    color: '#f8fafc',
+                    customClass: { popup: 'rounded-[2rem] border border-white/10 shadow-2xl' }
                 });
             }
         }
 
-         function closeScanner() {
+        function closeScanner() {
             const modal = document.getElementById('qrModal');
             
             if (modal) {
@@ -719,4 +732,4 @@
             }
         }
     </script>
-</x-app-layout>
+</x-app-layout>ayout>

@@ -10,7 +10,7 @@
         .group:hover .animate-wiggle { animation: wiggle 0.5s ease-in-out; }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen pb-32" 
+    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen pb-32 relative overflow-hidden" 
          x-data="{ 
             loading: false, 
             submitFilter() {
@@ -19,16 +19,20 @@
             }
          }">
     
+        {{-- Ambient Glows --}}
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+        <div class="absolute top-1/3 right-10 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
         {{-- LOADING OVERLAY --}}
         <div x-show="loading" style="display: none;" 
-             class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
-            <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center">
-                <div class="w-12 h-12 border-4 border-slate-100 border-t-elevate-primary rounded-full animate-spin mb-4"></div>
-                <span class="text-xs font-black text-elevate-dark tracking-widest uppercase animate-pulse">Memuat Data...</span>
+             class="fixed inset-0 z-[100] bg-[#020b18]/80 backdrop-blur-md flex items-center justify-center">
+            <div class="bg-gradient-to-b from-[#031d3d] to-[#021124] border border-white/10 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
+                <div class="w-12 h-12 border-4 border-slate-700 border-t-sky-400 rounded-full animate-spin mb-4"></div>
+                <span class="text-xs font-black text-sky-300 tracking-widest uppercase animate-pulse">Memuat Data...</span>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- HERO SECTION --}}
             <div class="mb-8 relative z-10">
@@ -48,18 +52,18 @@
                         Pantau aktivitas membaca buku, resume harian, dan evaluasi keterlibatan literasi siswa secara real-time.
                     </x-slot:description>
                     <x-slot:chips>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 text-xs font-semibold">
                             <i class="ph-bold ph-book-bookmark text-sky-400"></i> Jurnal Membaca
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 text-xs font-semibold">
                             <i class="ph-bold ph-chart-donut text-emerald-400"></i> Analisis Partisipasi
                         </span>
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 text-xs font-semibold">
                             <i class="ph-bold ph-calendar text-cyan-400"></i> Rekap Harian
                         </span>
                     </x-slot:chips>
                     <x-slot:showcaseStats>
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-md">
                             <i class="ph-fill ph-chart-pie-slice text-sky-400 text-sm"></i>
                             <span class="text-xs font-bold text-slate-300">Partisipasi:</span>
                             <span class="text-sm font-black text-white font-mono">{{ $participationRate }}%</span>
@@ -69,14 +73,14 @@
             </div>
 
             {{-- FILTER CARD --}}
-            <div class="mb-8 bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden">
+            <div class="mb-8 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] p-6 border border-white/10 shadow-2xl backdrop-blur-xl relative overflow-hidden">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-3">
-                    <h2 class="text-sm font-black text-slate-800 flex items-center gap-2 uppercase tracking-wider">
-                        <i class="ph-fill ph-funnel text-sky-600"></i>
+                    <h2 class="text-sm font-black text-white flex items-center gap-2 uppercase tracking-wider">
+                        <i class="ph-fill ph-funnel text-sky-400"></i>
                         Filter Jurnal Literasi
                     </h2>
-                    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600">
-                        <i class="ph-bold ph-calendar-blank text-sky-600"></i>
+                    <div class="inline-flex items-center gap-2 bg-slate-900/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-300">
+                        <i class="ph-bold ph-calendar-blank text-sky-400"></i>
                         <span>
                             @if(request('date'))
                                 {{ \Carbon\Carbon::parse(request('date'))->translatedFormat('d M Y') }}
@@ -91,10 +95,10 @@
                     {{-- Class Select --}}
                     <div class="flex-1 relative">
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Kelas</label>
-                        <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 focus:ring-sky-500 focus:border-sky-500 text-slate-800 shadow-sm transition-all cursor-pointer appearance-none">
-                            <option value="">-- Semua Kelas --</option>
+                        <select name="class_id" class="w-full rounded-2xl border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 focus:ring-sky-400 focus:border-sky-400 text-white shadow-sm transition-all cursor-pointer appearance-none [color-scheme:dark]">
+                            <option value="" class="bg-slate-900 text-white">-- Semua Kelas --</option>
                             @foreach($classes as $c)
-                                <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                <option value="{{ $c->id }}" class="bg-slate-900 text-white" {{ request('class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
                             @endforeach
                         </select>
                         <div class="absolute bottom-3 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
@@ -105,7 +109,7 @@
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Pilih Tanggal</label>
                         <div class="relative">
                             <input type="date" name="date" value="{{ request('date') }}" 
-                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold h-12 text-sm px-4 pl-11 focus:ring-sky-500 focus:border-sky-500 text-slate-800 shadow-sm placeholder-slate-400 transition-all">
+                                   class="w-full rounded-2xl border-white/10 bg-slate-900/80 font-bold h-12 text-sm px-4 pl-11 focus:ring-sky-400 focus:border-sky-400 text-white shadow-sm transition-all [color-scheme:dark]">
                             <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                         </div>
                     </div>
@@ -115,7 +119,7 @@
                             <i class="ph-bold ph-magnifying-glass text-lg group-hover:scale-110 transition-transform"></i>
                             <span>Terapkan</span>
                         </button>
-                        <a href="{{ route('admin.literacy.index') }}" class="flex-1 md:flex-none bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
+                        <a href="{{ route('admin.literacy.index') }}" class="flex-1 md:flex-none bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 border border-white/10 px-5 rounded-2xl h-12 font-bold text-sm flex items-center justify-center transition-colors active:scale-95" title="Reset Filter">
                             <i class="ph-bold ph-arrow-counter-clockwise text-lg"></i>
                         </a>
                     </div>
@@ -126,32 +130,32 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 
                 {{-- 1. Partisipasi Siswa --}}
-                <div class="animate-enter bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col justify-between group hover:shadow-lg transition-all relative overflow-hidden" style="animation-delay: 200ms">
+                <div class="animate-enter bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-white/10 backdrop-blur-xl flex flex-col justify-between group hover:border-sky-500/30 transition-all relative overflow-hidden" style="animation-delay: 200ms">
                     <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 pointer-events-none">
-                        <i class="ph-fill ph-chart-pie-slice text-[10rem] text-elevate-primary"></i>
+                        <i class="ph-fill ph-chart-pie-slice text-[10rem] text-sky-400"></i>
                     </div>
                     
                     <div class="relative z-10">
                         <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2 mb-4">
-                            <i class="ph-bold ph-users-three text-elevate-primary text-base"></i> Partisipasi
+                            <i class="ph-bold ph-users-three text-sky-400 text-base"></i> Partisipasi
                         </h3>
                         
                         <div class="flex items-baseline gap-2 mb-4">
-                            <span class="text-5xl lg:text-6xl font-black text-elevate-dark tracking-tight">{{ $participationRate }}<span class="text-2xl text-slate-400 ml-1">%</span></span>
+                            <span class="text-5xl lg:text-6xl font-black text-white tracking-tight">{{ $participationRate }}<span class="text-2xl text-slate-400 ml-1">%</span></span>
                         </div>
 
                         {{-- Progress Bar --}}
-                        <div class="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden flex shadow-inner">
-                            <div class="bg-elevate-primary h-full rounded-full transition-all duration-1000" style="width: {{ $participationRate }}%"></div>
+                        <div class="w-full bg-slate-900/80 border border-white/10 rounded-full h-3 mb-6 overflow-hidden flex shadow-inner">
+                            <div class="bg-gradient-to-r from-sky-500 to-blue-500 h-full rounded-full transition-all duration-1000" style="width: {{ $participationRate }}%"></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="px-3 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-[11px] font-bold flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div> 
+                            <div class="px-3 py-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-[11px] font-bold flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div> 
                                 <span class="truncate">Sudah: {{ $submittedStudentCount }}</span>
                             </div>
-                            <div class="px-3 py-2.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-xl text-[11px] font-bold flex items-center gap-2">
-                                <div class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></div> 
+                            <div class="px-3 py-2.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-[11px] font-bold flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-rose-400 shrink-0"></div> 
                                 <span class="truncate">Belum: {{ $notSubmittedCount }}</span>
                             </div>
                         </div>
@@ -159,39 +163,39 @@
                 </div>
 
                 {{-- 2. Buku Terpopuler (List) --}}
-                <div class="animate-enter lg:col-span-2 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 group hover:shadow-lg transition-all relative overflow-hidden flex flex-col" style="animation-delay: 300ms">
+                <div class="animate-enter lg:col-span-2 bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-white/10 backdrop-blur-xl group hover:border-sky-500/30 transition-all relative overflow-hidden flex flex-col" style="animation-delay: 300ms">
                     <div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition transform group-hover:scale-110 pointer-events-none">
-                        <i class="ph-fill ph-books text-[12rem] text-elevate-dark"></i>
+                        <i class="ph-fill ph-books text-[12rem] text-white"></i>
                     </div>
 
                     <div class="relative z-10 flex flex-col h-full">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                <i class="ph-bold ph-trend-up text-elevate-accent text-base"></i> Buku Populer
+                                <i class="ph-bold ph-trend-up text-amber-400 text-base"></i> Buku Populer
                             </h3>
-                            <span class="px-3 py-1 bg-elevate-accent/10 text-elevate-primary rounded-lg text-[10px] font-black uppercase tracking-wider border border-elevate-accent/20">Top 5</span>
+                            <span class="px-3 py-1 bg-sky-500/10 text-sky-400 rounded-lg text-[10px] font-black uppercase tracking-wider border border-sky-500/20">Top 5</span>
                         </div>
 
                         @if($topBooks->count() > 0)
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($topBooks as $index => $book)
-                                    <div class="flex items-center gap-4 p-3 rounded-2xl border transition-colors {{ $index == 0 ? 'bg-elevate-accent/5 border-elevate-accent/20 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-elevate-accent/30 hover:shadow-sm' }}">
+                                    <div class="flex items-center gap-4 p-3 rounded-2xl border transition-colors {{ $index == 0 ? 'bg-sky-500/10 border-sky-500/30 shadow-sm' : 'bg-slate-900/50 border-white/10 hover:bg-slate-800/50 hover:border-sky-500/30' }}">
                                         {{-- Rank Badge --}}
-                                        <div class="w-10 h-10 rounded-[0.8rem] flex items-center justify-center font-black text-sm shrink-0 {{ $index == 0 ? 'bg-elevate-primary text-white shadow-md shadow-elevate-primary/30' : 'bg-white text-slate-500 border border-slate-200' }}">
+                                        <div class="w-10 h-10 rounded-[0.8rem] flex items-center justify-center font-black text-sm shrink-0 {{ $index == 0 ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/30' : 'bg-slate-900/80 text-slate-300 border border-white/10' }}">
                                             #{{ $index + 1 }}
                                         </div>
                                         
                                         <div class="min-w-0 flex-1 py-1">
-                                            <h4 class="font-black text-elevate-dark text-sm truncate" title="{{ $book->title }}">
+                                            <h4 class="font-black text-white text-sm truncate" title="{{ $book->title }}">
                                                 {{ $book->title }}
                                             </h4>
                                             <p class="text-[10px] font-bold text-slate-400 truncate flex items-center gap-1.5 mt-0.5">
-                                                <i class="ph-fill ph-pen-nib text-elevate-primary"></i> {{ $book->author ?? 'Tanpa Penulis' }}
+                                                <i class="ph-fill ph-pen-nib text-sky-400"></i> {{ $book->author ?? 'Tanpa Penulis' }}
                                             </p>
                                         </div>
                                         
                                         <div class="text-right pl-2 shrink-0 pr-2">
-                                            <span class="block font-black text-elevate-primary text-lg leading-none">{{ $book->total_read }}</span>
+                                            <span class="block font-black text-sky-400 text-lg leading-none">{{ $book->total_read }}</span>
                                             <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold block mt-1">Pembaca</span>
                                         </div>
                                     </div>
@@ -199,10 +203,10 @@
                             </div>
                         @else
                             <div class="flex-1 flex flex-col items-center justify-center text-center py-8">
-                                <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-3 border border-slate-100 shadow-inner">
+                                <div class="w-14 h-14 bg-slate-900/80 rounded-full flex items-center justify-center text-slate-500 mb-3 border border-white/10 shadow-inner">
                                     <i class="ph-bold ph-books text-2xl"></i>
                                 </div>
-                                <p class="text-slate-500 text-sm font-bold">Belum ada data tren buku.</p>
+                                <p class="text-slate-400 text-sm font-bold">Belum ada data tren buku.</p>
                             </div>
                         @endif
                     </div>
@@ -210,14 +214,14 @@
             </div>
 
             {{-- TABEL DATA JURNAL --}}
-            <div class="animate-enter bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden min-h-[400px]" style="animation-delay: 400ms">
+            <div class="animate-enter bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 backdrop-blur-xl overflow-hidden min-h-[400px]" style="animation-delay: 400ms">
                 {{-- Table Header Custom --}}
-                <div class="px-6 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h3 class="font-black text-elevate-dark flex items-center gap-2 text-lg">
-                        <i class="ph-fill ph-list-dashes text-elevate-primary text-xl"></i>
+                <div class="px-6 py-6 border-b border-white/10 bg-slate-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h3 class="font-black text-white flex items-center gap-2 text-lg">
+                        <i class="ph-fill ph-list-dashes text-sky-400 text-xl"></i>
                         Daftar Jurnal Masuk
                     </h3>
-                    <div class="text-xs font-black uppercase tracking-widest text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-black uppercase tracking-widest text-slate-300 bg-slate-900/80 px-4 py-2 rounded-xl border border-white/10 shadow-sm">
                         Total: {{ $journals->total() }} Data
                     </div>
                 </div>
@@ -226,28 +230,28 @@
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50/50 border-b border-slate-100 text-[10px] uppercase tracking-widest text-slate-400 font-black">
+                                <tr class="bg-slate-900/60 border-b border-white/10 text-[10px] uppercase tracking-widest text-slate-400 font-black">
                                     <th class="p-5 pl-8 w-64">Siswa</th>
                                     <th class="p-5">Buku & Ringkasan</th>
                                     <th class="p-5 text-center w-28">Bukti</th>
                                     <th class="p-5 pr-8 text-right w-40">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50">
+                            <tbody class="divide-y divide-white/5">
                                 @foreach($journals as $item)
-                                <tr class="group hover:bg-slate-50/80 transition-colors">
+                                <tr class="group hover:bg-slate-800/40 transition-colors">
                                     <td class="p-5 pl-8 align-top">
                                         <div class="flex items-center gap-3.5">
-                                            {{-- Avatar Initials (Diperbaiki) --}}
-                                            <div class="w-10 h-10 rounded-2xl bg-elevate-accent/10 text-elevate-primary flex items-center justify-center font-black text-sm shrink-0 border border-elevate-accent/20 group-hover:bg-elevate-primary group-hover:text-white transition-colors shadow-sm">
+                                            {{-- Avatar Initials --}}
+                                            <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-300 flex items-center justify-center font-black text-sm shrink-0 border border-sky-500/30 group-hover:bg-sky-500 group-hover:text-white transition-colors shadow-sm">
                                                 {{ substr($item->student?->name ?? '?', 0, 1) }}
                                             </div>
                                             <div>
-                                                {{-- Nama Siswa (Diperbaiki) --}}
-                                                <p class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors leading-tight line-clamp-2">
+                                                {{-- Nama Siswa --}}
+                                                <p class="font-bold text-white text-sm group-hover:text-sky-400 transition-colors leading-tight line-clamp-2">
                                                     {{ $item->student?->name ?? 'Siswa Dihapus / Tidak Ditemukan' }}
                                                 </p>
-                                                {{-- Nama Kelas (Diperbaiki) --}}
+                                                {{-- Nama Kelas --}}
                                                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
                                                     {{ $item->student?->schoolClass?->name ?? '-' }}
                                                 </p>
@@ -260,50 +264,50 @@
                                     </td>
                                     <td class="p-5 align-top max-w-sm lg:max-w-md">
                                         <div class="flex flex-wrap gap-2 mb-2">
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-[10px] font-bold shadow-sm">
-                                                <i class="ph-bold ph-book-open text-elevate-primary text-sm"></i> {{ $item->pages_read }} Halaman
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/80 border border-white/10 text-slate-300 text-[10px] font-bold shadow-sm">
+                                                <i class="ph-bold ph-book-open text-sky-400 text-sm"></i> {{ $item->pages_read }} Halaman
                                             </span>
-                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-[10px] font-bold shadow-sm">
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold shadow-sm">
                                                 @for($i=1; $i<=5; $i++)
                                                     @if($i <= ($item->rating ?? 0)) ★ @else ☆ @endif
                                                 @endfor
                                             </span>
                                         </div>
-                                        <h4 class="font-black text-elevate-dark text-sm mb-1 leading-snug line-clamp-2">{{ $item->title }}</h4>
+                                        <h4 class="font-black text-white text-sm mb-1 leading-snug line-clamp-2">{{ $item->title }}</h4>
                                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Penulis: {{ $item->author ?? '-' }}</p>
                                         
                                         @if($item->favorite_character || $item->new_vocabulary)
                                             <div class="grid grid-cols-2 gap-2 mb-3">
                                                 @if($item->favorite_character)
-                                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                                    <div class="bg-slate-900/80 p-2 rounded-lg border border-white/10">
                                                         <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Tokoh Favorit</p>
-                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="{{ $item->favorite_character }}">{{ $item->favorite_character }}</p>
+                                                        <p class="text-[11px] font-medium text-slate-200 truncate" title="{{ $item->favorite_character }}">{{ $item->favorite_character }}</p>
                                                     </div>
                                                 @endif
                                                 @if($item->new_vocabulary)
-                                                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                                    <div class="bg-slate-900/80 p-2 rounded-lg border border-white/10">
                                                         <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Kosakata</p>
-                                                        <p class="text-[11px] font-medium text-slate-700 truncate" title="{{ $item->new_vocabulary }}">{{ $item->new_vocabulary }}</p>
+                                                        <p class="text-[11px] font-medium text-slate-200 truncate" title="{{ $item->new_vocabulary }}">{{ $item->new_vocabulary }}</p>
                                                     </div>
                                                 @endif
                                             </div>
                                         @endif
 
-                                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed relative group-hover:bg-white group-hover:border-elevate-accent/30 transition-all font-medium">
-                                            <i class="ph-fill ph-quotes text-elevate-accent/20 absolute -top-1 -left-1 text-2xl"></i>
+                                        <div class="bg-slate-900/80 p-4 rounded-2xl border border-white/10 text-xs text-slate-300 leading-relaxed relative group-hover:border-sky-500/30 transition-all font-medium">
+                                            <i class="ph-fill ph-quotes text-sky-400/20 absolute -top-1 -left-1 text-2xl"></i>
                                             <span class="relative z-10 break-words">{{ Str::limit($item->summary, 150) }}</span>
                                         </div>
                                     </td>
                                     <td class="p-5 align-top text-center">
                                         @if($item->proof_image)
                                             <a href="{{ asset('storage/'.$item->proof_image) }}" target="_blank" class="inline-block relative group/img">
-                                                <img src="{{ asset('storage/'.$item->proof_image) }}" class="h-16 w-16 object-cover rounded-xl border border-slate-200 shadow-sm transition transform group-hover/img:scale-105">
-                                                <div class="absolute inset-0 bg-elevate-dark/60 opacity-0 group-hover/img:opacity-100 rounded-xl flex items-center justify-center transition-all backdrop-blur-[2px]">
+                                                <img src="{{ asset('storage/'.$item->proof_image) }}" class="h-16 w-16 object-cover rounded-xl border border-white/10 shadow-sm transition transform group-hover/img:scale-105">
+                                                <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover/img:opacity-100 rounded-xl flex items-center justify-center transition-all backdrop-blur-[2px]">
                                                     <i class="ph-bold ph-eye text-white text-xl"></i>
                                                 </div>
                                             </a>
                                         @else
-                                            <div class="h-16 w-16 mx-auto rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-slate-300 bg-slate-50">
+                                            <div class="h-16 w-16 mx-auto rounded-xl border border-dashed border-white/15 flex items-center justify-center text-slate-500 bg-slate-900/50">
                                                 <i class="ph-bold ph-image-broken text-xl"></i>
                                             </div>
                                             <span class="text-[9px] text-slate-400 font-bold block mt-2 uppercase tracking-widest">Tanpa Bukti</span>
@@ -312,13 +316,13 @@
                                     <td class="p-5 pr-8 align-top text-right">
                                         <div class="flex flex-col gap-2 items-end">
                                             @if($item->status === 'rejected')
-                                                <div class="w-full px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1" title="{{ $item->rejection_reason }}">
+                                                <div class="w-full px-4 py-2 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1" title="{{ $item->rejection_reason }}">
                                                     <i class="ph-fill ph-x-circle text-sm"></i> Ditolak
                                                 </div>
                                             @elseif(!$item->verified_at)
                                                 <form action="{{ route('admin.literacy.verify', $item->id) }}" method="POST" class="w-full">
                                                     @csrf
-                                                    <button type="submit" class="w-full px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 mb-1">
+                                                    <button type="submit" class="w-full px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 mb-1">
                                                         <i class="ph-bold ph-check-circle text-base"></i> Verifikasi
                                                     </button>
                                                 </form>
@@ -326,12 +330,12 @@
                                                 {{-- Tombol Tolak dengan SweetAlert untuk input alasan --}}
                                                 <form id="form-reject-{{ $item->id }}" action="{{ route('admin.literacy.reject', $item->id) }}" method="POST" class="w-full">
                                                     @csrf
-                                                    <button type="button" onclick="rejectJournal({{ $item->id }})" class="w-full px-5 py-2 bg-white border border-rose-200 text-rose-500 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                                    <button type="button" onclick="rejectJournal({{ $item->id }})" class="w-full px-5 py-2 bg-slate-900/80 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
                                                         <i class="ph-bold ph-x text-base"></i> Tolak
                                                     </button>
                                                 </form>
                                             @else
-                                                <div class="w-full px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1">
+                                                <div class="w-full px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cursor-default shadow-sm mb-1">
                                                     <i class="ph-fill ph-check-circle text-sm"></i> Selesai
                                                 </div>
                                             @endif
@@ -345,21 +349,23 @@
                                                                 icon: 'warning',
                                                                 showCancelButton: true,
                                                                 confirmButtonColor: '#e11d48',
-                                                                cancelButtonColor: '#94a3b8',
+                                                                cancelButtonColor: '#334155',
                                                                 confirmButtonText: 'Ya, Hapus!',
                                                                 cancelButtonText: 'Batal',
                                                                 reverseButtons: true,
+                                                                background: '#021124',
+                                                                color: '#f8fafc',
                                                                 customClass: {
-                                                                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                                                                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                                                                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                                                                    popup: 'rounded-[2.5rem] font-sans border border-white/10 shadow-2xl backdrop-blur-xl',
+                                                                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/40',
+                                                                    cancelButton: 'bg-slate-800 text-slate-300 px-6 py-3 rounded-xl font-bold hover:bg-slate-700 transition-colors mx-2 border border-white/10'
                                                                 },
                                                                 buttonsStyling: false
                                                             }).then((result) => {
                                                                 if (result.isConfirmed) form.submit();
                                                             });">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="text-[10px] font-black text-slate-400 hover:text-rose-500 flex items-center gap-1.5 mt-1 transition-colors uppercase tracking-wider py-1 w-full justify-end">
+                                                <button type="submit" class="text-[10px] font-black text-slate-400 hover:text-rose-400 flex items-center gap-1.5 mt-1 transition-colors uppercase tracking-wider py-1 w-full justify-end">
                                                     <i class="ph-bold ph-trash text-sm"></i> Hapus
                                                 </button>
                                             </form>
@@ -370,16 +376,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-6 border-t border-slate-50 bg-slate-50/30">
+                    <div class="p-6 border-t border-white/10 bg-slate-900/40">
                         {{ $journals->withQueryString()->links() }}
                     </div>
                 @else
                     <div class="text-center py-24">
-                        <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300 shadow-inner border border-slate-100">
+                        <div class="w-24 h-24 bg-slate-900/80 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-500 shadow-inner border border-white/10">
                             <i class="ph-duotone ph-books text-5xl"></i>
                         </div>
-                        <h3 class="font-black text-elevate-dark text-xl mb-2">Belum ada data jurnal</h3>
-                        <p class="text-sm font-medium text-slate-500 max-w-sm mx-auto">Belum ada siswa yang mengisi jurnal literasi yang sesuai dengan filter pencarian ini.</p>
+                        <h3 class="font-black text-white text-xl mb-2">Belum ada data jurnal</h3>
+                        <p class="text-sm font-medium text-slate-400 max-w-sm mx-auto">Belum ada siswa yang mengisi jurnal literasi yang sesuai dengan filter pencarian ini.</p>
                     </div>
                 @endif
             </div>
@@ -401,12 +407,14 @@
                 confirmButtonText: 'Tolak Jurnal',
                 cancelButtonText: 'Batal',
                 confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#94a3b8',
+                cancelButtonColor: '#334155',
+                background: '#021124',
+                color: '#f8fafc',
                 customClass: {
-                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
-                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2',
-                    input: 'rounded-xl border-slate-200 focus:ring-elevate-primary focus:border-elevate-primary text-sm'
+                    popup: 'rounded-[2.5rem] font-sans border border-white/10 shadow-2xl backdrop-blur-xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/40',
+                    cancelButton: 'bg-slate-800 text-slate-300 px-6 py-3 rounded-xl font-bold hover:bg-slate-700 transition-colors mx-2 border border-white/10',
+                    input: 'rounded-xl border-white/10 bg-slate-900 text-white focus:ring-sky-400 focus:border-sky-400 text-sm'
                 },
                 buttonsStyling: false,
                 preConfirm: (reason) => {
@@ -435,8 +443,10 @@
                     icon: 'success',
                     title: 'Berhasil!',
                     text: '{{ session('success') }}',
-                    confirmButtonColor: '#3b5889',
-                    customClass: { popup: 'rounded-[2.5rem] shadow-xl border border-slate-100' }
+                    confirmButtonColor: '#38bdf8',
+                    background: '#021124',
+                    color: '#f8fafc',
+                    customClass: { popup: 'rounded-[2.5rem] shadow-2xl border border-white/10' }
                 });
             @endif
         });

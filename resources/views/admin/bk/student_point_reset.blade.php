@@ -1,45 +1,44 @@
 <x-app-layout>
-    <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden min-h-screen bg-slate-50">
+    <div class="py-8 sm:py-10 font-sans text-slate-100 relative overflow-hidden min-h-screen bg-[#020b18]">
         
         {{-- Efek Latar Belakang Halus --}}
-        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-[#56bbf1]/10 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- HEADER --}}
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 class="text-3xl font-black text-elevate-dark flex items-center gap-3">
-                        <i class="ph-duotone ph-archive text-elevate-primary"></i>
+                    <h1 class="text-3xl font-black text-white flex items-center gap-3">
+                        <i class="ph-duotone ph-archive text-[#56bbf1]"></i>
                         Tutup Buku Poin
                     </h1>
-                    <p class="text-slate-500 font-medium mt-1">Arsipkan poin kedisiplinan tahun ini dan reset poin siswa ke 0 untuk tahun ajaran baru.</p>
+                    <p class="text-slate-400 font-medium mt-1">Arsipkan poin kedisiplinan tahun ini dan reset poin siswa ke 0 untuk tahun ajaran baru.</p>
                 </div>
                 
                 <div>
-                    <!-- PERBAIKAN ROUTE: Menggunakan history.back() agar tidak error -->
-                    <a href="javascript:history.back()" class="px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                        <i class="ph-bold ph-arrow-left text-xl"></i> Kembali
+                    <a href="javascript:history.back()" class="px-5 py-2.5 bg-white/10 border border-white/15 rounded-2xl text-slate-200 font-bold hover:bg-white/20 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                        <i class="ph-bold ph-arrow-left text-xl text-[#56bbf1]"></i> Kembali
                     </a>
                 </div>
             </div>
 
             {{-- Pesan Flash --}}
             @if (session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3 px-2">
-                        <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                        <div class="p-2 bg-emerald-500/20 rounded-full text-emerald-400">
                             <i class="ph-bold ph-check-circle text-xl"></i>
                         </div>
                         <span class="font-bold text-sm">{{ session('success') }}</span>
                     </div>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-2 rounded-xl"><i class="ph-bold ph-x"></i></button>
+                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-300 p-2 rounded-xl"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
 
             @if (session('error'))
-                <div class="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center gap-3 shadow-sm">
-                    <div class="p-2 bg-rose-100 rounded-full text-rose-600">
+                <div class="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-2xl flex items-center gap-3 shadow-sm">
+                    <div class="p-2 bg-rose-500/20 rounded-full text-rose-400">
                         <i class="ph-bold ph-warning-circle text-xl"></i>
                     </div>
                     <span class="font-bold text-sm">{{ session('error') }}</span>
@@ -50,16 +49,16 @@
                 
                 {{-- KOTAK KIRI: FORM RESET --}}
                 <div class="lg:col-span-1">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-8 rounded-[2.5rem] shadow-2xl border border-white/10 relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 to-rose-700"></div>
                         
-                        <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-3xl mb-6 border border-rose-100">
+                        <div class="w-14 h-14 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center text-3xl mb-6 border border-rose-500/30">
                             <i class="ph-duotone ph-warning-octagon"></i>
                         </div>
                         
-                        <h3 class="text-lg font-black text-elevate-dark mb-2">Eksekusi Reset Poin</h3>
-                        <p class="text-xs text-slate-500 font-medium mb-6 leading-relaxed">
-                            Proses ini akan menyimpan saldo poin terakhir dari <strong class="text-elevate-dark">{{ $activeStudentsCount ?? 0 }} siswa aktif</strong> ke tabel riwayat, lalu mereset saldo poin aktif mereka kembali menjadi 0.
+                        <h3 class="text-lg font-black text-white mb-2">Eksekusi Reset Poin</h3>
+                        <p class="text-xs text-slate-400 font-medium mb-6 leading-relaxed">
+                            Proses ini akan menyimpan saldo poin terakhir dari <strong class="text-white">{{ $activeStudentsCount ?? 0 }} siswa aktif</strong> ke tabel riwayat, lalu mereset saldo poin aktif mereka kembali menjadi 0.
                         </p>
 
                         <form action="{{ route('admin.points_reset.submit') }}" method="POST" id="form-reset-poin">
@@ -70,7 +69,7 @@
                                     <div class="relative group">
                                         <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                         <input type="text" name="academic_year" placeholder="Contoh: 2023/2024" required 
-                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 font-bold text-elevate-dark transition-all shadow-sm outline-none">
+                                               class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-white/15 bg-[#021124] focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 font-bold text-white transition-all shadow-sm outline-none placeholder:text-slate-500">
                                     </div>
                                     <p class="text-[10px] text-slate-400 mt-2 ml-1">Ketik tahun ajaran untuk arsip (misal: 2023/2024).</p>
                                 </div>
@@ -85,40 +84,40 @@
 
                 {{-- KOTAK KANAN: TABEL ARSIP TAHUN SEBELUMNYA --}}
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden h-full flex flex-col relative">
-                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
+                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden h-full flex flex-col relative">
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#56bbf1] to-blue-600"></div>
 
-                        <div class="p-6 md:p-8 border-b border-slate-100 bg-slate-50/50">
-                            <h3 class="text-lg font-black text-elevate-dark flex items-center gap-2">
-                                <i class="ph-fill ph-folder-open text-elevate-primary"></i> Riwayat Arsip Tahunan
+                        <div class="p-6 md:p-8 border-b border-white/10 bg-white/5">
+                            <h3 class="text-lg font-black text-white flex items-center gap-2">
+                                <i class="ph-fill ph-folder-open text-[#56bbf1]"></i> Riwayat Arsip Tahunan
                             </h3>
                         </div>
                         
                         <div class="overflow-x-auto flex-1 custom-scrollbar">
-                            <table class="w-full text-left text-sm text-elevate-dark">
-                                <thead class="bg-slate-50/50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                            <table class="w-full text-left text-sm text-slate-200">
+                                <thead class="bg-white/5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-white/10">
                                     <tr>
                                         <th class="px-8 py-5">Tahun Ajaran</th>
                                         <th class="px-6 py-5 text-center">Siswa Diarsipkan</th>
                                         <th class="px-8 py-5 text-center">Rata-rata Poin</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-50">
+                                <tbody class="divide-y divide-white/5">
                                     @forelse($histories as $history)
-                                        <tr class="hover:bg-slate-50/50 transition-colors">
-                                            <td class="px-8 py-5 font-black text-elevate-dark text-base">
+                                        <tr class="hover:bg-white/5 transition-colors">
+                                            <td class="px-8 py-5 font-black text-white text-base">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-elevate-primary shadow-sm">
+                                                    <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-[#56bbf1] shadow-sm">
                                                         <i class="ph-duotone ph-calendar"></i>
                                                     </div>
                                                     {{ $history->academic_year }}
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-5 text-center font-bold text-slate-600">
+                                            <td class="px-6 py-5 text-center font-bold text-slate-300">
                                                 {{ number_format($history->total_students) }} Siswa
                                             </td>
                                             <td class="px-8 py-5 text-center">
-                                                <span class="inline-flex items-center justify-center px-3 py-1.5 bg-elevate-soft text-elevate-primary font-black rounded-xl border border-elevate-accent/20 text-xs shadow-sm">
+                                                <span class="inline-flex items-center justify-center px-3 py-1.5 bg-[#56bbf1]/10 text-[#56bbf1] font-black rounded-xl border border-[#56bbf1]/20 text-xs shadow-sm">
                                                     {{ number_format($history->average_score, 1) }}
                                                 </span>
                                             </td>
@@ -126,10 +125,10 @@
                                     @empty
                                         <tr>
                                             <td colspan="3" class="px-8 py-20 text-center">
-                                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-inner border border-slate-100">
+                                                <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 shadow-inner border border-white/10">
                                                     <i class="ph-duotone ph-folder-dashed text-4xl"></i>
                                                 </div>
-                                                <p class="text-sm font-bold text-slate-500">Belum ada riwayat arsip.</p>
+                                                <p class="text-sm font-bold text-slate-300">Belum ada riwayat arsip.</p>
                                                 <p class="text-xs text-slate-400 mt-1">Lakukan tutup buku untuk melihat data arsip poin di sini.</p>
                                             </td>
                                         </tr>
@@ -153,7 +152,8 @@
             if(!inputYear) {
                 Swal.fire({
                     icon: 'error', title: 'Input Kosong', text: 'Silakan ketik tahun ajaran terlebih dahulu!',
-                    customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
+                    background: '#021124', color: '#ffffff',
+                    customClass: { popup: 'rounded-2xl border border-white/15 shadow-lg font-sans' }
                 });
                 return;
             }
@@ -164,14 +164,16 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#94a3b8',
+                cancelButtonColor: '#64748b',
                 confirmButtonText: 'Ya, Reset Poin ke 0!',
                 cancelButtonText: 'Batal',
+                background: '#021124',
+                color: '#ffffff',
                 reverseButtons: true,
                 customClass: {
-                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                    popup: 'rounded-[2rem] font-sans border border-white/15 shadow-2xl',
                     confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
-                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                    cancelButton: 'bg-white/10 text-slate-300 px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors mx-2'
                 },
                 buttonsStyling: false
             }).then((result) => {
@@ -181,6 +183,8 @@
                         text: 'Tunggu sebentar, sedang mengarsipkan data.',
                         allowOutsideClick: false,
                         showConfirmButton: false,
+                        background: '#021124',
+                        color: '#ffffff',
                         didOpen: () => { Swal.showLoading() }
                     });
                     document.getElementById('form-reset-poin').submit();

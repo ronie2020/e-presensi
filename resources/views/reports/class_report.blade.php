@@ -51,31 +51,31 @@
                 />
             </div>
 
-            <div class="animate-enter bg-white rounded-[2rem] border border-slate-100 p-6 md:p-8 shadow-xl shadow-slate-200/40 relative overflow-hidden flex items-center mb-8 no-print" style="animation-delay: 100ms">
+            <div class="animate-enter bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] border border-white/10 p-6 md:p-8 shadow-2xl backdrop-blur-xl text-white relative overflow-hidden flex items-center mb-8 no-print" style="animation-delay: 100ms">
                      
                      {{-- Form Filter --}}
                      <form action="{{ route('reports.class.detail') }}" method="GET" class="w-full flex flex-col md:flex-row gap-5 items-end md:items-center" @submit="loading = true">
                         <div class="flex-1 w-full">
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Pilih Kelas</label>
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Pilih Kelas</label>
                             <div class="relative">
-                                <i class="ph-bold ph-chalkboard-teacher absolute left-4 top-3.5 text-elevate-primary text-xl"></i>
-                                <select name="class_id" class="w-full pl-12 rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark h-14 text-sm focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors" onchange="this.form.submit()">
-                                    <option value="" disabled {{ !$classId ? 'selected' : '' }}>-- Pilih Kelas --</option>
+                                <i class="ph-bold ph-chalkboard-teacher absolute left-4 top-4 text-sky-400 text-xl pointer-events-none z-10"></i>
+                                <select name="class_id" class="w-full pl-12 rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white h-14 text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-colors [color-scheme:dark]" onchange="this.form.submit()">
+                                    <option value="" disabled {{ !$classId ? 'selected' : '' }} class="bg-slate-900 text-white">-- Pilih Kelas --</option>
                                     @foreach($classes as $c)
-                                        <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                        <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $c->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                         <div class="w-full md:w-64">
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Bulan</label>
-                            <input type="month" name="month" value="{{ $monthStr }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark h-14 text-sm px-5 focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent transition-colors">
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Bulan</label>
+                            <input type="month" name="month" value="{{ $monthStr }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white h-14 text-sm px-5 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-colors [color-scheme:dark]">
                         </div>
-                        <button type="submit" class="w-full md:w-auto bg-elevate-dark hover:bg-elevate-primary text-white px-8 rounded-2xl h-14 font-bold text-sm shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <button type="submit" class="w-full md:w-auto bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white px-8 rounded-2xl h-14 font-bold text-sm shadow-lg shadow-sky-950/40 flex items-center justify-center gap-2 transition-all active:scale-95 border border-sky-400/30">
                             <i class="ph-bold ph-magnifying-glass"></i> Tampilkan
                         </button>
-                    </form>
-                </div>
+                     </form>
+            </div>
             </div>
 
             @if($classId && $students->count() > 0)

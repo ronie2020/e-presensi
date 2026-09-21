@@ -17,34 +17,40 @@
            ========================================================= */
         #reader { 
             width: 100% !important; 
-            min-height: 350px !important; 
+            min-height: 320px !important; 
             border: none !important; 
-            border-radius: 1rem; /* rounded-2xl */
+            border-radius: 1.25rem;
             overflow: hidden; 
             position: relative; 
-            background: #0f172a; 
+            background: #021124; 
         }
         
         #reader__scan_region { 
             width: 100% !important; 
-            min-height: 350px !important;
+            height: 100% !important;
+            min-height: 320px !important;
             background: transparent !important; 
         }
 
-        #reader video, 
-        #reader canvas { 
+        #reader video { 
             width: 100% !important; 
             height: 100% !important; 
-            min-height: 350px !important;
-            object-fit: cover !important; /* Memaksa kamera memenuhi container tanpa gepeng */
+            min-height: 320px !important;
+            object-fit: cover !important;
             display: block !important;
-            border-radius: 1rem;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
+            border-radius: 1.25rem;
         }
         
-        #reader__dashboard_section_csr span, #reader__dashboard_section_swaplink { display: none !important; }
+        #reader canvas { 
+            display: none !important;
+        }
+        
+        #reader__dashboard_section_csr span, 
+        #reader__dashboard_section_swaplink,
+        #reader__status_span,
+        #reader__header_message { 
+            display: none !important; 
+        }
         
         .digital-clock { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
     </style>
@@ -223,6 +229,9 @@
                             <div class="grid grid-cols-2 gap-3 mt-4">
                                 <button onclick="PiketApp.toggleCamera()" id="btnCamera" class="col-span-1 text-xs font-bold px-4 py-4 bg-white/10 hover:bg-white/20 text-white hover:text-sky-300 hover:border-sky-400/50 rounded-2xl transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm active:scale-95">
                                     <i class="ph-bold ph-camera text-xl"></i> <span id="cameraText">Buka Kamera</span>
+                                </button>
+                                <button onclick="PiketApp.switchCamera()" id="btnSwitchCamera" class="hidden col-span-1 text-xs font-bold px-4 py-4 bg-white/10 hover:bg-white/20 text-white hover:text-sky-300 hover:border-sky-400/50 rounded-2xl transition-all flex items-center justify-center gap-2 border border-white/15 shadow-sm active:scale-95">
+                                    <i class="ph-bold ph-camera-rotate text-xl"></i> <span>Putar Kamera</span>
                                 </button>
                                 <button onclick="PiketApp.openModalManual()" class="col-span-1 text-xs font-bold px-4 py-4 bg-sky-600 hover:bg-sky-500 text-white border border-sky-400/30 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95">
                                     <i class="ph-bold ph-keyboard text-xl"></i> Input Manual
@@ -456,6 +465,8 @@
             csrfToken: '{{ csrf_token() }}',
             isProcessing: false,
             isCameraRunning: false,
+            scanCooldown: false,
+            currentFacingMode: 'environment',
             html5QrCode: null,
             audioCtx: new (window.AudioContext || window.webkitAudioContext)(),
             
@@ -541,32 +552,95 @@
             },
 
             toggleCamera() {
+                if (this.isCameraRunning) {
+                    this.stopCamera();
+                } else {
+                    this.startCamera();
+                }
+            },
+
+            startCamera() {
                 const container = document.getElementById('cameraContainer');
                 const btnText = document.getElementById('cameraText');
-                
-                if (this.isCameraRunning) {
-                    this.html5QrCode.stop().then(() => {
-                        container.classList.add('hidden');
-                        btnText.textContent = "Buka Kamera";
-                        this.isCameraRunning = false;
-                        this.html5QrCode = null;
-                    });
-                } else {
-                    container.classList.remove('hidden');
-                    btnText.textContent = "Tutup Kamera";
+                const btnSwitch = document.getElementById('btnSwitchCamera');
+
+                if (container) container.classList.remove('hidden');
+                if (btnText) btnText.textContent = "Tutup Kamera";
+                if (btnSwitch) btnSwitch.classList.remove('hidden');
+
+                if (!this.html5QrCode) {
                     this.html5QrCode = new Html5Qrcode("reader");
-                    this.html5QrCode.start(
-                        { facingMode: "environment" }, 
-                        { fps: 10, qrbox: { width: 250, height: 250 } }, 
-                        (decodedText) => {
-                            if(this.isProcessing) return;
-                            this.html5QrCode.pause(); 
-                            this.handleScan(decodedText).then(() => { 
-                                setTimeout(() => { if(this.isCameraRunning) this.html5QrCode.resume(); }, 2000); 
-                            });
-                        }
-                    ).then(() => { this.isCameraRunning = true; })
-                     .catch(err => { Swal.fire({title: "Error Kamera", text: "Izin kamera diperlukan.", icon: "error", customClass: {popup: 'rounded-[2rem]'}}); container.classList.add('hidden'); });
+                }
+
+                const config = { 
+                    fps: 15, 
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                        let qrboxSize = Math.floor(minEdgeSize * 0.7);
+                        return { width: qrboxSize, height: qrboxSize };
+                    },
+                    aspectRatio: 1.0,
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    }
+                };
+
+                const cameraConstraints = { facingMode: this.currentFacingMode };
+
+                this.html5QrCode.start(
+                    cameraConstraints, 
+                    config, 
+                    (decodedText) => {
+                        if (this.isProcessing || this.scanCooldown) return;
+                        this.scanCooldown = true;
+                        this.handleScan(decodedText).finally(() => {
+                            setTimeout(() => { this.scanCooldown = false; }, 2500);
+                        });
+                    }
+                ).then(() => { 
+                    this.isCameraRunning = true; 
+                }).catch(err => { 
+                    console.warn("Camera start error:", err);
+                    Swal.fire({
+                        title: "Error Kamera", 
+                        text: "Izin kamera diperlukan atau kamera tidak dapat diakses.", 
+                        icon: "error", 
+                        customClass: { popup: 'rounded-[2rem]' }
+                    }); 
+                    this.stopCamera();
+                });
+            },
+
+            stopCamera() {
+                const container = document.getElementById('cameraContainer');
+                const btnText = document.getElementById('cameraText');
+                const btnSwitch = document.getElementById('btnSwitchCamera');
+
+                const cleanup = () => {
+                    if (container) container.classList.add('hidden');
+                    if (btnText) btnText.textContent = "Buka Kamera";
+                    if (btnSwitch) btnSwitch.classList.add('hidden');
+                    this.isCameraRunning = false;
+                };
+
+                if (this.html5QrCode && this.isCameraRunning) {
+                    this.html5QrCode.stop().then(cleanup).catch(cleanup);
+                } else {
+                    cleanup();
+                }
+            },
+
+            switchCamera() {
+                if (!this.isCameraRunning) return;
+                this.currentFacingMode = this.currentFacingMode === "environment" ? "user" : "environment";
+                if (this.html5QrCode) {
+                    this.html5QrCode.stop().then(() => {
+                        this.isCameraRunning = false;
+                        this.startCamera();
+                    }).catch(() => {
+                        this.isCameraRunning = false;
+                        this.startCamera();
+                    });
                 }
             },
 

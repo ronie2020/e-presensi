@@ -30,39 +30,37 @@
             />
 
             {{-- FILTER CARD --}}
-            <div class="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 mb-8 relative overflow-hidden">
+            <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-xl mb-8 relative overflow-hidden text-white">
                 <div class="relative z-10">
-                    <h3 class="font-black text-elevate-dark text-lg flex items-center gap-3 mb-6">
-                        <span class="bg-elevate-soft text-elevate-primary w-10 h-10 rounded-xl flex items-center justify-center"><i class="ph-bold ph-faders text-xl"></i></span>
+                    <h3 class="font-black text-white text-lg flex items-center gap-3 mb-6">
+                        <span class="bg-[#0d52a1]/20 text-sky-400 border border-sky-400/30 w-10 h-10 rounded-xl flex items-center justify-center"><i class="ph-bold ph-faders text-xl"></i></span>
                         Filter Data
                     </h3>
 
                     <form method="GET" action="{{ route('reports.teaching_journal') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
                         <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Dari Tanggal</label>
-                            {{-- Tambahkan ?? '' --}}
-                            <input type="date" name="start_date" value="{{ $startDate ?? '' }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Dari Tanggal</label>
+                            <input type="date" name="start_date" value="{{ $startDate ?? '' }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-5 transition-colors [color-scheme:dark]">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Sampai Tanggal</label>
-                            {{-- Tambahkan ?? '' --}}
-                            <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Sampai Tanggal</label>
+                            <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-5 transition-colors [color-scheme:dark]">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Guru</label>
-                            <select name="teacher_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft text-sm font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
-                                <option value="">Semua Guru</option>
-                                @foreach($teachers as $t) <option value="{{ $t->id }}" {{ $teacherId == $t->id ? 'selected' : '' }}>{{ $t->name }}</option> @endforeach
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Guru</label>
+                            <select name="teacher_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 text-sm font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-5 transition-colors [color-scheme:dark]">
+                                <option value="" class="bg-slate-900 text-white">Semua Guru</option>
+                                @foreach($teachers as $t) <option value="{{ $t->id }}" {{ $teacherId == $t->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $t->name }}</option> @endforeach
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Kelas</label>
-                            <select name="class_id" class="w-full rounded-2xl border-slate-200 bg-elevate-soft text-sm font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
-                                <option value="">Semua Kelas</option>
-                                @foreach($classes as $c) <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }}>{{ $c->name }}</option> @endforeach
+                            <label class="block text-xs font-bold text-sky-300 uppercase tracking-wider mb-2 ml-1">Kelas</label>
+                            <select name="class_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 text-sm font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-5 transition-colors [color-scheme:dark]">
+                                <option value="" class="bg-slate-900 text-white">Semua Kelas</option>
+                                @foreach($classes as $c) <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $c->name }}</option> @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="w-full h-14 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-2xl transition-colors shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 group active:scale-95">
+                        <button type="submit" class="w-full h-14 bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white font-bold rounded-2xl transition-colors shadow-lg shadow-sky-950/40 flex items-center justify-center gap-2 group active:scale-95 border border-sky-400/30">
                             <i class="ph-bold ph-magnifying-glass text-lg"></i> Terapkan
                         </button>
                     </form>

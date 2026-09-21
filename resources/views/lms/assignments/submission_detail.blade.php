@@ -1,5 +1,9 @@
 <x-app-layout>
-    <div class="py-4 sm:py-6 font-sans text-white relative">
+    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen relative overflow-hidden pb-20">
+        
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-[#0d52a1]/20 via-[#031d3d]/10 to-transparent opacity-30 pointer-events-none -z-10 blur-3xl"></div>
+
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 relative z-10">
             
             {{-- HERO SECTION --}}
@@ -53,7 +57,7 @@
                             $icon = $isCorrect ? 'ph-check-circle text-emerald-400' : 'ph-x-circle text-rose-400';
                         @endphp
                         
-                        <div class="rounded-2xl border {{ $borderColor }} bg-[#031d3d]/80 backdrop-blur-xl overflow-hidden shadow-lg shadow-black/20">
+                        <div class="rounded-2xl border {{ $borderColor }} bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] backdrop-blur-xl overflow-hidden shadow-xl border-white/10">
                             <div class="p-4 {{ $bgColor }} border-b {{ $borderColor }} flex items-start gap-3">
                                 <i class="ph-fill {{ $icon }} text-2xl mt-0.5 shrink-0"></i>
                                 <div>
@@ -77,7 +81,7 @@
                                             <span>{{ $optionText }}</span>
                                         </div>
                                     @else
-                                        <div class="p-4 bg-[#021124]/60 rounded-xl border border-white/10 text-slate-200 text-sm leading-relaxed">
+                                        <div class="p-4 bg-slate-900/80 rounded-xl border border-white/10 text-slate-200 text-sm leading-relaxed">
                                             {!! nl2br(e($answer->answer_text)) !!}
                                         </div>
                                     @endif
@@ -89,7 +93,7 @@
                                         @php
                                             $correctText = $options[$answer->question->correct_answer ?? ''] ?? '';
                                         @endphp
-                                        <div class="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/15 text-slate-200 font-bold text-xs sm:text-sm bg-[#021124]/70">
+                                        <div class="inline-flex items-center gap-3 px-4 py-2.5 rounded-xl border border-white/15 text-slate-200 font-bold text-xs sm:text-sm bg-slate-900/80">
                                             <span class="w-7 h-7 rounded-lg flex items-center justify-center bg-white/10 text-white text-xs font-black">
                                                 {{ $answer->question->correct_answer ?? '-' }}
                                             </span>

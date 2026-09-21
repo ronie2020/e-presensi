@@ -211,7 +211,7 @@
                             <label class="block text-[10px] font-bold text-sky-300 uppercase tracking-wide mb-2 ml-1">Status</label>
                             <div class="flex gap-2">
                                 <div class="relative flex-1 group">
-                                    <select name="status" class="w-full appearance-none pl-4 pr-10 py-3.5 rounded-2xl border border-white/15 bg-[#021124]/80 focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 text-sm font-bold text-white shadow-sm cursor-pointer transition-all outline-none">
+                                    <select name="status" class="w-full appearance-none pl-4 pr-10 py-3.5 rounded-2xl border border-white/15 bg-[#021124]/80 focus:border-sky-400 focus:ring-4 focus:ring-sky-400/20 text-sm font-bold text-white shadow-sm cursor-pointer transition-all outline-none [color-scheme:dark]">
                                         <option value="" class="bg-[#031d3d] text-white">Semua Status</option>
                                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }} class="bg-[#031d3d] text-white">Di Luar</option>
                                         <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }} class="bg-[#031d3d] text-white">Kembali</option>

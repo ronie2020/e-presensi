@@ -38,10 +38,10 @@
     @endphp
 
     {{-- MAIN CONTAINER --}}
-    <div class="fixed inset-0 z-50 bg-elevate-dark flex flex-col h-[100dvh] w-full overflow-hidden">
+    <div class="fixed inset-0 z-50 bg-[#020b18] flex flex-col h-[100dvh] w-full overflow-hidden">
         
         {{-- HEADER / TOOLBAR --}}
-        <div class="h-14 sm:h-16 bg-elevate-dark border-b border-white/10 flex items-center justify-between px-3 sm:px-6 shrink-0 z-20 shadow-lg relative">
+        <div class="h-14 sm:h-16 bg-[#021124] border-b border-white/10 flex items-center justify-between px-3 sm:px-6 shrink-0 z-20 shadow-lg relative">
             
             {{-- KIRI: Navigasi & Judul --}}
             <div class="flex items-center gap-3 sm:gap-4 overflow-hidden w-full mr-2">
@@ -86,7 +86,7 @@
             </div>
 
             {{-- SIDEBAR INFO (RESPONSIVE OVERLAY) --}}
-            <div id="book-sidebar" class="hidden md:flex w-full md:w-80 bg-elevate-dark/95 backdrop-blur-md md:bg-elevate-dark border-l border-white/10 flex-col absolute md:relative inset-0 md:inset-auto z-30 transition-all duration-300">
+            <div id="book-sidebar" class="hidden md:flex w-full md:w-80 bg-[#021124]/95 backdrop-blur-md md:bg-[#021124] border-l border-white/10 flex-col absolute md:relative inset-0 md:inset-auto z-30 transition-all duration-300">
                 
                 {{-- Header Sidebar Mobile --}}
                 <div class="md:hidden h-14 border-b border-white/10 flex justify-between items-center px-4 shrink-0">
@@ -116,7 +116,7 @@
                             {{-- Judul di Sidebar (Mobile Overlay) --}}
                             <div class="md:hidden text-center mb-6">
                                 <h2 class="text-white font-bold text-lg leading-snug">{{ $book->title }}</h2>
-                                <p class="text-elevate-accent text-sm mt-1 font-bold">{{ $book->author }}</p>
+                                <p class="text-sky-400 text-sm mt-1 font-bold">{{ $book->author }}</p>
                             </div>
 
                             <div class="bg-white/5 p-3 rounded-xl border border-white/10">
