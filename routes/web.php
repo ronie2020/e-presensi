@@ -157,6 +157,9 @@ Route::post('/library/kiosk/process', [LibraryKioskController::class, 'process']
 Route::get('/katalog', [BookController::class, 'catalogue'])->name('library.catalogue');
 Route::get('/katalog/baca/{book}', [BookController::class, 'read'])->name('library.books.read');
 
+// --- ROUTE PUBLIK PREVIEW LMS (KATALOG BELAJAR DICODING/UDEMY STYLE) ---
+Route::get('/belajar/materi/{id}', [StudentLmsController::class, 'publicPreview'])->name('lms.public.preview');
+
 // =========================================================================
 //  2. SISTEM SISWA (LOGIN & AREA SISWA)
 // =========================================================================

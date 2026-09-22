@@ -367,6 +367,25 @@ class LandingPageController extends Controller
         $publicSchedules = $scheduleCache['data'];
         $scheduleClasses = $scheduleCache['classes'];
 
+        // --- 12. KATALOG MODUL & MATERI PEMBELAJARAN TERBARU (DICODING/UDEMY STYLE) ---
+        $featuredMaterials = Cache::remember('landing_featured_materials', 600, function() {
+            if (class_exists(\App\Models\LmsMaterial::class)) {
+                try {
+                    $uniqueIds = \App\Models\LmsMaterial::selectRaw('MIN(id) as id')
+                        ->groupBy('title', 'subject_id');
+
+                    return \App\Models\LmsMaterial::whereIn('id', $uniqueIds)
+                        ->with(['subject', 'teacher', 'topic', 'attachments'])
+                        ->latest()
+                        ->take(6)
+                        ->get();
+                } catch (\Exception $e) {
+                    return collect([]);
+                }
+            }
+            return collect([]);
+        });
+
          return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
@@ -378,7 +397,8 @@ class LandingPageController extends Controller
             'latestVideoActivity',
             'popupAnnouncement',
             'publicSchedules',
-            'scheduleClasses'
+            'scheduleClasses',
+            'featuredMaterials'
         ));
     }
 

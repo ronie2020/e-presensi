@@ -62,8 +62,11 @@
                     </a>
                 @else
                     <div class="flex items-center gap-3 mr-2">
+                        <a href="#katalog-lms" class="text-xs font-bold text-sky-300 hover:text-white transition flex items-center gap-1.5">
+                            <i class="ph-bold ph-book-open text-sm"></i> Ruang Belajar
+                        </a>
                         <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-books text-sm"></i> Katalog
+                            <i class="ph-bold ph-books text-sm"></i> Katalog Buku
                         </a>
                         <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
                             <i class="ph-bold ph-student text-sm"></i> PPDB

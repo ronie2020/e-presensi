@@ -243,6 +243,7 @@
 <!-- KONTEN UTAMA -->
 <div class="w-full overflow-x-hidden relative">
     @include('landing.hero')
+    @include('landing.lms-catalog')
     @include('landing.ppdb')
     @include('landing.character')
     @include('landing.quick-access')

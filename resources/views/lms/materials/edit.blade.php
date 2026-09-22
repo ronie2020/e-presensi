@@ -120,6 +120,27 @@
                                     <input type="text" name="title" value="{{ old('title', $material->title) }}" required 
                                            class="w-full rounded-2xl border-white/10 bg-slate-900/80 font-black text-white focus:ring-sky-400/20 focus:border-sky-400 focus:bg-slate-900 h-14 px-5 transition-colors shadow-sm">
                                 </div>
+
+                                {{-- FOTO COVER MATERI (OPSIONAL) --}}
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Foto Sampul / Cover Course (Opsional)</label>
+                                    @if($material->cover_image)
+                                        <div class="mb-3 h-36 rounded-2xl overflow-hidden border border-white/20 relative group">
+                                            <img src="{{ asset('storage/' . $material->cover_image) }}" class="w-full h-full object-cover">
+                                            <div class="absolute bottom-2 left-2 bg-[#021124]/80 text-white text-[10px] font-bold px-3 py-1 rounded-full border border-white/20">Sampul Saat Ini</div>
+                                        </div>
+                                    @endif
+                                    <div class="relative flex items-center justify-center w-full">
+                                        <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-slate-900/60 hover:bg-slate-900/90 hover:border-sky-400/50 transition-all group">
+                                            <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                                                <i class="ph-duotone ph-image text-2xl text-sky-400 group-hover:scale-110 transition-transform mb-1"></i>
+                                                <p class="text-xs text-slate-300 font-bold">Ganti Foto Sampul Materi (Opsional)</p>
+                                                <p class="text-[10px] text-slate-400">Pilih gambar baru jika ingin mengganti foto sampul.</p>
+                                            </div>
+                                            <input type="file" name="cover_image" accept="image/*" class="hidden" />
+                                        </label>
+                                    </div>
+                                </div>
                                 
                                 <div>
                                     <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Mata Pelajaran <span class="text-rose-400">*</span></label>

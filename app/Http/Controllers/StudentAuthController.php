@@ -69,7 +69,11 @@ class StudentAuthController extends Controller
             return redirect()->route('alumni.dashboard')->with('success', 'Selamat datang kembali, Alumni!');
         }
 
-        // 4. Redirect Khusus (Jika login dari tombol spesifik di halaman depan)
+        // 4. Redirect Khusus (Jika login dari tombol spesifik di halaman depan/preview)
+        if ($request->filled('redirect_url')) {
+            return redirect()->to($request->input('redirect_url'))->with('success', 'Selamat datang, ' . $student->name . '! Silakan lanjutkan belajar.');
+        }
+
         $intended = $request->input('intended_app');
 
         if ($intended === 'cbt') {

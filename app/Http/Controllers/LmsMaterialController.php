@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class LmsMaterialController extends Controller
 {
@@ -72,6 +73,7 @@ class LmsMaterialController extends Controller
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'topic_id' => 'required|exists:topics,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'resume' => 'nullable|string', 
             'target_type' => 'required|in:class,grade',
             'class_id' => 'nullable|exists:classes,id', 
@@ -85,7 +87,12 @@ class LmsMaterialController extends Controller
         $teacherId = Auth::id();
         $now = now(); 
 
-        DB::transaction(function () use ($request, $teacherId, $now) {
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
+        }
+
+        DB::transaction(function () use ($request, $teacherId, $now, $coverPath) {
             $targetClassIds = [];
             
             if ($request->target_type == 'class') {
@@ -130,8 +137,10 @@ class LmsMaterialController extends Controller
                 $material = LmsMaterial::create([
                     'teacher_id' => $teacherId,
                     'subject_id' => $request->subject_id,
+                    'topic_id' => $request->topic_id,
                     'class_id' => $classId,
                     'title' => $request->title,
+                    'cover_image' => $coverPath,
                     'resume' => $request->resume,           
                     'type' => 'document', 
                     'created_at' => $now, 
@@ -148,6 +157,8 @@ class LmsMaterialController extends Controller
                 }
             }
         });
+
+        Cache::forget('landing_featured_materials');
 
         return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil diterbitkan!');
     }
@@ -184,12 +195,21 @@ class LmsMaterialController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'resume' => 'nullable|string',
             'new_attachments' => 'nullable|array',
             'topic_id' => 'required|exists:topics,id',
         ]);
 
-        DB::transaction(function () use ($request, $material) {
+        $coverPath = $material->cover_image;
+        if ($request->hasFile('cover_image')) {
+            if ($coverPath && Storage::disk('public')->exists($coverPath)) {
+                Storage::disk('public')->delete($coverPath);
+            }
+            $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
+        }
+
+        DB::transaction(function () use ($request, $material, $coverPath) {
             
             $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
                 ->where('title', $material->title)
@@ -203,6 +223,7 @@ class LmsMaterialController extends Controller
                     'title' => $request->title,
                     'subject_id' => $request->subject_id,
                     'topic_id' => $request->topic_id,
+                    'cover_image' => $coverPath,
                     'resume' => $request->resume,
                 ]);
 
@@ -255,6 +276,8 @@ class LmsMaterialController extends Controller
             }
         });
 
+        Cache::forget('landing_featured_materials');
+
         return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil diperbarui.');
     }
 
@@ -278,6 +301,8 @@ class LmsMaterialController extends Controller
             }
             $target->delete(); 
         }
+
+        Cache::forget('landing_featured_materials');
 
         return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil dihapus.');
     }

@@ -52,6 +52,38 @@ class StudentLmsController extends Controller
     }
 
     /**
+     * Preview Publik Materi / Modul Pembelajaran (Dicoding/Udemy Style)
+     */
+    public function publicPreview($id)
+    {
+        $material = LmsMaterial::with(['subject', 'teacher', 'schoolClass', 'topic', 'attachments'])->findOrFail($id);
+
+        // Ambil kuis/latihan soal terkait mata pelajaran & kelas materi ini
+        $assignments = LmsAssignment::where('subject_id', $material->subject_id)
+            ->where(function($q) use ($material) {
+                if ($material->class_id) {
+                    $q->where('class_id', $material->class_id)->orWhereNull('class_id');
+                }
+            })
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Ambil materi lain dari mata pelajaran yang sama (Modul Terkait)
+        $relatedMaterials = LmsMaterial::where('subject_id', $material->subject_id)
+            ->where('id', '!=', $material->id)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $isStudentLoggedIn = Auth::guard('student')->check();
+
+        return view('students.lms.public_preview', compact(
+            'material', 'assignments', 'relatedMaterials', 'isStudentLoggedIn'
+        ));
+    }
+
+    /**
      * Halaman Detail Mapel (Logika Lama Dipertahankan)
      */
     public function showSubject($subjectId)

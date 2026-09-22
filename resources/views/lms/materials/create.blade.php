@@ -145,6 +145,21 @@
                                            placeholder="Contoh: Modul 1 - Pengenalan Sel">
                                 </div>
 
+                                {{-- FOTO COVER MATERI (OPSIONAL) --}}
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Foto Sampul / Cover Course (Opsional)</label>
+                                    <div class="relative flex items-center justify-center w-full">
+                                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-slate-900/60 hover:bg-slate-900/90 hover:border-sky-400/50 transition-all group">
+                                            <div class="flex flex-col items-center justify-center pt-4 pb-4">
+                                                <i class="ph-duotone ph-image text-3xl text-sky-400 group-hover:scale-110 transition-transform mb-1.5"></i>
+                                                <p class="text-xs text-slate-300 font-bold mb-1">Unggah Foto Sampul Materi (JPG, PNG, WEBP)</p>
+                                                <p class="text-[10px] text-slate-400">Rekomendasi rasio 16:9 (Maksimal 5MB). Jika dikosongkan, gambar tematik otomatis akan digunakan.</p>
+                                            </div>
+                                            <input type="file" name="cover_image" accept="image/*" class="hidden" />
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <!-- MATA PELAJARAN -->
                                 <div>
                                     <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Mata Pelajaran <span class="text-rose-400">*</span></label>
