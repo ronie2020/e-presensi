@@ -11,6 +11,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class LmsAssignmentController extends Controller
@@ -95,6 +96,7 @@ class LmsAssignmentController extends Controller
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'topic_id' => 'required|exists:topics,id', // <--- WAJIB ADA BAB
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'deadline' => 'required',
             'description' => 'required|string',
             'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video',
@@ -110,10 +112,15 @@ class LmsAssignmentController extends Controller
         $teacherId = Auth::id();
         $now = now(); 
 
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
+        }
+
         try {
             $deadline = \Carbon\Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
 
-            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now, $coverPath) {
                 
                 $targetClassIds = [];
                 if ($request->target_type == 'class') {
@@ -144,6 +151,7 @@ class LmsAssignmentController extends Controller
                         'topic_id' => $request->topic_id, // <--- SIMPAN KE DATABASE
                         'class_id' => $classId,
                         'title' => $request->title,
+                        'cover_image' => $coverPath,
                         'description' => $description,
                         'deadline' => $deadline,
                         'assignment_type' => $request->assignment_type,
@@ -229,15 +237,24 @@ class LmsAssignmentController extends Controller
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'topic_id' => 'required|exists:topics,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'deadline' => 'required',
             'description' => 'required|string',
             'link_url' => 'nullable|url',
         ]);
 
+        $coverPath = $assignment->cover_image;
+        if ($request->hasFile('cover_image')) {
+            if ($coverPath && Storage::disk('public')->exists($coverPath)) {
+                Storage::disk('public')->delete($coverPath);
+            }
+            $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
+        }
+
         try {
             $deadline = Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
 
-            DB::transaction(function () use ($request, $assignment, $deadline) {
+            DB::transaction(function () use ($request, $assignment, $deadline, $coverPath) {
                 $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
                     ->where('title', $assignment->title)
                     ->where('created_at', $assignment->created_at)
@@ -249,7 +266,8 @@ class LmsAssignmentController extends Controller
                     $target->update([
                         'title' => $request->title,
                         'subject_id' => $request->subject_id,
-                        'topic_id' => $request->topic_id,   // ← tambahkan baris ini
+                        'topic_id' => $request->topic_id,
+                        'cover_image' => $coverPath,
                         'deadline' => $deadline,
                         'description' => $request->description,
                         'link_url' => $request->link_url, 

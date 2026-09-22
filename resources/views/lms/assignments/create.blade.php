@@ -93,7 +93,7 @@
 
             {{-- FORM CARD --}}
             <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden text-slate-100 backdrop-blur-xl">
-                <form action="{{ route('lms.assignments.store') }}" method="POST" id="createAssignmentForm" 
+                <form action="{{ route('lms.assignments.store') }}" method="POST" enctype="multipart/form-data" id="createAssignmentForm" 
                       x-data="{ 
                           targetType: '{{ old('target_type', 'class') }}', 
                           assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
@@ -136,6 +136,21 @@
                                 <div class="col-span-2">
                                     <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Judul Tugas <span class="text-rose-400">*</span></label>
                                     <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-2xl border-white/10 bg-slate-900/80 font-black text-white focus:bg-slate-900 focus:ring-sky-400/20 focus:border-sky-400 h-14 px-5 placeholder:font-bold placeholder:text-slate-500 transition-colors shadow-sm" placeholder="Contoh: Ulangan Harian Bab 1">
+                                </div>
+
+                                {{-- FOTO COVER TUGAS (OPSIONAL) --}}
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Foto Sampul / Cover Tugas (Opsional)</label>
+                                    <div class="relative flex items-center justify-center w-full">
+                                        <label class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer bg-slate-900/60 hover:bg-slate-900/90 hover:border-sky-400/50 transition-all group">
+                                            <div class="flex flex-col items-center justify-center pt-3 pb-3">
+                                                <i class="ph-duotone ph-image text-2xl text-sky-400 group-hover:scale-110 transition-transform mb-1"></i>
+                                                <p class="text-xs text-slate-300 font-bold">Unggah Foto Sampul Tugas (Opsional)</p>
+                                                <p class="text-[10px] text-slate-400">Pilih gambar sampul menarik untuk tugas ini (Format: JPG, PNG, WEBP max 5MB).</p>
+                                            </div>
+                                            <input type="file" name="cover_image" accept="image/*" class="hidden" />
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <!-- MAPEL -->

@@ -221,6 +221,13 @@
                              style="animation-delay: {{ ($index + 1) * 100 }}ms" 
                              x-data="{ openUpload: false, submissionType: 'file' }">
                             
+                            @if($task->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($task->cover_image))
+                                <div class="w-full h-44 sm:h-52 overflow-hidden relative shrink-0">
+                                    <img src="{{ asset('storage/' . $task->cover_image) }}" alt="{{ $task->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30"></div>
+                                </div>
+                            @endif
+
                             <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-start justify-between gap-6 relative">
                                 {{-- Status Stripe --}}
                                 <div class="absolute left-0 top-8 bottom-8 w-1.5 rounded-r-full {{ $mySubmission ? 'bg-emerald-500' : ($isLate ? 'bg-elevate-peach-dark' : 'bg-elevate-soft') }}"></div>

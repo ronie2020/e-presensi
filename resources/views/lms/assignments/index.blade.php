@@ -75,102 +75,148 @@
                             if($task->assignment_type == 'link') { $iconType = 'ph-link'; $labelType = 'Tugas Link'; }
                             
                             $isExpired = now() > $task->deadline;
+
+                            $assignSubName = strtolower($task->subject->name ?? '');
+                            $assignCover = match(true) {
+                                $task->assignment_type === 'quiz' => ['bg' => 'from-violet-600 via-purple-800 to-slate-900', 'icon' => 'ph-brain'],
+                                $task->assignment_type === 'link' => ['bg' => 'from-rose-500 via-pink-700 to-slate-900', 'icon' => 'ph-link'],
+                                str_contains($assignSubName, 'matematika') => ['bg' => 'from-blue-600 via-indigo-700 to-slate-900', 'icon' => 'ph-calculator'],
+                                str_contains($assignSubName, 'ipa') || str_contains($assignSubName, 'biologi') || str_contains($assignSubName, 'fisika') || str_contains($assignSubName, 'kimia') => ['bg' => 'from-emerald-600 via-teal-700 to-slate-900', 'icon' => 'ph-flask'],
+                                str_contains($assignSubName, 'inggris') || str_contains($assignSubName, 'indonesia') || str_contains($assignSubName, 'bahasa') => ['bg' => 'from-purple-600 via-indigo-800 to-slate-900', 'icon' => 'ph-translate'],
+                                str_contains($assignSubName, 'informatika') || str_contains($assignSubName, 'tik') => ['bg' => 'from-sky-500 via-blue-800 to-slate-950', 'icon' => 'ph-code'],
+                                str_contains($assignSubName, 'ips') || str_contains($assignSubName, 'sejarah') => ['bg' => 'from-amber-600 via-orange-700 to-slate-950', 'icon' => 'ph-compass'],
+                                str_contains($assignSubName, 'agama') => ['bg' => 'from-teal-600 via-cyan-700 to-slate-900', 'icon' => 'ph-hands-praying'],
+                                default => ['bg' => 'from-sky-600 via-indigo-800 to-slate-900', 'icon' => 'ph-file-text']
+                            };
                         @endphp
 
                         <div class="animate-enter group relative bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl border border-white/10 hover:border-sky-400/50 backdrop-blur-xl transition-all duration-300 flex flex-col h-full hover:-translate-y-1 overflow-hidden" style="animation-delay: {{ ($index + 1) * 100 }}ms">
                             
-                            {{-- Inner Card --}}
-                            <div class="p-6 md:p-8 h-full flex flex-col relative overflow-hidden">
-                                
-                                {{-- Background Dekoratif --}}
-                                <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-sky-500/10 opacity-30 group-hover:scale-150 transition-transform duration-700 pointer-events-none blur-xl"></div>
+                            {{-- COVER THUMBNAIL --}}
+                            <div class="relative h-40 w-full overflow-hidden shrink-0 bg-slate-900">
+                                @if($task->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($task->cover_image))
+                                    <img src="{{ asset('storage/' . $task->cover_image) }}" alt="{{ $task->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#021124] via-transparent to-black/30"></div>
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br {{ $assignCover['bg'] }} flex flex-col justify-between p-4 group-hover:scale-105 transition-transform duration-500 relative">
+                                        <div class="absolute -right-6 -bottom-6 text-white/[0.07] pointer-events-none select-none" style="font-size:9rem">
+                                            <i class="ph-duotone {{ $assignCover['icon'] }}"></i>
+                                        </div>
+                                        <div class="absolute inset-0 bg-gradient-to-t from-[#021124] via-transparent to-transparent pointer-events-none"></div>
+                                    </div>
+                                @endif
 
-                                {{-- Header: Badge & Status --}}
-                                <div class="flex justify-between items-start mb-5 relative z-10">
-                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-white/10 bg-slate-900/80 text-sky-400 group-hover:scale-110 transition-transform duration-300">
-                                        <i class="ph-duotone {{ $iconType }}"></i>
-                                    </div>
-                                    
-                                    <div class="flex flex-col items-end gap-1">
-                                        @if($isExpired)
-                                            <span class="bg-slate-800 text-slate-400 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                                                <i class="ph-bold ph-lock-key"></i> Ditutup
-                                            </span>
-                                        @else
-                                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 animate-pulse shadow-sm">
-                                                <i class="ph-bold ph-clock"></i> Aktif
-                                            </span>
-                                        @endif
-                                    </div>
+                                {{-- Top Badges Overlay --}}
+                                <div class="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
+                                    <span class="px-2.5 py-1 rounded-lg bg-[#021124]/85 backdrop-blur-md text-sky-300 border border-white/20 text-[10px] font-black uppercase tracking-wider shadow-md truncate max-w-[170px]">
+                                        <i class="ph-fill ph-book-bookmark text-sky-400 mr-1"></i>{{ $task->subject->name ?? 'Mata Pelajaran' }}
+                                    </span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-slate-900/85 backdrop-blur-md border border-white/20 text-slate-200 text-[10px] font-bold shadow-md flex items-center gap-1.5 shrink-0">
+                                        <i class="ph-bold {{ $iconType }} text-sky-400"></i>
+                                        {{ $labelType }}
+                                    </span>
                                 </div>
 
-                                {{-- Judul & Mapel --}}
-                                <div class="mb-5 relative z-10">
-                                    <h3 class="font-black text-xl text-white group-hover:text-sky-300 transition-colors line-clamp-1" title="{{ $task->title }}">
-                                        {{ $task->title }}
-                                    </h3>
-                                    <p class="text-sm font-bold text-slate-400 mt-1">{{ $task->subject->name }}</p>
-                                </div>
-
-                                {{-- Info Detail Grid --}}
-                                <div class="grid grid-cols-2 gap-4 mb-6 relative z-10">
-                                    {{-- Target Kelas --}}
-                                    <div class="bg-slate-900/60 p-4 rounded-xl border border-white/10">
-                                        <p class="text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-1.5">Target</p>
-                                        <div class="text-xs font-black text-slate-200 flex items-center gap-1.5">
-                                            <i class="ph-fill ph-users text-sky-400"></i>
+                                {{-- Bottom Badges Overlay --}}
+                                <div class="absolute bottom-2.5 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-slate-300 text-[10px] font-semibold border border-white/10 truncate max-w-[180px]">
+                                        <i class="ph-fill ph-users text-sky-400 shrink-0"></i>
+                                        <span class="truncate">
                                             @if($task->is_bulk)
                                                 Semua Kelas {{ $task->target_grade ?? '' }} ({{ $task->total_classes }})
                                             @else
                                                 {{ $task->schoolClass->name ?? 'Semua' }}
                                             @endif
+                                        </span>
+                                    </span>
+
+                                    @if($isExpired)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/80 backdrop-blur-md border border-slate-400/20 text-slate-300 text-[9px] font-black shadow-sm shrink-0">
+                                            <i class="ph-bold ph-lock-key"></i> Ditutup
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-900/80 backdrop-blur-md border border-emerald-400/30 text-emerald-300 text-[9px] font-black animate-pulse shadow-sm shrink-0">
+                                            <i class="ph-bold ph-clock"></i> Aktif
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Inner Card Body --}}
+                            <div class="p-4 sm:p-5 flex flex-col flex-grow relative overflow-hidden">
+                                
+                                {{-- Background Dekoratif --}}
+                                <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-sky-500/10 opacity-30 pointer-events-none blur-xl"></div>
+
+                                {{-- Judul & Mapel --}}
+                                <div class="mb-3 relative z-10">
+                                    <h3 class="font-bold text-base text-white group-hover:text-sky-300 transition-colors line-clamp-1" title="{{ $task->title }}">
+                                        {{ $task->title }}
+                                    </h3>
+                                    <p class="text-xs font-semibold text-slate-400 mt-0.5">{{ $task->subject->name }}</p>
+                                </div>
+
+                                {{-- Info Detail Grid --}}
+                                <div class="grid grid-cols-2 gap-2.5 mb-3.5 relative z-10">
+                                    {{-- Target Kelas --}}
+                                    <div class="bg-slate-900/60 px-3 py-2 rounded-xl border border-white/10">
+                                        <p class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-0.5">Target</p>
+                                        <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5 truncate">
+                                            <i class="ph-fill ph-users text-sky-400 shrink-0"></i>
+                                            <span class="truncate">
+                                                @if($task->is_bulk)
+                                                    Semua Kelas {{ $task->target_grade ?? '' }} ({{ $task->total_classes }})
+                                                @else
+                                                    {{ $task->schoolClass->name ?? 'Semua' }}
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
 
                                     {{-- Deadline --}}
-                                    <div class="bg-slate-900/60 p-4 rounded-xl border border-white/10">
-                                        <p class="text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-1.5">Deadline</p>
-                                        <div class="text-xs font-black {{ $isExpired ? 'text-rose-400' : 'text-slate-200' }} flex items-center gap-1.5">
-                                            <i class="ph-fill ph-calendar-blank {{ $isExpired ? 'text-rose-400' : 'text-slate-400' }}"></i>
-                                            {{ $task->deadline->format('d M, H:i') }}
+                                    <div class="bg-slate-900/60 px-3 py-2 rounded-xl border border-white/10">
+                                        <p class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-0.5">Deadline</p>
+                                        <div class="text-xs font-bold {{ $isExpired ? 'text-rose-400' : 'text-slate-200' }} flex items-center gap-1.5 truncate">
+                                            <i class="ph-fill ph-calendar-blank {{ $isExpired ? 'text-rose-400' : 'text-slate-400' }} shrink-0"></i>
+                                            <span class="truncate">{{ $task->deadline->format('d M, H:i') }}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                               {{-- Statistik Pengumpulan --}}
-                                <div class="mb-6 relative z-10">
-                                    <div class="flex justify-between text-xs font-bold text-slate-400 mb-2">
+                                {{-- Statistik Pengumpulan --}}
+                                <div class="mb-3.5 relative z-10">
+                                    <div class="flex justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
                                         <span>Total Pengumpulan</span>
-                                        <span class="text-sky-400">{{ $task->is_bulk ? $task->global_submissions_count : $task->submissions_count }} Siswa</span>
+                                        <span class="text-sky-400 font-bold">{{ $task->is_bulk ? $task->global_submissions_count : $task->submissions_count }} Siswa</span>
                                     </div>
-                                    <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden shadow-inner border border-white/5">
-                                        <div class="bg-gradient-to-r from-sky-400 to-blue-600 h-2.5 rounded-full" style="width: 10%"></div>
+                                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden shadow-inner border border-white/5">
+                                        <div class="bg-gradient-to-r from-sky-400 to-blue-600 h-2 rounded-full" style="width: 10%"></div>
                                     </div>
                                 </div>
 
                                 {{-- Footer Actions --}}
-                                <div class="pt-5 border-t border-white/10 mt-auto flex flex-wrap items-center justify-between gap-2 relative z-10">
+                                <div class="pt-3 border-t border-white/10 mt-auto flex items-center justify-between gap-2 relative z-10">
                                     {{-- Tombol Periksa (Utama) --}}
-                                    <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold px-3 py-3 rounded-2xl text-sm transition-all shadow-md shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-95" title="Periksa Jawaban Siswa">
-                                        <i class="ph-bold ph-list-checks text-lg"></i>
-                                        <span class="hidden sm:inline">Periksa</span>
+                                    <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold px-3 py-2 rounded-xl text-xs transition-all shadow-md shadow-sky-500/20 flex items-center justify-center gap-1.5 active:scale-95" title="Periksa Jawaban Siswa">
+                                        <i class="ph-bold ph-list-checks text-base"></i>
+                                        <span>Periksa</span>
                                     </a>
 
                                     {{-- Tombol Preview --}}
-                                    <a href="{{ route('lms.preview.player', ['subject' => $task->subject_id, 'class' => $task->class_id]) }}" target="_blank" class="w-12 h-12 shrink-0 rounded-2xl bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 transition-all flex items-center justify-center border border-white/10 hover:border-sky-400/40 shadow-sm active:scale-95" title="Preview Tampilan Siswa">
-                                        <i class="ph-bold ph-presentation-chart text-xl"></i>
+                                    <a href="{{ route('lms.preview.player', ['subject' => $task->subject_id, 'class' => $task->class_id]) }}" target="_blank" class="w-8 h-8 shrink-0 rounded-lg bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 transition-all flex items-center justify-center border border-white/10 hover:border-sky-400/40 shadow-sm active:scale-95" title="Preview Tampilan Siswa">
+                                        <i class="ph-bold ph-presentation-chart text-base"></i>
                                     </a>
 
                                     {{-- Tombol Edit --}}
-                                    <a href="{{ route('lms.assignments.edit', $task->id) }}" class="w-12 h-12 shrink-0 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center justify-center shadow-sm active:scale-95" title="Edit Latihan">
-                                        <i class="ph-bold ph-pencil-simple text-xl"></i>
+                                    <a href="{{ route('lms.assignments.edit', $task->id) }}" class="w-8 h-8 shrink-0 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center justify-center shadow-sm active:scale-95" title="Edit Latihan">
+                                        <i class="ph-bold ph-pencil-simple text-base"></i>
                                     </a>
 
                                     {{-- Tombol Hapus --}}
                                     <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task shrink-0 m-0">
                                         @csrf @method('DELETE')
-                                        <button type="button" class="btn-delete w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 transition-all flex items-center justify-center shadow-sm active:scale-95" title="Hapus Latihan">
-                                            <i class="ph-bold ph-trash text-xl"></i>
+                                        <button type="button" class="btn-delete w-8 h-8 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30 transition-all flex items-center justify-center shadow-sm active:scale-95" title="Hapus Latihan">
+                                            <i class="ph-bold ph-trash text-base"></i>
                                         </button>
                                     </form>
                                 </div>

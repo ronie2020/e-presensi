@@ -133,13 +133,13 @@
                         @endphp
 
                         {{-- START CARD --}}
-                        <div class="animate-enter group relative bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl flex flex-col h-full border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:border-sky-400/40 backdrop-blur-xl overflow-hidden" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                        <div class="animate-enter group relative bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-2xl shadow-xl flex flex-col h-full border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:border-sky-400/40 backdrop-blur-xl overflow-hidden" style="animation-delay: {{ ($index + 1) * 100 }}ms">
                             
                             {{-- CARD COVER THUMBNAIL --}}
-                            <div class="relative h-44 w-full overflow-hidden shrink-0">
+                            <div class="relative h-40 w-full overflow-hidden shrink-0 bg-slate-900">
                                 @if($material->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($material->cover_image))
                                     <img src="{{ asset('storage/' . $material->cover_image) }}" alt="{{ $material->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <div class="absolute inset-0 bg-gradient-to-t from-[#031d3d] via-transparent to-black/20"></div>
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#021124] via-transparent to-black/30"></div>
                                 @else
                                     @php
                                         $gradientTheme = match(true) {
@@ -156,7 +156,7 @@
                                             <i class="ph-duotone {{ $gradientTheme['icon'] }}"></i>
                                         </div>
                                         <div class="flex items-center justify-between relative z-10">
-                                            <span class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-lg text-white">
+                                            <span class="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-base text-white">
                                                 <i class="ph-bold {{ $gradientTheme['icon'] }}"></i>
                                             </span>
                                             <span class="text-[9px] font-black tracking-widest text-white/70 uppercase">MODUL DIGITAL</span>
@@ -164,52 +164,41 @@
                                         <div class="relative z-10">
                                             <p class="text-[11px] font-black text-white/90 uppercase tracking-widest">{{ $material->subject->name ?? 'Mata Pelajaran' }}</p>
                                         </div>
-                                        <div class="absolute inset-0 bg-gradient-to-t from-[#031d3d] via-transparent to-transparent"></div>
+                                        <div class="absolute inset-0 bg-gradient-to-t from-[#021124] via-transparent to-transparent"></div>
                                     </div>
                                 @endif
-                            </div>
 
-                            {{-- Inner Card Content --}}
-                            <div class="p-6 md:p-8 h-full flex flex-col relative overflow-hidden">
-                                
-                                {{-- Background Halus --}}
-                                <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full {{ $theme['bg'] }} opacity-30 group-hover:scale-150 transition-transform duration-700 pointer-events-none blur-xl"></div>
-
-                                {{-- Header: Ikon File & Tipe --}}
-                                <div class="flex justify-between items-start mb-5 relative z-10">
-                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border {{ $theme['border'] }} {{ $theme['bg'] }} {{ $theme['text'] }} group-hover:scale-110 transition-transform duration-300">
-                                        <i class="ph-duotone {{ $typeConfig['icon'] }}"></i>
-                                    </div>
-                                    
-                                    <div class="flex flex-col items-end gap-1.5">
-                                        {{-- Badge Tipe File --}}
-                                        <span class="px-3 py-1.5 rounded-lg bg-slate-900/80 border border-white/10 text-slate-300 text-[10px] font-black uppercase tracking-wider shadow-sm">
+                                {{-- Badges Overlay di atas Cover --}}
+                                <div class="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
+                                    <span class="px-2.5 py-1 rounded-lg bg-[#021124]/85 backdrop-blur-md text-sky-300 border border-white/20 text-[10px] font-black uppercase tracking-wider shadow-md truncate max-w-[170px]">
+                                        <i class="ph-fill ph-book-bookmark text-sky-400 mr-1"></i>{{ $material->subject->name ?? 'Mapel Umum' }}
+                                    </span>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        <span class="px-2.5 py-1 rounded-lg bg-slate-900/85 backdrop-blur-md border border-white/20 text-slate-200 text-[10px] font-bold shadow-md flex items-center gap-1">
+                                            <i class="ph-bold {{ $typeConfig['icon'] }} text-sky-400"></i>
                                             {{ $typeConfig['label'] }}
                                         </span>
                                         @if($material->attachments->count() > 1)
-                                            <span class="text-[10px] font-bold text-slate-400 bg-slate-900/80 border border-white/10 px-3 py-1 rounded-lg shadow-sm">
-                                                +{{ $material->attachments->count() - 1 }} File Lain
+                                            <span class="px-1.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 text-[9px] font-bold text-slate-300 shadow-md">
+                                                +{{ $material->attachments->count() - 1 }}
                                             </span>
                                         @endif
                                     </div>
                                 </div>
+                            </div>
 
-                                {{-- Judul Materi --}}
-                                <div class="mb-5 relative z-10">
-                                    <h3 class="font-black text-xl text-white group-hover:text-sky-300 transition-colors line-clamp-2 leading-snug min-h-[3.5rem]" title="{{ $material->title }}">
-                                        {{ $material->title }}
-                                    </h3>
-                                    
-                                    {{-- Badge Mata Pelajaran & Kelas --}}
-                                    <div class="flex flex-wrap gap-2 mt-3">
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border {{ $theme['bg'] }} {{ $theme['text'] }} {{ $theme['border'] }} shadow-sm">
-                                            <i class="ph-fill ph-book-bookmark"></i>
-                                            {{ $material->subject->name ?? 'Mapel Umum' }}
-                                        </span>
-                                        
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900/80 text-slate-300 border border-white/10 shadow-sm" 
+                            {{-- Inner Card Content --}}
+                            <div class="p-4 sm:p-5 flex flex-col flex-1 justify-between relative overflow-hidden">
+                                
+                                {{-- Background Glow Halus --}}
+                                <div class="absolute -right-10 -top-10 w-28 h-28 rounded-full {{ $theme['bg'] }} opacity-20 pointer-events-none blur-xl"></div>
+
+                                <div>
+                                    {{-- Class badge & Target --}}
+                                    <div class="flex items-center gap-2 mb-2 relative z-10">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-300" 
                                               title="{{ $material->is_bulk ? 'Materi ini dibagikan ke beberapa kelas sekaligus' : 'Materi khusus satu kelas' }}">
-                                            <i class="ph-fill ph-users"></i>
+                                            <i class="ph-fill ph-users text-sky-400"></i>
                                             @if($material->is_bulk)
                                                 Semua Kelas {{ $material->target_grade ?? '' }} ({{ $material->total_classes }})
                                             @else
@@ -217,47 +206,55 @@
                                             @endif
                                         </span>
                                     </div>
+
+                                    {{-- Judul Materi --}}
+                                    <h3 class="font-bold text-base text-white group-hover:text-sky-300 transition-colors line-clamp-2 leading-snug relative z-10" title="{{ $material->title }}">
+                                        {{ $material->title }}
+                                    </h3>
+
+                                    {{-- Deskripsi Singkat Ringkas --}}
+                                    @php
+                                        $desc = trim(strip_tags($material->resume ?? $material->description ?? ''));
+                                    @endphp
+                                    @if(!empty($desc))
+                                        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mt-2 font-normal relative z-10" title="{{ $desc }}">
+                                            {{ $desc }}
+                                        </p>
+                                    @endif
                                 </div>
 
-                               {{-- Deskripsi Singkat --}}
-                                <div class="relative z-10 bg-slate-900/60 rounded-xl p-4 border border-white/10 mb-6 flex-grow">
-                                    <p class="text-sm text-slate-400 line-clamp-3 leading-relaxed font-medium italic">
-                                        "{{ strip_tags($material->resume ?? $material->description ?? 'Tidak ada deskripsi tambahan.') }}"
-                                    </p>
-                                </div>
-
-                               {{-- Footer Actions --}}
-                                <div class="pt-5 border-t border-white/10 mt-auto flex flex-wrap items-center justify-between gap-3 relative z-10">
-                                    <div class="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 truncate">
+                                {{-- Footer Actions --}}
+                                <div class="pt-3.5 border-t border-white/10 mt-3.5 flex items-center justify-between gap-2 relative z-10">
+                                    <div class="text-[11px] font-medium text-slate-400 flex items-center gap-1.5 truncate">
                                         <i class="ph-fill ph-clock shrink-0 text-sky-400"></i> 
                                         <span class="truncate">{{ $material->created_at->diffForHumans() }}</span>
                                     </div>
                                     
                                     <div class="flex items-center gap-1.5 shrink-0">
                                         {{-- Tombol Buka --}}
-                                        <a href="{{ $finalUrl }}" target="{{ $targetAttr }}" class="w-10 h-10 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:from-sky-400 hover:to-blue-500 transition-all flex items-center justify-center active:scale-95 shadow-md shadow-sky-500/25 shrink-0" title="Buka / Download">
+                                        <a href="{{ $finalUrl }}" target="{{ $targetAttr }}" class="w-8 h-8 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:from-sky-400 hover:to-blue-500 transition-all flex items-center justify-center active:scale-95 shadow-md shadow-sky-500/25 shrink-0" title="Buka / Download">
                                             @if($realType == 'video' || $realType == 'link')
-                                                <i class="ph-bold ph-arrow-square-out text-lg"></i>
+                                                <i class="ph-bold ph-arrow-square-out text-sm"></i>
                                             @else
-                                                <i class="ph-bold ph-download-simple text-lg"></i>
+                                                <i class="ph-bold ph-download-simple text-sm"></i>
                                             @endif
                                         </a>
 
                                         {{-- Tombol Lihat Pembaca --}}
-                                        <a href="{{ route('lms.materials.readers', $material->id) }}" class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm shrink-0" title="Riwayat Pembaca">
-                                            <i class="ph-bold ph-users text-lg"></i>
+                                        <a href="{{ route('lms.materials.readers', $material->id) }}" class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 hover:bg-sky-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm shrink-0" title="Riwayat Pembaca">
+                                            <i class="ph-bold ph-users text-sm"></i>
                                         </a>
 
                                         {{-- Tombol Edit --}}
-                                        <a href="{{ route('lms.materials.edit', $material->id) }}" class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm shrink-0" title="Edit Materi">
-                                            <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                        <a href="{{ route('lms.materials.edit', $material->id) }}" class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm shrink-0" title="Edit Materi">
+                                            <i class="ph-bold ph-pencil-simple text-sm"></i>
                                         </a>
                                         
                                         {{-- Tombol Hapus --}}
                                         <form action="{{ route('lms.materials.destroy', $material->id) }}" method="POST" class="form-delete-material shrink-0 m-0">
                                             @csrf @method('DELETE')
-                                            <button type="button" class="btn-delete w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm" title="Hapus Materi">
-                                                <i class="ph-bold ph-trash text-lg"></i>
+                                            <button type="button" class="btn-delete w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center active:scale-95 shadow-sm" title="Hapus Materi">
+                                                <i class="ph-bold ph-trash text-sm"></i>
                                             </button>
                                         </form>
                                     </div>

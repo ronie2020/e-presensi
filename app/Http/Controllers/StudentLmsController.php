@@ -24,7 +24,7 @@ class StudentLmsController extends Controller
 
         foreach ($allSubjects as $subject) {
             // Cek Tugas Aktif
-            $activeTasksCount = LmsAssignment::where('subject_id', $subject->id)
+            $activeTasks = LmsAssignment::where('subject_id', $subject->id)
                 ->where(function($q) use ($student) {
                     $q->where('class_id', $student->class_id)->orWhereNull('class_id');
                 })
@@ -33,22 +33,59 @@ class StudentLmsController extends Controller
                 })
                 ->where(function($q) {
                     $q->where('deadline', '>', now())->orWhere('allow_late_submission', true);
-                })->count();
+                })
+                ->orderBy('deadline', 'asc')
+                ->get();
+            $activeTasksCount = $activeTasks->count();
 
-            // Cek Materi Baru
-            $newMaterialsCount = LmsMaterial::where('subject_id', $subject->id)
+            // Cek Materi Baru (7 hari terakhir)
+            $newMaterials = LmsMaterial::where('subject_id', $subject->id)
                 ->where(function($q) use ($student) {
                     $q->where('class_id', $student->class_id)->orWhereNull('class_id');
-                })->where('created_at', '>=', now()->subDays(7))->count();
+                })
+                ->where('created_at', '>=', now()->subDays(7))
+                ->latest()
+                ->get();
+            $newMaterialsCount = $newMaterials->count();
 
             if ($activeTasksCount > 0 || $newMaterialsCount > 0) {
                 $subject->active_tasks_count = $activeTasksCount;
                 $subject->new_materials_count = $newMaterialsCount;
+
+                // Cari cover gambar dari tugas aktif terdekat atau materi baru untuk ditonjolkan di Prioritas Belajar
+                $priorityCover = null;
+                $priorityItemTitle = null;
+
+                if ($activeTasksCount > 0) {
+                    $taskWithCover = $activeTasks->firstWhere('cover_image', '!=', null);
+                    $priorityCover = $taskWithCover?->cover_image;
+                    $priorityItemTitle = $activeTasks->first()?->title;
+                }
+
+                if (!$priorityCover && $newMaterialsCount > 0) {
+                    $matWithCover = $newMaterials->firstWhere('cover_image', '!=', null);
+                    $priorityCover = $matWithCover?->cover_image;
+                    if (!$priorityItemTitle) {
+                        $priorityItemTitle = $newMaterials->first()?->title;
+                    }
+                }
+
+                $subject->priority_cover = $priorityCover;
+                $subject->priority_item_title = $priorityItemTitle;
                 $prioritySubjects->push($subject);
             }
         }
 
-        return view('students.lms.index', compact('student', 'allSubjects', 'prioritySubjects'));
+        // Ambil materi/modul pembelajaran terbaru yang relevan untuk siswa (lms-catalog style)
+        $recentMaterials = LmsMaterial::with(['subject', 'teacher', 'schoolClass', 'attachments'])
+            ->where(function($q) use ($student) {
+                $q->where('class_id', $student->class_id)->orWhereNull('class_id');
+            })
+            ->latest()
+            ->take(6)
+            ->get();
+
+        return view('students.lms.index', compact('student', 'allSubjects', 'prioritySubjects', 'recentMaterials'));
     }
 
     /**
