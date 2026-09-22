@@ -102,7 +102,7 @@
                 <i class="ph-fill ph-check-circle text-lg"></i> {{ session('success') }}
             </div>
         @endif
-        @if($errors->any())
+        @if(isset($errors) && $errors->any())
             <div class="p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-xs font-bold animate-in fade-in slide-in-from-top-2">
                 <ul class="list-disc list-inside">
                     @foreach ($errors->all() as $error)

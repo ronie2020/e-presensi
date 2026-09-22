@@ -76,10 +76,10 @@
         </div>
 
         <!-- Error Message -->
-        @if(session('error') || $errors->any())
+        @if(session('error') || (isset($errors) && $errors->any()))
             <div class="mt-6 p-4 bg-rose-500/20 border border-rose-500/30 rounded-2xl text-rose-200 flex items-center justify-center gap-3 backdrop-blur-md shadow-lg max-w-lg mx-auto" role="alert">
                 <div class="bg-rose-500/30 rounded-full p-1.5"><i class="ph-bold ph-warning text-rose-300"></i></div>
-                <span class="font-bold text-xs sm:text-sm">{{ session('error') ?? $errors->first() }}</span>
+                <span class="font-bold text-xs sm:text-sm">{{ session('error') ?? (isset($errors) ? $errors->first() : '') }}</span>
             </div>
         @endif
 

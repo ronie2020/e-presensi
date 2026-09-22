@@ -9,41 +9,143 @@
 
 <style>
     /* Menyembunyikan scrollbar tapi tetap bisa discroll */
-    .custom-scrollbar::-webkit-scrollbar { height: 0px; background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar { height: 0px; width: 0px; background: transparent; }
     .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [x-cloak] { display: none !important; }
     .ph-fill, .ph-duotone, .ph-bold { vertical-align: middle; }
     
     /* Animasi transisi yang lebih halus dan elegan untuk tab */
     .tab-content-enter {
-        animation: slideFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: slideFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes slideFadeIn {
-        from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+        from { opacity: 0; transform: translateY(16px); filter: blur(4px); }
         to { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
     
-    /* Efek glass untuk container konten */
-    .content-glass-wrapper {
-        background: rgba(3, 29, 61, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 1.75rem;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5); 
-        transition: all 0.5s ease;
-        color: #ffffff;
+    /* ==========================================================================
+       TRANSFORMASI GLOBAL ESTETIKA ELEVATE DARK GLASSMORPHISM UNTUK TAB PORTAL
+       Menyelaraskan seluruh tab di dalam portal dengan desain utama website
+       ========================================================================== */
+    #portal-content-wrapper .bg-white,
+    #portal-content-wrapper .dark\:bg-slate-800,
+    #portal-content-wrapper .dark\:bg-slate-800\/80 {
+        background-color: rgba(3, 29, 61, 0.85) !important;
+        backdrop-filter: blur(24px) !important;
+        -webkit-backdrop-filter: blur(24px) !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        color: #ffffff !important;
+        box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.45) !important;
     }
 
-    html.dark .content-glass-wrapper {
-        background: rgba(3, 29, 61, 0.9);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6); 
+    #portal-content-wrapper .text-elevate-dark,
+    #portal-content-wrapper .text-slate-800,
+    #portal-content-wrapper .text-slate-900,
+    #portal-content-wrapper .text-slate-700 {
+        color: #ffffff !important;
+    }
+
+    #portal-content-wrapper .text-slate-500,
+    #portal-content-wrapper .text-slate-400 {
+        color: #94a3b8 !important;
+    }
+
+    #portal-content-wrapper .text-slate-600 {
+        color: #cbd5e1 !important;
+    }
+
+    #portal-content-wrapper .border-slate-100,
+    #portal-content-wrapper .border-slate-200,
+    #portal-content-wrapper .border-slate-300,
+    #portal-content-wrapper .divide-slate-100 > * + *,
+    #portal-content-wrapper .divide-slate-200 > * + * {
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    #portal-content-wrapper .bg-slate-50,
+    #portal-content-wrapper .bg-slate-100 {
+        background-color: rgba(2, 17, 36, 0.7) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #e2e8f0 !important;
+    }
+
+    #portal-content-wrapper .bg-slate-200 {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    #portal-content-wrapper .bg-elevate-soft {
+        background-color: rgba(56, 189, 248, 0.15) !important;
+        color: #38bdf8 !important;
+        border-color: rgba(56, 189, 248, 0.3) !important;
+    }
+
+    /* Form Controls & Inputs */
+    #portal-content-wrapper select,
+    #portal-content-wrapper input[type="text"],
+    #portal-content-wrapper input[type="date"],
+    #portal-content-wrapper input[type="number"],
+    #portal-content-wrapper input[type="file"],
+    #portal-content-wrapper textarea {
+        background-color: rgba(2, 17, 36, 0.85) !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    #portal-content-wrapper select option {
+        background-color: #021124 !important;
+        color: #ffffff !important;
+    }
+
+    /* Tables */
+    #portal-content-wrapper table {
+        color: #e2e8f0 !important;
+    }
+
+    #portal-content-wrapper thead tr,
+    #portal-content-wrapper th {
+        background-color: rgba(2, 17, 36, 0.9) !important;
+        color: #38bdf8 !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+
+    #portal-content-wrapper td {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    #portal-content-wrapper tbody tr:hover td {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    /* FullCalendar Dark Theme Fixes */
+    #portal-content-wrapper .fc-theme-standard td, 
+    #portal-content-wrapper .fc-theme-standard th {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    #portal-content-wrapper .fc-col-header-cell-cushion, 
+    #portal-content-wrapper .fc-daygrid-day-number {
+        color: #e2e8f0 !important;
+    }
+    #portal-content-wrapper .fc-scrollgrid {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    #portal-content-wrapper .fc-day-today {
+        background-color: rgba(56, 189, 248, 0.08) !important;
+    }
+    #portal-content-wrapper .fc-toolbar-title {
+        color: #ffffff !important;
+    }
+    #portal-content-wrapper .fc-button-primary {
+        background: rgba(3, 29, 61, 0.9) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
+    #portal-content-wrapper .fc-button-primary:hover {
+        background: #0d52a1 !important;
     }
 </style>
 
 <!-- X-DATA: Main Controller + DARK MODE LOGIC -->
-<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6 min-h-screen relative z-10"
+<div id="portal-content-wrapper" class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6 min-h-screen relative z-10 font-sans"
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
         isTransitioning: false,
@@ -92,23 +194,6 @@
             }, 300);
         }
      }">
-    
-    {{-- Latar Belakang Fixed Elevate Dark --}}
-    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-[#021124]">
-        {{-- Foto Gedung Sekolah Soft-Blur Ambient --}}
-        <div class="absolute inset-0 bg-cover bg-center opacity-10 filter blur-[14px] scale-110 contrast-125 saturate-50" 
-             style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.85)_50%,_#021124_100%)]"></div>
-        <div class="absolute inset-0 bg-gradient-to-tr from-[#021124] via-[#021124]/95 to-[#0d52a1]/25"></div>
-        
-        <!-- Ambient Globs -->
-        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-elevate-accent/15 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-1/2 -left-40 w-[600px] h-[600px] bg-elevate-primary/20 rounded-full blur-[160px] pointer-events-none"></div>
-        <div class="absolute -bottom-40 right-20 w-[400px] h-[400px] bg-elevate-accent/10 rounded-full blur-[130px] pointer-events-none"></div>
-        
-        <!-- Texture Overlay (Cubes) -->
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.04] mix-blend-overlay"></div>
-    </div>
 
     {{-- 1. HEADER PROFIL --}}
     @include('students.portal.partials.header')

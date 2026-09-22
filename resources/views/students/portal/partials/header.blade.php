@@ -1,4 +1,7 @@
-<div class="bg-elevate-dark rounded-[2.5rem] shadow-xl shadow-elevate-dark/10 overflow-hidden mb-8 border border-elevate-primary/30 relative group">
+<div class="bg-elevate-dark/95 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl shadow-black/50 overflow-hidden mb-8 border border-white/20 relative group">
+    
+    <!-- Top Glowing Accent Line -->
+    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-elevate-accent to-transparent opacity-80 z-20"></div>
     
     <!-- TOMBOL SAKLAR DARK MODE -->
     <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-50">
