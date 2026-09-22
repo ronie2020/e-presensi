@@ -106,10 +106,14 @@
                 </a>
                 
                 <div class="flex gap-3">
-                    {{-- [PERBAIKAN] Mengarahkan ke route print SKL Siswa di tab baru --}}
-                    <a href="{{ route('ppdb.print.letter', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark font-bold rounded-xl text-sm hover:bg-slate-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
-                        <i class="ph-bold ph-printer"></i> Cetak Surat Kelulusan
+                    <a href="{{ route('admin.ppdb.print', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark font-bold rounded-xl text-sm hover:bg-slate-50 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                        <i class="ph-bold ph-receipt"></i> Cetak Bukti Pendaftaran
                     </a>
+                    @if($registrant->status === 'accepted')
+                        <a href="{{ route('ppdb.print.letter', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-sm flex items-center gap-2 cursor-pointer">
+                            <i class="ph-bold ph-printer"></i> Cetak Surat Kelulusan
+                        </a>
+                    @endif
                 </div>
             </div>
 

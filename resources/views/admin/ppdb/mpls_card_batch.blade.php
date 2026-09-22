@@ -267,9 +267,13 @@
                     </div>
 
                     <!-- FOTO -->
-                    <div class="photo-container">
-                        <i class="ph-duotone ph-image text-xl text-slate-300 mb-0.5"></i>
-                        FOTO<br>3x4
+                    <div class="photo-container overflow-hidden">
+                        @if($student->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($student->photo_path))
+                            <img src="{{ asset('storage/' . $student->photo_path) }}" class="w-full h-full object-cover">
+                        @else
+                            <i class="ph-duotone ph-image text-xl text-slate-300 mb-0.5"></i>
+                            FOTO<br>3x4
+                        @endif
                     </div>
 
                     <!-- AREA TEKS DATA -->

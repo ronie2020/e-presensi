@@ -227,12 +227,13 @@ class AdminPpdbController extends Controller
                     }
 
                     // Cek apakah siswa ini sudah pernah ada di database (termasuk yang di-soft delete)
-                    $existingStudent = Student::withTrashed()->where('student_id', $studentReg->nisn)->first();
+                    $existingStudent = Student::withTrashed()->where('nisn', $studentReg->nisn)->first();
 
                     if ($existingStudent) {
                         // JIKA ADA: Pulihkan secara resmi terlebih dahulu, lalu perbarui datanya
                         $existingStudent->restore(); 
                         $existingStudent->update([
+                            'student_id'       => $studentReg->generated_nis,
                             'nisn'             => $studentReg->nisn,                 
                             'nis'              => $studentReg->generated_nis,         
                             'name'             => $studentReg->full_name,
@@ -259,7 +260,7 @@ class AdminPpdbController extends Controller
                     } else {
                         // JIKA BELUM ADA sama sekali: Buat baris data baru secara bersih
                         Student::create([
-                            'student_id'       => $studentReg->nisn,           
+                            'student_id'       => $studentReg->generated_nis,           
                             'nisn'             => $studentReg->nisn,                 
                             'nis'              => $studentReg->generated_nis,         
                             'name'             => $studentReg->full_name,

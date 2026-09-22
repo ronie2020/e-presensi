@@ -112,6 +112,7 @@ class PpdbRegistrantImport implements ToModel, WithHeadingRow, WithValidation
             'school_origin'      => !empty($row['asal_sekolah']) ? $row['asal_sekolah'] : '-',
             'birth_place'        => !empty($row['tempat_lahir']) ? $row['tempat_lahir'] : '-',
             'birth_date'         => $birthDate,
+            'religion'           => !empty($row['agama']) ? ucfirst($row['agama']) : 'Islam',
             'address'            => !empty($row['alamat']) ? $row['alamat'] : '-',
             
             // Input Nilai Rapor

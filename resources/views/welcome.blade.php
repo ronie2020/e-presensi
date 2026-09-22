@@ -175,7 +175,7 @@
 @scroll.window="
     scrolled = (window.pageYOffset > 20) ? true : false;
     showBackToTop = (window.pageYOffset > 500) ? true : false;
-    const sections = ['home', 'profil', 'kegiatan', 'prestasi', 'kontak'];
+    const sections = ['home', 'katalog-lms', 'profil', 'kegiatan', 'prestasi', 'kontak'];
     for (const section of sections) {
         const el = document.getElementById(section);
         if (el && window.scrollY >= (el.offsetTop - 150)) {

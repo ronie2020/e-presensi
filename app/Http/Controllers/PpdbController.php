@@ -38,6 +38,7 @@ class PpdbController extends Controller
             'gender'             => 'required|in:L,P',
             'birth_place'        => 'required|string|max:100',
             'birth_date'         => 'required|date',
+            'religion'           => 'nullable|string|max:50',
             'address'            => 'required|string',
             'school_origin'      => 'required|string|max:255',
             'npsn_school_origin' => 'nullable|numeric',

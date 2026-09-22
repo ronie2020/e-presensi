@@ -43,57 +43,51 @@
             </a>
 
             <!-- Desktop Menu -->
-            <div class="hidden lg:flex items-center gap-1 bg-white/5 backdrop-blur-md px-2 py-1.5 rounded-full border border-white/10 shadow-inner">
-                <a href="#home" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Beranda</a>
-                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Profil</a>
-                <a href="#layanan" class="px-5 py-2 rounded-full text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">Layanan</a>
-                <a href="#kegiatan" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Galeri</a>
-                <a href="#prestasi" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'prestasi' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Prestasi</a>
-                <a href="#kontak" class="px-5 py-2 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kontak' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Kontak</a>
+            <div class="hidden lg:flex items-center gap-0.5 bg-white/5 backdrop-blur-md px-2 py-1.5 rounded-full border border-white/10 shadow-inner">
+                <a href="#home" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all" :class="activeSection === 'home' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Beranda</a>
+                <a href="#katalog-lms" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5" :class="activeSection === 'katalog-lms' ? 'bg-sky-500/30 text-sky-200 border border-sky-400/30 shadow-sm' : 'text-sky-300 hover:bg-white/10 hover:text-white'">
+                    <i class="ph-bold ph-book-open text-sm text-sky-400"></i> Ruang Belajar
+                </a>
+                <a href="#profil" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all" :class="activeSection === 'profil' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Profil</a>
+                <a href="#kegiatan" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kegiatan' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Galeri</a>
+                <a href="#prestasi" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all" :class="activeSection === 'prestasi' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Prestasi</a>
+                <a href="#kontak" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all" :class="activeSection === 'kontak' ? 'bg-white/20 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'">Kontak</a>
             </div>                    
 
             <!-- Right Actions (Desktop) -->
-            <div class="hidden md:flex items-center gap-4">
-                
+            <div class="hidden lg:flex items-center gap-3">
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-elevate-accent to-elevate-primary hover:to-elevate-accent text-white text-xs font-bold shadow-[0_0_20px_rgba(86,187,241,0.4)] transition-all flex items-center gap-2 group border border-elevate-accent/30">
+                    <a href="{{ route('students.learning.index') }}" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-elevate-accent to-elevate-primary hover:to-elevate-accent text-white text-xs font-bold shadow-[0_0_20px_rgba(86,187,241,0.4)] transition-all flex items-center gap-2 group border border-elevate-accent/30 shrink-0">
                         <span>Dashboard Siswa</span>
                         <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </a>
                 @else
-                    <div class="flex items-center gap-3 mr-2">
-                        <a href="#katalog-lms" class="text-xs font-bold text-sky-300 hover:text-white transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-book-open text-sm"></i> Ruang Belajar
+                    <div class="hidden xl:flex items-center gap-3 mr-1">
+                        <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/5">
+                            <i class="ph-bold ph-books text-sm text-amber-400"></i> Katalog Buku
                         </a>
-                        <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
-                            <i class="ph-bold ph-books text-sm"></i> Katalog Buku
-                        </a>
-                        <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-slate-300 hover:text-elevate-accent transition flex items-center gap-1.5">
+                        <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-emerald-300 hover:text-white transition flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20">
                             <i class="ph-bold ph-student text-sm"></i> PPDB
                         </a> 
                     </div>
                     
                     <!-- Tombol Masuk Terpadu (Guru & Siswa) -->
-                    <div class="flex items-center gap-2">
-                        <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-black hover:bg-white/20 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-1.5">
-                            <i class="ph-bold ph-sign-in text-elevate-accent"></i> Masuk / Login
-                        </a>
-                    </div>
+                    <a href="{{ route('login') }}" class="px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-black hover:bg-white/20 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center gap-1.5 shrink-0">
+                        <i class="ph-bold ph-sign-in text-elevate-accent"></i> Masuk / Login
+                    </a>
                 @endif
 
                 <!-- Divider -->
-                <div class="h-6 w-px bg-white/20 mx-1"></div>                  
+                <div class="h-5 w-px bg-white/20 mx-0.5"></div>                  
                     
                 <!-- Tools (Search) -->
-                <div class="flex items-center gap-1.5">
-                    <button @click="searchOpen = true" class="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center shadow-sm border border-white/20 hover:bg-white/20 transition-all focus:outline-none backdrop-blur-sm" title="Pencarian Global">
-                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
-                    </button>
-                </div>
+                <button @click="searchOpen = true" class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center shadow-sm border border-white/20 hover:bg-white/20 transition-all focus:outline-none backdrop-blur-sm shrink-0" title="Pencarian Global">
+                    <i class="ph-bold ph-magnifying-glass text-base"></i>
+                </button>
             </div>
 
             <!-- Mobile Menu Button & Tools -->
-            <div class="flex md:hidden items-center gap-1.5 z-50">
+            <div class="flex lg:hidden items-center gap-1.5 z-50">
                 <button @click="searchOpen = true" class="w-9 h-9 rounded-xl bg-white/10 text-white flex items-center justify-center shadow-sm border border-white/20 backdrop-blur-sm focus:outline-none hover:bg-white/20">
                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                 </button>
@@ -112,23 +106,25 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-x-0"
             x-transition:leave-end="opacity-0 translate-x-full"
-            class="fixed inset-0 bg-white/98 dark:bg-slate-950/98 backdrop-blur-xl z-[60] md:hidden flex flex-col pt-24 px-6 overflow-y-auto pb-10">
+            class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[60] lg:hidden flex flex-col pt-24 px-6 overflow-y-auto pb-10">
             
-        <nav class="flex flex-col items-center space-y-6 text-center w-full px-4">
+        <nav class="flex flex-col items-center space-y-5 text-center w-full px-4">
             <!-- Mobile PPDB Link -->
-            <a href="{{ route('ppdb.create') }}" class="w-full py-4 bg-elevate-primary hover:bg-elevate-dark rounded-2xl text-white font-black text-lg shadow-xl shadow-elevate-primary/30 flex justify-center items-center transition-colors">
+            <a href="{{ route('ppdb.create') }}" class="w-full py-3.5 bg-elevate-primary hover:bg-elevate-dark rounded-2xl text-white font-black text-base shadow-xl shadow-elevate-primary/30 flex justify-center items-center transition-colors">
                 <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
             </a>
             
-            <a href="#profil" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Profil Sekolah</a>
-            <a href="#akademik" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Akademik</a>
-            <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Galeri Kegiatan</a>
-            <a href="#prestasi" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Prestasi</a>
-            <a href="#kontak" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Kontak</a>
+            <a href="#katalog-lms" @click="mobileMenuOpen = false" class="text-xl font-black text-sky-400 hover:text-sky-300 transition-colors flex items-center justify-center gap-2">
+                <i class="ph-bold ph-book-open"></i> Ruang Belajar (LMS)
+            </a>
+            <a href="#profil" @click="mobileMenuOpen = false" class="text-lg font-bold text-slate-200 hover:text-elevate-primary transition-colors">Profil Sekolah</a>
+            <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-lg font-bold text-slate-200 hover:text-elevate-primary transition-colors">Galeri Kegiatan</a>
+            <a href="#prestasi" @click="mobileMenuOpen = false" class="text-lg font-bold text-slate-200 hover:text-elevate-primary transition-colors">Prestasi</a>
+            <a href="#kontak" @click="mobileMenuOpen = false" class="text-lg font-bold text-slate-200 hover:text-elevate-primary transition-colors">Kontak</a>
             
-            <div class="w-16 h-1 rounded-full bg-slate-200 dark:bg-slate-800 my-4"></div>
+            <div class="w-16 h-1 rounded-full bg-white/10 my-2"></div>
 
-            <div class="flex flex-col gap-3 w-full mt-2">
+            <div class="flex flex-col gap-3 w-full mt-1">
                 @if(Auth::guard('student')->check())
                     <a href="{{ route('students.learning.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-layout text-elevate-accent"></i> Dashboard Siswa
@@ -145,10 +141,10 @@
                     </div>
 
                     {{-- 1 Tombol Login Terpadu (Siswa & Guru) --}}
-                    <a href="{{ route('login') }}" class="block w-full py-3.5 rounded-2xl bg-elevate-dark text-white font-black shadow-xl shadow-elevate-dark/30 flex items-center justify-center gap-2 text-sm">
+                    <a href="{{ route('login') }}" class="block w-full py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white font-black shadow-xl flex items-center justify-center gap-2 text-sm">
                         <i class="ph-bold ph-sign-in text-elevate-accent text-lg"></i> Masuk / Login Portal
                     </a>
-                    <a href="{{ route('library.catalogue') }}" class="block w-full py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-2">
+                    <a href="{{ route('library.catalogue') }}" class="block w-full py-2.5 rounded-xl bg-white/5 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 border border-white/10">
                         <i class="ph-bold ph-books"></i> Katalog Perpustakaan
                     </a>
                 @endif

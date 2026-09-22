@@ -21,6 +21,7 @@ class PpdbTemplateExport implements WithHeadings, ShouldAutoSize, WithStyles, Wi
             'jk',             // L/P
             'tempat_lahir',
             'tanggal_lahir',  // Format: YYYY-MM-DD
+            'agama',
             'alamat',
             'asal_sekolah',
             'rata_rata_nilai', // <--- [BARU] Kolom Nilai Rapor
