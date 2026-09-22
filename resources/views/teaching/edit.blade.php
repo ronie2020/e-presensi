@@ -104,7 +104,7 @@
                             </div>
                         </div>
 
-                        <div class="flex-1 p-6 md:p-8 overflow-y-auto max-h-[800px] custom-scrollbar bg-slate-900/40">
+                        <div class="flex-1 p-6 md:p-8 pb-32 md:pb-40 overflow-y-auto max-h-[800px] custom-scrollbar bg-slate-900/40">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($allStudents as $student)
                                     @php
@@ -121,7 +121,8 @@
                                                 const map = { 'present': 'Hadir', 'sick': 'Sakit', 'permission': 'Izin', 'alpha': 'Alpha' };
                                                 return this.currentStatus ? map[this.currentStatus] : 'PILIH STATUS';
                                             }
-                                         }">
+                                         }"
+                                         :class="open ? 'z-40 relative' : 'z-0 relative'">
                                         
                                         <div class="flex items-center gap-4 overflow-hidden">
                                             <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shrink-0 transition-colors shadow-sm"

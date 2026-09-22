@@ -308,7 +308,7 @@
                         </div>
 
                         {{-- 5. LIST SISWA --}}
-                        <div class="flex-1 p-5 md:p-8 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
+                        <div class="flex-1 p-5 md:p-8 pb-32 md:pb-40 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-3 sm:gap-4">
                                 @foreach($allStudents as $student)
                                     @php
@@ -317,9 +317,9 @@
                                         $initials = Str::upper(Str::substr(trim($student->name), 0, 1));
                                     @endphp
 
-                                    <div class="relative border-2 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-all duration-300" 
+                                    <div class="border-2 rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-all duration-300" 
                                          id="student-row-{{ $student->id }}"
-                                         x-data="{ name: '{{ strtolower($student->name) }}', id: '{{ $student->student_id }}', status: '{{ $initialStatus }}' }"
+                                         x-data="{ name: '{{ strtolower($student->name) }}', id: '{{ $student->student_id }}', status: '{{ $initialStatus }}', open: false }"
                                          @update-status-{{ $student->id }}.window="status = $event.detail.status"
                                          {{-- TAMBAHAN: Logika filter dikombinasikan dengan pencarian --}}
                                          x-show="(name.includes(searchQuery.toLowerCase()) || id.includes(searchQuery.toLowerCase())) &&
@@ -330,6 +330,8 @@
                                                  (filterTab === 'permission' && (status === 'Izin' || status === 'permission')) ||
                                                  (filterTab === 'alpha' && (status === 'Alfa' || status === 'alpha')))"
                                          :class="{
+                                            'z-40 relative': open,
+                                            'z-0 relative': !open,
                                             'bg-[#DFF6DD]/20 border-[#B7DFB9]': status === 'Hadir' || status === 'present',
                                             'bg-elevate-soft/40 border-slate-200': status === 'Sakit' || status === 'sick',
                                             'bg-[#FFEFD6]/20 border-[#FFD8A8]': status === 'Izin' || status === 'permission',
@@ -368,7 +370,7 @@
                                                 </button>
                                                 
                                                 {{-- Dropdown Pilihan --}}
-                                                <div class="relative" x-data="{ open: false }">
+                                                <div class="relative">
                                                     <button @click="open = !open" @click.outside="open = false"
                                                             class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
                                                             :class="['sick', 'permission', 'alpha', 'Sakit', 'Izin', 'Alfa'].includes(status) ? 'bg-elevate-dark text-white' : 'bg-slate-100 text-slate-400 hover:bg-elevate-dark hover:text-white'">
