@@ -226,7 +226,7 @@
                             </div>
                             
                             @if($isStudentLoggedIn)
-                                <a href="{{ route('assignment.quiz', $assignment->id) }}" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95">
+                                <a href="{{ route('students.learning.assignment.quiz', $assignment->id) }}" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all hover:scale-105 active:scale-95">
                                     <i class="ph-bold ph-play"></i> Mulai Kerjakan
                                 </a>
                             @else
