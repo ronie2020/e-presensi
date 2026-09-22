@@ -109,6 +109,12 @@
                 @else
                     @foreach($materials as $index => $item)
                         <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden hover:shadow-xl hover:shadow-elevate-primary/5 transition-all duration-300 group" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                            @if($item->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($item->cover_image))
+                                <div class="w-full h-48 sm:h-56 overflow-hidden relative shrink-0">
+                                    <img src="{{ asset('storage/' . $item->cover_image) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30"></div>
+                                </div>
+                            @endif
                             <div class="p-6 md:p-8 border-b border-elevate-soft bg-gradient-to-r from-white to-elevate-soft/30">
                                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                                     <div class="flex items-start gap-4">

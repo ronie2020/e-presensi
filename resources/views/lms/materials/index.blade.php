@@ -133,8 +133,42 @@
                         @endphp
 
                         {{-- START CARD --}}
-                        <div class="animate-enter group relative bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl flex flex-col h-full border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:border-sky-400/40 backdrop-blur-xl" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                        <div class="animate-enter group relative bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2rem] shadow-2xl flex flex-col h-full border border-white/10 transition-all duration-300 hover:-translate-y-1 hover:border-sky-400/40 backdrop-blur-xl overflow-hidden" style="animation-delay: {{ ($index + 1) * 100 }}ms">
                             
+                            {{-- CARD COVER THUMBNAIL --}}
+                            <div class="relative h-44 w-full overflow-hidden shrink-0">
+                                @if($material->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($material->cover_image))
+                                    <img src="{{ asset('storage/' . $material->cover_image) }}" alt="{{ $material->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#031d3d] via-transparent to-black/20"></div>
+                                @else
+                                    @php
+                                        $gradientTheme = match(true) {
+                                            str_contains($subjectName, 'matematika') => ['bg' => 'from-blue-600 via-indigo-700 to-slate-900', 'icon' => 'ph-calculator'],
+                                            str_contains($subjectName, 'ipa') || str_contains($subjectName, 'biologi') || str_contains($subjectName, 'fisika') => ['bg' => 'from-emerald-600 via-teal-700 to-slate-900', 'icon' => 'ph-flask'],
+                                            str_contains($subjectName, 'inggris') || str_contains($subjectName, 'bahasa') || str_contains($subjectName, 'indonesia') => ['bg' => 'from-purple-600 via-indigo-800 to-slate-900', 'icon' => 'ph-translate'],
+                                            str_contains($subjectName, 'informatika') || str_contains($subjectName, 'tik') => ['bg' => 'from-sky-600 via-blue-800 to-slate-950', 'icon' => 'ph-code'],
+                                            str_contains($subjectName, 'ips') || str_contains($subjectName, 'sejarah') => ['bg' => 'from-amber-600 via-orange-800 to-slate-950', 'icon' => 'ph-compass'],
+                                            default => ['bg' => 'from-sky-600 via-indigo-800 to-[#021124]', 'icon' => 'ph-book-open-text']
+                                        };
+                                    @endphp
+                                    <div class="w-full h-full bg-gradient-to-br {{ $gradientTheme['bg'] }} p-4 flex flex-col justify-between relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                                        <div class="absolute -right-6 -bottom-6 text-white/10 text-8xl pointer-events-none">
+                                            <i class="ph-duotone {{ $gradientTheme['icon'] }}"></i>
+                                        </div>
+                                        <div class="flex items-center justify-between relative z-10">
+                                            <span class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-lg text-white">
+                                                <i class="ph-bold {{ $gradientTheme['icon'] }}"></i>
+                                            </span>
+                                            <span class="text-[9px] font-black tracking-widest text-white/70 uppercase">MODUL DIGITAL</span>
+                                        </div>
+                                        <div class="relative z-10">
+                                            <p class="text-[11px] font-black text-white/90 uppercase tracking-widest">{{ $material->subject->name ?? 'Mata Pelajaran' }}</p>
+                                        </div>
+                                        <div class="absolute inset-0 bg-gradient-to-t from-[#031d3d] via-transparent to-transparent"></div>
+                                    </div>
+                                @endif
+                            </div>
+
                             {{-- Inner Card Content --}}
                             <div class="p-6 md:p-8 h-full flex flex-col relative overflow-hidden">
                                 
