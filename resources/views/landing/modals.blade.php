@@ -38,6 +38,8 @@
             <div x-show="guestBookModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-[#021124]/90 backdrop-blur-2xl text-left shadow-[0_0_40px_rgba(0,0,0,0.5)] transition-all sm:my-8 sm:w-full sm:max-w-lg border border-white/20">
                 <form action="{{ route('guestbook.store') }}" method="POST">
                     @csrf
+                    {{-- Honeypot Anti-Spam (tersembunyi dari manusia, diisi bot) --}}
+                    <input type="text" name="website_hp" style="display:none !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
                     <div class="px-6 py-6 sm:p-8">
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="text-2xl font-bold text-white">Buku Tamu Digital</h3>

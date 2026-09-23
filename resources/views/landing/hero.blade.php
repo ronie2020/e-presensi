@@ -59,6 +59,12 @@
                         <a href="{{ route('ppdb.create') }}" class="group relative px-7 py-3 rounded-full bg-gradient-to-r from-elevate-accent to-elevate-primary text-white font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(86,187,241,0.4)] hover:shadow-[0_0_35px_rgba(86,187,241,0.6)] hover:-translate-y-0.5 transition-all flex items-center gap-2">
                             <span>Daftar PPDB</span> <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         </a>
+
+                        {{-- Presensi / Kiosk QR --}}
+                        <a href="{{ route('kiosk.show') }}" class="group px-6 py-3 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs hover:-translate-y-0.5 transition-all flex items-center gap-2 backdrop-blur-md">
+                            <i class="ph-bold ph-qr-code text-emerald-400 text-sm"></i>
+                            <span>Scan Presensi</span>
+                        </a>
                         
                         {{-- Buka Ruang Belajar LMS --}}
                         <a href="{{ route('student.login.learning') }}" class="group px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs hover:-translate-y-0.5 transition-all flex items-center gap-2 backdrop-blur-md">
@@ -68,7 +74,7 @@
 
                         {{-- Cek Kelulusan --}}
                         <a href="{{ route('ppdb.check') }}" class="group px-5 py-3 rounded-full bg-transparent border border-white/20 text-slate-300 hover:text-white font-bold text-xs hover:bg-white/10 hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                            <i class="ph-fill ph-check-circle text-emerald-400"></i>
+                            <i class="ph-fill ph-check-circle text-sky-400"></i>
                             <span>Cek Kelulusan</span>
                         </a>
                     </div>

@@ -30,6 +30,7 @@
     {{-- Wrapper x-data: Memindahkan logika dari body ke sini agar tetap jalan di dalam layout --}}
     <div x-data="{ 
           modalOpen: false, 
+          showQrModal: false,
           teacher: {},
           linkCopied: false,
           isSearching: false, 
@@ -37,11 +38,13 @@
           openModal(data) {
               this.teacher = data;
               this.modalOpen = true;
+              this.showQrModal = false;
               this.linkCopied = false;
               document.body.style.overflow = 'hidden'; 
           },
           closeModal() {
               this.modalOpen = false;
+              this.showQrModal = false;
               setTimeout(() => { this.teacher = {} }, 300);
               document.body.style.overflow = 'auto'; 
           },
@@ -367,32 +370,42 @@
                                         <i class="ph-bold text-base" :class="linkCopied ? 'ph-check-circle' : 'ph-link'"></i>
                                         <span x-text="linkCopied ? 'Disalin!' : 'Bagikan'"></span>
                                     </button>
-                                </div>
-                            </div>
+                             <!-- Box QR Code Kontak (Jika Ditekan) -->
+                             <div x-show="showQrModal" x-transition class="mt-6 p-4 rounded-2xl bg-white/10 border border-white/20 text-center flex flex-col items-center justify-center">
+                                 <p class="text-xs font-bold text-white mb-2 flex items-center gap-1.5"><i class="ph-bold ph-qr-code text-emerald-400"></i> Scan QR untuk Simpan Kontak</p>
+                                 <div class="p-2 bg-white rounded-xl shadow-lg inline-block">
+                                     <img :src="'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(teacher.vcard_url || teacher.profile_url)" alt="QR Kontak Guru" class="w-40 h-40 object-contain">
+                                 </div>
+                                 <p class="text-[10px] text-slate-300 mt-2 font-medium">Buka Kamera / Pemindai QR di HP Anda</p>
+                             </div>
 
-                        </div>
-                    </div>
-                </div>
+                         </div>
+                     </div>
+                 </div>
 
-                <!-- Action Buttons -->
-                <div class="p-6 bg-white/5 border-t border-white/10 flex flex-wrap items-center justify-center sm:justify-end gap-3 rounded-b-[2rem]">
-                    <button @click="closeModal()" type="button" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-white/10 border border-white/15 hover:bg-white/20 transition-colors order-last sm:order-first text-sm">
-                        Tutup
-                    </button>
-                    
-                    <a :href="teacher.vcard_url" x-show="teacher.vcard_url" class="px-5 py-2.5 rounded-xl font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition-all text-sm flex items-center gap-2 shadow-sm">
-                        <i class="ph-bold ph-address-book"></i> Simpan Kontak
-                    </a>
+                 <!-- Action Buttons -->
+                 <div class="p-6 bg-white/5 border-t border-white/10 flex flex-wrap items-center justify-center sm:justify-end gap-3 rounded-b-[2rem]">
+                     <button @click="closeModal()" type="button" class="px-5 py-2.5 rounded-xl font-bold text-slate-300 bg-white/10 border border-white/15 hover:bg-white/20 transition-colors order-last sm:order-first text-sm">
+                         Tutup
+                     </button>
+                     
+                     <button type="button" @click="showQrModal = !showQrModal" x-show="teacher.vcard_url" class="px-4 py-2.5 rounded-xl font-bold text-slate-200 bg-white/10 border border-white/20 hover:bg-white/20 transition-all text-sm flex items-center gap-2 shadow-sm" :class="showQrModal ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : ''">
+                         <i class="ph-bold ph-qr-code text-emerald-400"></i> <span x-text="showQrModal ? 'Sembunyikan QR' : 'QR Kontak'"></span>
+                     </button>
 
-                    <a :href="teacher.cv_url" x-show="teacher.cv_url" target="_blank" class="px-5 py-2.5 rounded-xl font-bold text-elevate-accent bg-elevate-accent/15 border border-elevate-accent/30 hover:bg-elevate-accent hover:text-elevate-dark transition-all text-sm flex items-center gap-2 shadow-sm">
-                        <i class="ph-bold ph-download-simple"></i> Unduh CV
-                    </a>
+                     <a :href="teacher.vcard_url" x-show="teacher.vcard_url" class="px-5 py-2.5 rounded-xl font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition-all text-sm flex items-center gap-2 shadow-sm">
+                         <i class="ph-bold ph-address-book"></i> Simpan Kontak
+                     </a>
 
-                    <a :href="teacher.profile_url" class="px-6 py-2.5 rounded-xl font-bold text-elevate-dark bg-elevate-accent hover:bg-white transition-all text-sm flex items-center gap-2 shadow-lg shadow-elevate-accent/20">
-                        <i class="ph-bold ph-user-circle"></i> Lihat Profil <span class="hidden sm:inline">Lengkap</span>
-                    </a>
-                </div>
-            </div>
+                     <a :href="teacher.cv_url" x-show="teacher.cv_url" target="_blank" class="px-5 py-2.5 rounded-xl font-bold text-elevate-accent bg-elevate-accent/15 border border-elevate-accent/30 hover:bg-elevate-accent hover:text-elevate-dark transition-all text-sm flex items-center gap-2 shadow-sm">
+                         <i class="ph-bold ph-download-simple"></i> Unduh CV
+                     </a>
+
+                     <a :href="teacher.profile_url" class="px-6 py-2.5 rounded-xl font-bold text-elevate-dark bg-elevate-accent hover:bg-white transition-all text-sm flex items-center gap-2 shadow-lg shadow-elevate-accent/20">
+                         <i class="ph-bold ph-user-circle"></i> Lihat Profil <span class="hidden sm:inline">Lengkap</span>
+                     </a>
+                 </div>
+             </div>
         </div>
     </div>
 @endsection

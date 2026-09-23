@@ -277,32 +277,38 @@ class LandingPageController extends Controller
         $latestArticles = $literacyData['articles'];
 
          // --- 10. DATA JADWAL UJIAN CBT ---
-        // Menggunakan pencarian langsung tanpa Cache agar saat testing data langsung muncul.
-        // Menyesuaikan dengan kolom is_active di model CbtExam.
-        $publicExams = \App\Models\CbtExam::where('is_active', true)
-            ->where(function($query) {
-                $now = \Carbon\Carbon::now();
-                $query->whereNull('end_time')
-                      ->orWhere('end_time', '>=', $now);
-            })
-            ->orderBy('start_time', 'asc')
-            ->take(6)
-            ->get();
+        // Cache jadwal ujian CBT publik selama 10 menit (600 detik) untuk optimasi performa
+        $publicExams = Cache::remember('landing_public_exams', 600, function() {
+            if (!class_exists(\App\Models\CbtExam::class)) return collect([]);
+            return \App\Models\CbtExam::where('is_active', true)
+                ->where(function($query) {
+                    $now = \Carbon\Carbon::now();
+                    $query->whereNull('end_time')
+                          ->orWhere('end_time', '>=', $now);
+                })
+                ->orderBy('start_time', 'asc')
+                ->take(6)
+                ->get();
+        });
 
-        $latestVideoActivity = \App\Models\SchoolActivity::whereNotNull('video_url')
-            ->where('video_url', '!=', '')
-            ->latest()
-            ->first();
+        $latestVideoActivity = Cache::remember('landing_latest_video_activity', 1800, function() {
+            return \App\Models\SchoolActivity::whereNotNull('video_url')
+                ->where('video_url', '!=', '')
+                ->latest()
+                ->first();
+        });
 
-             // TAMBAHAN: Ambil 1 Pengumuman Terbaru untuk dijadikan Pop-up
-        $popupAnnouncement = \App\Models\Announcement::where('is_active', true)
-            ->where('is_popup', true)
-            ->where(function($query) {
-                $query->whereNull('expired_at')
-                      ->orWhere('expired_at', '>=', now());
-            })
-            ->latest()
-            ->first();
+        // TAMBAHAN: Ambil 1 Pengumuman Terbaru untuk dijadikan Pop-up (di-cache 10 menit)
+        $popupAnnouncement = Cache::remember('landing_popup_announcement', 600, function() {
+            return \App\Models\Announcement::where('is_active', true)
+                ->where('is_popup', true)
+                ->where(function($query) {
+                    $query->whereNull('expired_at')
+                          ->orWhere('expired_at', '>=', now());
+                })
+                ->latest()
+                ->first();
+        });
 
         // --- 11. DATA JADWAL PELAJARAN (TIMETABLE) ---
         // CATATAN PERBAIKAN: dengan 18 kelas x 41 JP/minggu, jadwal per hari bisa

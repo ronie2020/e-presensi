@@ -34,16 +34,38 @@
                     @endphp
 
                     <!-- Card Ujian -->
-                    <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(86,187,241,0.2)] border border-white/10 hover:border-elevate-accent/40 hover:bg-white/10 transition-all duration-300 hover:-translate-y-2 group flex flex-col h-full relative overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                    <div x-data="{
+                        targetTime: '{{ $isOngoing ? ($endTime ? $endTime->toIso8601String() : '') : $startTime->toIso8601String() }}',
+                        remainingText: '',
+                        updateTimer() {
+                            if(!this.targetTime) return;
+                            const diff = new Date(this.targetTime) - new Date();
+                            if(diff <= 0) {
+                                this.remainingText = '{{ $isOngoing ? "Waktu Berakhir" : "Dimulai Sekarang" }}';
+                                return;
+                            }
+                            const hours = Math.floor(diff / (1000 * 60 * 60));
+                            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                            this.remainingText = (hours > 0 ? hours + 'j ' : '') + mins + 'm ' + secs + 'd';
+                        },
+                        init() {
+                            this.updateTimer();
+                            setInterval(() => this.updateTimer(), 1000);
+                        }
+                    }" class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_32px_rgba(86,187,241,0.2)] border border-white/10 hover:border-elevate-accent/40 hover:bg-white/10 transition-all duration-300 hover:-translate-y-2 group flex flex-col h-full relative overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         
                         <!-- Latar belakang card dekoratif -->
                         <div class="absolute -right-10 -top-10 w-32 h-32 bg-elevate-accent/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
                         <!-- Header Status & Icon Kanan -->
                         <div class="flex justify-between items-center mb-6 relative z-10">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm transition-colors {{ $statusClass }}">
-                                <i class="ph-bold {{ $iconClass }} text-sm"></i> {{ $statusLabel }}
-                            </span>
+                            <div class="flex flex-col gap-1">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm transition-colors {{ $statusClass }}">
+                                    <i class="ph-bold {{ $iconClass }} text-sm"></i> {{ $statusLabel }}
+                                </span>
+                                <span x-show="remainingText" x-text="(targetTime ? ('{{ $isOngoing ? "Sisa: " : "Mulai: " }}' + remainingText) : '')" class="text-[10px] font-mono font-bold text-slate-300 pl-1"></span>
+                            </div>
                             <div class="w-12 h-12 rounded-[1rem] bg-white/10 text-elevate-accent flex items-center justify-center border border-white/15 group-hover:bg-gradient-to-r group-hover:from-elevate-accent group-hover:to-elevate-primary group-hover:text-white transition-colors shadow-sm">
                                 <i class="ph-duotone ph-desktop text-2xl"></i>
                             </div>
@@ -51,7 +73,7 @@
 
                         <!-- Info Utama -->
                         <div class="flex-1 flex flex-col mb-2 relative z-10">
-                            <!-- BUNGKUSAN BADGE: Mapel & Kelas -->
+                            <!-- BUNGKUSAN BADGE: Mapel & Kelas & SEB -->
                             <div class="flex flex-wrap items-center gap-2 mb-4">
                                 <div class="inline-flex items-center text-[9px] font-black uppercase tracking-widest text-elevate-accent bg-elevate-accent/10 px-2.5 py-1 rounded-lg border border-elevate-accent/20 transition-colors">
                                     {{ $exam->subject_name ?? 'Mata Pelajaran' }}
@@ -59,6 +81,10 @@
                                 <!-- BADGE KELAS -->
                                 <div class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-elevate-accent bg-elevate-accent/10 px-2.5 py-1 rounded-lg border border-elevate-accent/20 transition-colors">
                                     <i class="ph-bold ph-users-three text-xs"></i> {{ $exam->class_level ?? 'Semua Kelas' }}
+                                </div>
+                                <!-- BADGE SEB SAFE BROWSER -->
+                                <div class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 transition-colors" title="Ujian Terproteksi Safe Exam Browser">
+                                    <i class="ph-bold ph-shield-check text-xs"></i> SEB Ready
                                 </div>
                             </div>
 

@@ -175,7 +175,7 @@
 @scroll.window="
     scrolled = (window.pageYOffset > 20) ? true : false;
     showBackToTop = (window.pageYOffset > 500) ? true : false;
-    const sections = ['home', 'katalog-lms', 'profil', 'kegiatan', 'prestasi', 'kontak'];
+    const sections = ['home', 'katalog-lms', 'jadwal-ujian', 'profil', 'kegiatan', 'prestasi', 'perpustakaan', 'kontak'];
     for (const section of sections) {
         const el = document.getElementById(section);
         if (el && window.scrollY >= (el.offsetTop - 150)) {
@@ -284,6 +284,28 @@
     <div class="flex sm:hidden pr-2 shrink-0">
         <span class="text-xs font-black text-white leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
     </div>
+</div>
+
+<!-- FLOATING QUICK HUB NAVIGATOR (Scroll-to-Section Pills) -->
+<div x-cloak x-show="showBackToTop" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 translate-y-4 scale-95" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#021124]/90 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-1.5 rounded-full flex items-center gap-1 max-w-[90vw] overflow-x-auto no-scrollbar">
+    <a href="#katalog-lms" :class="activeSection === 'katalog-lms' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-books"></i> LMS
+    </a>
+    <a href="#jadwal-ujian" :class="activeSection === 'jadwal-ujian' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-desktop"></i> CBT
+    </a>
+    <a href="#profil" :class="activeSection === 'profil' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-buildings"></i> Profil
+    </a>
+    <a href="#kegiatan" :class="activeSection === 'kegiatan' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-calendar-check"></i> Kegiatan
+    </a>
+    <a href="#prestasi" :class="activeSection === 'prestasi' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-trophy"></i> Prestasi
+    </a>
+    <a href="#perpustakaan" :class="activeSection === 'perpustakaan' ? 'bg-elevate-accent text-elevate-dark font-black' : 'text-slate-300 hover:text-white hover:bg-white/10 font-bold'" class="px-3 py-1.5 rounded-full text-[10px] sm:text-xs transition-all flex items-center gap-1 shrink-0">
+        <i class="ph-bold ph-book-open text-sky-400"></i> Perpustakaan
+    </a>
 </div>
 
 <!-- BACK TO TOP -->

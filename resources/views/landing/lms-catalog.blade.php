@@ -1,5 +1,5 @@
 {{-- LANDING SECTION: KATALOG MODUL PEMBELAJARAN LMS (DICODING / UDEMY STYLE WITH THUMBNAILS) --}}
-<section id="katalog-lms" class="py-16 sm:py-24 relative overflow-hidden font-sans">
+<section id="katalog-lms" x-data="{ selectedClass: 'all' }" class="py-16 sm:py-24 relative overflow-hidden font-sans">
     
     <!-- Ambient Glow background -->
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/10 rounded-full blur-[180px] pointer-events-none"></div>
@@ -7,7 +7,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         
         <!-- SECTION HEADER -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/30 text-sky-400 text-xs font-bold uppercase tracking-widest mb-3 backdrop-blur-md">
                     <i class="ph-duotone ph-sparkle text-sm text-sky-400"></i>
@@ -28,6 +28,22 @@
             </a>
         </div>
 
+        <!-- FILTER PILLS BASED ON CLASS LEVEL -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
+            <button @click="selectedClass = 'all'" :class="selectedClass === 'all' ? 'bg-sky-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.4)] border-sky-400' : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'" class="px-4 py-2 rounded-full text-xs font-bold border transition-all shrink-0 flex items-center gap-1.5">
+                <i class="ph-bold ph-squares-four"></i> Semua Tingkat
+            </button>
+            <button @click="selectedClass = '7'" :class="selectedClass === '7' ? 'bg-sky-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.4)] border-sky-400' : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'" class="px-4 py-2 rounded-full text-xs font-bold border transition-all shrink-0 flex items-center gap-1.5">
+                <i class="ph-bold ph-number-circle-seven"></i> Kelas 7
+            </button>
+            <button @click="selectedClass = '8'" :class="selectedClass === '8' ? 'bg-sky-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.4)] border-sky-400' : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'" class="px-4 py-2 rounded-full text-xs font-bold border transition-all shrink-0 flex items-center gap-1.5">
+                <i class="ph-bold ph-number-circle-eight"></i> Kelas 8
+            </button>
+            <button @click="selectedClass = '9'" :class="selectedClass === '9' ? 'bg-sky-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.4)] border-sky-400' : 'bg-white/5 text-slate-300 hover:bg-white/10 border-white/10'" class="px-4 py-2 rounded-full text-xs font-bold border transition-all shrink-0 flex items-center gap-1.5">
+                <i class="ph-bold ph-number-circle-nine"></i> Kelas 9
+            </button>
+        </div>
+
         <!-- GRID OF FEATURED MATERIALS -->
         @if(isset($featuredMaterials) && count($featuredMaterials) > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -44,9 +60,10 @@
                             str_contains($subjectName, 'ips') || str_contains($subjectName, 'sejarah') => ['bg' => 'from-amber-600 via-orange-800 to-slate-950', 'icon' => 'ph-compass', 'color' => 'text-amber-300'],
                             default => ['bg' => 'from-sky-600 via-indigo-800 to-[#021124]', 'icon' => 'ph-book-open-text', 'color' => 'text-sky-300']
                         };
-                    @endphp
 
-                    <div class="rounded-[2.5rem] bg-[#031d3d]/80 backdrop-blur-xl border border-white/15 shadow-xl hover:border-sky-400/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                        $classVal = strtolower($mat->schoolClass->name ?? $mat->class_level ?? '');
+                    @endphp
+                    <div x-show="selectedClass === 'all' || '{{ $classVal }}'.includes(selectedClass)" x-transition class="rounded-[2.5rem] bg-[#031d3d]/80 backdrop-blur-xl border border-white/15 shadow-xl hover:border-sky-400/50 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
                         
                         <!-- CARD THUMBNAIL / COVER IMAGE (UDEMY STYLE) -->
                         <div class="relative h-48 w-full overflow-hidden shrink-0">
