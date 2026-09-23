@@ -113,6 +113,7 @@ class ScheduleController extends Controller
             'activity_name' => 'required|string|max:255',
             'trigger_time' => 'required',
             'audio_file' => 'nullable|mimes:mp3,wav|max:5120',
+            'repeat_count' => 'nullable|integer|min:1|max:5',
         ]);
 
         // Cek bentrok: pastikan belum ada jadwal lain di jam yang sama untuk hari-hari yang dipilih
@@ -136,6 +137,8 @@ class ScheduleController extends Controller
             $audioPath = $request->file('audio_file')->store('bells', 'public');
         }
 
+        $repeatCount = max(1, min(5, (int) ($request->input('repeat_count', 1))));
+
         $rows = [];
         foreach ($request->days as $day) {
             $rows[] = [
@@ -143,6 +146,7 @@ class ScheduleController extends Controller
                 'activity_name' => $request->activity_name,
                 'trigger_time' => $request->trigger_time,
                 'audio_file' => $audioPath,
+                'repeat_count' => $repeatCount,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -161,6 +165,7 @@ class ScheduleController extends Controller
             'activity_name' => 'required|string|max:255',
             'trigger_time' => 'required',
             'audio_file' => 'nullable|mimes:mp3,wav|max:5120',
+            'repeat_count' => 'nullable|integer|min:1|max:5',
         ]);
 
         // Cek bentrok dengan entri lain (di luar dirinya sendiri) pada hari & jam yang sama
@@ -183,6 +188,7 @@ class ScheduleController extends Controller
             'day_type' => $request->day_type,
             'activity_name' => $request->activity_name,
             'trigger_time' => $request->trigger_time,
+            'repeat_count' => max(1, min(5, (int) ($request->input('repeat_count', 1)))),
             'updated_at' => now(),
         ];
 
@@ -240,6 +246,7 @@ class ScheduleController extends Controller
                         'activity_name' => $entry->activity_name,
                         'trigger_time' => $entry->trigger_time,
                         'audio_file' => $entry->audio_file,
+                        'repeat_count' => $entry->repeat_count ?? 1,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

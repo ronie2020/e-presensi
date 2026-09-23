@@ -340,11 +340,13 @@
                         {{-- Form Input Bel (Dengan Pilihan Hari) --}}
                         <form action="{{ route('schedules.learning.store') }}" method="POST" enctype="multipart/form-data" class="bg-slate-900/70 p-6 rounded-[2rem] border border-white/10 shadow-lg">
                             @csrf
-                            <div class="grid grid-cols-1 gap-4">
-                                <div class="bg-slate-900 p-4 rounded-xl border border-white/10 shadow-sm flex flex-col md:flex-row items-start md:items-end gap-3">
-                                    <div class="w-full md:w-auto shrink-0">
-                                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Hari <span class="normal-case text-slate-500 font-semibold">(bisa lebih dari 1)</span></label>
-                                        <div class="flex flex-wrap gap-1.5">
+                            <div class="bg-slate-900 p-4 rounded-xl border border-white/10 shadow-sm space-y-3">
+
+                                {{-- Baris 1: Hari + Nama Kegiatan + Waktu --}}
+                                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+                                    <div class="shrink-0">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Hari <span class="normal-case text-slate-500">(bisa lebih dari 1)</span></label>
+                                        <div class="flex gap-1.5">
                                             @foreach(['Senin' => 'Sen', 'Selasa' => 'Sel', 'Rabu' => 'Rab', 'Kamis' => 'Kam', 'Jumat' => 'Jum'] as $dayValue => $dayLabel)
                                             <label class="cursor-pointer select-none">
                                                 <input type="checkbox" name="days[]" value="{{ $dayValue }}" class="peer sr-only" {{ in_array($dayValue, old('days', [])) ? 'checked' : '' }}>
@@ -353,23 +355,45 @@
                                             @endforeach
                                         </div>
                                     </div>
-                                    <div class="w-full md:flex-1">
+                                    <div class="flex-1 w-full">
                                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Nama Kegiatan</label>
-                                        <input type="text" name="activity_name" placeholder="Cth: Jam ke-1" required class="w-full text-sm font-bold rounded-lg border-white/10 bg-slate-950 text-white placeholder-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 py-2.5">
+                                        <input type="text" name="activity_name" placeholder="Cth: Jam ke-1, Istirahat, dll..." required
+                                               class="w-full text-sm font-bold rounded-lg border-white/10 bg-slate-950 text-white placeholder-slate-500 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 py-2.5">
                                     </div>
-                                    <div class="w-full md:w-32 shrink-0">
+                                    <div class="w-full sm:w-32 shrink-0">
                                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Waktu</label>
-                                        <input type="time" name="trigger_time" required class="w-full text-sm font-bold rounded-lg border-white/10 bg-slate-950 text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 py-2.5 [color-scheme:dark]">
+                                        <input type="time" name="trigger_time" required
+                                               class="w-full text-sm font-bold rounded-lg border-white/10 bg-slate-950 text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 py-2.5 [color-scheme:dark]">
                                     </div>
-                                    <div class="w-full md:w-1/4 shrink-0">
-                                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">Audio (Opsional)</label>
-                                        <input type="file" name="audio_file" accept=".mp3,.wav" class="w-full text-xs font-bold rounded-lg border border-white/10 focus:border-sky-400 p-2 bg-slate-950 text-white file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-[#0d52a1] file:text-white hover:file:bg-sky-600">
+                                </div>
+
+                                {{-- Pemisah --}}
+                                <div class="border-t border-white/5"></div>
+
+                                {{-- Baris 2: Audio + Ulangi Bel + Tombol Tambah --}}
+                                <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+                                    <div class="flex-1 w-full">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 ml-1">File Audio Bel <span class="normal-case text-slate-500">(Opsional — kosongkan untuk suara default)</span></label>
+                                        <input type="file" name="audio_file" accept=".mp3,.wav"
+                                               class="w-full text-xs font-bold rounded-lg border border-white/10 focus:border-sky-400 p-2 bg-slate-950 text-white file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-bold file:bg-[#0d52a1] file:text-white hover:file:bg-sky-600">
                                     </div>
-                                    <button type="submit" class="w-full md:w-auto bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white px-5 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 flex justify-center items-center gap-2 h-[42px] shrink-0 border border-sky-400/30">
-                                        <i class="ph-bold ph-plus"></i> Tambah
+                                    <div class="w-full sm:w-44 shrink-0">
+                                        <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-2 ml-1">Ulangi Bel</label>
+                                        <select name="repeat_count"
+                                                class="w-full text-sm font-bold rounded-lg border-white/10 bg-slate-950 text-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 py-2.5 [color-scheme:dark]">
+                                            <option value="1">1&times; — Sekali saja</option>
+                                            <option value="2">2&times; — Dua kali</option>
+                                            <option value="3">3&times; — Tiga kali</option>
+                                            <option value="4">4&times; — Empat kali</option>
+                                            <option value="5">5&times; — Lima kali</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit"
+                                            class="w-full sm:w-auto shrink-0 bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white px-6 py-2.5 rounded-lg font-bold transition-all shadow-md active:scale-95 flex justify-center items-center gap-2 border border-sky-400/30">
+                                        <i class="ph-bold ph-plus"></i> Tambah Jadwal
                                     </button>
                                 </div>
-                                <p class="text-[10px] text-slate-400 font-semibold ml-2">*Centang satu atau beberapa hari untuk jam yang sama. Kosongkan audio untuk suara standar.</p>
+
                             </div>
                         </form>
 
@@ -435,6 +459,7 @@
                                             <th class="px-5 py-3">Waktu</th>
                                             <th class="px-5 py-3">Nama Kegiatan</th>
                                             <th class="px-5 py-3">Suara Bel</th>
+                                            <th class="px-5 py-3 text-center text-emerald-400">Ulang</th>
                                             <th class="px-5 py-3 text-center">Aksi</th>
                                         </tr>
                                     </thead>
@@ -460,6 +485,13 @@
                                                 @else
                                                     <span class="text-[10px] font-bold bg-slate-800 text-slate-400 px-2 py-1 rounded-md border border-white/10">Default Sound</span>
                                                 @endif
+                                            </td>
+                                            <td class="px-5 py-3">
+                                                @php $rc = $ls->repeat_count ?? 1; @endphp
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md border
+                                                    {{ $rc >= 3 ? 'bg-emerald-900/40 text-emerald-300 border-emerald-500/30' : ($rc == 2 ? 'bg-sky-900/40 text-sky-300 border-sky-500/30' : 'bg-slate-800 text-slate-400 border-white/10') }}">
+                                                    <i class="ph-bold ph-repeat"></i> {{ $rc }}x
+                                                </span>
                                             </td>
                                             <td class="px-5 py-3 flex items-center justify-center gap-2">
                                                 <button type="button" @click="$dispatch('open-edit-bel-modal', {{ json_encode($ls) }})" class="w-7 h-7 inline-flex items-center justify-center rounded-lg bg-slate-800 text-amber-400 hover:bg-amber-500 hover:text-white transition-all border border-white/10">
@@ -495,6 +527,7 @@
                 editDay: 'Senin',
                 editName: '',
                 editTime: '',
+                editRepeat: 1,
                 formAction: ''
             }"
             @open-edit-bel-modal.window="
@@ -503,6 +536,7 @@
                 editDay = $event.detail.day_type ?? 'Senin';
                 editName = $event.detail.activity_name;
                 editTime = $event.detail.trigger_time.substring(0, 5);
+                editRepeat = parseInt($event.detail.repeat_count) || 1;
                 formAction = '{{ url('schedules/learning') }}/' + editId;
             "
         >
@@ -550,6 +584,16 @@
                                     <label class="block text-[10px] font-bold text-sky-300 uppercase mb-2 ml-1">File Audio Baru (Opsional)</label>
                                     <input type="file" name="audio_file" accept=".mp3,.wav" class="w-full text-xs font-bold rounded-lg border border-white/10 focus:border-sky-400 p-2 bg-slate-900 text-white file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#0d52a1] file:text-white hover:file:bg-sky-600">
                                     <p class="text-[10px] text-slate-400 font-semibold ml-1 mt-1">*Kosongkan jika tidak ingin mengubah audio saat ini.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-emerald-400 uppercase mb-2 ml-1">Ulangi Bel</label>
+                                    <select name="repeat_count" x-model="editRepeat" class="w-full text-sm font-bold rounded-lg border-white/10 focus:border-emerald-400 py-2.5 bg-slate-900 text-white [color-scheme:dark]">
+                                        <option value="1">1x (Sekali)</option>
+                                        <option value="2">2x (Dua kali)</option>
+                                        <option value="3">3x (Tiga kali)</option>
+                                        <option value="4">4x (Empat kali)</option>
+                                        <option value="5">5x (Lima kali)</option>
+                                    </select>
                                 </div>
                                 <div class="mt-6 flex justify-end gap-3">
                                     <button type="button" @click="showModal = false" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-all text-sm border border-white/10">Batal</button>

@@ -425,23 +425,43 @@
                         let playKey = `${this.getDateKey()}_${currentMinute}`;
 
                         if (this.lastPlayedTime !== playKey) {
-                            this.lastPlayedTime = playKey; 
-                            
-                            if (this.$refs.bellAudio) {
-                                this.$refs.bellAudio.src = '/storage/' + currentSchedule.audio_file;
-                                let playPromise = this.$refs.bellAudio.play();
-                                
-                                if (playPromise !== undefined) {
-                                    playPromise.then(_ => {
-                                        this.audioBlocked = false;
-                                    }).catch(error => {
-                                        console.warn('Autoplay diblokir browser', error);
-                                        this.audioBlocked = true;
-                                    });
-                                }
-                            }
+                            this.lastPlayedTime = playKey;
+                            const repeatCount = Math.min(5, Math.max(1, parseInt(currentSchedule.repeat_count) || 1));
+                            this.playBellWithRepeat('/storage/' + currentSchedule.audio_file, repeatCount);
                         }
                     }
+                },
+
+                playBellWithRepeat(src, totalRepeats) {
+                    if (!this.$refs.bellAudio) return;
+                    const audio = this.$refs.bellAudio;
+                    let played = 0;
+
+                    const playOnce = () => {
+                        audio.src = src;
+                        audio.load();
+                        const promise = audio.play();
+                        if (promise !== undefined) {
+                            promise.then(() => {
+                                this.audioBlocked = false;
+                            }).catch(err => {
+                                console.warn('Autoplay diblokir browser', err);
+                                this.audioBlocked = true;
+                            });
+                        }
+                    };
+
+                    audio.onended = () => {
+                        played++;
+                        if (played < totalRepeats) {
+                            // Jeda singkat antar pengulangan (500ms)
+                            setTimeout(playOnce, 500);
+                        } else {
+                            audio.onended = null; // reset handler setelah selesai
+                        }
+                    };
+
+                    playOnce();
                 }
             }
         }
