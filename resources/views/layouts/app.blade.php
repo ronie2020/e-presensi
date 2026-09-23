@@ -57,11 +57,13 @@
         <div x-data="{ 
                 sidebarOpen: false, 
                 sidebarExpanded: localStorage.getItem('sidebarExpanded') === null ? true : localStorage.getItem('sidebarExpanded') === 'true',
+                menuSearch: '',
                 toggleSidebar() {
                     this.sidebarExpanded = !this.sidebarExpanded;
                     localStorage.setItem('sidebarExpanded', this.sidebarExpanded);
                 }
             }" 
+            @keydown.window="if (($event.ctrlKey || $event.metaKey) && $event.key.toLowerCase() === 'k') { $event.preventDefault(); if(!sidebarExpanded) toggleSidebar(); setTimeout(() => $refs.sidebarSearchInput?.focus(), 150); }"
             class="h-screen flex overflow-hidden bg-transparent">
             
             <!-- ====== SIDEBAR NAVIGASI ====== -->            
