@@ -92,7 +92,12 @@
                         <h3 class="text-xl font-bold text-white">Daftar Kunjungan Tamu</h3>
                         <p class="text-sm text-slate-300">Riwayat pengisian buku tamu sekolah.</p>
                     </div>
-                    <button type="button" @click="guestListModalOpen = false" class="text-slate-400 hover:text-rose-400 transition bg-white/5 hover:bg-white/10 p-2 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" @click="guestListModalOpen = false; guestBookModalOpen = true" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-elevate-accent to-elevate-primary text-white text-xs font-bold hover:shadow-[0_0_15px_rgba(86,187,241,0.4)] border border-elevate-accent/30 transition shadow-sm">
+                            <i class="ph-bold ph-pencil-simple-line"></i> Isi Buku Tamu
+                        </button>
+                        <button type="button" @click="guestListModalOpen = false" class="text-slate-400 hover:text-rose-400 transition bg-white/5 hover:bg-white/10 p-2 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
+                    </div>
                 </div>
                 
                 <div class="p-0 overflow-y-auto flex-1 bg-white/5">

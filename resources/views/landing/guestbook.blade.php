@@ -7,9 +7,14 @@
             <h2 class="text-3xl font-black text-white">Kata Mereka</h2>
             <p class="text-slate-300 mt-2 mb-6 font-medium">Pesan dan kesan dari pengunjung sekolah kami.</p>
             
-            <button @click="guestListModalOpen = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/15 text-slate-300 text-sm font-bold hover:border-elevate-accent/40 hover:text-elevate-accent hover:bg-white/10 transition shadow-sm">
-                <i class="ph-bold ph-list-dashes text-elevate-accent"></i> Lihat Semua Tamu
-            </button>
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+                <button @click="guestBookModalOpen = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-elevate-accent to-elevate-primary text-white text-sm font-bold hover:shadow-[0_0_20px_rgba(86,187,241,0.4)] border border-elevate-accent/30 transition shadow-lg">
+                    <i class="ph-bold ph-pencil-simple-line"></i> Isi Buku Tamu
+                </button>
+                <button @click="guestListModalOpen = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/15 text-slate-300 text-sm font-bold hover:border-elevate-accent/40 hover:text-elevate-accent hover:bg-white/10 transition shadow-sm">
+                    <i class="ph-bold ph-list-dashes text-elevate-accent"></i> Lihat Semua Tamu
+                </button>
+            </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
