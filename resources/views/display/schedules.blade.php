@@ -437,31 +437,32 @@
                     const audio = this.$refs.bellAudio;
                     let played = 0;
 
-                    const playOnce = () => {
-                        audio.src = src;
-                        audio.load();
-                        const promise = audio.play();
-                        if (promise !== undefined) {
-                            promise.then(() => {
-                                this.audioBlocked = false;
-                            }).catch(err => {
-                                console.warn('Autoplay diblokir browser', err);
-                                this.audioBlocked = true;
-                            });
-                        }
-                    };
-
+                    // Pasang handler onended SEBELUM mulai play,
+                    // supaya setiap kali audio selesai, kita bisa ulang.
                     audio.onended = () => {
                         played++;
                         if (played < totalRepeats) {
-                            // Jeda singkat antar pengulangan (500ms)
-                            setTimeout(playOnce, 500);
+                            // Jeda 500ms antar pengulangan, lalu putar ulang
+                            // (TIDAK load() ulang — cukup reset posisi)
+                            setTimeout(() => {
+                                audio.currentTime = 0;
+                                audio.play().catch(err => console.warn('Repeat play error', err));
+                            }, 500);
                         } else {
-                            audio.onended = null; // reset handler setelah selesai
+                            // Selesai semua pengulangan — bersihkan handler
+                            audio.onended = null;
                         }
                     };
 
-                    playOnce();
+                    // Load audio sekali saja, lalu mulai putar pertama kali
+                    audio.src = src;
+                    audio.load();
+                    audio.play().then(() => {
+                        this.audioBlocked = false;
+                    }).catch(err => {
+                        console.warn('Autoplay diblokir browser', err);
+                        this.audioBlocked = true;
+                    });
                 }
             }
         }
