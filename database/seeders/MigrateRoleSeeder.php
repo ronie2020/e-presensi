@@ -16,6 +16,7 @@ class MigrateRoleSeeder extends Seeder
 
         // 1. Buat Master Role
         $roles = [
+            'Superadmin',           // Role tertinggi – bisa mengatur segalanya
             'Admin',                
             'Kepala Sekolah',       
             'TU',                   

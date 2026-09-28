@@ -16,8 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,    // Buat User dulu
-            SubjectSeeder::class, // Lalu buat Mapel
+            MigrateRoleSeeder::class, // Buat semua master role (termasuk Superadmin)
+            UserSeeder::class,        // Buat User Admin & Guru Piket
+            SubjectSeeder::class,     // Lalu buat Mapel
+            SuperadminSeeder::class,  // Buat akun Superadmin
         ]);
     }
 }

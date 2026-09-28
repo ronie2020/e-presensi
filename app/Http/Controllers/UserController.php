@@ -21,6 +21,7 @@ class UserController extends Controller
      * Daftar Role yang tersedia dalam sistem sesuai fungsi.
      */
     protected $availableRoles = [
+        'Superadmin',           // Role tertinggi – hanya bisa diassign oleh Superadmin
         'Admin',                
         'Kepala Sekolah',       
         'TU',                   
@@ -31,11 +32,24 @@ class UserController extends Controller
     ];
 
     /**
-     * Helper: Cek apakah user yang login memiliki role Admin
+     * Role yang hanya bisa diassign oleh Superadmin (bukan Admin biasa)
+     */
+    protected $superadminOnlyRoles = ['Superadmin'];
+
+    /**
+     * Helper: Cek apakah user yang login memiliki role Admin atau Superadmin
      */
     private function checkIsAdmin()
     {
-        return Auth::user()->hasRole('Admin');
+        return Auth::user()->hasAnyRole(['Admin', 'Superadmin']);
+    }
+
+    /**
+     * Helper: Cek apakah user yang login adalah Superadmin
+     */
+    private function checkIsSuperadmin()
+    {
+        return Auth::user()->hasRole('Superadmin');
     }
 
     /**
@@ -74,7 +88,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', 'array'], 
-            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)],
+            'role.*' => ['string'],
             
             'position' => ['nullable', 'string', 'max:50'],
             'pangkat' => ['nullable', 'string', 'max:50'],
@@ -87,9 +101,17 @@ class UserController extends Controller
             'facebook' => ['nullable', 'string', 'max:50'],
         ]);
 
-        // KEAMANAN: Hanya Admin yang boleh membuat user
+        // KEAMANAN: Hanya Admin/Superadmin yang boleh membuat user
         if (!$this->checkIsAdmin()) {
             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk membuat user baru.');
+        }
+
+        // KEAMANAN: Hanya Superadmin yang bisa assign role Superadmin
+        $requestedRoles = $request->input('role', []);
+        foreach ($requestedRoles as $role) {
+            if (in_array($role, $this->superadminOnlyRoles) && !$this->checkIsSuperadmin()) {
+                return redirect()->back()->with('error', 'Anda tidak memiliki wewenang untuk memberikan role Superadmin.');
+            }
         }
 
         $photoPath = null;
@@ -169,7 +191,8 @@ class UserController extends Controller
         // Jika form mengupdate Role, wajib diisi minimal satu
         if ($isUpdatingRole) {
             $rules['role'] = ['required', 'array'];
-            $rules['role.*'] = ['string', 'in:' . implode(',', $this->availableRoles)];
+            // Superadmin bisa assign semua role; Admin hanya bisa assign role non-Superadmin
+            $rules['role.*'] = ['string'];
         }
 
         $request->validate($rules);
@@ -177,8 +200,19 @@ class UserController extends Controller
         // Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
         if ($isUpdatingRole && Auth::id() == $user->id) {
             $rolesSubmitted = $request->input('role', []);
-            if (!in_array('Admin', $rolesSubmitted)) {
-                return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
+            $myHighestRole = $this->checkIsSuperadmin() ? 'Superadmin' : 'Admin';
+            if (!in_array($myHighestRole, $rolesSubmitted)) {
+                return redirect()->back()->with('error', "Anda tidak boleh menghapus role {$myHighestRole} dari akun Anda sendiri.");
+            }
+        }
+
+        // KEAMANAN: Hanya Superadmin yang bisa assign role Superadmin ke user lain
+        if ($isUpdatingRole) {
+            $requestedRoles = $request->input('role', []);
+            foreach ($requestedRoles as $role) {
+                if (in_array($role, $this->superadminOnlyRoles) && !$this->checkIsSuperadmin()) {
+                    return redirect()->back()->with('error', 'Anda tidak memiliki wewenang untuk memberikan role Superadmin.');
+                }
             }
         }
 
@@ -236,13 +270,19 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
 
-        // CEK OTORISASI: Hanya Admin
+        // CEK OTORISASI: Hanya Admin/Superadmin
         if (!$this->checkIsAdmin()) {
             abort(403, 'Akses ditolak.');
         }
 
-        if ($user->hasRole('Admin')) {
-            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus sesama Administrator.');
+        // Superadmin tidak bisa dihapus oleh Admin biasa
+        if ($user->hasRole('Superadmin') && !$this->checkIsSuperadmin()) {
+            return redirect()->route('users.index')->with('error', 'Admin tidak memiliki wewenang menghapus akun Superadmin.');
+        }
+
+        // Admin tidak bisa dihapus oleh sesama Admin (hanya Superadmin)
+        if ($user->hasRole('Admin') && !$this->checkIsSuperadmin()) {
+            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus sesama Administrator. Hubungi Superadmin.');
         }
 
         if ($user->photo_path) {
@@ -265,6 +305,7 @@ class UserController extends Controller
             'file' => 'required|mimes:xlsx,xls|max:5120'
         ]);
 
+        // Hanya Admin/Superadmin
         if (!$this->checkIsAdmin()) {
             abort(403, 'Akses ditolak.');
         }
