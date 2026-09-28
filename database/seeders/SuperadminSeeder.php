@@ -43,7 +43,13 @@ class SuperadminSeeder extends Seeder
             $this->command->info('   Password: Sup3r@dmin#2025!');
             $this->command->warn('   SEGERA GANTI PASSWORD setelah login pertama kali!');
         } else {
-            $this->command->info('Akun Superadmin sudah ada, melewati pembuatan akun baru.');
+            // Update password dan pastikan role Superadmin aktif
+            $superadmin->update([
+                'name'     => 'Super Administrator',
+                'password' => Hash::make('Sup3r@dmin#2025!'),
+                'role'     => 'Superadmin',
+            ]);
+            $this->command->info('Akun Superadmin sudah ada, password & role berhasil diperbarui/direset.');
         }
 
         // Pastikan role Superadmin ter-assign ke akun ini
