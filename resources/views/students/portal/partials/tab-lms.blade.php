@@ -175,7 +175,7 @@
 
                                             <div class="flex items-start justify-end relative z-10">
                                                 <span class="text-[9px] font-black tracking-widest text-white/80 uppercase bg-black/25 px-2 py-1 rounded-md backdrop-blur-sm">
-                                                    {{ $isQuiz ? 'Kuis Online' : ($isLink ? 'Link Tugas' : 'Upload File') }}
+                                                    {{ $isQuiz ? 'Kuis Online' : ($isLink ? 'Link Tugas' : ($task->assignment_type == 'offline' ? 'Tugas Tatap Muka' : 'Upload File')) }}
                                                 </span>
                                             </div>
                                             <div class="relative z-10">
@@ -250,6 +250,11 @@
                                                             <i class="ph-bold ph-check"></i> Selesai
                                                         </button>
                                                     </form>
+                                                </div>
+                                            @elseif($task->assignment_type == 'offline')
+                                                <div class="w-full py-2.5 px-3 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center gap-2 border border-slate-200">
+                                                    <i class="ph-bold ph-chalkboard-teacher text-emerald-600 text-base"></i>
+                                                    <span>Tugas Tatap Muka di Kelas</span>
                                                 </div>
                                             @else 
                                                 <button @click="openUpload = !openUpload" 

@@ -208,7 +208,7 @@
                         <div>
                             <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-4 ml-1">Jenis Penugasan <span class="text-rose-400">*</span></label>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                 {{-- Card 1: Upload File --}}
                                 <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="file_upload" x-model="assignmentType" class="peer sr-only">
@@ -254,6 +254,21 @@
                                         </div>
                                         <div><span class="block font-black text-white peer-checked:text-rose-300 text-sm sm:text-base">Video Interaktif</span></div>
                                         <div class="absolute top-4 right-4 text-rose-400 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                                    </div>
+                                </label>
+
+                                {{-- Card 5: Tugas Offline / Praktik --}}
+                                <label class="cursor-pointer group relative">
+                                    <input type="radio" name="assignment_type" value="offline" x-model="assignmentType" class="peer sr-only">
+                                    <div class="p-6 rounded-2xl border-2 border-white/10 bg-slate-900/60 hover:border-emerald-400/50 transition-all peer-checked:border-emerald-400 peer-checked:bg-emerald-500/10 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-4">
+                                        <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-white/10 text-slate-400 flex items-center justify-center text-3xl peer-checked:bg-emerald-500 peer-checked:border-emerald-400 peer-checked:text-slate-950 transition-colors shadow-sm">
+                                            <i class="ph-duotone ph-chalkboard-teacher"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block font-black text-white peer-checked:text-emerald-300 text-sm sm:text-base">Tugas Offline</span>
+                                            <span class="text-[10px] text-slate-400 block mt-0.5 font-medium">Praktik / Fisik</span>
+                                        </div>
+                                        <div class="absolute top-4 right-4 text-emerald-400 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
                                     </div>
                                 </label>
                             </div>
@@ -396,6 +411,30 @@
                                         class="w-full py-4 border-2 border-dashed border-rose-500/30 bg-rose-500/10 text-rose-300 rounded-[1.5rem] font-bold text-sm hover:bg-rose-500/20 transition-all flex items-center justify-center gap-2 active:scale-95">
                                     <i class="ph-bold ph-plus text-lg"></i> Tambah Titik Pemberhentian Kuis
                                 </button>
+                            </div>
+
+                            <!-- E. JIKA TUGAS OFFLINE / PRAKTIK -->
+                            <div x-show="assignmentType === 'offline'" style="display: none;" class="space-y-5">
+                                <div class="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 text-2xl border border-emerald-500/30 shadow-sm">
+                                        <i class="ph-duotone ph-chalkboard-teacher"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-black text-emerald-200 mb-1">Penilaian Tatap Muka di Kelas</h4>
+                                        <p class="text-xs text-slate-300 font-medium leading-relaxed">
+                                            Tugas ini dikerjakan atau dinilai secara langsung di kelas (seperti pemeriksaan buku PR/catatan, penilaian praktik laboratorium, ujian lisan/hafalan, presentasi kelompok, atau ulangan kertas manual).
+                                        </p>
+                                        <div class="mt-2.5 flex items-center gap-2 text-[11px] font-bold text-emerald-300">
+                                            <i class="ph-bold ph-check-circle"></i>
+                                            <span>Siswa tidak perlu upload file di portal. Guru langsung menginput nilai di buku nilai.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2 ml-1">Keterangan / Rubrik Penilaian <span class="text-slate-500 text-[9px] lowercase font-normal">(opsional)</span></label>
+                                    <textarea name="description_offline" rows="3" class="w-full rounded-2xl border-white/10 bg-slate-900/80 text-white focus:ring-emerald-400/20 focus:border-emerald-400 p-4 transition-colors shadow-sm placeholder:text-slate-500 text-sm font-medium" placeholder="Contoh: Penilaian hafalan surat pendek juz 30 di depan kelas dengan kriteria tajwid, makhraj, dan kelancaran.">{{ old('description_offline') }}</textarea>
+                                </div>
                             </div>
 
                         </div>

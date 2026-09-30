@@ -25,22 +25,22 @@
             
             {{-- HERO SECTION --}}
             <x-hero-section
-                badge="{{ str_replace('_', ' ', $assignment->assignment_type) }}"
-                badgeIcon="ph-tag"
+                badge="{{ $assignment->assignment_type == 'offline' ? 'Tugas Tatap Muka / Offline' : str_replace('_', ' ', $assignment->assignment_type) }}"
+                badgeIcon="{{ $assignment->assignment_type == 'offline' ? 'ph-chalkboard-teacher' : 'ph-tag' }}"
                 title="{{ $assignment->title }}"
                 titleHighlight="{{ $assignment->subject->name }}"
-                description="Monitoring pengumpulan tugas, tinjau berkas jawaban siswa, dan berikan evaluasi nilai serta umpan balik secara terstruktur."
+                description="{{ $assignment->assignment_type == 'offline' ? 'Lembar input nilai tugas tatap muka di kelas. Anda dapat memasukkan nilai dan umpan balik langsung untuk seluruh siswa.' : 'Monitoring pengumpulan tugas, tinjau berkas jawaban siswa, dan berikan evaluasi nilai serta umpan balik secara terstruktur.' }}"
                 :chips="[
                     ['icon' => 'ph-users-three', 'label' => ($assignment->is_bulk ? 'Semua Kelas ' . $assignment->target_grade : ($assignment->schoolClass->name ?? 'Semua Kelas'))],
-                    ['icon' => 'ph-clock', 'label' => 'Deadline: ' . $assignment->deadline->format('d M Y, H:i')],
+                    ['icon' => 'ph-clock', 'label' => ($assignment->assignment_type == 'offline' ? 'Waktu: ' : 'Deadline: ') . $assignment->deadline->format('d M Y, H:i')],
                     ['icon' => 'ph-check-circle', 'label' => 'Penilaian Terintegrasi']
                 ]"
-                heroIcon="ph-tray"
-                :showcaseNumber="$submissions->count()"
-                showcaseLabel="Terkumpul"
+                heroIcon="{{ $assignment->assignment_type == 'offline' ? 'ph-chalkboard-teacher' : 'ph-tray' }}"
+                :showcaseNumber="$assignment->assignment_type == 'offline' ? $submissions->whereNotNull('grade')->count() : $submissions->count()"
+                showcaseLabel="{{ $assignment->assignment_type == 'offline' ? 'Telah Dinilai' : 'Terkumpul' }}"
                 showcaseSubtitle="dari {{ $allStudents->count() }} Siswa"
-                statusOrb="{{ $submissions->count() >= $allStudents->count() && $allStudents->count() > 0 ? 'Lengkap' : 'Sedang Berjalan' }}"
-                statusColor="{{ $submissions->count() >= $allStudents->count() && $allStudents->count() > 0 ? 'emerald' : 'amber' }}"
+                statusOrb="{{ ($assignment->assignment_type == 'offline' ? $submissions->whereNotNull('grade')->count() : $submissions->count()) >= $allStudents->count() && $allStudents->count() > 0 ? 'Lengkap' : 'Sedang Berjalan' }}"
+                statusColor="{{ ($assignment->assignment_type == 'offline' ? $submissions->whereNotNull('grade')->count() : $submissions->count()) >= $allStudents->count() && $allStudents->count() > 0 ? 'emerald' : 'amber' }}"
             >
                 <x-slot:cta>
                     <div class="flex flex-wrap items-center gap-3">
@@ -127,8 +127,14 @@
                                     $ansCount = $submission ? $submission->answers->count() : 0;
                                     
                                     $rowStatus = 'missing';
-                                    if ($submission) {
-                                        $rowStatus = isset($submission->grade) ? 'graded' : 'ungraded';
+                                    if ($assignment->assignment_type == 'offline') {
+                                        $rowStatus = ($submission && $submission->grade !== null) ? 'graded' : 'missing';
+                                    } else {
+                                        if ($submission && isset($submission->grade)) {
+                                            $rowStatus = 'graded';
+                                        } elseif ($submission) {
+                                            $rowStatus = 'ungraded';
+                                        }
                                     }
 
                                     $mappedAnswers = [];
@@ -167,21 +173,39 @@
 
                                     <!-- Status -->
                                     <td class="px-6 py-4 text-center">
-                                        @if($submission)
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide {{ $isLate ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }} shadow-sm">
-                                                <span class="w-1.5 h-1.5 rounded-full {{ $isLate ? 'bg-amber-400' : 'bg-emerald-400' }}"></span> 
-                                                {{ $isLate ? 'Late' : 'On Time' }}
-                                            </span>
+                                        @if($assignment->assignment_type == 'offline')
+                                            @if($submission && $submission->grade !== null)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Dinilai
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Belum Dinilai
+                                                </span>
+                                            @endif
                                         @else
-                                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide bg-slate-800 text-slate-400 border border-white/10 shadow-sm">
-                                                Belum
-                                            </span>
+                                            @if($submission)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide {{ $isLate ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }} shadow-sm">
+                                                    <span class="w-1.5 h-1.5 rounded-full {{ $isLate ? 'bg-amber-400' : 'bg-emerald-400' }}"></span> 
+                                                    {{ $isLate ? 'Late' : 'On Time' }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wide bg-slate-800 text-slate-400 border border-white/10 shadow-sm">
+                                                    Belum
+                                                </span>
+                                            @endif
                                         @endif
                                     </td>
 
                                     <!-- Jawaban -->
                                     <td class="px-6 py-4">
-                                        @if($submission)
+                                        @if($assignment->assignment_type == 'offline')
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shadow-sm">
+                                                    <i class="ph-bold ph-chalkboard-teacher text-base"></i> Tatap Muka
+                                                </span>
+                                            </div>
+                                        @elseif($submission)
                                             <div class="flex flex-col gap-2">
                                                 @if($assignment->assignment_type == 'quiz')
                                                     <button type="button" 
@@ -219,51 +243,57 @@
                                                 @endif
                                             </div>
                                         @else
-                                            <span class="text-slate-600 text-2xl ml-2"><i class="ph-duotone ph-minus-circle"></i></span>
+                                            <span class="text-xs text-slate-500 italic">Belum ada berkas online</span>
                                         @endif
                                     </td>
 
-                                    <!-- Nilai -->
+                                    <!-- Nilai Final -->
                                     <td class="px-6 py-4 text-center">
-                                        @if($submission)
-                                            <form action="{{ route('lms.submissions.grade', $submission->id) }}" method="POST" class="contents grade-form" id="form-grade-{{$submission->id}}">
-                                                @csrf
-                                                @if($assignment->assignment_type == 'quiz')
-                                                    @php
-                                                        $autoScore = $submission->answers->sum(fn($ans) => $ans->is_correct ? $ans->points : 0);
-                                                    @endphp
-                                                    <div class="text-[10px] text-slate-400 mb-1.5 font-bold uppercase tracking-widest">
-                                                        PG: <span class="text-sky-400">{{ $autoScore }}</span>
-                                                    </div>
-                                                @endif
-                                                <input type="number" name="grade" id="grade_input_{{ $submission->id }}"
-                                                       value="{{ $submission->grade }}" 
-                                                       class="w-20 text-center rounded-xl border-white/10 bg-slate-900/80 focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 text-base font-black text-white py-2.5 shadow-sm transition-colors" placeholder="0">
-                                            </form>
-                                        @else
-                                            <span class="text-slate-600 font-black text-lg">-</span>
+                                        @if($submission && $assignment->assignment_type == 'quiz')
+                                            @php
+                                                $autoScore = $submission->answers->sum(fn($ans) => $ans->is_correct ? $ans->points : 0);
+                                            @endphp
+                                            <div class="text-[10px] text-slate-400 mb-1.5 font-bold uppercase tracking-widest">
+                                                PG: <span class="text-sky-400">{{ $autoScore }}</span>
+                                            </div>
                                         @endif
+                                        <input type="number" min="0" max="100" 
+                                               id="grade_input_{{ $student->id }}"
+                                               data-student-id="{{ $student->id }}"
+                                               value="{{ $submission->grade ?? '' }}" 
+                                               class="student-grade-input w-20 text-center rounded-xl border-white/10 bg-slate-900/80 focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 text-base font-black text-white py-2.5 shadow-sm transition-colors" 
+                                               placeholder="0">
                                     </td>
 
+                                    <!-- Feedback -->
                                     <td class="px-6 py-4">
-                                        @if($submission)
-                                            <input type="text" form="form-grade-{{$submission->id}}" name="teacher_feedback" value="{{ $submission->teacher_feedback }}" class="w-full text-sm font-bold text-white placeholder:text-slate-500 rounded-xl border-white/10 py-3 px-4 bg-slate-900/80 focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 shadow-sm transition-colors" placeholder="Ketik feedback...">
-                                        @endif
+                                        <input type="text" 
+                                               id="feedback_input_{{ $student->id }}"
+                                               data-student-id="{{ $student->id }}"
+                                               value="{{ $submission->teacher_feedback ?? '' }}" 
+                                               class="student-feedback-input w-full text-sm font-bold text-white placeholder:text-slate-500 rounded-xl border-white/10 py-3 px-4 bg-slate-900/80 focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 shadow-sm transition-colors" 
+                                               placeholder="Ketik feedback...">
                                     </td>
 
+                                    <!-- Aksi -->
                                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                                        @if($submission)
-                                            @if($assignment->assignment_type == 'quiz')
-                                                <a href="{{ route('lms.submissions.detail', $submission->id) }}" class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-300 inline-flex items-center justify-center shadow-sm hover:bg-blue-500/30 transition-all active:scale-95 mr-1" title="Lihat Analisis Detail">
-                                                    <i class="ph-bold ph-chart-bar text-lg"></i>
-                                                </a>
-                                            @endif
+                                        @if($submission && $assignment->assignment_type == 'quiz')
+                                            <a href="{{ route('lms.submissions.detail', $submission->id) }}" class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-300 inline-flex items-center justify-center shadow-sm hover:bg-blue-500/30 transition-all active:scale-95 mr-1" title="Lihat Analisis Detail">
+                                                <i class="ph-bold ph-chart-bar text-lg"></i>
+                                            </a>
+                                        @endif
 
-                                            <button type="button" onclick="document.getElementById('form-grade-{{$submission->id}}').submit()" class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/30 text-sky-300 inline-flex items-center justify-center shadow-sm hover:bg-sky-500/30 transition-all active:scale-95" title="Simpan Individu">
-                                                <i class="ph-bold ph-floppy-disk text-lg"></i>
-                                            </button>
-                                            
-                                            <form action="{{ route('lms.submissions.destroy', $submission->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('Hapus data jawaban siswa ini? Siswa harus mengerjakan ulang.')">
+                                        {{-- Tombol Simpan Individu --}}
+                                        <button type="button" 
+                                                onclick="saveStudentGrade('{{ $student->id }}')" 
+                                                id="btn_save_{{ $student->id }}"
+                                                class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/30 text-sky-300 inline-flex items-center justify-center shadow-sm hover:bg-sky-500/30 transition-all active:scale-95" 
+                                                title="Simpan Nilai Siswa Ini">
+                                            <i class="ph-bold ph-floppy-disk text-lg"></i>
+                                        </button>
+                                        
+                                        @if($submission)
+                                            <form action="{{ route('lms.submissions.destroy', $submission->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('Hapus data jawaban / nilai siswa ini?')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 inline-flex items-center justify-center hover:bg-rose-500/30 transition-colors shadow-sm active:scale-95" title="Hapus Jawaban">
                                                     <i class="ph-bold ph-trash text-lg"></i>
@@ -397,10 +427,11 @@
                 showReviewModal: false,
                 activeReview: null,
 
-                openReview(studentName, answers, submissionId) {
+                openReview(studentName, answers, submissionId, studentId) {
                     this.activeReview = {
                         student_name: studentName,
                         submission_id: submissionId,
+                        student_id: studentId,
                         answers: answers.map(a => ({ ...a, score: a.points }))
                     };
                     this.showReviewModal = true;
@@ -413,7 +444,8 @@
 
                 applyToTable() {
                     const totalScore = this.calculateTotal();
-                    const inputField = document.getElementById('grade_input_' + this.activeReview.submission_id);
+                    const targetId = this.activeReview.student_id || this.activeReview.submission_id;
+                    const inputField = document.getElementById('grade_input_' + targetId);
                     if(inputField) {
                         inputField.value = totalScore;
                         inputField.classList.add('ring-4', 'ring-sky-400/40', 'bg-slate-900');
@@ -424,14 +456,123 @@
             }));
         });
         
-        // FUNGSI SIMPAN SEMUA
+        // FUNGSI SIMPAN NILAI INDIVIDU (AJAX)
+        window.saveStudentGrade = async function(studentId) {
+            const gradeInput = document.getElementById(`grade_input_${studentId}`);
+            const feedbackInput = document.getElementById(`feedback_input_${studentId}`);
+            const btn = document.getElementById(`btn_save_${studentId}`);
+
+            if (!gradeInput) return;
+
+            const gradeVal = gradeInput.value.trim();
+            const feedbackVal = feedbackInput ? feedbackInput.value.trim() : '';
+
+            if (gradeVal !== '' && (isNaN(gradeVal) || Number(gradeVal) < 0 || Number(gradeVal) > 100)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nilai Tidak Valid',
+                    text: 'Nilai harus berupa angka antara 0 sampai 100.',
+                    background: '#021124',
+                    color: '#fff',
+                    customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
+                });
+                return;
+            }
+
+            const originalIcon = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-lg"></i>';
+            }
+
+            try {
+                const url = `{{ url('/lms/assignments/'.$assignment->id.'/grade-student') }}/${studentId}`;
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('grade', gradeVal);
+                formData.append('feedback', feedbackVal);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    if (btn) {
+                        btn.innerHTML = '<i class="ph-bold ph-check text-emerald-400 text-lg"></i>';
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = originalIcon;
+                        }, 2000);
+                    }
+
+                    // Update baris status ke graded jika ada nilai
+                    const row = gradeInput.closest('.student-row');
+                    if (row && gradeVal !== '') {
+                        row.setAttribute('data-status', 'graded');
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Nilai Tersimpan!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        background: '#021124',
+                        color: '#fff',
+                        customClass: { popup: 'rounded-2xl border border-emerald-500/20 shadow-lg bg-[#021124] text-emerald-300 font-sans' }
+                    });
+                } else {
+                    throw new Error(data.message || 'Gagal menyimpan nilai');
+                }
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalIcon;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: err.message || 'Terjadi kesalahan saat menyimpan nilai.',
+                    background: '#021124',
+                    color: '#fff',
+                    customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
+                });
+            }
+        };
+
+        // FUNGSI SIMPAN SEMUA (BATCH SAVE VIA AJAX)
         window.saveAllGrades = async function() {
-            const forms = document.querySelectorAll('.grade-form');
-            if (forms.length === 0) {
+            const gradeInputs = document.querySelectorAll('.student-grade-input');
+            const payload = [];
+
+            gradeInputs.forEach(input => {
+                const studentId = input.getAttribute('data-student-id');
+                const gradeVal = input.value.trim();
+                const feedbackInput = document.getElementById(`feedback_input_${studentId}`);
+                const feedbackVal = feedbackInput ? feedbackInput.value.trim() : '';
+
+                if (gradeVal !== '' || feedbackVal !== '') {
+                    payload.push({
+                        student_id: studentId,
+                        grade: gradeVal !== '' ? parseInt(gradeVal) : null,
+                        feedback: feedbackVal
+                    });
+                }
+            });
+
+            if (payload.length === 0) {
                 Swal.fire({ 
                     icon: 'info', 
                     title: 'Kosong', 
-                    text: 'Tidak ada data jawaban siswa yang bisa dinilai saat ini.',
+                    text: 'Belum ada nilai yang diinputkan untuk disimpan.',
                     background: '#021124',
                     color: '#fff',
                     customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
@@ -441,7 +582,7 @@
 
             const result = await Swal.fire({
                 title: 'Simpan Semua Nilai?',
-                text: `Sistem akan memproses dan menyimpan nilai dari ${forms.length} siswa secara bersamaan.`,
+                text: `Sistem akan memproses dan menyimpan nilai dari ${payload.length} siswa secara bersamaan.`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#38bdf8',
@@ -460,8 +601,8 @@
             if (!result.isConfirmed) return;
 
             Swal.fire({
-                title: 'Memproses Data...',
-                html: 'Menyimpan nilai ke server: <b>0</b>%',
+                title: 'Menyimpan Nilai...',
+                text: `Sedang menyimpan nilai ${payload.length} siswa ke server...`,
                 allowOutsideClick: false,
                 background: '#021124',
                 color: '#fff',
@@ -471,56 +612,44 @@
                 customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
             });
 
-            let successCount = 0;
-            let errorCount = 0;
-            let total = forms.length;
-            let processed = 0;
-            const swalHtml = Swal.getHtmlContainer().querySelector('b');
+            try {
+                const response = await fetch('{{ route("lms.assignments.gradeBulk", $assignment->id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ grades: payload })
+                });
 
-            for (const form of forms) {
-                try {
-                    const formData = new FormData(form);
-                    
-                    const feedbackInput = document.querySelector(`input[name="teacher_feedback"][form="${form.id}"]`);
-                    if (feedbackInput && !formData.has('teacher_feedback')) {
-                        formData.append('teacher_feedback', feedbackInput.value);
-                    }
+                const data = await response.json();
 
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || `Berhasil menyimpan ${data.saved} nilai siswa.`,
+                        background: '#021124',
+                        color: '#fff',
+                        customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
+                    }).then(() => {
+                        window.location.reload();
                     });
-                    
-                    if (response.ok) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                } catch (err) {
-                    console.error('Error saving form:', form.id, err);
-                    errorCount++;
+                } else {
+                    throw new Error(data.message || 'Gagal menyimpan nilai massal.');
                 }
-                
-                processed++;
-                if(swalHtml) {
-                    swalHtml.textContent = Math.round((processed / total) * 100);
-                }
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: err.message || 'Terjadi kesalahan saat menyimpan nilai.',
+                    background: '#021124',
+                    color: '#fff',
+                    customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
+                });
             }
-
-            Swal.fire({
-                icon: errorCount === 0 ? 'success' : 'warning',
-                title: 'Selesai!',
-                text: `Berhasil menyimpan ${successCount} nilai. ${errorCount > 0 ? `Gagal: ${errorCount} data.` : ''}`,
-                background: '#021124',
-                color: '#fff',
-                customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
-            }).then(() => {
-                if(successCount > 0) window.location.reload();
-            });
         };
 
         // Filter Tabel

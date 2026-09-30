@@ -361,6 +361,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/submissions/{submission}/detail', [LmsAssignmentController::class, 'showSubmissionDetail'])->name('submissions.detail');
 
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
+        Route::post('/assignments/{assignment}/grade-student/{student}', [LmsAssignmentController::class, 'gradeStudent'])->name('assignments.gradeStudent');
+        Route::post('/assignments/{assignment}/grade-bulk', [LmsAssignmentController::class, 'gradeBulk'])->name('assignments.gradeBulk');
         Route::delete('/submissions/{id}', [LmsAssignmentController::class, 'destroySubmission'])->name('submissions.destroy');
         
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');

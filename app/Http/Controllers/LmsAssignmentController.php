@@ -78,7 +78,6 @@ class LmsAssignmentController extends Controller
     {
         // Tetapkan deskripsi berdasarkan tipe tugas
         $description = null;
-        $description = null;
         if ($request->assignment_type == 'file_upload') {
             $description = $request->description_file;
         } elseif ($request->assignment_type == 'quiz') {
@@ -87,19 +86,29 @@ class LmsAssignmentController extends Controller
             $description = $request->description_link;
         } elseif ($request->assignment_type == 'interactive_video') {
             $description = "Tugas Video Interaktif. Silakan tonton video ini dengan saksama dan jawab pertanyaan yang muncul secara otomatis di tengah video.";
+        } elseif ($request->assignment_type == 'offline') {
+            $description = $request->description_offline ?? $request->description ?? "Tugas / Penilaian Tatap Muka di Kelas.";
+        } else {
+            $description = $request->description;
+        }
+
+        if (empty($description)) {
+            $description = ($request->assignment_type == 'offline') 
+                ? "Tugas / Penilaian Tatap Muka di Kelas." 
+                : "Instruksi tugas pembelajaran.";
         }
 
         $request->merge(['description' => $description]);
 
-        // Validasi diperbarui untuk mendukung 'interactive_video'
+        // Validasi diperbarui untuk mendukung 'interactive_video' dan 'offline'
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
-            'topic_id' => 'required|exists:topics,id', // <--- WAJIB ADA BAB
+            'topic_id' => 'nullable|exists:topics,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'deadline' => 'required',
             'description' => 'required|string',
-            'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video',
+            'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video,offline',
             'target_type' => 'required|in:grade,class',
             'class_id' => 'required_if:target_type,class|nullable|exists:classes,id',
             'link_url' => 'nullable|required_if:assignment_type,link|url',
@@ -119,8 +128,9 @@ class LmsAssignmentController extends Controller
 
         try {
             $deadline = \Carbon\Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
+            $firstAssignment = null;
 
-            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now, $coverPath) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now, $coverPath, &$firstAssignment) {
                 
                 $targetClassIds = [];
                 if ($request->target_type == 'class') {
@@ -162,6 +172,10 @@ class LmsAssignmentController extends Controller
                         'updated_at' => $now,
                     ]);
 
+                    if (!$firstAssignment) {
+                        $firstAssignment = $assignment;
+                    }
+
                     // ... (Logika simpan pertanyaan Kuis & Video Interaktif tetap sama)
                     // PROSES PENYIMPANAN SOAL KUIS BIASA
                     if ($request->assignment_type == 'quiz' && $request->has('questions')) {
@@ -196,6 +210,10 @@ class LmsAssignmentController extends Controller
                     }
                 }
             });
+
+            if ($request->boolean('redirect_to_submissions') && $firstAssignment) {
+                return redirect()->route('lms.assignments.submissions', $firstAssignment->id)->with('success', 'Tugas offline berhasil dibuat! Silakan masukkan nilai siswa di bawah ini.');
+            }
 
             return redirect()->route('lms.assignments.index')->with('success', 'Tugas berhasil diterbitkan!');
 
@@ -376,6 +394,126 @@ class LmsAssignmentController extends Controller
         ]);
 
         return back()->with('success', 'Nilai berhasil disimpan.');
+    }
+
+    /**
+     * Simpan / Perbarui nilai siswa individual (Mendukung siswa yang belum submit / tugas offline)
+     */
+    public function gradeStudent(Request $request, LmsAssignment $assignment, Student $student)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $assignment->teacher_id !== $user->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'grade' => 'nullable|integer|min:0|max:100',
+            'feedback' => 'nullable|string|max:255'
+        ]);
+
+        // Cek tugas kelas yang cocok jika ini tugas multi-kelas
+        $targetAssignment = $assignment;
+        if ($assignment->class_id !== $student->class_id) {
+            $sibling = LmsAssignment::where('teacher_id', $assignment->teacher_id)
+                ->where('title', $assignment->title)
+                ->where('created_at', $assignment->created_at)
+                ->where('class_id', $student->class_id)
+                ->first();
+            if ($sibling) {
+                $targetAssignment = $sibling;
+            }
+        }
+
+        $gradeVal = ($request->grade !== '' && $request->grade !== null) ? (int)$request->grade : null;
+
+        $submission = LmsSubmission::updateOrCreate(
+            [
+                'assignment_id' => $targetAssignment->id,
+                'student_id' => $student->id,
+            ],
+            [
+                'grade' => $gradeVal,
+                'teacher_feedback' => $request->feedback,
+                'submitted_at' => now(),
+            ]
+        );
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'submission_id' => $submission->id,
+                'grade' => $submission->grade,
+                'message' => 'Nilai berhasil disimpan.'
+            ]);
+        }
+
+        return back()->with('success', 'Nilai berhasil disimpan.');
+    }
+
+    /**
+     * Simpan nilai massal (Batch Save) untuk seluruh siswa
+     */
+    public function gradeBulk(Request $request, LmsAssignment $assignment)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $assignment->teacher_id !== $user->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'grades' => 'required|array',
+            'grades.*.student_id' => 'required|exists:students,id',
+            'grades.*.grade' => 'nullable',
+            'grades.*.feedback' => 'nullable|string|max:255',
+        ]);
+
+        // Kumpulkan saudara tugas untuk penugasan multi-kelas
+        $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
+            ->where('title', $assignment->title)
+            ->where('created_at', $assignment->created_at)
+            ->get()
+            ->keyBy('class_id');
+
+        $studentIds = collect($request->grades)->pluck('student_id')->filter();
+        $students = Student::whereIn('id', $studentIds)->get()->keyBy('id');
+
+        $saved = 0;
+        foreach ($request->grades as $item) {
+            $sId = $item['student_id'] ?? null;
+            $gVal = $item['grade'] ?? null;
+            $fVal = $item['feedback'] ?? null;
+
+            if (!$sId || !isset($students[$sId])) continue;
+            
+            // Simpan jika nilai diisi (atau angka 0)
+            if ($gVal !== null && $gVal !== '') {
+                $targetStudent = $students[$sId];
+                $targetAssignment = $siblings->get($targetStudent->class_id) ?? $assignment;
+
+                LmsSubmission::updateOrCreate(
+                    [
+                        'assignment_id' => $targetAssignment->id,
+                        'student_id' => $targetStudent->id,
+                    ],
+                    [
+                        'grade' => (int)$gVal,
+                        'teacher_feedback' => $fVal,
+                        'submitted_at' => now(),
+                    ]
+                );
+                $saved++;
+            }
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'saved' => $saved,
+                'message' => "Berhasil menyimpan {$saved} nilai siswa."
+            ]);
+        }
+
+        return back()->with('success', "Berhasil menyimpan {$saved} nilai siswa.");
     }
 
     public function destroySubmission($id)

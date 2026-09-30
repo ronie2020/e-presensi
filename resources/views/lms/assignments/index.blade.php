@@ -73,6 +73,8 @@
                             $labelType = 'Tugas File';
                             if($task->assignment_type == 'quiz') { $iconType = 'ph-brain'; $labelType = 'Kuis Online'; }
                             if($task->assignment_type == 'link') { $iconType = 'ph-link'; $labelType = 'Tugas Link'; }
+                            if($task->assignment_type == 'offline') { $iconType = 'ph-chalkboard-teacher'; $labelType = 'Tugas Offline'; }
+                            if($task->assignment_type == 'interactive_video') { $iconType = 'ph-youtube-logo'; $labelType = 'Video Interaktif'; }
                             
                             $isExpired = now() > $task->deadline;
 
@@ -80,6 +82,8 @@
                             $assignCover = match(true) {
                                 $task->assignment_type === 'quiz' => ['bg' => 'from-violet-600 via-purple-800 to-slate-900', 'icon' => 'ph-brain'],
                                 $task->assignment_type === 'link' => ['bg' => 'from-rose-500 via-pink-700 to-slate-900', 'icon' => 'ph-link'],
+                                $task->assignment_type === 'offline' => ['bg' => 'from-emerald-600 via-teal-800 to-slate-950', 'icon' => 'ph-chalkboard-teacher'],
+                                $task->assignment_type === 'interactive_video' => ['bg' => 'from-rose-600 via-red-800 to-slate-950', 'icon' => 'ph-youtube-logo'],
                                 str_contains($assignSubName, 'matematika') => ['bg' => 'from-blue-600 via-indigo-700 to-slate-900', 'icon' => 'ph-calculator'],
                                 str_contains($assignSubName, 'ipa') || str_contains($assignSubName, 'biologi') || str_contains($assignSubName, 'fisika') || str_contains($assignSubName, 'kimia') => ['bg' => 'from-emerald-600 via-teal-700 to-slate-900', 'icon' => 'ph-flask'],
                                 str_contains($assignSubName, 'inggris') || str_contains($assignSubName, 'indonesia') || str_contains($assignSubName, 'bahasa') => ['bg' => 'from-purple-600 via-indigo-800 to-slate-900', 'icon' => 'ph-translate'],

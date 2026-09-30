@@ -13,7 +13,7 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans min-h-screen text-slate-100 bg-[#020b18] relative overflow-hidden pb-20">
+    <div class="py-8 sm:py-10 font-sans min-h-screen text-slate-100 bg-[#020b18] relative overflow-hidden pb-20" x-data="gradePage()">
         
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-sky-600/10 via-blue-600/5 to-transparent pointer-events-none -z-10 blur-3xl"></div>
@@ -41,6 +41,12 @@
             >
                 <x-slot:cta>
                     <div class="flex flex-wrap items-center gap-3">
+                        @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false))
+                            <button type="button" @click="openQuickOfflineModal = true" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/25 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
+                                <i class="ph-bold ph-plus-circle text-base"></i>
+                                <span>+ Nilai Tugas Offline</span>
+                            </button>
+                        @endif
                         @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false) && isset($assignments) && $assignments->isNotEmpty())
                             <a href="{{ route('lms.grades.export', ['level_id' => $selectedLevelId ?? '', 'class_id' => $selectedClassId ?? '', 'subject_id' => $selectedSubjectId]) }}" class="btn-export px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/30 hover:scale-[1.02] transition-all flex items-center gap-2 border border-white/20 active:scale-95">
                                 <i class="ph-bold ph-microsoft-excel-logo text-base"></i>
@@ -149,9 +155,14 @@
                             <p class="text-slate-400 text-sm max-w-md mx-auto leading-relaxed font-medium">
                                 Belum ada tugas atau kuis yang dibuat untuk filter yang Anda pilih.
                             </p>
-                            <a href="{{ route('lms.assignments.create') }}" class="mt-8 px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold rounded-2xl hover:from-sky-400 hover:to-blue-500 shadow-lg shadow-sky-500/25 transition-all flex items-center gap-2 active:scale-95">
-                                <i class="ph-bold ph-plus text-lg"></i> Buat Tugas Baru
-                            </a>
+                            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                                <button type="button" @click="openQuickOfflineModal = true" class="px-7 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-2xl hover:from-emerald-400 hover:to-teal-500 shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2 active:scale-95">
+                                    <i class="ph-bold ph-plus-circle text-lg"></i> + Input Tugas Offline
+                                </button>
+                                <a href="{{ route('lms.assignments.create') }}" class="px-7 py-3.5 bg-slate-900 border border-white/20 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all flex items-center gap-2 active:scale-95">
+                                    <i class="ph-bold ph-plus text-lg"></i> Buat Tugas Baru
+                                </a>
+                            </div>
                         </div>
                     @else
                         {{-- Data Table --}}
@@ -171,8 +182,13 @@
                                                     </span>
                                                     <div class="flex items-center gap-1.5">
                                                         <span class="text-[9px] text-slate-300 font-bold bg-slate-900 border border-white/10 px-2 py-0.5 rounded shadow-sm">{{ $task->created_at->format('d/m') }}</span>
-                                                        <span class="text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-widest shadow-sm {{ $task->assignment_type == 'quiz' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20' }}">
-                                                            {{ $task->assignment_type == 'quiz' ? 'Kuis' : 'Tugas' }}
+                                                        <span class="text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-widest shadow-sm 
+                                                            @if($task->assignment_type == 'quiz') bg-purple-500/10 text-purple-400 border border-purple-500/20
+                                                            @elseif($task->assignment_type == 'offline') bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                                                            @else bg-sky-500/10 text-sky-400 border border-sky-500/20 @endif">
+                                                            @if($task->assignment_type == 'quiz') Kuis
+                                                            @elseif($task->assignment_type == 'offline') Offline
+                                                            @else Tugas @endif
                                                         </span>
                                                     </div>
                                                 </div>
@@ -287,6 +303,125 @@
             @endif
 
         </div>
+
+        {{-- MODAL QUICK INPUT TUGAS OFFLINE --}}
+        @if((($selectedLevelId ?? false) || ($selectedClassId ?? false)) && ($selectedSubjectId ?? false))
+        <template x-teleport="body">
+            <div x-show="openQuickOfflineModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    {{-- Backdrop --}}
+                    <div x-show="openQuickOfflineModal" 
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         @click="openQuickOfflineModal = false"
+                         class="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"></div>
+
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                    {{-- Dialog Panel --}}
+                    <div x-show="openQuickOfflineModal" 
+                         x-transition:enter="ease-out duration-300"
+                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave="ease-in duration-200"
+                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                         class="inline-block align-bottom bg-gradient-to-b from-[#031d3d] via-[#021124] to-[#020b18] rounded-[2.5rem] border border-white/10 text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full p-6 sm:p-8 relative z-50 text-slate-100 font-sans">
+                        
+                        {{-- Header Modal --}}
+                        <div class="flex items-center justify-between pb-5 border-b border-white/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-2xl shadow-sm">
+                                    <i class="ph-duotone ph-chalkboard-teacher"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-black text-white" id="modal-title">Input Nilai Tugas Offline</h3>
+                                    <p class="text-xs text-slate-400 font-medium">Catat nilai PR fisik, hafalan, ujian kertas, atau praktik kelas</p>
+                                </div>
+                            </div>
+                            <button type="button" @click="openQuickOfflineModal = false" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+
+                        {{-- Target Badge Info --}}
+                        <div class="my-5 p-4 rounded-2xl bg-slate-900/80 border border-white/10 flex items-center justify-between flex-wrap gap-2 text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-400 font-semibold">Mapel:</span>
+                                <span class="font-black text-sky-400">{{ $selectedSubject->name ?? '-' }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-slate-400 font-semibold">Target:</span>
+                                <span class="font-black text-emerald-400">
+                                    {{ $selectedClass ? $selectedClass->name : ($selectedLevel->name ?? 'Tingkat ' . $selectedLevelId) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Form Create & Redirect --}}
+                        <form action="{{ route('lms.assignments.store') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <input type="hidden" name="assignment_type" value="offline">
+                            <input type="hidden" name="redirect_to_submissions" value="1">
+                            <input type="hidden" name="subject_id" value="{{ $selectedSubjectId }}">
+                            <input type="hidden" name="target_type" value="{{ $selectedClassId ? 'class' : 'grade' }}">
+                            @if($selectedClassId)
+                                <input type="hidden" name="class_id" value="{{ $selectedClassId }}">
+                            @else
+                                <input type="hidden" name="target_grade" value="{{ $selectedLevelId }}">
+                            @endif
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Judul Tugas / Penilaian <span class="text-rose-400">*</span></label>
+                                <input type="text" name="title" required placeholder="Contoh: Ulangan Harian 1, PR Buku Tulis, Praktik Sholat" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 h-13 px-4 transition-colors shadow-sm placeholder:text-slate-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1 flex items-center justify-between">
+                                    <span>Pokok Bahasan / Bab</span>
+                                    <span x-show="loadingTopics" class="text-xs normal-case text-sky-400 font-normal"><i class="ph-bold ph-spinner animate-spin"></i> Memuat bab...</span>
+                                </label>
+                                <div class="relative group">
+                                    <select name="topic_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 h-13 px-4 appearance-none cursor-pointer transition-colors shadow-sm [color-scheme:dark]">
+                                        <option value="" class="bg-slate-900 text-white">-- Penilaian Umum (Tanpa Bab Khusus) --</option>
+                                        <template x-for="t in offlineTopics" :key="t.id">
+                                            <option :value="t.id" x-text="t.title" class="bg-slate-900 text-white"></option>
+                                        </template>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Tanggal Pelaksanaan / Penilaian <span class="text-rose-400">*</span></label>
+                                <input type="datetime-local" name="deadline" value="{{ now()->format('Y-m-d\TH:i') }}" required class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 h-13 px-4 transition-colors shadow-sm [color-scheme:dark]">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Keterangan / Catatan Penilaian <span class="text-slate-500 text-[9px] lowercase font-normal">(opsional)</span></label>
+                                <textarea name="description_offline" rows="2" placeholder="Catatan rubrik penilaian atau materi yang diuji..." class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-medium text-white focus:bg-slate-900 focus:border-sky-400 focus:ring-sky-400/20 p-3.5 transition-colors shadow-sm placeholder:text-slate-500 text-sm"></textarea>
+                            </div>
+
+                            <div class="pt-4 flex items-center justify-end gap-3 border-t border-white/10">
+                                <button type="button" @click="openQuickOfflineModal = false" class="px-5 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider transition-colors">
+                                    Batal
+                                </button>
+                                <button type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-2 active:scale-95">
+                                    <i class="ph-bold ph-pencil-simple text-base"></i>
+                                    <span>Simpan & Input Nilai</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </template>
+        @endif
+
     </div>
 
     {{-- SCRIPT ALPINE JS & SWEETALERT --}}
@@ -294,6 +429,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('alpine:init', () => {
+            Alpine.data('gradePage', () => ({
+                openQuickOfflineModal: false,
+                offlineTopics: [],
+                loadingTopics: false,
+                init() {
+                    const subjectId = '{{ $selectedSubjectId ?? '' }}';
+                    if (subjectId) {
+                        this.loadingTopics = true;
+                        fetch('/lms/api/subjects/' + subjectId + '/topics')
+                            .then(r => r.json())
+                            .then(data => {
+                                this.offlineTopics = data || [];
+                                this.loadingTopics = false;
+                            })
+                            .catch(() => { this.loadingTopics = false; });
+                    }
+                }
+            }));
+
             // Komponen Alpine JS untuk mengatur Dropdown Tingkat & Kelas yang bersambung
             Alpine.data('gradeFilter', () => ({
                 selectedLevel: '{{ $selectedLevelId ?? '' }}',
