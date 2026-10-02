@@ -72,6 +72,13 @@ class LmsTopicController extends Controller
     public function destroy($id)
     {
         $topic = Topic::findOrFail($id);
+        $user = Auth::user();
+        if (!$this->isUserAdmin($user)) {
+            $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
+            if (!in_array($topic->subject_id, $allowedSubjectIds)) {
+                abort(403, 'Anda tidak memiliki wewenang untuk menghapus pokok bahasan ini.');
+            }
+        }
         
         // Pastikan tidak ada materi/tugas yang masih terkait sebelum dihapus (Opsional, karena di migration kita set nullOnDelete)
         if ($topic->materials()->count() > 0 || $topic->assignments()->count() > 0) {
@@ -86,6 +93,14 @@ class LmsTopicController extends Controller
     public function edit($id)
     {
         $topic = \App\Models\Topic::findOrFail($id);
+        $user = Auth::user();
+        if (!$this->isUserAdmin($user)) {
+            $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
+            if (!in_array($topic->subject_id, $allowedSubjectIds)) {
+                abort(403, 'Anda tidak memiliki wewenang untuk mengedit pokok bahasan ini.');
+            }
+        }
+
         $subjects = $this->getScopedSubjects();
         if ($topic->subject_id && !$subjects->contains('id', $topic->subject_id)) {
             $currSub = Subject::find($topic->subject_id);
@@ -96,6 +111,15 @@ class LmsTopicController extends Controller
 
     public function update(\Illuminate\Http\Request $request, $id)
     {
+        $topic = \App\Models\Topic::findOrFail($id);
+        $user = Auth::user();
+        if (!$this->isUserAdmin($user)) {
+            $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
+            if (!in_array($topic->subject_id, $allowedSubjectIds) || !in_array($request->subject_id, $allowedSubjectIds)) {
+                abort(403, 'Anda tidak memiliki wewenang untuk mengubah pokok bahasan ini.');
+            }
+        }
+
         $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'title' => 'required|string|max:255',
@@ -103,7 +127,6 @@ class LmsTopicController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $topic = \App\Models\Topic::findOrFail($id);
         $topic->update($request->all());
 
         return redirect()->route('lms.topics.index')->with('success', 'Bab berhasil diperbarui!');
