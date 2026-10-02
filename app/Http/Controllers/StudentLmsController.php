@@ -28,6 +28,14 @@ class StudentLmsController extends Controller
                 ->where(function($q) use ($student) {
                     $q->where('class_id', $student->class_id)->orWhereNull('class_id');
                 })
+                ->where(function($q) {
+                    $q->whereNull('description')
+                      ->orWhere('description', 'NOT LIKE', '%CBT%');
+                })
+                ->where(function($q) {
+                    $q->where('assignment_type', '!=', 'quiz')
+                      ->orWhereHas('questions');
+                })
                 ->whereDoesntHave('submissions', function($q) use ($student) {
                     $q->where('student_id', $student->id);
                 })
@@ -138,6 +146,14 @@ class StudentLmsController extends Controller
             }])
             ->where('subject_id', $subjectId)
             ->where('class_id', $student->class_id)
+            ->where(function($q) {
+                $q->whereNull('description')
+                  ->orWhere('description', 'NOT LIKE', '%CBT%');
+            })
+            ->where(function($q) {
+                $q->where('assignment_type', '!=', 'quiz')
+                  ->orWhereHas('questions');
+            })
             ->latest()
             ->get();
 
@@ -180,7 +196,7 @@ class StudentLmsController extends Controller
             return back()->with('success', 'Tugas berhasil ditandai selesai!');
         }
 
-         // TAMBAHAN: Jika tipe tugas adalah Video Interaktif (Otomatis selesai tanpa validasi form upload)
+        // TAMBAHAN: Jika tipe tugas adalah Video Interaktif (Otomatis selesai tanpa validasi form upload)
         if ($request->submission_type == 'interactive_video' || $assignment->assignment_type == 'interactive_video') {
             LmsSubmission::updateOrCreate(
                 ['assignment_id' => $assignmentId, 'student_id' => $student->id],
@@ -192,6 +208,20 @@ class StudentLmsController extends Controller
                 ]
             );
             return back()->with('success', 'Video Interaktif berhasil diselesaikan!');
+        }
+
+        // TAMBAHAN: Jika tipe tugas adalah Offline, CBT, atau Penanda Selesai Manual
+        if (in_array($request->submission_type, ['offline', 'cbt', 'read']) || $assignment->assignment_type == 'offline') {
+            LmsSubmission::updateOrCreate(
+                ['assignment_id' => $assignmentId, 'student_id' => $student->id],
+                [
+                    'submitted_at' => now(), 
+                    'student_note' => $request->student_note ?? ($request->submission_type == 'cbt' ? 'Penilaian disinkronkan via CBT' : 'Telah ditandai selesai oleh siswa'),
+                    'submission_type' => $request->submission_type ?? 'offline',
+                    'grade' => null
+                ]
+            );
+            return back()->with('success', 'Tugas berhasil ditandai selesai!');
         }
         
         // Cek Deadline

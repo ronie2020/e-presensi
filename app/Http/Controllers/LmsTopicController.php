@@ -3,18 +3,56 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Topic;
 use App\Models\Subject;
+use App\Models\TeachingLoad;
+use App\Models\Timetable;
+use App\Models\LmsMaterial;
+use App\Models\LmsAssignment;
 
 class LmsTopicController extends Controller
 {
     // Menampilkan halaman kelola Bab
     public function index(Request $request)
     {
-        $subjects = Subject::orderBy('name', 'asc')->get();
+        $user = Auth::user();
         
+        $isAdmin = false;
+        if (method_exists($user, 'hasRole')) {
+            $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin') || $user->hasRole('Administrator');
+        }
+        if (!$isAdmin && isset($user->role)) {
+            $isAdmin = in_array(strtolower($user->role), ['admin', 'super-admin', 'administrator']);
+        }
+
+        $teacherSubjectIds = collect();
+        if (!$isAdmin) {
+            $loadSubjectIds = TeachingLoad::where('teacher_id', $user->id)->pluck('subject_id');
+            $timetableSubjectIds = Timetable::where('teacher_id', $user->id)->pluck('subject_id');
+            $materialSubjectIds = LmsMaterial::where('teacher_id', $user->id)->pluck('subject_id');
+            $assignmentSubjectIds = LmsAssignment::where('teacher_id', $user->id)->pluck('subject_id');
+
+            $teacherSubjectIds = $loadSubjectIds
+                ->concat($timetableSubjectIds)
+                ->concat($materialSubjectIds)
+                ->concat($assignmentSubjectIds)
+                ->filter()
+                ->unique();
+        }
+
+        if ($isAdmin || $teacherSubjectIds->isEmpty()) {
+            $subjects = Subject::orderBy('name', 'asc')->get();
+        } else {
+            $subjects = Subject::whereIn('id', $teacherSubjectIds)->orderBy('name', 'asc')->get();
+        }
+
         $query = Topic::with('subject');
-        
+
+        if (!$isAdmin && $teacherSubjectIds->isNotEmpty()) {
+            $query->whereIn('subject_id', $teacherSubjectIds);
+        }
+
         // Filter berdasarkan mapel jika ada
         if ($request->filled('subject_id')) {
             $query->where('subject_id', $request->subject_id);

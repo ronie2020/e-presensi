@@ -28,6 +28,14 @@ class StudentLearningController extends Controller
         $assignments = LmsAssignment::with(['questions', 'topic'])
             ->where('subject_id', $subjectId)
             ->where('class_id', $classId)
+            ->where(function($q) {
+                $q->whereNull('description')
+                  ->orWhere('description', 'NOT LIKE', '%CBT%');
+            })
+            ->where(function($q) {
+                $q->where('assignment_type', '!=', 'quiz')
+                  ->orWhereHas('questions');
+            })
             ->get();
             
        // 2. Gabungkan dan urutkan
@@ -118,6 +126,10 @@ class StudentLearningController extends Controller
                                            ->where('student_id', $student->id)
                                            ->first();
                 $isCompleted = $submission ? true : false;
+                $questionsCount = $item->questions ? $item->questions->count() : 0;
+                $isCbt = str_contains(strtolower($item->description ?? ''), 'cbt') || 
+                         str_contains(strtolower($item->title ?? ''), 'cbt') || 
+                         ($item->assignment_type === 'quiz' && $questionsCount === 0);
 
                 $syllabus[] = [
                     'id' => 'a_' . $item->id,
@@ -127,25 +139,44 @@ class StudentLearningController extends Controller
                     'type' => 'assignment', 
                     'assignment_type' => $item->assignment_type,
                     'content' => $item->description,
-                    'duration' => $item->duration_minutes,
+                    'duration' => $item->duration_minutes ?? 0,
                     'link_url' => $item->link_url,
                     'grade' => $submission->grade ?? null,
                     'completed' => $isCompleted,
                     'locked' => false,
                     'questions' => $item->questions, 
+                    'questions_count' => $questionsCount,
+                    'is_cbt' => $isCbt,
                 ];
             }
         }
 
         // 3. TERAPKAN LOGIKA PENGUNCIAN (PREREQUISITE)
+        // Suatu item hanya terkunci jika materi/tugas sebelumnya belum diselesaikan oleh siswa.
         $isPreviousCompleted = true;
+        $previousDbId = null;
+        $previousType = null;
+
         foreach ($syllabus as $key => $item) {
             if ($key === 0) {
                 $syllabus[$key]['locked'] = false; 
             } else {
-                $syllabus[$key]['locked'] = !$isPreviousCompleted; 
+                // Jika item ini adalah bagian dari materi yang sama (intro & attachments)
+                if ($item['type'] !== 'assignment' && $previousType !== 'assignment' && $item['db_id'] === $previousDbId) {
+                    $syllabus[$key]['locked'] = $syllabus[$key - 1]['locked'];
+                } else {
+                    $syllabus[$key]['locked'] = !$isPreviousCompleted; 
+                }
             }
-            $isPreviousCompleted = $syllabus[$key]['completed'];
+
+            // Update status kelengkapan untuk item pada materi/tugas berikutnya
+            $isNextDifferent = !isset($syllabus[$key + 1]) || $syllabus[$key + 1]['db_id'] !== $item['db_id'] || $syllabus[$key + 1]['type'] !== $item['type'];
+            if ($isNextDifferent) {
+                $isPreviousCompleted = $item['completed'];
+            }
+
+            $previousDbId = $item['db_id'];
+            $previousType = $item['type'];
         }
 
         return view('students.lms.learning-player', [

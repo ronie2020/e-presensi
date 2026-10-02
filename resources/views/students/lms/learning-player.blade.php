@@ -249,7 +249,8 @@
                                         <div class="absolute -top-10 -right-10 w-40 h-40 bg-elevate-primary/30 blur-2xl rounded-full pointer-events-none"></div>
                                         <div class="relative z-10">
                                             <span class="px-3 py-1 bg-elevate-peach/20 text-elevate-peach-light text-[10px] font-black uppercase tracking-widest rounded-full border border-elevate-peach/20 mb-3 inline-block shadow-sm" x-text="activeItem.assignment_type.replace('_', ' ').toUpperCase()"></span>
-                                            <h2 class="text-xl md:text-2xl font-black text-white leading-tight" x-text="activeItem.group_title"></h2>
+                                            <h2 class="text-xl md:text-2xl font-black text-white leading-tight mb-1" x-text="activeItem.title"></h2>
+                                            <p class="text-xs font-semibold text-white/70" x-text="activeItem.group_title"></p>
                                         </div>
                                     </div>
                                     <div class="p-6 md:p-8">
@@ -274,11 +275,33 @@
 
                                         <template x-if="!activeItem.completed">
                                             <div>
-                                                {{-- OPSI 1: KUIS ONLINE --}}
-                                                <template x-if="activeItem.assignment_type === 'quiz'">
+                                                {{-- OPSI 1A: KUIS ONLINE BIASA (DENGAN SOAL LMS) --}}
+                                                <template x-if="activeItem.assignment_type === 'quiz' && !activeItem.is_cbt && activeItem.questions_count > 0">
                                                     <a :href="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/quiz'" class="block w-full py-4 bg-elevate-primary text-white text-center font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors active:scale-95">
-                                                        <i class="ph-bold ph-play-circle mr-2"></i> Buka Halaman Kuis (<span x-text="activeItem.duration"></span> Menit)
+                                                        <i class="ph-bold ph-play-circle mr-2"></i> Buka Halaman Kuis (<span x-text="activeItem.duration || 0"></span> Menit)
                                                     </a>
+                                                </template>
+
+                                                {{-- OPSI 1B: KUIS / TUGAS SINKRONISASI CBT ATAU TANPA SOAL LMS --}}
+                                                <template x-if="activeItem.assignment_type === 'quiz' && (activeItem.is_cbt || !activeItem.questions_count || activeItem.questions_count === 0)">
+                                                    <div class="space-y-4">
+                                                        <div class="p-5 bg-elevate-soft/50 border border-elevate-soft rounded-2xl flex items-start gap-3">
+                                                            <i class="ph-fill ph-info text-2xl text-elevate-primary shrink-0 mt-0.5"></i>
+                                                            <div>
+                                                                <p class="text-sm font-bold text-elevate-dark">Penilaian Disinkronkan dengan Ujian CBT</p>
+                                                                <p class="text-xs text-elevate-dark/70 font-medium mt-1 leading-relaxed">Nilai ujian ini diambil secara otomatis dari hasil Ujian CBT. Jika kamu telah atau akan mengerjakan melalui Ujian CBT, silakan klik tombol di bawah untuk memperbarui status alur belajar kamu.</p>
+                                                            </div>
+                                                        </div>
+                                                        <form :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" method="POST" x-data="{ submitting: false }" @submit="submitting = true">
+                                                            @csrf
+                                                            <input type="hidden" name="submission_type" value="cbt">
+                                                            <button type="submit" :disabled="submitting" class="w-full py-4 bg-elevate-primary text-white font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors flex items-center justify-center gap-2" :class="submitting ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'">
+                                                                <i class="ph-bold ph-spinner-gap animate-spin text-lg" x-show="submitting" x-cloak></i>
+                                                                <i class="ph-bold ph-check-circle text-lg" x-show="!submitting"></i> 
+                                                                <span x-text="submitting ? 'Memproses...' : 'Tandai Selesai & Lanjut'"></span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </template>
 
                                                 {{-- OPSI 2: TUGAS UPLOAD & LINK --}}
@@ -312,11 +335,22 @@
                                                 {{-- OPSI 3: VIDEO INTERAKTIF --}}
                                                 <template x-if="activeItem.assignment_type === 'interactive_video'">
                                                     <div class="space-y-6">
-                                                        {{-- Indikator Warning jika soal belum termuat --}}
+                                                        {{-- Indikator Warning jika soal belum termuat atau tidak ada --}}
                                                         <template x-if="!interactiveQuestionsState || interactiveQuestionsState.length === 0">
-                                                            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-700 text-sm font-bold flex items-center gap-3">
-                                                                <i class="ph-bold ph-warning-circle text-xl shrink-0"></i>
-                                                                Terdapat kendala: Data kuis interaktif kosong. Lapor ke guru atau coba refresh halaman.
+                                                            <div class="space-y-4">
+                                                                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800 text-sm font-medium flex items-center gap-3">
+                                                                    <i class="ph-bold ph-info text-xl shrink-0 text-yellow-600"></i>
+                                                                    Video ini dapat ditonton secara penuh. Silakan klik tombol di bawah setelah selesai menonton.
+                                                                </div>
+                                                                <form :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" method="POST" x-data="{ submitting: false }" @submit="submitting = true">
+                                                                    @csrf
+                                                                    <input type="hidden" name="submission_type" value="interactive_video">
+                                                                    <button type="submit" :disabled="submitting" class="w-full py-4 bg-elevate-primary text-white font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors flex items-center justify-center gap-2" :class="submitting ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'">
+                                                                        <i class="ph-bold ph-spinner-gap animate-spin text-lg" x-show="submitting" x-cloak></i>
+                                                                        <i class="ph-bold ph-check-circle text-lg" x-show="!submitting"></i> 
+                                                                        <span x-text="submitting ? 'Memproses...' : 'Selesaikan Tugas Video'"></span>
+                                                                    </button>
+                                                                </form>
                                                             </div>
                                                         </template>
 
@@ -382,6 +416,28 @@
                                                                 </button>
                                                             </form>
                                                         </template>
+                                                    </div>
+                                                </template>
+
+                                                {{-- OPSI 4: TUGAS OFFLINE / TATAP MUKA --}}
+                                                <template x-if="activeItem.assignment_type === 'offline'">
+                                                    <div class="space-y-4">
+                                                        <div class="p-5 bg-elevate-soft/50 border border-elevate-soft rounded-2xl flex items-start gap-3">
+                                                            <i class="ph-fill ph-chalkboard-teacher text-2xl text-elevate-primary shrink-0 mt-0.5"></i>
+                                                            <div>
+                                                                <p class="text-sm font-bold text-elevate-dark">Tugas Tatap Muka / Offline</p>
+                                                                <p class="text-xs text-elevate-dark/70 font-medium mt-1 leading-relaxed">Tugas ini dikumpulkan secara langsung kepada guru di kelas. Klik tombol di bawah setelah kamu menyelesaikan tugas ini.</p>
+                                                            </div>
+                                                        </div>
+                                                        <form :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" method="POST" x-data="{ submitting: false }" @submit="submitting = true">
+                                                            @csrf
+                                                            <input type="hidden" name="submission_type" value="offline">
+                                                            <button type="submit" :disabled="submitting" class="w-full py-4 bg-elevate-primary text-white font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors flex items-center justify-center gap-2" :class="submitting ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'">
+                                                                <i class="ph-bold ph-spinner-gap animate-spin text-lg" x-show="submitting" x-cloak></i>
+                                                                <i class="ph-bold ph-check-circle text-lg" x-show="!submitting"></i> 
+                                                                <span x-text="submitting ? 'Memproses...' : 'Tandai Selesai & Lanjut'"></span>
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </template>
 

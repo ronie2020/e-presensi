@@ -235,6 +235,14 @@ class StudentPortalController extends Controller
             $pendingTasks = LmsAssignment::with('subject')
                 ->where('class_id', $classId)
                 ->where(function($q) {
+                    $q->whereNull('description')
+                      ->orWhere('description', 'NOT LIKE', '%CBT%');
+                })
+                ->where(function($q) {
+                    $q->where('assignment_type', '!=', 'quiz')
+                      ->orWhereHas('questions');
+                })
+                ->where(function($q) {
                     $q->where('deadline', '>=', Carbon::now('Asia/Jakarta'))
                       ->orWhere('allow_late_submission', true);
                 })                
@@ -278,7 +286,18 @@ class StudentPortalController extends Controller
         
         if ($classId) {
             if (class_exists(LmsAssignment::class)) {
-                $assignments = LmsAssignment::with('subject')->where('class_id', $classId)->latest()->get();
+                $assignments = LmsAssignment::with('subject')
+                    ->where('class_id', $classId)
+                    ->where(function($q) {
+                        $q->whereNull('description')
+                          ->orWhere('description', 'NOT LIKE', '%CBT%');
+                    })
+                    ->where(function($q) {
+                        $q->where('assignment_type', '!=', 'quiz')
+                          ->orWhereHas('questions');
+                    })
+                    ->latest()
+                    ->get();
                 $lms_assignments_grouped = $assignments->groupBy(fn($i) => $i->subject->name ?? 'Umum');
                 if (class_exists(LmsSubmission::class)) {
                     $submissions = LmsSubmission::where('student_id', $id)->get();                    
