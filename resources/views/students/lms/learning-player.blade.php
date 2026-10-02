@@ -320,7 +320,7 @@
                                                             </div>
                                                         </template>
                                                         <template x-if="activeItem.assignment_type === 'file_upload'">
-                                                            <input type="file" name="file" required class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                            <input type="file" name="file" required @change="if($event.target.files[0] && $event.target.files[0].size > 10 * 1024 * 1024) { Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 10MB. Silakan pilih file yang lebih kecil.', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem] font-sans' } }); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
                                                         </template>
                                                         <textarea name="student_note" rows="3" placeholder="Tambahkan catatan opsional..." class="w-full rounded-xl border-elevate-soft p-4 focus:ring-2 focus:ring-elevate-accent/20 focus:border-elevate-accent text-elevate-dark bg-white outline-none transition-all text-sm resize-none shadow-sm"></textarea>
                                                         
@@ -447,6 +447,137 @@
                                 </div>
                             </template>
                         </div>
+
+                        {{-- FORUM DISKUSI & TANYA JAWAB PER MATERI --}}
+                        <template x-if="activeItem && activeItem.type !== 'assignment'">
+                            <div class="mt-8 bg-white rounded-[2rem] shadow-sm border border-elevate-soft p-6 md:p-8">
+                                <div class="flex items-center justify-between mb-6 border-b border-elevate-soft pb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-2xl bg-elevate-primary/10 text-elevate-primary flex items-center justify-center text-xl font-bold">
+                                            <i class="ph-bold ph-chats-teardrop"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-black text-elevate-dark">Forum Diskusi & Tanya Jawab</h3>
+                                            <p class="text-xs text-elevate-dark/60 font-medium">Tanyakan materi ini kepada Guru atau ajak teman berdiskusi.</p>
+                                        </div>
+                                    </div>
+                                    <button @click="fetchDiscussions()" class="px-3.5 py-1.5 bg-elevate-soft hover:bg-elevate-primary hover:text-white text-elevate-primary text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5">
+                                        <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+                                    </button>
+                                </div>
+
+                                {{-- FORM INPUT KOMENTAR BARU --}}
+                                <div class="mb-6 flex gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-md">
+                                        <i class="ph-bold ph-user"></i>
+                                    </div>
+                                    <div class="flex-1 space-y-2">
+                                        <textarea x-model="discussionComment" rows="3" placeholder="Tuliskan pertanyaan atau tanggapan kamu tentang materi ini..." class="w-full rounded-2xl border border-elevate-soft p-4 focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-accent text-sm text-elevate-dark outline-none transition-all shadow-sm resize-none"></textarea>
+                                        <div class="flex justify-end">
+                                            <button @click="postDiscussion()" :disabled="!discussionComment.trim()" class="px-6 py-2.5 bg-elevate-primary text-white font-bold rounded-xl text-xs hover:bg-elevate-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-elevate-primary/20 flex items-center gap-2">
+                                                <i class="ph-bold ph-paper-plane-right"></i> Kirim Pertanyaan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- LIST DISKUSI --}}
+                                <div class="space-y-4">
+                                    <template x-if="loadingDiscussions">
+                                        <div class="p-8 text-center text-elevate-dark/50">
+                                            <i class="ph-duotone ph-spinner-gap animate-spin text-3xl text-elevate-primary block mx-auto mb-2"></i>
+                                            <span class="text-xs font-bold">Memuat forum diskusi...</span>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!loadingDiscussions && discussions.length === 0">
+                                        <div class="p-8 text-center border-2 border-dashed border-elevate-soft rounded-2xl bg-elevate-soft/20 text-elevate-dark/50">
+                                            <i class="ph-bold ph-chat-centered-text text-3xl mb-2 text-elevate-primary/40 block mx-auto"></i>
+                                            <p class="text-xs font-bold">Belum ada diskusi pada materi ini. Jadilah yang pertama bertanya!</p>
+                                        </div>
+                                    </template>
+
+                                    <template x-for="item in discussions" :key="item.id">
+                                        <div class="p-4 md:p-5 rounded-2xl bg-elevate-soft/30 border border-elevate-soft space-y-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs text-white shadow-sm"
+                                                         :class="item.author_role === 'Siswa' ? 'bg-sky-500' : 'bg-emerald-600'">
+                                                        <span x-text="item.author_name ? item.author_name.charAt(0) : 'U'"></span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="font-bold text-xs text-elevate-dark" x-text="item.author_name"></span>
+                                                            <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase"
+                                                                  :class="item.author_role === 'Siswa' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-800'"
+                                                                  x-text="item.author_role"></span>
+                                                            <template x-if="item.is_verified">
+                                                                <span class="text-[9px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                                                                    <i class="ph-bold ph-check"></i> Terverifikasi
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                        <span class="text-[10px] text-slate-400" x-text="new Date(item.created_at).toLocaleString('id-ID')"></span>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Action Buttons --}}
+                                                <div class="flex items-center gap-1">
+                                                    @if(in_array(Auth::user()->role ?? '', ['Admin', 'Superadmin', 'Guru', 'Guru Mata Pelajaran']))
+                                                        <button @click="verifyDiscussion(item.id)" :title="item.is_verified ? 'Batal verifikasi' : 'Tandai Jawaban Benar'" class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 transition-colors">
+                                                            <i class="ph-bold" :class="item.is_verified ? 'ph-check-circle-fill text-lg' : 'ph-check-circle text-lg'"></i>
+                                                        </button>
+                                                    @endif
+                                                    <button @click="deleteDiscussion(item.id)" title="Hapus Komentar" class="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                                                        <i class="ph-bold ph-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <p class="text-xs md:text-sm text-elevate-dark/80 whitespace-pre-line pl-12" x-text="item.comment"></p>
+
+                                            {{-- Replies --}}
+                                            <div class="pl-12 pt-2 space-y-2">
+                                                <template x-for="reply in item.replies" :key="reply.id">
+                                                    <div class="p-3 rounded-xl bg-white border border-elevate-soft space-y-1">
+                                                        <div class="flex items-center justify-between">
+                                                            <div class="flex items-center gap-2">
+                                                                <span class="font-bold text-xs text-elevate-dark" x-text="reply.author_name"></span>
+                                                                <span class="text-[8px] font-extrabold px-1.5 py-0.2 rounded uppercase"
+                                                                      :class="reply.author_role === 'Siswa' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-800'"
+                                                                      x-text="reply.author_role"></span>
+                                                            </div>
+                                                            <button @click="deleteDiscussion(reply.id)" class="text-rose-400 hover:text-rose-600 text-xs">
+                                                                <i class="ph-bold ph-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                        <p class="text-xs text-elevate-dark/70" x-text="reply.comment"></p>
+                                                    </div>
+                                                </template>
+
+                                                {{-- Reply Form Toggle --}}
+                                                <div class="pt-1">
+                                                    <template x-if="replyingToId !== item.id">
+                                                        <button @click="replyingToId = item.id; replyComment = ''" class="text-xs font-bold text-elevate-primary hover:underline flex items-center gap-1">
+                                                            <i class="ph-bold ph-arrow-bend-down-right"></i> Balas
+                                                        </button>
+                                                    </template>
+                                                    <template x-if="replyingToId === item.id">
+                                                        <div class="space-y-2 bg-white p-3 rounded-xl border border-elevate-soft">
+                                                            <textarea x-model="replyComment" rows="2" placeholder="Tulis balasan..." class="w-full p-2.5 border border-elevate-soft rounded-lg text-xs outline-none focus:border-elevate-primary resize-none"></textarea>
+                                                            <div class="flex justify-end gap-2">
+                                                                <button @click="replyingToId = null" class="px-3 py-1 bg-slate-100 text-slate-600 font-bold text-xs rounded-lg">Batal</button>
+                                                                <button @click="postDiscussion(item.id)" :disabled="!replyComment.trim()" class="px-4 py-1 bg-elevate-primary text-white font-bold text-xs rounded-lg disabled:opacity-50">Kirim Balasan</button>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
 
@@ -506,6 +637,13 @@
                 activeInteractiveQuiz: null,
                 selectedInteractiveAnswer: null,
 
+                // State Forum Diskusi LMS
+                discussions: [],
+                discussionComment: '',
+                replyingToId: null,
+                replyComment: '',
+                loadingDiscussions: false,
+
                 //  State Pelacakan Waktu
                 timeSpent: 0,
                 lastLogTime: Date.now(),
@@ -527,7 +665,7 @@
 
                 getEmbedUrl(url) {
                     if (!url) return '';
-                    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+                    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
                     if (ytMatch && ytMatch[1]) {
                         return `https://www.youtube.com/embed/${ytMatch[1]}?rel=0`;
                     }
@@ -538,7 +676,8 @@
                 },
 
                 extractYoutubeId(url) {
-                    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+                    if (!url) return null;
+                    const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
                     return ytMatch ? ytMatch[1] : null;
                 },
                 
@@ -549,6 +688,8 @@
 
                     if (this.activeItem.type === 'assignment' && this.activeItem.assignment_type === 'interactive_video') {
                         setTimeout(() => this.initInteractiveVideo(this.activeItem), 500);
+                    } else if (this.activeItem.type !== 'assignment') {
+                        this.fetchDiscussions();
                     }
 
                     // TAMBAHAN: Mulai pelacakan waktu
@@ -646,8 +787,106 @@
 
                         if (newItem.type === 'assignment' && newItem.assignment_type === 'interactive_video') {
                             this.initInteractiveVideo(newItem);
+                        } else if (newItem.type !== 'assignment') {
+                            this.fetchDiscussions();
                         }
                     }, 300);
+                },
+
+                fetchDiscussions() {
+                    if (!this.activeItem || this.activeItem.type === 'assignment') return;
+                    this.loadingDiscussions = true;
+                    fetch(`/students/learning/material/${this.activeItem.db_id}/discussions`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                this.discussions = data.discussions;
+                            }
+                        })
+                        .catch(err => console.error('Error fetching discussions', err))
+                        .finally(() => { this.loadingDiscussions = false; });
+                },
+
+                postDiscussion(parentId = null) {
+                    const comment = parentId ? this.replyComment : this.discussionComment;
+                    if (!comment.trim()) return;
+
+                    fetch(`/students/learning/material/${this.activeItem.db_id}/discussions`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            comment: comment,
+                            parent_id: parentId
+                        })
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            if (parentId) {
+                                this.replyComment = '';
+                                this.replyingToId = null;
+                            } else {
+                                this.discussionComment = '';
+                            }
+                            this.fetchDiscussions();
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan' });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error posting discussion', err);
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal mengunggah komentar diskusi.' });
+                    });
+                },
+
+                verifyDiscussion(discussionId) {
+                    fetch(`/students/learning/discussions/${discussionId}/verify`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            this.fetchDiscussions();
+                        }
+                    });
+                },
+
+                deleteDiscussion(discussionId) {
+                    Swal.fire({
+                        title: 'Hapus Diskusi?',
+                        text: 'Komentar ini akan dihapus secara permanen.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        confirmButtonText: 'Ya, Hapus'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            fetch(`/students/learning/discussions/${discussionId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    this.fetchDiscussions();
+                                } else {
+                                    Swal.fire({ icon: 'error', title: 'Gagal', text: data.message });
+                                }
+                            });
+                        }
+                    });
                 },
 
                  // Fungsi Mengirim Waktu ke Server

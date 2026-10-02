@@ -29,6 +29,10 @@ class LmsMaterial extends Model
     }
 
     public function topic() {
-    return $this->belongsTo(Topic::class);
+        return $this->belongsTo(Topic::class);
+    }
+
+    public function discussions() {
+        return $this->hasMany(LmsDiscussion::class, 'material_id');
     }
 }

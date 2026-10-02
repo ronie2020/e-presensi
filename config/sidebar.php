@@ -148,6 +148,13 @@ return [
                 'icon' => 'ph-clipboard-text',
                 'roles' => ['Superadmin', 'Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas', 'Kepala Sekolah']
             ],
+            [
+                'name' => 'Monitoring Progres',
+                'route' => 'lms.monitoring',
+                'active_check' => 'lms.monitoring',
+                'icon' => 'ph-chart-line-up',
+                'roles' => ['Superadmin', 'Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas', 'Kepala Sekolah']
+            ],
         ],
         'Akademik' => [
             [

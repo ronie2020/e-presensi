@@ -37,6 +37,8 @@ class BankQuestionsImport implements ToModel, WithHeadingRow
             'correct_answer' => strtoupper(trim($row['kunci'] ?? 'A')),
             'score_weight' => isset($row['bobot']) ? (int) $row['bobot'] : 2,
             'tags' => $row['materi_kd'] ?? null,
+            'difficulty' => strtolower($row['kesulitan'] ?? $row['difficulty'] ?? 'sedang'),
+            'bloom_taxonomy' => strtoupper($row['bloom'] ?? $row['bloom_taxonomy'] ?? 'C2'),
         ]);
     }
 

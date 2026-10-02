@@ -268,6 +268,7 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     Route::prefix('students/learning')->name('students.learning.')->group(function () {
         Route::get('/', [StudentLmsController::class, 'index'])->name('index');
         Route::get('/subject/{subject_id}', [StudentLmsController::class, 'showSubject'])->name('subject.show');
+        Route::get('/subject/{subject_id}/certificate', [StudentLmsController::class, 'downloadCertificate'])->name('subject.certificate');
         Route::get('/material/{id}/download', [StudentLmsController::class, 'downloadMaterial'])->name('material.download');
         
         // Upload Tugas & Kuis
@@ -281,6 +282,12 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         // Route AJAX untuk auto-save / menandai materi selesai dibaca
         Route::post('/mark-material', [\App\Http\Controllers\StudentLearningController::class, 'markMaterialComplete'])->name('mark-material');
         Route::post('/log-time', [\App\Http\Controllers\StudentLmsController::class, 'logTime'])->name('log-time');
+
+        // Forum Diskusi LMS per Materi
+        Route::get('/material/{materialId}/discussions', [\App\Http\Controllers\StudentLearningController::class, 'getDiscussions'])->name('discussions.index');
+        Route::post('/material/{materialId}/discussions', [\App\Http\Controllers\StudentLearningController::class, 'storeDiscussion'])->name('discussions.store');
+        Route::post('/discussions/{discussionId}/verify', [\App\Http\Controllers\StudentLearningController::class, 'verifyDiscussion'])->name('discussions.verify');
+        Route::delete('/discussions/{discussionId}', [\App\Http\Controllers\StudentLearningController::class, 'destroyDiscussion'])->name('discussions.destroy');
     });
 
     // B. UJIAN SISWA (CBT)    
@@ -353,6 +360,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('materials', LmsMaterialController::class);
         // Route untuk melihat log pembaca materi
         Route::get('/materials/{material}/readers', [\App\Http\Controllers\LmsMaterialController::class, 'readers'])->name('materials.readers');
+        
+        // Forum Diskusi LMS per Materi (Sisi Guru)
+        Route::get('/materials/{materialId}/discussions', [\App\Http\Controllers\StudentLearningController::class, 'getDiscussions'])->name('materials.discussions.index');
+        Route::post('/materials/{materialId}/discussions', [\App\Http\Controllers\StudentLearningController::class, 'storeDiscussion'])->name('materials.discussions.store');
+        Route::post('/discussions/{discussionId}/verify', [\App\Http\Controllers\StudentLearningController::class, 'verifyDiscussion'])->name('discussions.verify');
+        Route::delete('/discussions/{discussionId}', [\App\Http\Controllers\StudentLearningController::class, 'destroyDiscussion'])->name('discussions.destroy');
+
         Route::resource('assignments', LmsAssignmentController::class);
          // --- ROUTE BARU: PREVIEW MODE GURU ---
         Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');  
@@ -368,6 +382,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');
         Route::get('/grades/export', [LmsGradeController::class, 'exportExcel'])->name('grades.export');
         Route::get('/grades/print', [LmsGradeController::class, 'printReport'])->name('grades.print');
+
+        // Monitoring Progres Belajar Siswa untuk Guru
+        Route::get('/monitoring', [LmsMaterialController::class, 'monitoring'])->name('monitoring');
 
     });
 

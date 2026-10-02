@@ -202,7 +202,8 @@
 
                 <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-0">
                     <div class="max-w-7xl mx-auto relative z-10">
-                        {{ $slot }}
+                        {{ $slot ?? '' }}
+                        @yield('content')
                     </div>
                     <div class="h-10"></div>
                 </main>

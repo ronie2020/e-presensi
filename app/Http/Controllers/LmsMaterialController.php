@@ -6,6 +6,9 @@ use App\Models\LmsMaterial;
 use App\Models\LmsMaterialAttachment; 
 use App\Models\Subject;
 use App\Models\SchoolClass;
+use App\Models\Student;
+use App\Models\TeachingLoad;
+use App\Models\Timetable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +37,7 @@ class LmsMaterialController extends Controller
 
         $materials = LmsMaterial::whereIn('id', $subQuery)
             ->with(['subject', 'schoolClass', 'attachments']) 
+            ->withCount('discussions')
             ->latest()
             ->paginate(10)
             ->withQueryString(); 
@@ -447,5 +451,144 @@ class LmsMaterialController extends Controller
             'syllabusJson' => json_encode($syllabus),
             'isPreview' => true 
         ]);
+    }
+
+    public function monitoring(Request $request)
+    {
+        $user = Auth::user();
+
+        if (in_array($user->role, ['Admin', 'Superadmin', 'Kepala Sekolah'])) {
+            $classes = SchoolClass::orderBy('name')->get();
+            $subjects = Subject::orderBy('name')->get();
+        } else {
+            $teacherId = $user->id;
+            
+            $subjectIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('subject_id');
+            $subjectIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('subject_id');
+            $subjectIdsFromMaterials = LmsMaterial::where('teacher_id', $teacherId)->pluck('subject_id');
+            $allSubjectIds = $subjectIdsFromLoad->concat($subjectIdsFromTimetable)->concat($subjectIdsFromMaterials)->unique()->filter();
+
+            $classIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('class_id');
+            $classIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('class_id');
+            $classIdsFromMaterials = LmsMaterial::where('teacher_id', $teacherId)->pluck('class_id');
+            $classIdsFromAssignments = \App\Models\LmsAssignment::where('teacher_id', $teacherId)->pluck('class_id');
+            $allClassIds = $classIdsFromLoad
+                ->concat($classIdsFromTimetable)
+                ->concat($classIdsFromMaterials)
+                ->concat($classIdsFromAssignments)
+                ->unique()
+                ->filter();
+
+            $subjects = Subject::whereIn('id', $allSubjectIds)->orderBy('name')->get();
+            if ($subjects->isEmpty()) {
+                $subjects = Subject::orderBy('name')->get();
+            }
+
+            $classes = SchoolClass::whereIn('id', $allClassIds)->orderBy('name')->get();
+            if ($classes->isEmpty()) {
+                $classes = SchoolClass::orderBy('name')->get();
+            }
+        }
+
+        $selectedClassId = $request->input('class_id', $classes->first()?->id);
+        $selectedSubjectId = $request->input('subject_id', $subjects->first()?->id);
+
+        $studentsData = collect();
+        $materialsCount = 0;
+        $assignmentsCount = 0;
+        $totalStudentsCount = 0;
+        $completedStudentsCount = 0;
+        $warningStudentsCount = 0;
+        $avgProgress = 0;
+
+        if ($selectedClassId && $selectedSubjectId) {
+            $materials = LmsMaterial::where('subject_id', $selectedSubjectId)->get();
+            $assignments = \App\Models\LmsAssignment::where('subject_id', $selectedSubjectId)
+                ->where('description', 'not like', '%CBT%')
+                ->get();
+
+            $materialsCount = $materials->count();
+            $assignmentsCount = $assignments->count();
+            $totalItems = $materialsCount + $assignmentsCount;
+
+            $students = Student::where('class_id', $selectedClassId)
+                ->where(function($q) {
+                    $q->where('status', 'active')->orWhereNull('status');
+                })
+                ->orderBy('name')
+                ->get();
+
+            $totalStudentsCount = $students->count();
+            $materialIds = $materials->pluck('id');
+            $assignmentIds = $assignments->pluck('id');
+
+            $allLogs = \App\Models\LmsMaterialLog::whereIn('material_id', $materialIds)
+                ->whereIn('student_id', $students->pluck('id'))
+                ->get()
+                ->groupBy('student_id');
+
+            $allSubmissions = \App\Models\LmsSubmission::whereIn('assignment_id', $assignmentIds)
+                ->whereIn('student_id', $students->pluck('id'))
+                ->get()
+                ->groupBy('student_id');
+
+            $totalProgressSum = 0;
+
+            foreach ($students as $student) {
+                $studentLogs = $allLogs->get($student->id, collect());
+                $studentSubmissions = $allSubmissions->get($student->id, collect());
+
+                $readMaterialsCount = $studentLogs->pluck('material_id')->unique()->count();
+                $submittedAssignmentsCount = $studentSubmissions->pluck('assignment_id')->unique()->count();
+
+                $completedCount = $readMaterialsCount + $submittedAssignmentsCount;
+                $progressPercent = $totalItems > 0 ? round(($completedCount / $totalItems) * 100) : 0;
+
+                $totalProgressSum += $progressPercent;
+
+                if ($progressPercent >= 100) {
+                    $completedStudentsCount++;
+                    $status = 'Selesai Total';
+                    $badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+                } elseif ($progressPercent >= 50) {
+                    $status = 'Progres Baik';
+                    $badgeClass = 'bg-sky-500/10 text-sky-400 border-sky-500/20';
+                } elseif ($progressPercent > 0) {
+                    $status = 'Belum Tuntas';
+                    $warningStudentsCount++;
+                    $badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                } else {
+                    $status = 'Belum Mulai';
+                    $warningStudentsCount++;
+                    $badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+                }
+
+                $studentsData->push([
+                    'student' => $student,
+                    'read_materials' => $readMaterialsCount,
+                    'submitted_assignments' => $submittedAssignmentsCount,
+                    'total_items' => $totalItems,
+                    'progress_percent' => $progressPercent,
+                    'status' => $status,
+                    'badge_class' => $badgeClass
+                ]);
+            }
+
+            $avgProgress = $totalStudentsCount > 0 ? round($totalProgressSum / $totalStudentsCount) : 0;
+        }
+
+        return view('lms.monitoring.index', compact(
+            'classes',
+            'subjects',
+            'selectedClassId',
+            'selectedSubjectId',
+            'studentsData',
+            'materialsCount',
+            'assignmentsCount',
+            'totalStudentsCount',
+            'completedStudentsCount',
+            'warningStudentsCount',
+            'avgProgress'
+        ));
     }
 }

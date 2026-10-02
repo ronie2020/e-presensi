@@ -377,8 +377,17 @@ class StudentExamController extends Controller
                 $studentAns = trim($ans->answer);
                 $correctAns = trim($q->correct_answer);
 
-                if ($type === 'choice' || $type === 'true_false') {        // pilihan ganda            
-                    if (strcasecmp($studentAns, $correctAns) == 0) {
+                if ($type === 'choice' || $type === 'true_false' || $type === 'multiple_choice' || $type === 'multiple_select') {        // pilihan ganda / PG Kompleks
+                    $studentDec = json_decode($studentAns, true);
+                    $correctDec = json_decode($correctAns, true);
+
+                    if (is_array($studentDec) && is_array($correctDec)) {
+                        sort($studentDec);
+                        sort($correctDec);
+                        if ($studentDec == $correctDec) {
+                            $isCorrect = true;
+                        }
+                    } elseif (strcasecmp($studentAns, $correctAns) == 0) {
                         $isCorrect = true;
                     }
                 } 

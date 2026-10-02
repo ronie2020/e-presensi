@@ -9,6 +9,7 @@ use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
 use App\Models\LmsSubmission;
 use App\Models\LmsMaterialLog;
+use App\Models\LmsDiscussion;
 
 class StudentLearningController extends Controller
 {
@@ -196,5 +197,107 @@ class StudentLearningController extends Controller
 
         return response()->json(['status' => 'success']);
     }
-   
+
+    // ==========================================
+    // FORUM DISKUSI & TANYA JAWAB PER MATERI
+    // ==========================================
+
+    public function getDiscussions($materialId)
+    {
+        $discussions = LmsDiscussion::with(['replies'])
+            ->where('material_id', $materialId)
+            ->whereNull('parent_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'discussions' => $discussions
+        ]);
+    }
+
+    public function storeDiscussion(Request $request, $materialId)
+    {
+        $request->validate([
+            'comment' => 'required|string|max:1000',
+            'parent_id' => 'nullable|integer|exists:lms_discussions,id'
+        ]);
+
+        $student = Auth::guard('student')->user();
+        $user = Auth::user();
+
+        if ($student) {
+            $authorName = $student->name;
+            $authorRole = 'Siswa';
+            $studentId = $student->id;
+            $userId = null;
+        } elseif ($user) {
+            $authorName = $user->name;
+            $authorRole = $user->role ?? 'Guru';
+            $userId = $user->id;
+            $studentId = null;
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
+
+        $discussion = LmsDiscussion::create([
+            'material_id' => $materialId,
+            'user_id' => $userId,
+            'student_id' => $studentId,
+            'author_name' => $authorName,
+            'author_role' => $authorRole,
+            'parent_id' => $request->parent_id,
+            'comment' => $request->comment,
+            'is_verified' => false
+        ]);
+
+        $discussion->load('replies');
+
+        return response()->json([
+            'status' => 'success',
+            'discussion' => $discussion
+        ]);
+    }
+
+    public function verifyDiscussion($discussionId)
+    {
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['Admin', 'Superadmin', 'Guru', 'Guru Mata Pelajaran'])) {
+            return response()->json(['status' => 'error', 'message' => 'Hanya guru/admin yang dapat memverifikasi jawaban.'], 403);
+        }
+
+        $discussion = LmsDiscussion::findOrFail($discussionId);
+        $discussion->is_verified = !$discussion->is_verified;
+        $discussion->save();
+
+        return response()->json([
+            'status' => 'success',
+            'is_verified' => $discussion->is_verified
+        ]);
+    }
+
+    public function destroyDiscussion($discussionId)
+    {
+        $discussion = LmsDiscussion::findOrFail($discussionId);
+        $student = Auth::guard('student')->user();
+        $user = Auth::user();
+
+        $canDelete = false;
+
+        if ($user && in_array($user->role, ['Admin', 'Superadmin', 'Guru', 'Guru Mata Pelajaran'])) {
+            $canDelete = true;
+        } elseif ($user && $user->id == $discussion->user_id) {
+            $canDelete = true;
+        } elseif ($student && $student->id == $discussion->student_id) {
+            $canDelete = true;
+        }
+
+        if (!$canDelete) {
+            return response()->json(['status' => 'error', 'message' => 'Anda tidak memiliki hak akses untuk menghapus komentar ini.'], 403);
+        }
+
+        $discussion->delete();
+
+        return response()->json(['status' => 'success']);
+    }
 }

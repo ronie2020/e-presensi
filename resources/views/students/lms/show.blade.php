@@ -67,6 +67,21 @@
                     <div class="bg-elevate-peach p-2 rounded-xl text-white"><i class="ph-fill ph-warning-circle text-xl"></i></div>
                     <span class="font-bold text-sm">{{ session('error') }}</span>
                 </div>
+            @if(isset($progressPercent) && $progressPercent >= 100)
+                <div class="animate-enter mb-6 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 text-white p-6 rounded-[2rem] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-amber-400/40">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shrink-0 shadow-inner">
+                            🏆
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black tracking-tight">Selamat! Kamu Telah Menuntaskan Modul Ini 100%</h3>
+                            <p class="text-xs text-amber-100 font-medium">Sertifikat Kelulusan Resmi Digital telah diterbitkan oleh sekolah untuk kamu.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('students.learning.subject.certificate', $subject->id) }}" target="_blank" class="w-full md:w-auto px-6 py-3 bg-white text-amber-900 font-black rounded-xl text-xs hover:bg-amber-50 transition-all shadow-lg text-center shrink-0 flex items-center justify-center gap-2 transform active:scale-95">
+                        <i class="ph-bold ph-certificate text-lg"></i> Unduh Sertifikat Digital
+                    </a>
+                </div>
             @endif
 
             {{-- TAB MENU ELEVATE --}}
@@ -359,7 +374,7 @@
                                                         {{-- INPUT FILE --}}
                                                         <div x-show="submissionType === 'file'">
                                                             <label class="block text-xs font-bold text-elevate-dark/60 uppercase mb-2 ml-1">File Jawaban (PDF/JPG)</label>
-                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
+                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" @change="if($event.target.files[0] && $event.target.files[0].size > 10 * 1024 * 1024) { alert('Ukuran file terlalu besar! Maksimum 10MB.'); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
                                                         </div>
 
                                                         {{-- INPUT LINK --}}

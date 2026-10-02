@@ -310,6 +310,17 @@ class StudentPortalController extends Controller
             }
         }
         
+        // --- HASIL UJIAN CBT ---
+        $cbt_exam_results = collect([]);
+        if (class_exists(\App\Models\CbtStudentExam::class)) {
+            $cbt_exam_results = \App\Models\CbtStudentExam::with('exam')
+                ->where('student_id', $id)
+                ->where('status', 'finished')
+                ->orderBy('finished_at', 'desc')
+                ->take(10)
+                ->get();
+        }
+
         // --- PERPUSTAKAAN ---
         $library_visits = 0; $library_history = collect([]);
         $ebooks = collect([]); $ebookHistory = collect([]); 
@@ -526,7 +537,8 @@ class StudentPortalController extends Controller
             'jadwalPelajaranHariIni' => $jadwalPelajaranHariIni, // <-- Variabel diubah
             'pendingTasks' => $pendingTasks,
             'calendarEvents' => $calendarEvents,
-            'upcomingAgendas' => $upcomingAgendas
+            'upcomingAgendas' => $upcomingAgendas,
+            'cbt_exam_results' => $cbt_exam_results
         ];
 
         if (view()->exists('students.portal.show')) {

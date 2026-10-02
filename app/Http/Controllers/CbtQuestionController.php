@@ -116,7 +116,9 @@ class CbtQuestionController extends Controller
             'options' => $options,
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
-            'tags' => $request->tags
+            'tags' => $request->tags,
+            'difficulty' => $request->input('difficulty', 'sedang'),
+            'bloom_taxonomy' => $request->input('bloom_taxonomy', 'C2')
         ]);
 
         return back()->with('success', 'Soal berhasil ditambahkan!');
@@ -246,7 +248,9 @@ class CbtQuestionController extends Controller
             'options' => $options, 
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
-            'tags' => $request->tags
+            'tags' => $request->tags,
+            'difficulty' => $request->input('difficulty', 'sedang'),
+            'bloom_taxonomy' => $request->input('bloom_taxonomy', 'C2')
         ]);
         
         return back()->with('success', 'Soal berhasil diperbarui!');

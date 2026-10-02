@@ -79,6 +79,44 @@
         </div>
     </div>
 
+    {{-- 1.5. REKAP HASIL UJIAN CBT TERBARU --}}
+    @if(isset($cbt_exam_results) && $cbt_exam_results->isNotEmpty())
+        <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl">
+                        <i class="ph-bold ph-desktop"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-lg text-slate-800">Hasil Ujian CBT Terbaru</h3>
+                        <p class="text-xs text-slate-400 font-medium">Transparansi rekapitulasi skor ujian CBT untuk siswa dan orang tua.</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 font-extrabold text-xs rounded-full border border-indigo-100">
+                    {{ $cbt_exam_results->count() }} Ujian Selesai
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach($cbt_exam_results as $res)
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-4 hover:border-indigo-300 transition-colors">
+                        <div>
+                            <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block mb-0.5">{{ $res->exam->subject_name ?? 'Ujian CBT' }}</span>
+                            <h4 class="font-bold text-sm text-slate-800 line-clamp-1">{{ $res->exam->title ?? 'Judul Ujian' }}</h4>
+                            <span class="text-[10px] text-slate-400 font-mono">{{ $res->finished_at ? date('d M Y, H:i', strtotime($res->finished_at)) : '-' }}</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-xs font-bold text-slate-400 block mb-0.5">Nilai Akhir</span>
+                            <span class="text-2xl font-black {{ ($res->total_score >= ($res->exam->passing_grade ?? 75)) ? 'text-emerald-600' : 'text-rose-600' }}">
+                                {{ number_format($res->total_score, 1) }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- 2. SUB-TAB SWITCHER --}}
     <div class="flex justify-center">
         <div class="bg-slate-100 p-1.5 rounded-2xl inline-flex items-center gap-1 border border-slate-200 shadow-inner">

@@ -19,7 +19,9 @@ class CbtQuestion extends Model
         'options', 
         'correct_answer', 
         'score_weight',
-        'tags'
+        'tags',
+        'difficulty',
+        'bloom_taxonomy'
     ];
 
     protected $casts = [

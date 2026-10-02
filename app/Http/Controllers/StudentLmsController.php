@@ -157,7 +157,24 @@ class StudentLmsController extends Controller
             ->latest()
             ->get();
 
-        return view('students.lms.show', compact('subject', 'materials', 'assignments'));
+        $totalItems = $materials->count() + $assignments->count();
+
+        $readCount = \App\Models\LmsMaterialLog::whereIn('material_id', $materials->pluck('id'))
+            ->where('student_id', $student->id)
+            ->pluck('material_id')
+            ->unique()
+            ->count();
+
+        $submittedCount = LmsSubmission::whereIn('assignment_id', $assignments->pluck('id'))
+            ->where('student_id', $student->id)
+            ->pluck('assignment_id')
+            ->unique()
+            ->count();
+
+        $completedTotal = $readCount + $submittedCount;
+        $progressPercent = $totalItems > 0 ? round(($completedTotal / $totalItems) * 100) : 0;
+
+        return view('students.lms.show', compact('subject', 'materials', 'assignments', 'progressPercent'));
     }
 
     /**
@@ -385,5 +402,57 @@ class StudentLmsController extends Controller
         $log->save();
 
         return response()->json(['status' => 'success', 'logged_seconds' => $request->time_spent]);
+    }
+
+    /**
+     * Unduh / Cetak Sertifikat Digital Kelulusan Modul LMS (100% Complete)
+     */
+    public function downloadCertificate($subjectId)
+    {
+        $student = Auth::guard('student')->user();
+        if (!$student) {
+            return redirect()->route('student.login')->with('error', 'Silakan login sebagai siswa.');
+        }
+
+        $subject = Subject::findOrFail($subjectId);
+        $classId = $student->class_id ?? $student->school_class_id;
+
+        $materials = LmsMaterial::where('subject_id', $subjectId)
+            ->where('class_id', $classId)
+            ->get();
+
+        $assignments = LmsAssignment::where('subject_id', $subjectId)
+            ->where('class_id', $classId)
+            ->where(function($q) {
+                $q->whereNull('description')
+                  ->orWhere('description', 'NOT LIKE', '%CBT%');
+            })
+            ->get();
+
+        $totalItems = $materials->count() + $assignments->count();
+
+        $readCount = \App\Models\LmsMaterialLog::whereIn('material_id', $materials->pluck('id'))
+            ->where('student_id', $student->id)
+            ->pluck('material_id')
+            ->unique()
+            ->count();
+
+        $submittedCount = LmsSubmission::whereIn('assignment_id', $assignments->pluck('id'))
+            ->where('student_id', $student->id)
+            ->pluck('assignment_id')
+            ->unique()
+            ->count();
+
+        $completedTotal = $readCount + $submittedCount;
+        $progress = $totalItems > 0 ? round(($completedTotal / $totalItems) * 100) : 0;
+
+        if ($progress < 100 && $totalItems > 0) {
+            return back()->with('error', 'Sertifikat hanya dapat diunduh jika alur belajar Anda telah tuntas 100%. Progres Anda saat ini: ' . $progress . '%');
+        }
+
+        $certificateNo = 'CERT-LMS-' . date('Y') . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT) . '-' . str_pad($subject->id, 3, '0', STR_PAD_LEFT);
+        $issueDate = date('d F Y');
+
+        return view('students.lms.certificate', compact('student', 'subject', 'certificateNo', 'issueDate', 'progress'));
     }
 }

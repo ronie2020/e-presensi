@@ -406,6 +406,29 @@
                                     </template>
                                 </div>
 
+                                {{-- Metadata Kesukaran & Taksonomi Bloom --}}
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tingkat Kesukaran</label>
+                                        <select name="difficulty" class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-bold h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                            <option value="mudah" {{ old('difficulty') == 'mudah' ? 'selected' : '' }}>🟢 Mudah</option>
+                                            <option value="sedang" {{ old('difficulty', 'sedang') == 'sedang' ? 'selected' : '' }}>🟡 Sedang</option>
+                                            <option value="sulit" {{ old('difficulty') == 'sulit' ? 'selected' : '' }}>🔴 Sulit</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Taksonomi Bloom</label>
+                                        <select name="bloom_taxonomy" class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-bold h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                            <option value="C1" {{ old('bloom_taxonomy') == 'C1' ? 'selected' : '' }}>C1 - Mengingat</option>
+                                            <option value="C2" {{ old('bloom_taxonomy', 'C2') == 'C2' ? 'selected' : '' }}>C2 - Memahami</option>
+                                            <option value="C3" {{ old('bloom_taxonomy') == 'C3' ? 'selected' : '' }}>C3 - Menerapkan</option>
+                                            <option value="C4" {{ old('bloom_taxonomy') == 'C4' ? 'selected' : '' }}>C4 - Menganalisis</option>
+                                            <option value="C5" {{ old('bloom_taxonomy') == 'C5' ? 'selected' : '' }}>C5 - Evaluasi</option>
+                                            <option value="C6" {{ old('bloom_taxonomy') == 'C6' ? 'selected' : '' }}>C6 - Mencipta</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 {{-- Bobot --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
@@ -523,13 +546,23 @@
                             </div>
 
                             <div class="pl-20 sm:pl-24">
-                                {{-- Badge Tipe Soal --}}
-                                    <div class="mb-2">
+                                {{-- Badge Tipe Soal & Metadata --}}
+                                    <div class="mb-2 flex flex-wrap items-center gap-1.5">
                                         @if($qType == 'choice') <span class="text-[10px] font-bold bg-[#56bbf1]/10 text-[#0d52a1] px-2 py-0.5 rounded border border-[#56bbf1]/20">PILIHAN GANDA</span>
                                         @elseif($qType == 'true_false') <span class="text-[10px] font-bold bg-[#f9a282]/10 text-[#c86845] px-2 py-0.5 rounded border border-[#f9a282]/20">BENAR / SALAH</span>
                                         @elseif($qType == 'matching') <span class="text-[10px] font-bold bg-[#e5eff5] text-[#2c3f61] px-2 py-0.5 rounded border border-slate-200">MENJODOHKAN</span>
                                         @elseif($qType == 'essay') <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">ESSAI</span>
                                         @endif
+
+                                        @if(($q->difficulty ?? 'sedang') == 'mudah')
+                                            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">🟢 MUDAH</span>
+                                        @elseif(($q->difficulty ?? 'sedang') == 'sulit')
+                                            <span class="text-[10px] font-bold bg-rose-50 text-rose-700 px-2 py-0.5 rounded border border-rose-200">🔴 SULIT</span>
+                                        @else
+                                            <span class="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">🟡 SEDANG</span>
+                                        @endif
+
+                                        <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">🧠 {{ strtoupper($q->bloom_taxonomy ?? 'C2') }}</span>
                                     </div>
 
                                     {{-- Tampilkan TAGS --}}
@@ -636,7 +669,9 @@
                                             options: {{ json_encode($q->options) }}, 
                                             correct_answer: '{{ $q->correct_answer }}',
                                             score_weight: {{ $q->score_weight }},
-                                            tags: '{{ addslashes($q->tags ?? '') }}'
+                                            tags: '{{ addslashes($q->tags ?? '') }}',
+                                            difficulty: '{{ addslashes($q->difficulty ?? 'sedang') }}',
+                                            bloom_taxonomy: '{{ addslashes($q->bloom_taxonomy ?? 'C2') }}'
                                         }, '{{ route('bank.questions.update', $q->id) }}')" 
                                         class="w-9 h-9 rounded-xl bg-white border border-[#f9a282]/50 text-[#c86845] hover:bg-[#f9a282]/10 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
@@ -910,6 +945,29 @@
                                         <input type="text" name="correct_answer" x-model="editState.correct_answer" class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                     </div>
                                 </template>
+                            </div>
+
+                            {{-- Metadata Kesukaran & Taksonomi Bloom (EDIT) --}}
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tingkat Kesukaran</label>
+                                    <select name="difficulty" x-model="editState.difficulty" class="w-full rounded-xl border-slate-200 bg-white text-xs font-bold h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                        <option value="mudah">🟢 Mudah</option>
+                                        <option value="sedang">🟡 Sedang</option>
+                                        <option value="sulit">🔴 Sulit</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Taksonomi Bloom</label>
+                                    <select name="bloom_taxonomy" x-model="editState.bloom_taxonomy" class="w-full rounded-xl border-slate-200 bg-white text-xs font-bold h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                        <option value="C1">C1 - Mengingat</option>
+                                        <option value="C2">C2 - Memahami</option>
+                                        <option value="C3">C3 - Menerapkan</option>
+                                        <option value="C4">C4 - Menganalisis</option>
+                                        <option value="C5">C5 - Evaluasi</option>
+                                        <option value="C6">C6 - Mencipta</option>
+                                    </select>
+                                </div>
                             </div>
 
                             {{-- Bobot Nilai (EDIT) --}}
