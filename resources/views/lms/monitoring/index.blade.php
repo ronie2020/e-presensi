@@ -129,7 +129,7 @@
                                 <td class="py-4 px-6 text-slate-400 font-mono text-xs">{{ $idx + 1 }}</td>
                                 <td class="py-4 px-6">
                                     <div class="font-semibold text-white">{{ $row['student']->name }}</div>
-                                    <div class="text-xs text-slate-400 font-mono">NISN: {{ $row['student']->nisn ?? '-' }}</div>
+                                    <div class="text-xs text-slate-400 font-mono">NISN: {{ $row['student']->student_id ?? '-' }}</div>
                                 </td>
                                 <td class="py-4 px-6">
                                     <div class="flex items-center gap-2">
@@ -157,7 +157,9 @@
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-md {{ $row['badge_class'] }}">
-                                        @if($row['progress_percent'] >= 100)
+                                        @if($row['total_items'] == 0)
+                                            <i class="ph-bold ph-minus-circle"></i>
+                                        @elseif($row['progress_percent'] >= 100)
                                             <i class="ph-bold ph-check-circle"></i>
                                         @elseif($row['progress_percent'] >= 50)
                                             <i class="ph-bold ph-clock"></i>

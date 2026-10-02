@@ -466,7 +466,13 @@ class LmsMaterialController extends Controller
             $subjectIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('subject_id');
             $subjectIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('subject_id');
             $subjectIdsFromMaterials = LmsMaterial::where('teacher_id', $teacherId)->pluck('subject_id');
-            $allSubjectIds = $subjectIdsFromLoad->concat($subjectIdsFromTimetable)->concat($subjectIdsFromMaterials)->unique()->filter();
+            $subjectIdsFromAssignments = \App\Models\LmsAssignment::where('teacher_id', $teacherId)->pluck('subject_id');
+            $allSubjectIds = $subjectIdsFromLoad
+                ->concat($subjectIdsFromTimetable)
+                ->concat($subjectIdsFromMaterials)
+                ->concat($subjectIdsFromAssignments)
+                ->unique()
+                ->filter();
 
             $classIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('class_id');
             $classIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('class_id');
@@ -493,6 +499,13 @@ class LmsMaterialController extends Controller
         $selectedClassId = $request->input('class_id', $classes->first()?->id);
         $selectedSubjectId = $request->input('subject_id', $subjects->first()?->id);
 
+        if (!$classes->contains('id', $selectedClassId)) {
+            $selectedClassId = $classes->first()?->id;
+        }
+        if (!$subjects->contains('id', $selectedSubjectId)) {
+            $selectedSubjectId = $subjects->first()?->id;
+        }
+
         $studentsData = collect();
         $materialsCount = 0;
         $assignmentsCount = 0;
@@ -502,10 +515,28 @@ class LmsMaterialController extends Controller
         $avgProgress = 0;
 
         if ($selectedClassId && $selectedSubjectId) {
-            $materials = LmsMaterial::where('subject_id', $selectedSubjectId)->get();
-            $assignments = \App\Models\LmsAssignment::where('subject_id', $selectedSubjectId)
-                ->where('description', 'not like', '%CBT%')
-                ->get();
+            $materialsQuery = LmsMaterial::where('subject_id', $selectedSubjectId)
+                ->where(function($q) use ($selectedClassId) {
+                    $q->where('class_id', $selectedClassId)->orWhereNull('class_id');
+                });
+
+            $assignmentsQuery = \App\Models\LmsAssignment::where('subject_id', $selectedSubjectId)
+                ->where(function($q) {
+                    $q->whereNull('description')
+                      ->orWhere('description', 'not like', '%CBT%');
+                })
+                ->where(function($q) use ($selectedClassId) {
+                    $q->where('class_id', $selectedClassId)->orWhereNull('class_id');
+                });
+
+            // Jika user adalah Guru, hanya ambil materi & tugas yang dibuat oleh guru yang bersangkutan
+            if (!in_array($user->role, ['Admin', 'Superadmin', 'Kepala Sekolah'])) {
+                $materialsQuery->where('teacher_id', $user->id);
+                $assignmentsQuery->where('teacher_id', $user->id);
+            }
+
+            $materials = $materialsQuery->get();
+            $assignments = $assignmentsQuery->get();
 
             $materialsCount = $materials->count();
             $assignmentsCount = $assignments->count();
@@ -546,7 +577,10 @@ class LmsMaterialController extends Controller
 
                 $totalProgressSum += $progressPercent;
 
-                if ($progressPercent >= 100) {
+                if ($totalItems === 0) {
+                    $status = 'Belum Ada Konten';
+                    $badgeClass = 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+                } elseif ($progressPercent >= 100) {
                     $completedStudentsCount++;
                     $status = 'Selesai Total';
                     $badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
