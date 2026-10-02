@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Traits\TeacherScopeTrait;
 
 class LmsAssignmentController extends Controller
 {
+    use TeacherScopeTrait;
     public function index()
     {
         $user = Auth::user();
@@ -61,16 +63,16 @@ class LmsAssignmentController extends Controller
             }
         }
 
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        $classes = $this->getScopedClasses();
 
         return view('lms.assignments.index', compact('assignments', 'subjects', 'classes'));
     }
 
     public function create()
     {
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        $classes = $this->getScopedClasses();
         return view('lms.assignments.create', compact('subjects', 'classes'));
     }
 
@@ -237,8 +239,17 @@ class LmsAssignmentController extends Controller
 
         $isBulk = $siblingsCount > 1;
 
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        if ($assignment->subject_id && !$subjects->contains('id', $assignment->subject_id)) {
+            $currSub = Subject::find($assignment->subject_id);
+            if ($currSub) $subjects->push($currSub);
+        }
+
+        $classes = $this->getScopedClasses();
+        if ($assignment->class_id && !$classes->contains('id', $assignment->class_id)) {
+            $currClass = SchoolClass::find($assignment->class_id);
+            if ($currClass) $classes->push($currClass);
+        }
 
         return view('lms.assignments.edit', compact('assignment', 'subjects', 'classes', 'isBulk'));
     }

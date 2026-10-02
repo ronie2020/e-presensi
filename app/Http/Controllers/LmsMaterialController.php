@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Traits\TeacherScopeTrait;
 
 class LmsMaterialController extends Controller
 {
+    use TeacherScopeTrait;
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -58,16 +60,16 @@ class LmsMaterialController extends Controller
             }
         }
 
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        $classes = $this->getScopedClasses();
 
         return view('lms.materials.index', compact('materials', 'subjects', 'classes'));
     }
 
     public function create()
     {
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        $classes = $this->getScopedClasses();
         return view('lms.materials.create', compact('subjects', 'classes'));
     }
 
@@ -182,8 +184,17 @@ class LmsMaterialController extends Controller
 
         $isBulk = $siblingsCount > 1;
 
-        $subjects = Subject::all();
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        $subjects = $this->getScopedSubjects();
+        if ($material->subject_id && !$subjects->contains('id', $material->subject_id)) {
+            $currSub = Subject::find($material->subject_id);
+            if ($currSub) $subjects->push($currSub);
+        }
+
+        $classes = $this->getScopedClasses();
+        if ($material->class_id && !$classes->contains('id', $material->class_id)) {
+            $currClass = SchoolClass::find($material->class_id);
+            if ($currClass) $classes->push($currClass);
+        }
 
         return view('lms.materials.edit', compact('material', 'subjects', 'classes', 'isBulk'));
     }
@@ -457,44 +468,8 @@ class LmsMaterialController extends Controller
     {
         $user = Auth::user();
 
-        if (in_array($user->role, ['Admin', 'Superadmin', 'Kepala Sekolah'])) {
-            $classes = SchoolClass::orderBy('name')->get();
-            $subjects = Subject::orderBy('name')->get();
-        } else {
-            $teacherId = $user->id;
-            
-            $subjectIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('subject_id');
-            $subjectIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('subject_id');
-            $subjectIdsFromMaterials = LmsMaterial::where('teacher_id', $teacherId)->pluck('subject_id');
-            $subjectIdsFromAssignments = \App\Models\LmsAssignment::where('teacher_id', $teacherId)->pluck('subject_id');
-            $allSubjectIds = $subjectIdsFromLoad
-                ->concat($subjectIdsFromTimetable)
-                ->concat($subjectIdsFromMaterials)
-                ->concat($subjectIdsFromAssignments)
-                ->unique()
-                ->filter();
-
-            $classIdsFromLoad = TeachingLoad::where('teacher_id', $teacherId)->pluck('class_id');
-            $classIdsFromTimetable = Timetable::where('teacher_id', $teacherId)->pluck('class_id');
-            $classIdsFromMaterials = LmsMaterial::where('teacher_id', $teacherId)->pluck('class_id');
-            $classIdsFromAssignments = \App\Models\LmsAssignment::where('teacher_id', $teacherId)->pluck('class_id');
-            $allClassIds = $classIdsFromLoad
-                ->concat($classIdsFromTimetable)
-                ->concat($classIdsFromMaterials)
-                ->concat($classIdsFromAssignments)
-                ->unique()
-                ->filter();
-
-            $subjects = Subject::whereIn('id', $allSubjectIds)->orderBy('name')->get();
-            if ($subjects->isEmpty()) {
-                $subjects = Subject::orderBy('name')->get();
-            }
-
-            $classes = SchoolClass::whereIn('id', $allClassIds)->orderBy('name')->get();
-            if ($classes->isEmpty()) {
-                $classes = SchoolClass::orderBy('name')->get();
-            }
-        }
+        $classes = $this->getScopedClasses();
+        $subjects = $this->getScopedSubjects();
 
         $selectedClassId = $request->input('class_id', $classes->first()?->id);
         $selectedSubjectId = $request->input('subject_id', $subjects->first()?->id);

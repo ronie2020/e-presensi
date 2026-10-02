@@ -10,47 +10,22 @@ use App\Models\TeachingLoad;
 use App\Models\Timetable;
 use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
+use App\Traits\TeacherScopeTrait;
 
 class LmsTopicController extends Controller
 {
+    use TeacherScopeTrait;
+
     // Menampilkan halaman kelola Bab
     public function index(Request $request)
     {
         $user = Auth::user();
-        
-        $isAdmin = false;
-        if (method_exists($user, 'hasRole')) {
-            $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin') || $user->hasRole('Administrator');
-        }
-        if (!$isAdmin && isset($user->role)) {
-            $isAdmin = in_array(strtolower($user->role), ['admin', 'super-admin', 'administrator']);
-        }
-
-        $teacherSubjectIds = collect();
-        if (!$isAdmin) {
-            $loadSubjectIds = TeachingLoad::where('teacher_id', $user->id)->pluck('subject_id');
-            $timetableSubjectIds = Timetable::where('teacher_id', $user->id)->pluck('subject_id');
-            $materialSubjectIds = LmsMaterial::where('teacher_id', $user->id)->pluck('subject_id');
-            $assignmentSubjectIds = LmsAssignment::where('teacher_id', $user->id)->pluck('subject_id');
-
-            $teacherSubjectIds = $loadSubjectIds
-                ->concat($timetableSubjectIds)
-                ->concat($materialSubjectIds)
-                ->concat($assignmentSubjectIds)
-                ->filter()
-                ->unique();
-        }
-
-        if ($isAdmin || $teacherSubjectIds->isEmpty()) {
-            $subjects = Subject::orderBy('name', 'asc')->get();
-        } else {
-            $subjects = Subject::whereIn('id', $teacherSubjectIds)->orderBy('name', 'asc')->get();
-        }
-
+        $isAdmin = $this->isUserAdmin($user);
+        $subjects = $this->getScopedSubjects($user);
         $query = Topic::with('subject');
 
-        if (!$isAdmin && $teacherSubjectIds->isNotEmpty()) {
-            $query->whereIn('subject_id', $teacherSubjectIds);
+        if (!$isAdmin) {
+            $query->whereIn('subject_id', $subjects->pluck('id'));
         }
 
         // Filter berdasarkan mapel jika ada
@@ -70,6 +45,14 @@ class LmsTopicController extends Controller
     // Menyimpan Bab Baru
     public function store(Request $request)
     {
+        $user = Auth::user();
+        if (!$this->isUserAdmin($user)) {
+            $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
+            if (!in_array($request->subject_id, $allowedSubjectIds)) {
+                return back()->withErrors('Anda tidak memiliki wewenang untuk menambahkan bab pada mata pelajaran ini.');
+            }
+        }
+
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'title' => 'required|string|max:255',
@@ -103,7 +86,11 @@ class LmsTopicController extends Controller
     public function edit($id)
     {
         $topic = \App\Models\Topic::findOrFail($id);
-        $subjects = \App\Models\Subject::orderBy('name')->get();
+        $subjects = $this->getScopedSubjects();
+        if ($topic->subject_id && !$subjects->contains('id', $topic->subject_id)) {
+            $currSub = Subject::find($topic->subject_id);
+            if ($currSub) $subjects->push($currSub);
+        }
         return view('lms.topics.edit', compact('topic', 'subjects'));
     }
 

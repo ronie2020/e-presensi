@@ -15,9 +15,12 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\GradeRecapExport; 
+use App\Traits\TeacherScopeTrait;
 
 class LmsGradeController extends Controller
 {
+    use TeacherScopeTrait;
+
     /**
      * Helper: Ambil Data Nilai (Agar tidak duplikasi kode)
      */
@@ -34,12 +37,27 @@ class LmsGradeController extends Controller
 
         // Validasi: Minimal Level ATAU Class dipilih, DAN Subject dipilih
         if (($levelId || $classId) && $subjectId) {
+            // Validasi hak akses guru pada Mapel
+            if (!$this->isUserAdmin($user)) {
+                $allowedSubjects = $this->getScopedSubjects($user);
+                if (!$allowedSubjects->contains('id', $subjectId)) {
+                    return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedLevel', 'selectedSubject');
+                }
+            }
+
             $selectedSubject = Subject::find($subjectId);
 
             $classIds = [];
 
             // 1. Tentukan target ID kelas berdasarkan filter
             if ($classId) {
+                // Validasi hak akses guru pada Kelas
+                if (!$this->isUserAdmin($user)) {
+                    $allowedClasses = $this->getScopedClasses($user);
+                    if (!$allowedClasses->contains('id', $classId)) {
+                        return compact('students', 'assignments', 'gradeBook', 'selectedClass', 'selectedLevel', 'selectedSubject');
+                    }
+                }
                 $selectedClass = SchoolClass::find($classId);
                 if ($selectedClass) {
                     $classIds = [$selectedClass->id];
@@ -54,6 +72,12 @@ class LmsGradeController extends Controller
                 $classIds = SchoolClass::where('name', 'LIKE', $levelId . '%')
                                     ->orWhere('name', 'LIKE', $romawi . '%')
                                     ->pluck('id')->toArray();
+
+                // Batasi hanya kelas yang diajar oleh guru jika bukan admin
+                if (!$this->isUserAdmin($user)) {
+                    $allowedClassIds = $this->getScopedClasses($user)->pluck('id')->toArray();
+                    $classIds = array_values(array_intersect($classIds, $allowedClassIds));
+                }
 
                 // Buat object virtual agar tidak error saat dipanggil namanya di Blade/PDF
                 $selectedLevel = (object)['name' => 'Tingkat ' . $levelId];
@@ -153,8 +177,8 @@ class LmsGradeController extends Controller
      */
     public function index(Request $request)
     {
-        $classes = SchoolClass::select('id', 'name')->orderBy('name')->get();
-        $subjects = Subject::select('id', 'name')->orderBy('name')->get();
+        $classes = $this->getScopedClasses();
+        $subjects = $this->getScopedSubjects();
 
         $period = $request->period ?? 'semester';
         
