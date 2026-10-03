@@ -99,6 +99,43 @@
                             <input id="order_number" type="number" name="order_number" value="{{ old('order_number') ?? $topic->order_number }}" min="1" required class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-4 shadow-sm transition-all duration-300">
                         </div>
                     </div>
+
+                    {{-- Tingkat & Kelas Target --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="grade_level" class="block text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Tingkat Jenjang</label>
+                            <div class="relative group">
+                                <select id="grade_level" name="grade_level" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-4 appearance-none text-sm cursor-pointer shadow-sm transition-all duration-300 [color-scheme:dark]">
+                                    <option value="" class="bg-slate-900 text-white">Semua Tingkat</option>
+                                    @foreach($gradeLevels as $gl)
+                                        <option value="{{ $gl }}" {{ (old('grade_level') ?? $topic->grade_level) == $gl ? 'selected' : '' }} class="bg-slate-900 text-white">
+                                            Tingkat {{ $gl }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-caret-down"></i></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="class_id" class="block text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Kelas Spesifik</label>
+                            <div class="relative group">
+                                <select id="class_id" name="class_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-14 px-4 appearance-none text-sm cursor-pointer shadow-sm transition-all duration-300 [color-scheme:dark]">
+                                    <option value="" data-grade="" class="bg-slate-900 text-white">Semua Kelas</option>
+                                    @foreach($classes as $c)
+                                        @php
+                                            preg_match('/\d+/', $c->name, $m);
+                                            $cg = $m[0] ?? '';
+                                        @endphp
+                                        <option value="{{ $c->id }}" data-grade="{{ $cg }}" {{ (old('class_id') ?? $topic->class_id) == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">
+                                            Kelas {{ $c->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-caret-down"></i></div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div>
                         <label for="title" class="block text-[11px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Judul Bab <span class="text-rose-400">*</span></label>
@@ -126,6 +163,45 @@
 
     @push('scripts')
     <script>
+        // Interaktivitas Tingkat & Kelas pada Edit Form
+        const gradeSelect = document.getElementById('grade_level');
+        const classSelect = document.getElementById('class_id');
+
+        function filterClassOptions() {
+            if (!gradeSelect || !classSelect) return;
+            const selectedGrade = gradeSelect.value;
+            const options = classSelect.querySelectorAll('option');
+
+            options.forEach(opt => {
+                const classGrade = opt.getAttribute('data-grade');
+                if (!opt.value) {
+                    opt.hidden = false;
+                } else if (!selectedGrade) {
+                    opt.hidden = false;
+                } else {
+                    opt.hidden = (classGrade !== selectedGrade);
+                }
+            });
+
+            const currentOpt = classSelect.options[classSelect.selectedIndex];
+            if (currentOpt && currentOpt.hidden) {
+                classSelect.value = '';
+            }
+        }
+
+        if (gradeSelect && classSelect) {
+            gradeSelect.addEventListener('change', filterClassOptions);
+            classSelect.addEventListener('change', function() {
+                const selectedOpt = this.options[this.selectedIndex];
+                const classGrade = selectedOpt ? selectedOpt.getAttribute('data-grade') : '';
+                if (classGrade) {
+                    gradeSelect.value = classGrade;
+                }
+            });
+            // Jalankan filter saat halaman pertama kali terbuka
+            filterClassOptions();
+        }
+
         // Efek loading saat form disubmit
         document.getElementById('editForm').addEventListener('submit', function() {
             const btn = document.getElementById('submitBtn');

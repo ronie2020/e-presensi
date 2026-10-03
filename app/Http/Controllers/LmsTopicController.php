@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Topic;
 use App\Models\Subject;
+use App\Models\SchoolClass;
 use App\Models\TeachingLoad;
 use App\Models\Timetable;
 use App\Models\LmsMaterial;
@@ -22,7 +23,13 @@ class LmsTopicController extends Controller
         $user = Auth::user();
         $isAdmin = $this->isUserAdmin($user);
         $subjects = $this->getScopedSubjects($user);
-        $query = Topic::with('subject');
+
+        $classes = $this->getScopedClasses($user);
+        if ($classes->isEmpty()) {
+            $classes = SchoolClass::where('name', '!=', 'admin')->orderBy('name', 'asc')->get();
+        }
+
+        $query = Topic::with(['subject', 'schoolClass']);
 
         if (!$isAdmin) {
             $query->whereIn('subject_id', $subjects->pluck('id'));
@@ -33,13 +40,32 @@ class LmsTopicController extends Controller
             $query->where('subject_id', $request->subject_id);
         }
 
-        // Urutkan berdasarkan mapel, lalu berdasarkan urutan Bab
+        // Filter berdasarkan tingkat (misal 7, 8, 9) jika ada
+        if ($request->filled('grade_level')) {
+            $grade = $request->grade_level;
+            $query->where(function($q) use ($grade) {
+                $q->where('grade_level', $grade)
+                  ->orWhereHas('schoolClass', function($sq) use ($grade) {
+                      $sq->where('name', 'like', $grade . '%');
+                  });
+            });
+        }
+
+        // Filter berdasarkan kelas spesifik jika ada
+        if ($request->filled('class_id')) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        // Urutkan berdasarkan mapel, lalu berdasarkan tingkat/kelas, lalu berdasarkan urutan Bab
         $topics = $query->orderBy('subject_id', 'asc')
+                        ->orderByRaw('grade_level IS NULL, grade_level ASC')
                         ->orderBy('order_number', 'asc')
                         ->paginate(20)
                         ->withQueryString();
 
-        return view('lms.topics.index', compact('topics', 'subjects'));
+        $gradeLevels = ['7', '8', '9'];
+
+        return view('lms.topics.index', compact('topics', 'subjects', 'classes', 'gradeLevels'));
     }
 
     // Menyimpan Bab Baru
@@ -55,13 +81,24 @@ class LmsTopicController extends Controller
 
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
+            'grade_level' => 'nullable|string|max:10',
+            'class_id' => 'nullable|exists:classes,id',
             'title' => 'required|string|max:255',
             'order_number' => 'required|integer|min:1',
             'description' => 'nullable|string'
         ], [
             'subject_id.required' => 'Mata pelajaran wajib dipilih.',
             'title.required' => 'Judul bab tidak boleh kosong.',
+            'order_number.required' => 'Nomor urutan bab tidak boleh kosong.',
         ]);
+
+        // Jika kelas spesifik dipilih, sinkronkan grade_level otomatis jika belum terisi
+        if (!empty($validated['class_id'])) {
+            $class = SchoolClass::find($validated['class_id']);
+            if ($class && preg_match('/\d+/', $class->name, $matches)) {
+                $validated['grade_level'] = $matches[0];
+            }
+        }
 
         Topic::create($validated);
 
@@ -92,7 +129,7 @@ class LmsTopicController extends Controller
 
     public function edit($id)
     {
-        $topic = \App\Models\Topic::findOrFail($id);
+        $topic = Topic::findOrFail($id);
         $user = Auth::user();
         if (!$this->isUserAdmin($user)) {
             $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
@@ -106,12 +143,20 @@ class LmsTopicController extends Controller
             $currSub = Subject::find($topic->subject_id);
             if ($currSub) $subjects->push($currSub);
         }
-        return view('lms.topics.edit', compact('topic', 'subjects'));
+
+        $classes = $this->getScopedClasses($user);
+        if ($classes->isEmpty()) {
+            $classes = SchoolClass::where('name', '!=', 'admin')->orderBy('name', 'asc')->get();
+        }
+
+        $gradeLevels = ['7', '8', '9'];
+
+        return view('lms.topics.edit', compact('topic', 'subjects', 'classes', 'gradeLevels'));
     }
 
-    public function update(\Illuminate\Http\Request $request, $id)
+    public function update(Request $request, $id)
     {
-        $topic = \App\Models\Topic::findOrFail($id);
+        $topic = Topic::findOrFail($id);
         $user = Auth::user();
         if (!$this->isUserAdmin($user)) {
             $allowedSubjectIds = $this->getScopedSubjects($user)->pluck('id')->toArray();
@@ -120,14 +165,25 @@ class LmsTopicController extends Controller
             }
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
+            'grade_level' => 'nullable|string|max:10',
+            'class_id' => 'nullable|exists:classes,id',
             'title' => 'required|string|max:255',
             'order_number' => 'required|integer|min:1',
             'description' => 'nullable|string',
         ]);
 
-        $topic->update($request->all());
+        if (!empty($validated['class_id'])) {
+            $class = SchoolClass::find($validated['class_id']);
+            if ($class && preg_match('/\d+/', $class->name, $matches)) {
+                $validated['grade_level'] = $matches[0];
+            }
+        } else {
+            $validated['class_id'] = null;
+        }
+
+        $topic->update($validated);
 
         return redirect()->route('lms.topics.index')->with('success', 'Bab berhasil diperbarui!');
     }

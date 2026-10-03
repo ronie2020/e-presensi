@@ -384,14 +384,24 @@ class LibraryCirculationController extends Controller
      */
     public function studentBorrow()
     {
-        // Ambil semua data siswa yang aktif beserta relasi kelasnya
-        // (Ditambahkan mapping class_name agar sesuai dengan format di Blade UI)
+        // Ambil data kelas dan data siswa yang aktif beserta relasi kelasnya
+        $classes = SchoolClass::orderBy('name', 'asc')->get();
         $students = Student::with('schoolClass')->orderBy('name', 'asc')->get()->map(function($student) {
             $student->class_name = $student->schoolClass ? $student->schoolClass->name : 'Tanpa Kelas';
             return $student;
         });
+
+        $studentsPayload = $students->map(function($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'nisn' => $s->student_id ?? $s->nisn ?? '-',
+                'class_id' => $s->class_id,
+                'class_name' => $s->class_name,
+            ];
+        });
         
-        return view('library.circulation.student-borrow', compact('students'));
+        return view('library.circulation.student-borrow', compact('students', 'classes', 'studentsPayload'));
     }
 
     /**

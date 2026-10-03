@@ -126,28 +126,37 @@
                                     </h3>
                                     
                                     <div class="space-y-5">
+                                        {{-- 1. PILIH KELAS --}}
                                         <div>
-                                            <label class="block text-xs font-bold text-sky-400 uppercase mb-2 ml-1">Pilih Siswa <span class="text-rose-400">*</span></label>
+                                            <label class="block text-xs font-bold text-sky-400 uppercase mb-2 ml-1">1. Pilih Kelas <span class="text-rose-400">*</span></label>
                                             <div class="relative group">
-                                                <i class="ph-bold ph-identification-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-sky-400 transition-colors"></i>
-                                                <select name="student_id" id="student_id" required class="w-full pl-11 pr-10 py-3.5 rounded-2xl border-white/10 bg-slate-900 font-bold text-white focus:ring-2 focus:ring-[#56bbf1]/30 focus:border-[#56bbf1] transition-all shadow-sm">
-                                                    <option value="">-- Cari / Pilih Siswa --</option>
-                                                    @php
-                                                        $groupedStudents = collect($students)->sortBy([
-                                                            ['class_name', 'asc'],
-                                                            ['name', 'asc']
-                                                        ])->groupBy('class_name');
-                                                    @endphp
-                                                    
-                                                    @foreach($groupedStudents as $className => $classStudents)
-                                                        <optgroup label="=== Kelas {{ $className }} ===" class="bg-slate-900 text-sky-400">
-                                                            @foreach($classStudents as $student)
-                                                                <option value="{{ $student->id }}" class="bg-slate-900 text-white">{{ $student->name }} (NISN: {{ $student->student_id }})</option>
-                                                            @endforeach
-                                                        </optgroup>
+                                                <i class="ph-bold ph-users-three absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-sky-400 transition-colors"></i>
+                                                <select id="class_select" class="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-white/10 bg-slate-900 font-bold text-white focus:ring-2 focus:ring-[#56bbf1]/30 focus:border-[#56bbf1] transition-all shadow-sm [color-scheme:dark]">
+                                                    <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+                                                    @foreach($classes as $c)
+                                                        <option value="{{ $c->id }}">Kelas {{ $c->name }}</option>
                                                     @endforeach
                                                 </select>
+                                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                             </div>
+                                        </div>
+
+                                        {{-- 2. PILIH SISWA --}}
+                                        <div>
+                                            <div class="flex items-center justify-between mb-2 ml-1">
+                                                <label class="block text-xs font-bold text-sky-400 uppercase">2. Pilih Siswa <span class="text-rose-400">*</span></label>
+                                                <span id="student_count_badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30"></span>
+                                            </div>
+                                            <div class="relative group">
+                                                <i class="ph-bold ph-identification-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-sky-400 transition-colors"></i>
+                                                <select name="student_id" id="student_id" required disabled class="w-full pl-11 pr-10 py-3.5 rounded-2xl border border-white/10 bg-slate-900 font-bold text-white focus:ring-2 focus:ring-[#56bbf1]/30 focus:border-[#56bbf1] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed [color-scheme:dark]">
+                                                    <option value="">-- Pilih Kelas Terlebih Dahulu --</option>
+                                                </select>
+                                                <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                            </div>
+                                            <p id="student_status_desc" class="text-[11px] text-slate-400 mt-1.5 ml-1 italic">
+                                                <i class="ph-bold ph-arrow-elbow-left-up text-sky-400"></i> Pilih kelas di atas untuk memuat daftar siswa.
+                                            </p>
                                         </div>
 
                                         <div>
@@ -290,6 +299,69 @@
         const counterWrapper = document.getElementById('counterWrapper');
         const btnSubmit = document.getElementById('btnSubmit');
         const mainInput = document.getElementById('mainScannerInput');
+
+        // LOGIKA FILTER SISWA BERDASARKAN KELAS
+        const allStudentsData = @json($studentsPayload);
+
+        const classSelect = document.getElementById('class_select');
+        const studentSelect = document.getElementById('student_id');
+        const studentCountBadge = document.getElementById('student_count_badge');
+        const studentStatusDesc = document.getElementById('student_status_desc');
+
+        if (classSelect && studentSelect) {
+            classSelect.addEventListener('change', function() {
+                const selectedClassId = this.value;
+                studentSelect.innerHTML = '';
+
+                if (!selectedClassId) {
+                    studentSelect.disabled = true;
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = '-- Pilih Kelas Terlebih Dahulu --';
+                    studentSelect.appendChild(opt);
+                    
+                    if (studentCountBadge) studentCountBadge.classList.add('hidden');
+                    if (studentStatusDesc) {
+                        studentStatusDesc.innerHTML = '<i class="ph-bold ph-arrow-elbow-left-up text-sky-400"></i> Pilih kelas di atas untuk memuat daftar siswa.';
+                        studentStatusDesc.className = 'text-[11px] text-slate-400 mt-1.5 ml-1 italic';
+                    }
+                    return;
+                }
+
+                const filteredStudents = allStudentsData.filter(s => String(s.class_id) === String(selectedClassId));
+                
+                studentSelect.disabled = false;
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = filteredStudents.length > 0 ? `-- Pilih Nama Siswa (${filteredStudents.length} Siswa) --` : '-- Tidak ada siswa di kelas ini --';
+                studentSelect.appendChild(defaultOpt);
+
+                filteredStudents.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = `${s.name} (NISN: ${s.nisn})`;
+                    studentSelect.appendChild(opt);
+                });
+
+                if (filteredStudents.length > 0) {
+                    if (studentCountBadge) {
+                        studentCountBadge.textContent = `${filteredStudents.length} Siswa`;
+                        studentCountBadge.classList.remove('hidden');
+                    }
+                    if (studentStatusDesc) {
+                        studentStatusDesc.innerHTML = `<i class="ph-bold ph-check-circle text-emerald-400"></i> Ditemukan ${filteredStudents.length} siswa di kelas ini.`;
+                        studentStatusDesc.className = 'text-[11px] text-emerald-400 mt-1.5 ml-1 font-semibold';
+                    }
+                    studentSelect.focus();
+                } else {
+                    if (studentCountBadge) studentCountBadge.classList.add('hidden');
+                    if (studentStatusDesc) {
+                        studentStatusDesc.innerHTML = '<i class="ph-bold ph-warning text-amber-400"></i> Tidak ada siswa aktif yang terdaftar di kelas ini.';
+                        studentStatusDesc.className = 'text-[11px] text-amber-400 mt-1.5 ml-1 font-semibold';
+                    }
+                }
+            });
+        }
 
         // BEEP SOUND
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();

@@ -86,6 +86,39 @@
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
                             </div>
+
+                            {{-- Pilihan Tingkat / Kelas --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label for="grade_level_create" class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Tingkat Jenjang</label>
+                                    <div class="relative group">
+                                        <select id="grade_level_create" name="grade_level" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-12 px-3 appearance-none text-xs cursor-pointer shadow-sm transition-all duration-300 [color-scheme:dark]">
+                                            <option value="" class="bg-slate-900 text-white">Semua Tingkat</option>
+                                            @foreach($gradeLevels as $gl)
+                                                <option value="{{ $gl }}" {{ old('grade_level') == $gl ? 'selected' : '' }} class="bg-slate-900 text-white">Tingkat {{ $gl }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-caret-down text-xs"></i></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="class_id_create" class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Kelas Spesifik</label>
+                                    <div class="relative group">
+                                        <select id="class_id_create" name="class_id" class="w-full rounded-2xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 h-12 px-3 appearance-none text-xs cursor-pointer shadow-sm transition-all duration-300 [color-scheme:dark]">
+                                            <option value="" data-grade="" class="bg-slate-900 text-white">Semua Kelas</option>
+                                            @foreach($classes as $c)
+                                                @php
+                                                    preg_match('/\d+/', $c->name, $m);
+                                                    $cg = $m[0] ?? '';
+                                                @endphp
+                                                <option value="{{ $c->id }}" data-grade="{{ $cg }}" {{ old('class_id') == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">Kelas {{ $c->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-caret-down text-xs"></i></div>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <div>
                                 <label for="title_create" class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Judul Bab <span class="text-rose-400">*</span></label>
@@ -115,24 +148,51 @@
                     <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] p-6 shadow-2xl border border-white/10 min-h-[500px] backdrop-blur-xl">
                         
                         {{-- Filter Area --}}
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-white/10">
-                            <h3 class="font-black text-lg text-white flex items-center gap-2">
-                                <div class="p-1.5 bg-sky-500/10 rounded-lg text-sky-400 border border-sky-500/20"><i class="ph-bold ph-list-dashes"></i></div>
-                                Daftar Bab Tersimpan
-                            </h3>
+                        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h3 class="font-black text-lg text-white flex items-center gap-2">
+                                    <div class="p-1.5 bg-sky-500/10 rounded-lg text-sky-400 border border-sky-500/20"><i class="ph-bold ph-list-dashes"></i></div>
+                                    Daftar Bab Tersimpan
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Filter dan kelola pokok bahasan sesuai mata pelajaran dan kelas/tingkat.</p>
+                            </div>
                             
-                            <form action="{{ route('lms.topics.index') }}" method="GET" class="w-full sm:w-auto flex gap-2">
-                                <div class="relative group w-full sm:w-56">
+                            <form action="{{ route('lms.topics.index') }}" method="GET" class="w-full xl:w-auto flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                {{-- Filter Mapel --}}
+                                <div class="relative group w-full sm:w-44">
                                     <select name="subject_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
-                                        <option value="" class="bg-slate-900 text-white">Filter Mapel...</option>
+                                        <option value="" class="bg-slate-900 text-white">Semua Mapel</option>
                                         @foreach($subjects as $subject)
                                             <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $subject->name }}</option>
                                         @endforeach
                                     </select>
-                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-funnel text-sm"></i></div>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-funnel text-xs"></i></div>
                                 </div>
-                                @if(request('subject_id'))
-                                    <a href="{{ route('lms.topics.index') }}" class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center shrink-0 border border-rose-500/20 hover:bg-rose-500/20 transition-colors shadow-sm" title="Hapus Filter"><i class="ph-bold ph-x"></i></a>
+
+                                {{-- Filter Tingkat --}}
+                                <div class="relative group w-full sm:w-32">
+                                    <select name="grade_level" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                        <option value="" class="bg-slate-900 text-white">Semua Tingkat</option>
+                                        @foreach($gradeLevels as $gl)
+                                            <option value="{{ $gl }}" {{ request('grade_level') == $gl ? 'selected' : '' }} class="bg-slate-900 text-white">Tingkat {{ $gl }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-graduation-cap text-xs"></i></div>
+                                </div>
+
+                                {{-- Filter Kelas --}}
+                                <div class="relative group w-full sm:w-32">
+                                    <select name="class_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                        <option value="" class="bg-slate-900 text-white">Semua Kelas</option>
+                                        @foreach($classes as $c)
+                                            <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">Kelas {{ $c->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 group-hover:text-sky-400 transition-colors"><i class="ph-bold ph-users-three text-xs"></i></div>
+                                </div>
+
+                                @if(request('subject_id') || request('grade_level') || request('class_id'))
+                                    <a href="{{ route('lms.topics.index') }}" class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center shrink-0 border border-rose-500/20 hover:bg-rose-500/20 transition-colors shadow-sm" title="Reset Semua Filter"><i class="ph-bold ph-arrow-counter-clockwise"></i></a>
                                 @endif
                             </form>
                         </div>
@@ -154,20 +214,38 @@
 
                                     {{-- Card Item --}}
                                     <div class="flex items-center justify-between p-4 border border-white/10 rounded-2xl hover:border-sky-400/40 transition-all duration-300 group bg-slate-900/60">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-sky-400 border border-sky-500/20 flex items-center justify-center font-black text-sm shrink-0">
+                                        <div class="flex items-start gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-sky-400 border border-sky-500/20 flex items-center justify-center font-black text-sm shrink-0 mt-0.5">
                                                 {{ $topic->order_number }}
                                             </div>
                                             <div>
-                                                <h4 class="font-black text-white text-sm group-hover:text-sky-300 transition-colors">{{ $topic->title }}</h4>
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <h4 class="font-black text-white text-sm group-hover:text-sky-300 transition-colors">{{ $topic->title }}</h4>
+                                                    
+                                                    {{-- Badges Tingkat / Kelas --}}
+                                                    @if($topic->schoolClass)
+                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                                                            <i class="ph-bold ph-users-three"></i> Kelas {{ $topic->schoolClass->name }}
+                                                        </span>
+                                                    @elseif($topic->grade_level)
+                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                                                            <i class="ph-bold ph-graduation-cap"></i> Tingkat {{ $topic->grade_level }}
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium bg-slate-800 text-slate-400 border border-white/10">
+                                                            <i class="ph-bold ph-globe"></i> Semua Tingkat
+                                                        </span>
+                                                    @endif
+                                                </div>
+
                                                 @if($topic->description)
-                                                    <p class="text-xs text-slate-400 font-medium truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-0.5">{{ $topic->description }}</p>
+                                                    <p class="text-xs text-slate-400 font-medium truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-1">{{ $topic->description }}</p>
                                                 @endif
                                             </div>
                                         </div>
                                         
                                         {{-- ACTION BUTTONS --}}
-                                        <div class="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                                        <div class="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 shrink-0">
                                             <!-- Tombol Edit -->
                                             <a href="{{ route('lms.topics.edit', $topic->id) }}" class="w-8 h-8 bg-sky-500/10 border border-sky-500/20 text-sky-400 rounded-xl hover:bg-sky-500 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Edit Bab">
                                                 <i class="ph-bold ph-pencil-simple"></i>
@@ -233,6 +311,45 @@
                 customClass: { popup: 'rounded-2xl border border-white/10 bg-[#021124] text-white' }
             });
         @endif
+
+        // Interaktivitas Tingkat & Kelas pada Form Tambah
+        const gradeCreateSelect = document.getElementById('grade_level_create');
+        const classCreateSelect = document.getElementById('class_id_create');
+
+        function filterCreateClassOptions() {
+            if (!gradeCreateSelect || !classCreateSelect) return;
+            const selectedGrade = gradeCreateSelect.value;
+            const options = classCreateSelect.querySelectorAll('option');
+
+            options.forEach(opt => {
+                const classGrade = opt.getAttribute('data-grade');
+                if (!opt.value) {
+                    opt.hidden = false;
+                } else if (!selectedGrade) {
+                    opt.hidden = false;
+                } else {
+                    opt.hidden = (classGrade !== selectedGrade);
+                }
+            });
+
+            const currentOpt = classCreateSelect.options[classCreateSelect.selectedIndex];
+            if (currentOpt && currentOpt.hidden) {
+                classCreateSelect.value = '';
+            }
+        }
+
+        if (gradeCreateSelect && classCreateSelect) {
+            gradeCreateSelect.addEventListener('change', filterCreateClassOptions);
+            classCreateSelect.addEventListener('change', function() {
+                const selectedOpt = this.options[this.selectedIndex];
+                const classGrade = selectedOpt ? selectedOpt.getAttribute('data-grade') : '';
+                if (classGrade) {
+                    gradeCreateSelect.value = classGrade;
+                }
+            });
+            // Inisialisasi awal jika ada nilai old
+            filterCreateClassOptions();
+        }
 
         // Konfirmasi Hapus SweetAlert2
         document.querySelectorAll('.btn-delete').forEach(button => {
