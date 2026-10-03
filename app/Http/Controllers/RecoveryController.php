@@ -34,11 +34,19 @@ class RecoveryController extends Controller
             ->paginate(15);
 
         // Statistik
-        $totalRecovered = $recoveryRecords->sum(fn($r) => $r->disciplineType->point_value);
+        $totalRecovered = (int) DisciplineRecord::whereHas('disciplineType', function($q) {
+                $q->where('name', 'like', '%Amnesti%')
+                  ->orWhere('name', 'like', '%Pemutihan%')
+                  ->orWhere('name', 'like', '%Decay%');
+            })
+            ->join('discipline_types', 'discipline_records.discipline_type_id', '=', 'discipline_types.id')
+            ->sum('discipline_types.point_value');
+
         $activeCount = DisciplineRecord::whereHas('disciplineType', function($q) {
                 $q->where('name', 'like', '%Amnesti%')
-                  ->orWhere('name', 'like', '%Pemutihan%');
-            })->distinct('student_id')->count();
+                  ->orWhere('name', 'like', '%Pemutihan%')
+                  ->orWhere('name', 'like', '%Decay%');
+            })->distinct()->count('student_id');
 
         // PERBAIKAN: Data siswa untuk modal input (Mengatasi status null)
         $students = Student::with('schoolClass')

@@ -39,7 +39,8 @@ class LibraryCirculationController extends Controller
             // 1. CARI SISWA
             $studentQuery = Student::where('student_id', $query)
                         ->orWhere('rfid_id', $query)
-                        ->orWhere('nis', $query);
+                        ->orWhere('nis', $query)
+                        ->orWhere('nisn', $query);
             try {
                 $studentQuery->with('schoolClass');
             } catch (\Exception $e) {}

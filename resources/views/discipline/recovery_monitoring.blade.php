@@ -91,6 +91,35 @@
                 </x-hero-section>
             </div>
 
+            {{-- Flash Messages --}}
+            @if (session('success'))
+                <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-[1.5rem] flex items-center justify-between shadow-xl backdrop-blur-md animate-enter">
+                    <span class="font-bold text-sm flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-lg text-emerald-400"></i> {{ session('success') }}
+                    </span>
+                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-200 p-1"><i class="ph-bold ph-x"></i></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 text-rose-200 rounded-[1.5rem] flex items-center justify-between shadow-xl backdrop-blur-md animate-enter">
+                    <span class="font-bold text-sm flex items-center gap-2">
+                        <i class="ph-fill ph-warning-circle text-lg text-rose-400"></i> {{ session('error') }}
+                    </span>
+                    <button @click="show = false" class="text-rose-400 hover:text-rose-200 p-1"><i class="ph-bold ph-x"></i></button>
+                </div>
+            @endif
+
+            @if (isset($errors) && $errors->any())
+                <div class="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 text-rose-200 rounded-[1.5rem] shadow-xl backdrop-blur-md animate-enter">
+                    <ul class="list-disc list-inside text-sm font-bold text-rose-200/90 space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             {{-- STATS CARDS --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] p-6 rounded-[2rem] border border-emerald-500/30 shadow-2xl backdrop-blur-xl">
@@ -159,7 +188,6 @@
                             <tr>
                                 <td colspan="6" class="px-8 py-20 text-center text-slate-500 italic">Belum ada data pemulihan poin.</td>
                             </tr>
-                            @empty
                             @endforelse
                         </tbody>
                     </table>

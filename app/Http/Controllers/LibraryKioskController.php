@@ -49,6 +49,8 @@ class LibraryKioskController extends Controller
             // 1. Cari Siswa
             $student = Student::where('rfid_id', $scanData)
                         ->orWhere('student_id', $scanData)
+                        ->orWhere('nisn', $scanData)
+                        ->orWhere('nis', $scanData)
                         ->first();
 
             if (!$student) {

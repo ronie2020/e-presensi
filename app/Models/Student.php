@@ -161,6 +161,37 @@ class Student extends Authenticatable
     }
 
     /**
+     * ACCESSOR & MUTATOR: Sinkronisasi NISN & Student ID
+     * Sesuai ketentuan sistem: student_id diarahkan ke NISN siswa.
+     * Sehingga memanggil $student->nisn otomatis merujuk ke student_id jika kolom nisn belum terisi.
+     */
+    public function getNisnAttribute($value)
+    {
+        return !empty($value) ? $value : ($this->attributes['student_id'] ?? null);
+    }
+
+    public function setNisnAttribute($value)
+    {
+        $this->attributes['nisn'] = $value;
+        if (empty($this->attributes['student_id'])) {
+            $this->attributes['student_id'] = $value;
+        }
+    }
+
+    public function getStudentIdAttribute($value)
+    {
+        return !empty($value) ? $value : ($this->attributes['nisn'] ?? null);
+    }
+
+    public function setStudentIdAttribute($value)
+    {
+        $this->attributes['student_id'] = $value;
+        if (empty($this->attributes['nisn'])) {
+            $this->attributes['nisn'] = $value;
+        }
+    }
+
+    /**
      * Relasi ke Kelas
      */
     public function schoolClass(): BelongsTo

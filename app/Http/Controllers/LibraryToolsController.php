@@ -37,6 +37,7 @@ class LibraryToolsController extends Controller
             $student = Student::with('schoolClass')
                         ->where('student_id', $request->nisn) 
                         ->orWhere('nis', $request->nisn)      
+                        ->orWhere('nisn', $request->nisn)      
                         ->first();
 
             if ($student) {
