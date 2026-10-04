@@ -65,11 +65,14 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {{-- KIRI: FORM TAMBAH BAB --}}
-                <div class="lg:col-span-1 animate-enter" style="animation-delay: 100ms">
-                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] p-6 shadow-2xl border border-white/10 backdrop-blur-xl">
-                        <div class="flex items-center gap-3 mb-6">
+                <div class="lg:col-span-1 animate-enter lg:sticky lg:top-8 self-start" style="animation-delay: 100ms">
+                    <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] p-6 sm:p-7 shadow-2xl border border-white/10 backdrop-blur-xl">
+                        <div class="flex items-center gap-3 mb-5">
                             <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center text-xl shadow-sm"><i class="ph-bold ph-plus"></i></div>
-                            <h3 class="font-black text-lg text-white">Tambah Bab Baru</h3>
+                            <div>
+                                <h3 class="font-black text-lg text-white leading-tight">Tambah Bab Baru</h3>
+                                <p class="text-[11px] text-slate-400">Susun silabus & pokok bahasan</p>
+                            </div>
                         </div>
 
                         <form id="createForm" action="{{ route('lms.topics.store') }}" method="POST" class="space-y-5">
@@ -147,20 +150,30 @@
                 <div class="lg:col-span-2 animate-enter" style="animation-delay: 200ms">
                     <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] p-6 shadow-2xl border border-white/10 min-h-[500px] backdrop-blur-xl">
                         
-                        {{-- Filter Area --}}
-                        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 pb-4 border-b border-white/10">
-                            <div>
-                                <h3 class="font-black text-lg text-white flex items-center gap-2">
-                                    <div class="p-1.5 bg-sky-500/10 rounded-lg text-sky-400 border border-sky-500/20"><i class="ph-bold ph-list-dashes"></i></div>
-                                    Daftar Bab Tersimpan
-                                </h3>
-                                <p class="text-xs text-slate-400 mt-0.5">Filter dan kelola pokok bahasan sesuai mata pelajaran dan kelas/tingkat.</p>
+                        {{-- Filter & Header Area --}}
+                        <div class="mb-6 pb-5 border-b border-white/10 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center text-xl shrink-0 shadow-sm">
+                                        <i class="ph-bold ph-list-dashes"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2.5">
+                                            <h3 class="font-black text-lg text-white">Daftar Bab Tersimpan</h3>
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                                                {{ $topics->total() }} Bab
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-0.5">Filter dan kelola pokok bahasan sesuai mata pelajaran dan kelas/tingkat.</p>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <form action="{{ route('lms.topics.index') }}" method="GET" class="w-full xl:w-auto flex flex-wrap sm:flex-nowrap items-center gap-2">
+                            {{-- Filter Toolbar --}}
+                            <form action="{{ route('lms.topics.index') }}" method="GET" class="flex flex-wrap items-center gap-2.5 pt-1">
                                 {{-- Filter Mapel --}}
-                                <div class="relative group w-full sm:w-44">
-                                    <select name="subject_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                <div class="relative group min-w-[160px] flex-1 sm:flex-initial">
+                                    <select name="subject_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/90 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3.5 pr-8 appearance-none cursor-pointer transition-all [color-scheme:dark]">
                                         <option value="" class="bg-slate-900 text-white">Semua Mapel</option>
                                         @foreach($subjects as $subject)
                                             <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $subject->name }}</option>
@@ -170,8 +183,8 @@
                                 </div>
 
                                 {{-- Filter Tingkat --}}
-                                <div class="relative group w-full sm:w-32">
-                                    <select name="grade_level" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                <div class="relative group min-w-[130px] flex-1 sm:flex-initial">
+                                    <select name="grade_level" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/90 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3.5 pr-8 appearance-none cursor-pointer transition-all [color-scheme:dark]">
                                         <option value="" class="bg-slate-900 text-white">Semua Tingkat</option>
                                         @foreach($gradeLevels as $gl)
                                             <option value="{{ $gl }}" {{ request('grade_level') == $gl ? 'selected' : '' }} class="bg-slate-900 text-white">Tingkat {{ $gl }}</option>
@@ -181,8 +194,8 @@
                                 </div>
 
                                 {{-- Filter Kelas --}}
-                                <div class="relative group w-full sm:w-32">
-                                    <select name="class_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/80 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                <div class="relative group min-w-[130px] flex-1 sm:flex-initial">
+                                    <select name="class_id" onchange="this.form.submit()" class="w-full rounded-xl border border-white/10 bg-slate-900/90 font-bold text-white focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs h-10 px-3.5 pr-8 appearance-none cursor-pointer transition-all [color-scheme:dark]">
                                         <option value="" class="bg-slate-900 text-white">Semua Kelas</option>
                                         @foreach($classes as $c)
                                             <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">Kelas {{ $c->name }}</option>
@@ -192,35 +205,45 @@
                                 </div>
 
                                 @if(request('subject_id') || request('grade_level') || request('class_id'))
-                                    <a href="{{ route('lms.topics.index') }}" class="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center shrink-0 border border-rose-500/20 hover:bg-rose-500/20 transition-colors shadow-sm" title="Reset Semua Filter"><i class="ph-bold ph-arrow-counter-clockwise"></i></a>
+                                    <a href="{{ route('lms.topics.index') }}" class="h-10 px-3 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center gap-1.5 shrink-0 border border-rose-500/20 hover:bg-rose-500/20 font-bold text-xs transition-colors shadow-sm" title="Reset Semua Filter">
+                                        <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                                        <span>Reset</span>
+                                    </a>
                                 @endif
                             </form>
                         </div>
 
                         {{-- List Table --}}
                         @if($topics->count() > 0)
-                            <div class="space-y-4">
+                            <div class="space-y-3.5">
                                 @php $currentSubject = null; @endphp
                                 @foreach($topics as $topic)
                                     
                                     {{-- Grouping Header per Mapel --}}
                                     @if($currentSubject !== $topic->subject_id)
-                                        <div class="bg-sky-500/10 border border-sky-500/20 px-4 py-2 rounded-xl mt-6 first:mt-0 flex items-center gap-2">
-                                            <div class="w-2 h-2 rounded-full bg-sky-400"></div>
-                                            <p class="text-[11px] font-black text-sky-300 uppercase tracking-widest">{{ $topic->subject->name }}</p>
+                                        <div class="bg-sky-500/10 border border-sky-500/20 px-4 py-2.5 rounded-xl mt-6 first:mt-0 flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse"></div>
+                                                <p class="text-xs font-black text-sky-300 uppercase tracking-widest">{{ $topic->subject->name }}</p>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-sky-400/80 bg-sky-500/10 px-2.5 py-0.5 rounded-md border border-sky-500/20">
+                                                Mata Pelajaran
+                                            </span>
                                         </div>
                                         @php $currentSubject = $topic->subject_id; @endphp
                                     @endif
 
                                     {{-- Card Item --}}
-                                    <div class="flex items-center justify-between p-4 border border-white/10 rounded-2xl hover:border-sky-400/40 transition-all duration-300 group bg-slate-900/60">
-                                        <div class="flex items-start gap-4">
-                                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-sky-400 border border-sky-500/20 flex items-center justify-center font-black text-sm shrink-0 mt-0.5">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-white/10 rounded-2xl hover:border-sky-400/40 transition-all duration-300 group bg-slate-900/60 hover:bg-slate-900/90">
+                                        <div class="flex items-start gap-3.5 min-w-0 flex-1">
+                                            <div class="w-10 h-10 rounded-xl bg-slate-900 text-sky-400 border border-sky-500/25 flex items-center justify-center font-black text-sm shrink-0 mt-0.5 shadow-sm group-hover:border-sky-400 group-hover:shadow-sky-500/20 transition-all">
                                                 {{ $topic->order_number }}
                                             </div>
-                                            <div>
+                                            <div class="min-w-0 flex-1">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <h4 class="font-black text-white text-sm group-hover:text-sky-300 transition-colors">{{ $topic->title }}</h4>
+                                                    <h4 class="font-black text-white text-sm group-hover:text-sky-300 transition-colors leading-snug break-words">
+                                                        {{ $topic->title }}
+                                                    </h4>
                                                     
                                                     {{-- Badges Tingkat / Kelas --}}
                                                     @if($topic->schoolClass)
@@ -236,26 +259,37 @@
                                                             <i class="ph-bold ph-globe"></i> Semua Tingkat
                                                         </span>
                                                     @endif
+
+                                                    {{-- Badges Jumlah Materi & Tugas --}}
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/20" title="{{ $topic->materials_count ?? 0 }} Materi">
+                                                        <i class="ph-bold ph-book-open-text text-sky-400"></i> {{ $topic->materials_count ?? 0 }} Materi
+                                                    </span>
+
+                                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20" title="{{ $topic->assignments_count ?? 0 }} Tugas">
+                                                        <i class="ph-bold ph-pencil-simple text-amber-400"></i> {{ $topic->assignments_count ?? 0 }} Tugas
+                                                    </span>
                                                 </div>
 
                                                 @if($topic->description)
-                                                    <p class="text-xs text-slate-400 font-medium truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-1">{{ $topic->description }}</p>
+                                                    <p class="text-xs text-slate-400 font-medium line-clamp-2 mt-1.5 text-ellipsis">{{ $topic->description }}</p>
                                                 @endif
                                             </div>
                                         </div>
                                         
-                                        {{-- ACTION BUTTONS --}}
-                                        <div class="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 shrink-0">
+                                        {{-- ACTION BUTTONS (Selalu terlihat jelas) --}}
+                                        <div class="flex items-center gap-2 shrink-0 self-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-white/5 w-full sm:w-auto justify-end">
                                             <!-- Tombol Edit -->
-                                            <a href="{{ route('lms.topics.edit', $topic->id) }}" class="w-8 h-8 bg-sky-500/10 border border-sky-500/20 text-sky-400 rounded-xl hover:bg-sky-500 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Edit Bab">
-                                                <i class="ph-bold ph-pencil-simple"></i>
+                                            <a href="{{ route('lms.topics.edit', $topic->id) }}" class="px-3 py-1.5 sm:px-0 sm:py-0 sm:w-9 sm:h-9 bg-sky-500/10 border border-sky-500/25 text-sky-400 rounded-xl hover:bg-sky-500 hover:text-white flex items-center justify-center gap-1.5 transition-all shadow-sm text-xs font-bold active:scale-95" title="Edit Bab">
+                                                <i class="ph-bold ph-pencil-simple text-sm"></i>
+                                                <span class="sm:hidden">Edit</span>
                                             </a>
                                             
                                             <!-- Tombol Hapus dengan SweetAlert2 -->
                                             <form action="{{ route('lms.topics.destroy', $topic->id) }}" method="POST" class="form-delete m-0">
                                                 @csrf @method('DELETE')
-                                                <button type="button" class="btn-delete w-8 h-8 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white flex items-center justify-center transition-all shadow-sm" title="Hapus Bab">
-                                                    <i class="ph-bold ph-trash"></i>
+                                                <button type="button" class="btn-delete px-3 py-1.5 sm:px-0 sm:py-0 sm:w-9 sm:h-9 bg-rose-500/10 border border-rose-500/25 text-rose-400 rounded-xl hover:bg-rose-500 hover:text-white flex items-center justify-center gap-1.5 transition-all shadow-sm text-xs font-bold active:scale-95" title="Hapus Bab">
+                                                    <i class="ph-bold ph-trash text-sm"></i>
+                                                    <span class="sm:hidden">Hapus</span>
                                                 </button>
                                             </form>
                                         </div>

@@ -29,7 +29,8 @@ class LmsTopicController extends Controller
             $classes = SchoolClass::where('name', '!=', 'admin')->orderBy('name', 'asc')->get();
         }
 
-        $query = Topic::with(['subject', 'schoolClass']);
+        $query = Topic::with(['subject', 'schoolClass'])
+            ->withCount(['materials', 'assignments']);
 
         if (!$isAdmin) {
             $query->whereIn('subject_id', $subjects->pluck('id'));
