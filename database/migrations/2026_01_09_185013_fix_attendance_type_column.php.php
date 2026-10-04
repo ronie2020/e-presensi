@@ -18,7 +18,9 @@ return new class extends Migration
             $tableName = 'attendance_siswas';
         }
 
-        DB::statement("ALTER TABLE `$tableName` MODIFY COLUMN `type` VARCHAR(50) NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE `$tableName` MODIFY COLUMN `type` VARCHAR(50) NOT NULL");
+        }
     }
 
     public function down()

@@ -12,19 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // 1. Update ENUM status untuk menyertakan 'Uzur Syar'i'
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat', 'Uzur Syar\'i') NOT NULL");
-
-        // 2. Ubah kolom time_in agar boleh NULL (nullable)
-        // Ini agar input manual Izin/Uzur tidak error saat jam tidak diisi
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN time_in TIME NULL");
-
-        // 3. Ubah juga kolom time_out jika ada agar boleh NULL
-        // Berdasarkan log error Anda, kolom ini juga dikirimkan sebagai null
-        try {
-            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN time_out TIME NULL");
-        } catch (\Exception $e) {
-            // Abaikan jika kolom time_out memang tidak ada di tabel Anda
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat', 'Uzur Syar\'i') NOT NULL");
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN time_in TIME NULL");
+            try {
+                DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN time_out TIME NULL");
+            } catch (\Exception $e) {
+                // Abaikan jika kolom time_out memang tidak ada di tabel Anda
+            }
         }
     }
 
@@ -33,10 +28,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Kembalikan ke definisi awal (Tanpa Uzur Syar'i dan NOT NULL)
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat') NOT NULL");
-        
-        // Kembalikan time_in menjadi NOT NULL (Hati-hati: ini akan error jika ada data NULL di DB)
-        // DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN time_in TIME NOT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat') NOT NULL");
+        }
     }
 };

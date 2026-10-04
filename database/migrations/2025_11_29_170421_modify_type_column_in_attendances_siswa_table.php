@@ -9,8 +9,9 @@ return new class extends Migration
 {
     public function up()
     {
-        // Ubah tipe kolom 'type' dari ENUM menjadi VARCHAR(50) agar fleksibel
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN type VARCHAR(50) NOT NULL DEFAULT 'Harian'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN type VARCHAR(50) NOT NULL DEFAULT 'Harian'");
+        }
         
         // Opsional: Jika kolom 'activity' belum ada (cek tabel Anda), kita tambahkan sekalian.
         // Karena di controller ada kode 'activity' => $activity

@@ -12,9 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        // Menggunakan Raw SQL untuk mengubah kolom ENUM agar menerima 'Terlambat'
-        // Pastikan nama tabel benar 'attendances_siswa'
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat') DEFAULT 'Hadir'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat') DEFAULT 'Hadir'");
+        }
     }
 
     /**
@@ -22,7 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Kembalikan ke kondisi semula jika di-rollback
-        DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa') DEFAULT 'Hadir'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE attendances_siswa MODIFY COLUMN status ENUM('Hadir', 'Sakit', 'Izin', 'Alfa') DEFAULT 'Hadir'");
+        }
     }
 };

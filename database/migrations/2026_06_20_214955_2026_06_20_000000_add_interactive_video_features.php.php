@@ -10,8 +10,9 @@ return new class extends Migration
    public function up()
     {
         // 1. UPDATE TABEL lms_assignments
-        // UBAH DARI ENUM MENJADI VARCHAR AGAR AMAN DI HOSTING DAN TIDAK ERROR DATA TRUNCATED
-        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
+        }
 
         Schema::table('lms_assignments', function (Blueprint $table) {
             // Tambahkan kolom youtube_url HANYA jika kolom tersebut belum ada
@@ -89,7 +90,8 @@ return new class extends Migration
             }
         });
         
-        // Kembalikan ke VARCHAR jika di-rollback agar tidak memicu error ENUM lagi
-        DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE lms_assignments MODIFY COLUMN assignment_type VARCHAR(50) NOT NULL DEFAULT 'file_upload'");
+        }
     }
 };
