@@ -118,8 +118,8 @@
                                             currentStatus: '{{ $status }}',
                                             open: false,
                                             get statusText() {
-                                                const map = { 'present': 'Hadir', 'sick': 'Sakit', 'permission': 'Izin', 'alpha': 'Alpha' };
-                                                return this.currentStatus ? map[this.currentStatus] : 'PILIH STATUS';
+                                                const map = { 'present': 'Hadir', 'Hadir': 'Hadir', 'Terlambat': 'Terlambat', 'late': 'Terlambat', 'sick': 'Sakit', 'Sakit': 'Sakit', 'permission': 'Izin', 'Izin': 'Izin', 'alpha': 'Alpha', 'Alfa': 'Alpha' };
+                                                return this.currentStatus ? (map[this.currentStatus] || this.currentStatus) : 'PILIH STATUS';
                                             }
                                          }"
                                          :class="open ? 'z-40 relative' : 'z-0 relative'">
@@ -127,17 +127,17 @@
                                         <div class="flex items-center gap-4 overflow-hidden">
                                             <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shrink-0 transition-colors shadow-sm"
                                                  :class="{
-                                                    'bg-emerald-500 text-white': currentStatus === 'present',
-                                                    'bg-rose-500 text-white': currentStatus === 'alpha',
-                                                    'bg-sky-500 text-white': currentStatus === 'sick',
-                                                    'bg-amber-500 text-white': currentStatus === 'permission',
+                                                    'bg-emerald-500 text-white': ['present', 'Hadir', 'Terlambat', 'late', 'terlambat'].includes(currentStatus),
+                                                    'bg-rose-500 text-white': ['alpha', 'Alfa', 'Alpa', 'alfa'].includes(currentStatus),
+                                                    'bg-sky-500 text-white': ['sick', 'Sakit', 'sakit'].includes(currentStatus),
+                                                    'bg-amber-500 text-white': ['permission', 'Izin', 'izin'].includes(currentStatus),
                                                     'bg-slate-800 text-slate-400 border border-white/10': !currentStatus
                                                  }">
                                                 <i class="ph-bold" :class="{
-                                                    'ph-check': currentStatus === 'present',
-                                                    'ph-x': currentStatus === 'alpha',
-                                                    'ph-thermometer': currentStatus === 'sick',
-                                                    'ph-hand-waving': currentStatus === 'permission',
+                                                    'ph-check': ['present', 'Hadir', 'Terlambat', 'late', 'terlambat'].includes(currentStatus),
+                                                    'ph-x': ['alpha', 'Alfa', 'Alpa', 'alfa'].includes(currentStatus),
+                                                    'ph-thermometer': ['sick', 'Sakit', 'sakit'].includes(currentStatus),
+                                                    'ph-hand-waving': ['permission', 'Izin', 'izin'].includes(currentStatus),
                                                     'ph-question': !currentStatus
                                                 }"></i>
                                             </div>

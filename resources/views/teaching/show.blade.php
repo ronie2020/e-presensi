@@ -325,33 +325,33 @@
                                          x-show="(name.includes(searchQuery.toLowerCase()) || id.includes(searchQuery.toLowerCase())) &&
                                                  (filterTab === 'all' ||
                                                  (filterTab === 'unmarked' && !status) ||
-                                                 (filterTab === 'present' && (status === 'Hadir' || status === 'present')) ||
-                                                 (filterTab === 'sick' && (status === 'Sakit' || status === 'sick')) ||
-                                                 (filterTab === 'permission' && (status === 'Izin' || status === 'permission')) ||
-                                                 (filterTab === 'alpha' && (status === 'Alfa' || status === 'alpha')))"
+                                                 (filterTab === 'present' && ['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status)) ||
+                                                 (filterTab === 'sick' && ['Sakit', 'sick', 'sakit'].includes(status)) ||
+                                                 (filterTab === 'permission' && ['Izin', 'permission', 'izin'].includes(status)) ||
+                                                 (filterTab === 'alpha' && ['Alfa', 'alpha', 'Alpa', 'alfa'].includes(status)))"
                                          :class="{
                                             'z-40 relative': open,
                                             'z-0 relative': !open,
-                                            'bg-[#DFF6DD]/20 border-[#B7DFB9]': status === 'Hadir' || status === 'present',
-                                            'bg-elevate-soft/40 border-slate-200': status === 'Sakit' || status === 'sick',
-                                            'bg-[#FFEFD6]/20 border-[#FFD8A8]': status === 'Izin' || status === 'permission',
-                                            'bg-[#FDE7E9]/20 border-[#F4C3C9]': status === 'Alfa' || status === 'alpha',
+                                            'bg-[#DFF6DD]/20 border-[#B7DFB9]': ['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status),
+                                            'bg-elevate-soft/40 border-slate-200': ['Sakit', 'sick', 'sakit'].includes(status),
+                                            'bg-[#FFEFD6]/20 border-[#FFD8A8]': ['Izin', 'permission', 'izin'].includes(status),
+                                            'bg-[#FDE7E9]/20 border-[#F4C3C9]': ['Alfa', 'alpha', 'Alpa', 'alfa'].includes(status),
                                             'bg-white border-slate-100 hover:border-slate-300 shadow-sm': !status
                                          }">
                                         
                                         {{-- Avatar Status --}}
                                         <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm transition-all border"
                                              :class="{ 
-                                                 'bg-[#107C10] text-white border-[#107C10]': status === 'Hadir' || status === 'present',
-                                                 'bg-elevate-primary text-white border-elevate-primary': status === 'Sakit' || status === 'sick',
-                                                 'bg-[#D83B01] text-white border-[#D83B01]': status === 'Izin' || status === 'permission',
-                                                 'bg-[#D13438] text-white border-[#D13438]': status === 'Alfa' || status === 'alpha',
+                                                 'bg-[#107C10] text-white border-[#107C10]': ['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status),
+                                                 'bg-elevate-primary text-white border-elevate-primary': ['Sakit', 'sick', 'sakit'].includes(status),
+                                                 'bg-[#D83B01] text-white border-[#D83B01]': ['Izin', 'permission', 'izin'].includes(status),
+                                                 'bg-[#D13438] text-white border-[#D13438]': ['Alfa', 'alpha', 'Alpa', 'alfa'].includes(status),
                                                  'bg-slate-100 text-slate-400 border-slate-200': !status 
                                              }">
-                                             <template x-if="status === 'Hadir' || status === 'present'"> <i class="ph-bold ph-check text-lg sm:text-xl"></i> </template>
-                                             <template x-if="status === 'Sakit' || status === 'sick'"> <span>S</span> </template>
-                                             <template x-if="status === 'Izin' || status === 'permission'"> <span>I</span> </template>
-                                             <template x-if="status === 'Alfa' || status === 'alpha'"> <span>A</span> </template>
+                                             <template x-if="['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status)"> <i class="ph-bold ph-check text-lg sm:text-xl"></i> </template>
+                                             <template x-if="['Sakit', 'sick', 'sakit'].includes(status)"> <span>S</span> </template>
+                                             <template x-if="['Izin', 'permission', 'izin'].includes(status)"> <span>I</span> </template>
+                                             <template x-if="['Alfa', 'alpha', 'Alpa', 'alfa'].includes(status)"> <span>A</span> </template>
                                              <template x-if="!status"> <span>{{ $initials }}</span> </template>
                                         </div>
 
@@ -363,9 +363,9 @@
                                         @if($isOpen)
                                             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                                                 {{-- Tombol Hadir Cepat --}}
-                                                <button @click="setManual({{ $student->id }}, 'present')" 
+                                                <button @click="setManual({{ $student->id }}, ['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status) ? null : 'present')" 
                                                         class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
-                                                        :class="status === 'Hadir' || status === 'present' ? 'bg-[#107C10] text-white' : 'bg-slate-100 text-slate-400 hover:bg-[#DFF6DD] hover:text-[#107C10]'">
+                                                        :class="['Hadir', 'present', 'Terlambat', 'late', 'terlambat'].includes(status) ? 'bg-[#107C10] text-white' : 'bg-slate-100 text-slate-400 hover:bg-[#DFF6DD] hover:text-[#107C10]'">
                                                     <i class="ph-bold ph-check text-base sm:text-lg"></i>
                                                 </button>
                                                 
@@ -373,7 +373,7 @@
                                                 <div class="relative">
                                                     <button @click="open = !open" @click.outside="open = false"
                                                             class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
-                                                            :class="['sick', 'permission', 'alpha', 'Sakit', 'Izin', 'Alfa'].includes(status) ? 'bg-elevate-dark text-white' : 'bg-slate-100 text-slate-400 hover:bg-elevate-dark hover:text-white'">
+                                                            :class="['sick', 'permission', 'alpha', 'Sakit', 'Izin', 'Alfa', 'sakit', 'izin', 'alfa', 'alpa'].includes(status) ? 'bg-elevate-dark text-white' : 'bg-slate-100 text-slate-400 hover:bg-elevate-dark hover:text-white'">
                                                         <i class="ph-bold ph-dots-three-vertical text-lg sm:text-xl"></i>
                                                     </button>
                                                     
@@ -541,6 +541,13 @@
 
                 async setManual(studentId, status) {
                     try {
+                        let rowEl = document.getElementById('student-row-' + studentId);
+                        let oldStatus = null;
+                        if(rowEl) {
+                            let alpineEl = Alpine.$data(rowEl);
+                            if(alpineEl) oldStatus = alpineEl.status;
+                        }
+
                         const response = await fetch('{{ route("teaching.manual") }}', {
                             method: 'POST',
                             headers: { 
@@ -562,10 +569,12 @@
                             const newStatus = data.new_status || null; 
                             window.dispatchEvent(new CustomEvent('update-status-' + studentId, { detail: { status: newStatus } }));
                             
+                            this.updateLocalStats(oldStatus, newStatus);
+
                             playBeep('success');
                             
                             // Map ke bahasa Indonesia agar sama dengan database
-                            const statusMap = { 'present': 'HADIR', 'sick': 'SAKIT', 'permission': 'IZIN', 'alpha': 'ALFA', 'Hadir': 'HADIR', 'Sakit': 'SAKIT', 'Izin': 'IZIN', 'Alfa': 'ALFA' };
+                            const statusMap = { 'present': 'HADIR', 'sick': 'SAKIT', 'permission': 'IZIN', 'alpha': 'ALFA', 'Hadir': 'HADIR', 'Sakit': 'SAKIT', 'Izin': 'IZIN', 'Alfa': 'ALFA', 'Terlambat': 'TERLAMBAT', 'late': 'TERLAMBAT' };
                             const statusText = newStatus ? (statusMap[newStatus] || newStatus.toUpperCase()) : 'DIRESET';
 
                             this.showToast('success', 'Status: ' + statusText);
