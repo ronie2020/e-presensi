@@ -663,16 +663,17 @@
                     
                     this.html5QrcodeScanner = new Html5Qrcode("reader");
                     const config = { 
-                        fps: 8, 
-                        qrbox: { width: 220, height: 220 },
+                        fps: 5,
+                        qrbox: { width: 200, height: 200 },
                         experimentalFeatures: {
                             useBarCodeDetectorIfSupported: true
                         }
                     };
 
                     /**
-                     * Setelah kamera berhasil dibuka, kunci fokus menggunakan MediaTrack API
-                     * agar kamera tidak terus "hunting" / bergerak-gerak mencari fokus.
+                     * Kunci fokus kamera secara paksa menggunakan MediaTrack API.
+                     * Prioritas: manual focus > continuous > biarkan apa adanya.
+                     * Ini mencegah webcam/kamera HP terus "hunting" mencari fokus.
                      */
                     const lockCameraFocus = () => {
                         setTimeout(() => {
@@ -682,29 +683,37 @@
                             if (!stream) return;
                             const track = stream.getVideoTracks()[0];
                             if (!track) return;
+                            
                             const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-                            const constraints = {};
 
-                            // Kunci mode fokus jika didukung perangkat
-                            if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-                                constraints.focusMode = 'continuous';
+                            // Coba kunci ke mode manual dengan jarak fokus tetap (mencegah hunting)
+                            if (capabilities.focusMode && capabilities.focusMode.includes('manual') && capabilities.focusDistance) {
+                                const minFocus = capabilities.focusDistance.min || 0;
+                                const maxFocus = capabilities.focusDistance.max || 1;
+                                // Fokus di 30% dari rentang (jarak dekat = ideal baca QR)
+                                const targetFocus = minFocus + (maxFocus - minFocus) * 0.3;
+                                track.applyConstraints({
+                                    advanced: [{ focusMode: 'manual', focusDistance: targetFocus }]
+                                }).catch(() => {
+                                    // Jika manual gagal, coba continuous
+                                    if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                                        track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+                                    }
+                                });
+                            } else if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                                track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
                             }
-                            // Kurangi exposure agar sensor tidak terus menyesuaikan
-                            if (capabilities.exposureMode && capabilities.exposureMode.includes('continuous')) {
-                                constraints.exposureMode = 'continuous';
-                            }
-                            // Kunci white balance
-                            if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('continuous')) {
-                                constraints.whiteBalanceMode = 'continuous';
-                            }
-                            // Set resolusi stabil agar tidak ada perubahan mendadak
-                            constraints.width = { ideal: 1280 };
-                            constraints.height = { ideal: 720 };
 
-                            if (Object.keys(constraints).length > 0) {
-                                track.applyConstraints({ advanced: [constraints] }).catch(() => {});
+                            // Kunci exposure agar tidak berubah-ubah
+                            if (capabilities.exposureMode && capabilities.exposureMode.includes('manual')) {
+                                track.applyConstraints({ advanced: [{ exposureMode: 'manual' }] }).catch(() => {});
                             }
-                        }, 1200); // Tunggu 1.2 detik setelah stream stabil
+
+                            // Kunci white balance agar warna tidak berfluktuasi
+                            if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('manual')) {
+                                track.applyConstraints({ advanced: [{ whiteBalanceMode: 'manual' }] }).catch(() => {});
+                            }
+                        }, 1500);
                     };
                     
                     const onScanSuccess = (decodedText) => { 
