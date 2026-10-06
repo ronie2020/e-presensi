@@ -663,11 +663,48 @@
                     
                     this.html5QrcodeScanner = new Html5Qrcode("reader");
                     const config = { 
-                        fps: 10, 
-                        qrbox: { width: 250, height: 250 },
+                        fps: 8, 
+                        qrbox: { width: 220, height: 220 },
                         experimentalFeatures: {
                             useBarCodeDetectorIfSupported: true
                         }
+                    };
+
+                    /**
+                     * Setelah kamera berhasil dibuka, kunci fokus menggunakan MediaTrack API
+                     * agar kamera tidak terus "hunting" / bergerak-gerak mencari fokus.
+                     */
+                    const lockCameraFocus = () => {
+                        setTimeout(() => {
+                            const videoEl = document.querySelector('#reader video');
+                            if (!videoEl) return;
+                            const stream = videoEl.srcObject;
+                            if (!stream) return;
+                            const track = stream.getVideoTracks()[0];
+                            if (!track) return;
+                            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+                            const constraints = {};
+
+                            // Kunci mode fokus jika didukung perangkat
+                            if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                                constraints.focusMode = 'continuous';
+                            }
+                            // Kurangi exposure agar sensor tidak terus menyesuaikan
+                            if (capabilities.exposureMode && capabilities.exposureMode.includes('continuous')) {
+                                constraints.exposureMode = 'continuous';
+                            }
+                            // Kunci white balance
+                            if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('continuous')) {
+                                constraints.whiteBalanceMode = 'continuous';
+                            }
+                            // Set resolusi stabil agar tidak ada perubahan mendadak
+                            constraints.width = { ideal: 1280 };
+                            constraints.height = { ideal: 720 };
+
+                            if (Object.keys(constraints).length > 0) {
+                                track.applyConstraints({ advanced: [constraints] }).catch(() => {});
+                            }
+                        }, 1200); // Tunggu 1.2 detik setelah stream stabil
                     };
                     
                     const onScanSuccess = (decodedText) => { 
@@ -679,20 +716,24 @@
                         } 
                     };
 
-                    // Coba kamera belakang (Mobile)
+                    // Coba kamera belakang (Mobile / HP)
                     this.html5QrcodeScanner.start(
                         { facingMode: "environment" }, 
                         config,
                         onScanSuccess,
                         (errorMessage) => { }
-                    ).catch(err => {
+                    ).then(() => {
+                        lockCameraFocus();
+                    }).catch(err => {
                         // Fallback ke kamera depan / Webcam PC
                         this.html5QrcodeScanner.start(
                             { facingMode: "user" }, 
                             config,
                             onScanSuccess,
                             (errorMessage) => { }
-                        ).catch(e => {
+                        ).then(() => {
+                            lockCameraFocus();
+                        }).catch(e => {
                             this.statusMessage = "Error Kamera: Izin ditolak atau kamera tidak ditemukan.";
                             Swal.fire({
                                 title: 'Kamera Error', 
