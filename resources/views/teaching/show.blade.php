@@ -655,47 +655,45 @@
                 },
 
                 startScanner() {
+                    if (this.html5QrcodeScanner) {
+                        try {
+                            this.html5QrcodeScanner.stop().catch(() => {});
+                        } catch(e) {}
+                    }
+                    
                     this.html5QrcodeScanner = new Html5Qrcode("reader");
                     const config = { 
                         fps: 10, 
                         qrbox: { width: 250, height: 250 },
-                        aspectRatio: 1.0,
                         experimentalFeatures: {
                             useBarCodeDetectorIfSupported: true
                         }
                     };
-
-                    const videoConstraints = {
-                        facingMode: "environment",
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        focusMode: "continuous"
-                    };
                     
-                    this.html5QrcodeScanner.start(videoConstraints, config,
-                        (decodedText) => { 
-                             if (!this.loading) { 
-                                 this.rfidCode = decodedText; 
-                                 this.submitScan();
-                                 this.loading = true;
-                                 setTimeout(() => { this.loading = false; }, 2000);
-                             } 
-                        },
+                    const onScanSuccess = (decodedText) => { 
+                        if (!this.loading) { 
+                            this.rfidCode = decodedText; 
+                            this.submitScan();
+                            this.loading = true;
+                            setTimeout(() => { this.loading = false; }, 2000);
+                        } 
+                    };
+
+                    // Coba kamera belakang (Mobile)
+                    this.html5QrcodeScanner.start(
+                        { facingMode: "environment" }, 
+                        config,
+                        onScanSuccess,
                         (errorMessage) => { }
                     ).catch(err => {
-                        // Fallback to basic environment camera if custom constraints fail
-                        this.html5QrcodeScanner.start({ facingMode: "environment" }, config,
-                            (decodedText) => { 
-                                 if (!this.loading) { 
-                                     this.rfidCode = decodedText; 
-                                     this.submitScan();
-                                     this.loading = true;
-                                     setTimeout(() => { this.loading = false; }, 2000);
-                                 } 
-                            },
+                        // Fallback ke kamera depan / Webcam PC
+                        this.html5QrcodeScanner.start(
+                            { facingMode: "user" }, 
+                            config,
+                            onScanSuccess,
                             (errorMessage) => { }
                         ).catch(e => {
-                            this.statusMessage = "Error Kamera: Izin ditolak.";
+                            this.statusMessage = "Error Kamera: Izin ditolak atau kamera tidak ditemukan.";
                             Swal.fire({
                                 title: 'Kamera Error', 
                                 text: 'Pastikan Anda menggunakan HTTPS dan memberikan izin kamera.', 
