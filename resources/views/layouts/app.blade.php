@@ -200,12 +200,44 @@
                     </div>
                 </header>
 
-                <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-0">
-                    <div class="max-w-7xl mx-auto relative z-10">
+                <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-0 flex flex-col justify-between">
+                    <div class="max-w-7xl mx-auto relative z-10 w-full flex-1">
                         {{ $slot ?? '' }}
                         @yield('content')
                     </div>
-                    <div class="h-10"></div>
+
+                    <!-- FOOTER APLIKASI (ELEVATE DARK GLASSMORPHISM) -->
+                    <footer class="max-w-7xl mx-auto w-full mt-12 pt-6 pb-2 border-t border-white/10 text-xs text-slate-400 no-print relative z-10">
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <!-- Kiri: Brand & Hak Cipta -->
+                            <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-center md:text-left">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded-md bg-gradient-to-br from-elevate-accent to-elevate-primary flex items-center justify-center text-[10px] text-white font-black shadow-sm">
+                                        N
+                                    </div>
+                                    <span class="font-bold text-white tracking-wide">SIMADU-Netila</span>
+                                </div>
+                                <span class="text-slate-600 hidden sm:inline">&bull;</span>
+                                <span class="text-slate-300 font-medium">SMP Negeri 3 Lakbok</span>
+                                <span class="text-slate-600 hidden sm:inline">&bull;</span>
+                                <span class="text-slate-400">&copy; {{ date('Y') }} All rights reserved.</span>
+                            </div>
+
+                            <!-- Kanan: Status Server, Versi, & Link Cepat -->
+                            <div class="flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-4">
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>Server Aktif</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-sky-300 font-mono text-[11px] font-bold" title="Versi Sistem">
+                                    v5.0
+                                </span>
+                                <a href="{{ route('portal.index') }}" target="_blank" class="hover:text-sky-300 transition-colors flex items-center gap-1 text-slate-300">
+                                    <i class="ph-bold ph-arrow-square-out text-sm text-sky-400"></i> Portal Siswa
+                                </a>
+                            </div>
+                        </div>
+                    </footer>
                 </main>
             </div>
         </div>

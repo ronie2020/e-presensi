@@ -100,12 +100,56 @@ class DashboardController extends Controller
         // 4. DATA KARTU (CARDS)
         // =====================================================================
         $cards = [
-            ['title' => 'Total Siswa Aktif', 'value' => $totalStudents, 'icon' => 'ph-student', 'filter_status' => 'all'],
-            ['title' => 'Total Hadir', 'value' => $presentCount, 'icon' => 'ph-check-circle', 'percentage' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0, 'filter_status' => 'present', 'trend' => $period === 'today' ? $trendHadir : null],
-            ['title' => 'Belum Hadir', 'value' => $notYetScannedCount, 'icon' => 'ph-minus-circle', 'filter_status' => 'absent'],
-            ['title' => 'Terlambat', 'value' => $lateCount, 'icon' => 'ph-clock', 'filter_status' => 'late'],
-            ['title' => 'Pulang Awal', 'value' => $earlyLeaveCount, 'icon' => 'ph-person-simple-run', 'filter_status' => 'early_leave'],
-            ['title' => 'Sakit / Izin', 'value' => $sickPermitCount, 'icon' => 'ph-first-aid', 'filter_status' => 'excused']
+            [
+                'title' => 'Total Siswa Aktif', 
+                'value' => $totalStudents, 
+                'icon' => 'ph-student', 
+                'filter_status' => 'all',
+                'action_url' => route('students.index'),
+                'action_label' => 'Buka Data Siswa'
+            ],
+            [
+                'title' => 'Total Hadir', 
+                'value' => $presentCount, 
+                'icon' => 'ph-check-circle', 
+                'percentage' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0, 
+                'filter_status' => 'present', 
+                'trend' => $period === 'today' ? $trendHadir : null,
+                'action_url' => route('reports.daily', ['date' => $dateParam, 'activeTab' => 'hadir']),
+                'action_label' => 'Lihat Rekap Hadir'
+            ],
+            [
+                'title' => 'Belum Hadir', 
+                'value' => $notYetScannedCount, 
+                'icon' => 'ph-minus-circle', 
+                'filter_status' => 'absent',
+                'action_url' => route('reports.daily', ['date' => $dateParam, 'activeTab' => 'belum']),
+                'action_label' => 'Cek Siswa Belum Hadir'
+            ],
+            [
+                'title' => 'Terlambat', 
+                'value' => $lateCount, 
+                'icon' => 'ph-clock', 
+                'filter_status' => 'late',
+                'action_url' => route('reports.daily', ['date' => $dateParam, 'activeTab' => 'hadir']),
+                'action_label' => 'Lihat Siswa Terlambat'
+            ],
+            [
+                'title' => 'Pulang Awal / Izin', 
+                'value' => $earlyLeaveCount, 
+                'icon' => 'ph-person-simple-run', 
+                'filter_status' => 'early_leave',
+                'action_url' => route('permit.index'),
+                'action_label' => 'Kelola Perizinan Keluar'
+            ],
+            [
+                'title' => 'Sakit / Izin', 
+                'value' => $sickPermitCount, 
+                'icon' => 'ph-first-aid', 
+                'filter_status' => 'excused',
+                'action_url' => route('reports.daily', ['date' => $dateParam, 'activeTab' => 'lain']),
+                'action_label' => 'Lihat Data Sakit / Izin'
+            ]
         ];
 
         // =====================================================================
@@ -135,8 +179,17 @@ class DashboardController extends Controller
             ->take(6)->get();
 
         // =====================================================================
-        // 7. PERINGKAT KELAS (TERBAIK & TERENDAH)
+        // 7. PERINGKAT KELAS (TERBAIK & TERENDAH) - PERHITUNGAN PERSENTASE AKURAT
         // =====================================================================
+        // Hitung total siswa aktif per kelas
+        $classStudentCounts = DB::table('students')
+            ->where('status', '!=', 'graduated')
+            ->whereNull('deleted_at')
+            ->whereNotNull('class_id')
+            ->select('class_id', DB::raw('count(*) as total'))
+            ->groupBy('class_id')
+            ->pluck('total', 'class_id');
+
         $classQueryBase = DB::table('attendances_siswa') 
             ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -147,17 +200,33 @@ class DashboardController extends Controller
 
         $classRanks = (clone $classQueryBase)
             ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat', 'hadir', 'tepat waktu', 'terlambat'])
-            ->select('classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as present_count'))
-            ->groupBy('classes.name')
-            ->orderByDesc('present_count')
-            ->take(5)->get();
+            ->select('classes.id as class_id', 'classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as present_count'))
+            ->groupBy('classes.id', 'classes.name')
+            ->get()
+            ->map(function($rank) use ($classStudentCounts) {
+                $total = $classStudentCounts[$rank->class_id] ?? 0;
+                $rank->total_students = $total;
+                $rank->percentage = $total > 0 ? min(100, round(($rank->present_count / $total) * 100, 1)) : 0;
+                return $rank;
+            })
+            ->sortByDesc('percentage')
+            ->take(5)
+            ->values();
             
         $lowestClassRanks = (clone $classQueryBase)
             ->whereIn('attendances_siswa.status', ['Alfa', 'Alpa', 'Alpha', 'Sakit', 'Izin', 'alfa', 'alpa', 'alpha', 'sakit', 'izin'])
-            ->select('classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as absent_count'))
-            ->groupBy('classes.name')
-            ->orderByDesc('absent_count')
-            ->take(5)->get();
+            ->select('classes.id as class_id', 'classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as absent_count'))
+            ->groupBy('classes.id', 'classes.name')
+            ->get()
+            ->map(function($rank) use ($classStudentCounts) {
+                $total = $classStudentCounts[$rank->class_id] ?? 0;
+                $rank->total_students = $total;
+                $rank->percentage = $total > 0 ? min(100, round(($rank->absent_count / $total) * 100, 1)) : 0;
+                return $rank;
+            })
+            ->sortByDesc('absent_count')
+            ->take(5)
+            ->values();
 
         // =====================================================================
         // 8. DATA GRAFIK (CHART.JS) - SUPER OPTIMIZED
@@ -193,11 +262,11 @@ class DashboardController extends Controller
         }
 
         // =====================================================================
-        // 8.5 MONITORING SISWA KELUAR
+        // 8.5 MONITORING SISWA KELUAR (PRIORITAS SISWA TERLAMA DI LUAR)
         // =====================================================================
         $studentsOut = StudentPermit::with('student.schoolClass')
             ->where('status', 'OUT')
-            ->orderBy('time_out', 'desc')
+            ->orderBy('time_out', 'asc')
             ->get();
         $countOut = $studentsOut->count();
 
