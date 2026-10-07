@@ -231,7 +231,7 @@
                                     <span>Server Aktif</span>
                                 </div>
                                 <span class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-sky-300 font-mono text-[11px] font-bold" title="Versi Sistem">
-                                    v5.0
+                                    v7.0
                                 </span>
                                 <a href="{{ route('portal.index') }}" target="_blank" class="hover:text-sky-300 transition-colors flex items-center gap-1 text-slate-300">
                                     <i class="ph-bold ph-arrow-square-out text-sm text-sky-400"></i> Portal Siswa
