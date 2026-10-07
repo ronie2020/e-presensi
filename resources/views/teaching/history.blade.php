@@ -103,6 +103,16 @@
                                         <i class="ph-bold ph-calendar-check"></i> {{ $history->timetable->timeslot->name }}
                                     </span>
                                     @endif
+                                    @if($history->homework_title)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-500/30" title="Ada Tugas: {{ $history->homework_title }}">
+                                        <i class="ph-bold ph-clipboard-text"></i> Tugas: {{ $history->homework_type === 'offline' ? 'Tatap Muka' : ($history->homework_type === 'file_upload' ? 'Upload File' : 'Link') }}
+                                    </span>
+                                    @endif
+                                    @if($history->material_status === 'belum_selesai')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30" title="Materi pertemuan ini belum tuntas">
+                                        <i class="ph-bold ph-warning"></i> Materi Blm Selesai
+                                    </span>
+                                    @endif
                                 </div>                                
                                 <h3 class="text-xl sm:text-2xl font-black text-white leading-tight mb-2 group-hover:text-sky-400 transition-colors">
                                     {{ $history->topic ?? 'Tidak Ada Topik' }}

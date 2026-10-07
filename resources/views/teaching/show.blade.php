@@ -117,7 +117,50 @@
                 @endif
             @endif
 
-            {{-- 2. HEADER SESI KELAS ELEVATE --}}
+            {{-- BANNER: REMINDER TUGAS YANG BELUM DEADLINE --}}
+            @if($pendingHomework)
+                @php
+                    $hwDeadline = \Carbon\Carbon::parse($pendingHomework->homework_deadline);
+                    $hwDaysLeft = (int) now('Asia/Jakarta')->diffInDays($hwDeadline, false);
+                    $hwHoursLeft = (int) now('Asia/Jakarta')->diffInHours($hwDeadline, false);
+                @endphp
+                <div class="mb-4 rounded-2xl border border-violet-200 bg-violet-50 p-4 flex items-start gap-3 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="ph-bold ph-clipboard-text text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-black text-violet-800 text-sm mb-0.5">📝 Ada Tugas Belum Deadline dari Pertemuan Sebelumnya</p>
+                        <div class="bg-violet-100 rounded-xl px-4 py-2.5 border border-violet-200 mb-1.5">
+                            <p class="text-xs font-black text-violet-900 mb-0.5">{{ $pendingHomework->homework_title }}</p>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full
+                                    {{ $pendingHomework->homework_type === 'offline' ? 'bg-slate-100 text-slate-700 border border-slate-200' : 
+                                       ($pendingHomework->homework_type === 'file_upload' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-green-100 text-green-700 border border-green-200') }}">
+                                    <i class="ph-bold {{ $pendingHomework->homework_type === 'offline' ? 'ph-pencil-line' : ($pendingHomework->homework_type === 'file_upload' ? 'ph-upload' : 'ph-link') }}"></i>
+                                    {{ $pendingHomework->homework_type === 'offline' ? 'Tatap Muka' : ($pendingHomework->homework_type === 'file_upload' ? 'Upload File' : 'Link Tugas') }}
+                                </span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-violet-700">
+                                    <i class="ph-bold ph-clock"></i>
+                                    Deadline: {{ $hwDeadline->translatedFormat('d M Y, H:i') }}
+                                    @if($hwDaysLeft > 0)
+                                        <span class="font-black text-violet-800">({{ $hwDaysLeft }} hari lagi)</span>
+                                    @elseif($hwHoursLeft > 0)
+                                        <span class="font-black text-rose-600">({{ $hwHoursLeft }} jam lagi!)</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                        @if($pendingHomework->lms_assignment_id)
+                            <a href="{{ route('lms.assignments.submissions', $pendingHomework->lms_assignment_id) }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 text-[11px] font-black text-violet-700 hover:text-violet-900 underline underline-offset-2">
+                                <i class="ph-bold ph-arrow-square-out"></i> Lihat pengumpulan di LMS
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+
             <x-hero-section
                 badge="{{ $session->timetable->studentClass->name ?? 'Kelas' }}"
                 badgeIcon="ph-chalkboard-teacher"
@@ -280,6 +323,103 @@
                                             <p x-show="!materialStatus" x-cloak class="text-[10px] text-slate-400 font-medium text-center pt-1">Pilih status agar guru berikutnya tahu kondisi materi.</p>
                                         </div>
                                         
+                                        {{-- SECTION: TUGAS / PR --}}
+                                        <div class="rounded-2xl border-2 p-5 transition-all"
+                                             :class="hasHomework ? 'border-violet-200 bg-violet-50/50' : 'border-slate-100 bg-slate-50/50'">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <label class="text-xs font-bold uppercase tracking-wider transition-colors"
+                                                       :class="hasHomework ? 'text-violet-700' : 'text-elevate-primary'">
+                                                    <i class="ph-bold ph-clipboard-text mr-1"></i>
+                                                    Tugas / PR
+                                                </label>
+                                                {{-- Toggle Ada/Tidak Ada Tugas --}}
+                                                <button type="button" @click="hasHomework = !hasHomework; if(!hasHomework){ homeworkTitle=''; homeworkDeadline=''; homeworkType='offline'; homeworkDesc=''; homeworkLinkUrl=''; }"
+                                                        class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-black border-2 transition-all active:scale-95"
+                                                        :class="hasHomework ? 'bg-violet-600 text-white border-violet-600' : 'bg-slate-100 text-slate-500 border-slate-200 hover:border-violet-300'">
+                                                    <i class="ph-bold" :class="hasHomework ? 'ph-check' : 'ph-plus'"></i>
+                                                    <span x-text="hasHomework ? 'Ada Tugas' : 'Tidak Ada'"></span>
+                                                </button>
+                                            </div>
+
+                                            <div x-show="hasHomework" x-transition x-cloak class="space-y-3">
+                                                {{-- Judul Tugas --}}
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-violet-700 uppercase tracking-wider mb-1.5 ml-1">Judul Tugas <span class="text-rose-500">*</span></label>
+                                                    <input type="text" x-model="homeworkTitle" 
+                                                        class="journal-input w-full rounded-xl border-violet-200 focus:bg-white focus:border-violet-400 focus:ring-violet-400/30 font-bold text-elevate-dark py-3 px-4 text-sm bg-white transition-all"
+                                                        placeholder="Contoh: Latihan Soal Halaman 45-50">
+                                                    <input type="hidden" name="homework_title" :value="homeworkTitle">
+                                                </div>
+
+                                                {{-- Deskripsi Tugas --}}
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-violet-700 uppercase tracking-wider mb-1.5 ml-1">Instruksi / Deskripsi</label>
+                                                    <textarea x-model="homeworkDesc" rows="2"
+                                                        class="journal-input w-full rounded-xl border-violet-200 focus:bg-white focus:border-violet-400 focus:ring-violet-400/30 text-sm text-elevate-dark py-3 px-4 bg-white transition-all"
+                                                        placeholder="Kerjakan soal no 1-10, kumpulkan dalam bentuk foto..."></textarea>
+                                                    <input type="hidden" name="homework_description" :value="homeworkDesc">
+                                                </div>
+
+                                                {{-- Tipe Tugas --}}
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-violet-700 uppercase tracking-wider mb-1.5 ml-1">Tipe Pengumpulan</label>
+                                                    <input type="hidden" name="homework_type" :value="homeworkType">
+                                                    <div class="flex gap-2">
+                                                        <button type="button" @click="homeworkType = 'offline'"
+                                                                class="flex-1 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 border-2 transition-all"
+                                                                :class="homeworkType === 'offline' ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'">
+                                                            <i class="ph-bold ph-pencil-line"></i> Tatap Muka
+                                                        </button>
+                                                        <button type="button" @click="homeworkType = 'file_upload'"
+                                                                class="flex-1 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 border-2 transition-all"
+                                                                :class="homeworkType === 'file_upload' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300'">
+                                                            <i class="ph-bold ph-upload"></i> Upload File
+                                                        </button>
+                                                        <button type="button" @click="homeworkType = 'link'"
+                                                                class="flex-1 py-2.5 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 border-2 transition-all"
+                                                                :class="homeworkType === 'link' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300'">
+                                                            <i class="ph-bold ph-link"></i> Link
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {{-- URL Link (muncul jika tipe = link) --}}
+                                                <div x-show="homeworkType === 'link'" x-transition x-cloak>
+                                                    <label class="block text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1.5 ml-1">URL Tugas</label>
+                                                    <input type="url" x-model="homeworkLinkUrl"
+                                                        class="journal-input w-full rounded-xl border-emerald-200 focus:bg-white focus:border-emerald-400 focus:ring-emerald-400/30 text-sm py-3 px-4 bg-white transition-all"
+                                                        placeholder="https://...">
+                                                    <input type="hidden" name="homework_link_url" :value="homeworkLinkUrl">
+                                                </div>
+
+                                                {{-- Deadline --}}
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-violet-700 uppercase tracking-wider mb-1.5 ml-1">Deadline Pengumpulan</label>
+                                                    <input type="datetime-local" x-model="homeworkDeadline"
+                                                        class="journal-input w-full rounded-xl border-violet-200 focus:bg-white focus:border-violet-400 focus:ring-violet-400/30 text-sm py-3 px-4 bg-white transition-all font-bold text-elevate-dark">
+                                                    <input type="hidden" name="homework_deadline" :value="homeworkDeadline">
+                                                </div>
+
+                                                {{-- Info LMS jika tugas sudah tersinkronisasi --}}
+                                                @if($session->lms_assignment_id)
+                                                    <div class="flex items-center gap-2 bg-violet-100 rounded-xl px-3 py-2 border border-violet-200">
+                                                        <i class="ph-fill ph-check-circle text-violet-600"></i>
+                                                        <span class="text-[11px] font-bold text-violet-700">Tersinkronisasi ke LMS</span>
+                                                        <a href="{{ route('lms.assignments.submissions', $session->lms_assignment_id) }}" target="_blank"
+                                                           class="ml-auto text-[11px] font-black text-violet-600 hover:text-violet-800 underline">
+                                                            Lihat di LMS →
+                                                        </a>
+                                                    </div>
+                                                @else
+                                                    <p class="text-[10px] text-violet-500 font-medium text-center">
+                                                        <i class="ph-bold ph-info"></i> Simpan jurnal untuk otomatis membuat tugas di LMS
+                                                    </p>
+                                                @endif
+                                            </div>
+
+                                            <p x-show="!hasHomework" x-cloak class="text-[10px] text-slate-400 font-medium text-center">Klik tombol di atas jika ada tugas untuk pertemuan ini.</p>
+                                        </div>
+
                                         <div>
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi</label>
                                             @if($session->photo_proof)
@@ -539,6 +679,14 @@
                 // Status Penyelesaian Materi
                 materialStatus: {!! json_encode($session->material_status ?? '') !!} || null,
                 materialCoverage: {!! json_encode($session->material_coverage ?? '') !!},
+
+                // Tugas / PR
+                hasHomework: {{ $session->homework_title ? 'true' : 'false' }},
+                homeworkTitle: {!! json_encode($session->homework_title ?? '') !!},
+                homeworkDesc: {!! json_encode($session->homework_description ?? '') !!},
+                homeworkType: {!! json_encode($session->homework_type ?? 'offline') !!},
+                homeworkLinkUrl: {!! json_encode($session->homework_link_url ?? '') !!},
+                homeworkDeadline: '{{ $session->homework_deadline ? \Carbon\Carbon::parse($session->homework_deadline)->format("Y-m-d\TH:i") : '' }}',
 
                 init() {
                     // Watcher untuk menyimpan jurnal ke localStorage setiap kali ada huruf yang diketik

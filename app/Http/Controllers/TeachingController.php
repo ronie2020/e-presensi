@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\ClassAttendance;
 use App\Models\DisciplineRecord; 
 use App\Models\DisciplineType;
+use App\Models\LmsAssignment; // Untuk sinkronisasi tugas jurnal → LMS
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -110,7 +111,16 @@ class TeachingController extends Controller
             ->orderBy('date', 'desc')
             ->first();
 
-        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats', 'previousSession'));
+        // Cek apakah ada tugas dari sesi sebelumnya yang deadlinenya belum lewat
+        $pendingHomework = null;
+        if ($previousSession && $previousSession->homework_title && $previousSession->homework_deadline) {
+            $deadline = Carbon::parse($previousSession->homework_deadline);
+            if ($deadline->isFuture()) {
+                $pendingHomework = $previousSession; // Deadline belum lewat, tampilkan reminder
+            }
+        }
+
+        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats', 'previousSession', 'pendingHomework'));
     }
 
     // --- HALAMAN EDIT (REVISI SETELAH TUTUP) ---
@@ -128,15 +138,21 @@ class TeachingController extends Controller
     // --- UPDATE JURNAL ---
     public function update(Request $request, $id)
     {
-        $session = TeachingSession::findOrFail($id);
+        $session = TeachingSession::with('timetable')->findOrFail($id);
         
         $request->validate([
-            'topic'             => 'required|string|max:255', 
-            'activities'        => 'nullable|string',
-            'photo_proof'       => 'nullable|image|max:5120', 
-            'video_link'        => 'nullable|url',
-            'material_status'   => 'nullable|in:selesai,belum_selesai',
-            'material_coverage' => 'nullable|string|max:1000',
+            'topic'                => 'required|string|max:255', 
+            'activities'           => 'nullable|string',
+            'photo_proof'          => 'nullable|image|max:5120', 
+            'video_link'           => 'nullable|url',
+            'material_status'      => 'nullable|in:selesai,belum_selesai',
+            'material_coverage'    => 'nullable|string|max:1000',
+            // Validasi tugas
+            'homework_title'       => 'nullable|string|max:255',
+            'homework_description' => 'nullable|string',
+            'homework_type'        => 'nullable|in:offline,file_upload,link',
+            'homework_link_url'    => 'nullable|url',
+            'homework_deadline'    => 'nullable|date',
         ]);
 
         $data = [
@@ -145,8 +161,13 @@ class TeachingController extends Controller
             'reference_link'    => $request->reference_link ?? null,
             'video_link'        => $request->video_link,
             'material_status'   => $request->material_status,
-            // Hanya simpan material_coverage jika status belum_selesai
             'material_coverage' => ($request->material_status === 'belum_selesai') ? $request->material_coverage : null,
+            // Simpan data tugas
+            'homework_title'       => $request->homework_title,
+            'homework_description' => $request->homework_description,
+            'homework_type'        => $request->homework_title ? $request->homework_type : null,
+            'homework_link_url'    => ($request->homework_type === 'link') ? $request->homework_link_url : null,
+            'homework_deadline'    => $request->homework_title ? $request->homework_deadline : null,
         ];
 
         if ($request->hasFile('photo_proof')) {
@@ -158,7 +179,80 @@ class TeachingController extends Controller
 
         $session->update($data);
 
+        // --- SINKRONISASI KE LMS ASSIGNMENT ---
+        $this->syncHomeworkToLms($session, $request);
+
         return back()->with('success', 'Jurnal & Bukti Kegiatan berhasil disimpan.');
+    }
+
+    /**
+     * Sinkronisasi tugas dari jurnal mengajar ke LmsAssignment.
+     * - Jika ada homework_title → buat atau update LmsAssignment
+     * - Jika homework_title dikosongkan → putus link saja (LmsAssignment tetap ada di LMS)
+     */
+    private function syncHomeworkToLms(TeachingSession $session, Request $request): void
+    {
+        // Jika tidak ada judul tugas → putus link (LmsAssignment tetap ada di LMS, tidak dihapus)
+        if (!$request->homework_title) {
+            if ($session->lms_assignment_id) {
+                $session->update(['lms_assignment_id' => null]);
+            }
+            return;
+        }
+
+        $timetable = $session->timetable;
+        if (!$timetable) return;
+
+        // Tentukan description LMS
+        $lmsDescription = $request->homework_description 
+            ?: 'Tugas dari jurnal mengajar: ' . $request->topic;
+
+        // Map tipe tugas
+        $assignmentType = $request->homework_type ?? 'offline';
+        $linkUrl = ($assignmentType === 'link') ? $request->homework_link_url : null;
+
+        $deadline = $request->homework_deadline 
+            ? Carbon::parse($request->homework_deadline)->format('Y-m-d H:i:s')
+            : Carbon::now()->addDays(7)->format('Y-m-d H:i:s'); // Default 7 hari
+
+        try {
+            if ($session->lms_assignment_id) {
+                // Update LmsAssignment yang sudah ada
+                $lmsAssignment = LmsAssignment::find($session->lms_assignment_id);
+                if ($lmsAssignment) {
+                    $lmsAssignment->update([
+                        'title'           => $request->homework_title,
+                        'description'     => $lmsDescription,
+                        'deadline'        => $deadline,
+                        'assignment_type' => $assignmentType,
+                        'link_url'        => $linkUrl,
+                    ]);
+                    return;
+                }
+            }
+
+            // Buat LmsAssignment baru
+            $lmsAssignment = LmsAssignment::create([
+                'teacher_id'      => $session->teacher_id,
+                'subject_id'      => $timetable->subject_id,
+                'class_id'        => $timetable->class_id,
+                'title'           => $request->homework_title,
+                'description'     => $lmsDescription,
+                'deadline'        => $deadline,
+                'assignment_type' => $assignmentType,
+                'link_url'        => $linkUrl,
+                'allow_late_submission' => false,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+
+            // Simpan foreign key di teaching_sessions
+            $session->update(['lms_assignment_id' => $lmsAssignment->id]);
+
+        } catch (\Exception $e) {
+            // Gagal sync LMS tidak perlu stop keseluruhan, hanya log
+            \Log::warning('Gagal sinkronisasi tugas ke LMS: ' . $e->getMessage());
+        }
     }
 
     // --- RIWAYAT MENGAJAR ---
