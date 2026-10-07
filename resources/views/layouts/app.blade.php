@@ -14,6 +14,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://unpkg.com/@phosphor-icons/web"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         
         <style>
             body { font-family: 'Plus Jakarta Sans', sans-serif; }

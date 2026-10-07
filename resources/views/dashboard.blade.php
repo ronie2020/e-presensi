@@ -424,9 +424,18 @@
                         <p class="text-[9px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">vs Kemarin</p>
                     @endif
 
-                    <div class="flex items-center justify-between text-[10px] text-slate-400/80 group-hover:text-sky-300 transition-colors pt-2.5 border-t border-white/10 mt-3 font-semibold">
-                        <span>Detail</span>
-                        <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    <div class="pt-2.5 border-t border-white/10 mt-3 font-semibold text-[10px]">
+                        @if(!empty($card['action_url']))
+                            <a href="{{ $card['action_url'] }}" onclick="event.stopPropagation()" class="flex items-center justify-between text-slate-400/80 group-hover:text-sky-300 hover:!text-white transition-colors py-0.5" title="Buka detail {{ $card['title'] }}">
+                                <span>Detail</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        @else
+                            <div class="flex items-center justify-between text-slate-400/80 group-hover:text-sky-300 transition-colors py-0.5">
+                                <span>Detail</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -802,12 +811,19 @@
         </div>
     </div>
 
-    {{-- SCRIPT CHART.JS --}}
+    {{-- SCRIPT CHART.JS & SWEETALERT2 --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- SCRIPT INITIALIZATION & SWEETALERT CUSTOM FUNCTION --}}
     <script>
         function showCardInfo(title, value, colorKey, actionUrl, actionLabel) {
+            if (typeof Swal === 'undefined') {
+                if (actionUrl) {
+                    window.location.href = actionUrl;
+                }
+                return;
+            }
             let colorHex = '#56bbf1'; 
             if(colorKey === 'success') colorHex = '#10b981';
             if(colorKey === 'warning') colorHex = '#f59e0b';
