@@ -112,9 +112,21 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-5 text-center align-top">
-                                        <div class="flex gap-2 justify-center">
-                                            @if($session->photo_proof)<a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-dark flex items-center justify-center hover:bg-elevate-dark hover:text-white transition-colors shadow-sm"><i class="ph-bold ph-image text-lg"></i></a>@endif
-                                            @if($session->reference_link || $session->video_link)<a href="{{ $session->reference_link ?? $session->video_link }}" target="_blank" class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center hover:bg-elevate-primary hover:text-white transition-colors shadow-sm border border-slate-200"><i class="ph-bold ph-link text-lg"></i></a>@endif
+                                        <div class="flex gap-2 justify-center flex-wrap">
+                                            @if($session->photo_proof)
+                                                @php
+                                                    $photos = json_decode($session->photo_proof, true);
+                                                    if (!is_array($photos)) {
+                                                        $photos = [$session->photo_proof];
+                                                    }
+                                                @endphp
+                                                @foreach($photos as $index => $photo)
+                                                    <a href="{{ asset('storage/' . $photo) }}" target="_blank" class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-dark flex items-center justify-center hover:bg-elevate-dark hover:text-white transition-colors shadow-sm" title="Lihat Foto {{ $index + 1 }}">
+                                                        <i class="ph-bold ph-image text-lg"></i>
+                                                    </a>
+                                                @endforeach
+                                            @endif
+                                            @if($session->reference_link || $session->video_link)<a href="{{ $session->reference_link ?? $session->video_link }}" target="_blank" class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center hover:bg-elevate-primary hover:text-white transition-colors shadow-sm border border-slate-200" title="Lihat Referensi/Video"><i class="ph-bold ph-link text-lg"></i></a>@endif
                                         </div>
                                     </td>
                                 </tr>

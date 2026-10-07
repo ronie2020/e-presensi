@@ -420,8 +420,40 @@
                                             <p x-show="!hasHomework" x-cloak class="text-[10px] text-slate-400 font-medium text-center">Klik tombol di atas jika ada tugas untuk pertemuan ini.</p>
                                         </div>
 
-                                        <div x-data="{ photoPreviews: [] }">
-                                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi (Bisa lebih dari 1)</label>
+                                        <div x-data="{ 
+                                            photoPreviews: [],
+                                            allFiles: [],
+                                            handleFileSelect(e) {
+                                                if(e.target.files.length === 0) return;
+                                                
+                                                const newFiles = Array.from(e.target.files);
+                                                if (this.allFiles.length + newFiles.length > 5) {
+                                                    Swal.fire({
+                                                        icon: 'warning',
+                                                        title: 'Batas Upload',
+                                                        text: 'Maksimal 5 foto dokumentasi.',
+                                                        confirmButtonColor: '#3b5889'
+                                                    });
+                                                    const slotLeft = 5 - this.allFiles.length;
+                                                    this.allFiles = [...this.allFiles, ...newFiles.slice(0, slotLeft)];
+                                                } else {
+                                                    this.allFiles = [...this.allFiles, ...newFiles];
+                                                }
+                                                
+                                                this.updatePreviewsAndInput();
+                                            },
+                                            removeFile(index) {
+                                                this.allFiles.splice(index, 1);
+                                                this.updatePreviewsAndInput();
+                                            },
+                                            updatePreviewsAndInput() {
+                                                this.photoPreviews = this.allFiles.map(file => URL.createObjectURL(file));
+                                                const dt = new DataTransfer();
+                                                this.allFiles.forEach(file => dt.items.add(file));
+                                                this.$refs.photoInput.files = dt.files;
+                                            }
+                                        }">
+                                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi (Maksimal 5 Foto)</label>
                                             
                                             {{-- Tampilkan foto-foto lama jika ada --}}
                                             @php
@@ -451,27 +483,32 @@
 
                                             {{-- Tampilkan pratinjau foto baru --}}
                                             <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4" x-show="photoPreviews.length > 0" x-cloak>
-                                                <template x-for="preview in photoPreviews" :key="preview">
+                                                <template x-for="(preview, index) in photoPreviews" :key="index">
                                                     <div class="relative h-32 rounded-2xl overflow-hidden border border-elevate-accent/50 shadow-sm bg-elevate-primary/10">
                                                         <img :src="preview" class="w-full h-full object-cover">
-                                                        <div class="absolute bottom-0 left-0 right-0 bg-elevate-primary/90 text-white text-[10px] font-bold py-1.5 text-center backdrop-blur-sm">Foto Baru</div>
+                                                        <button type="button" @click.prevent="removeFile(index)" class="absolute top-1 right-1 bg-rose-500/90 backdrop-blur-sm text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-rose-600 transition-colors shadow-md border border-rose-400 z-10">
+                                                            <i class="ph-bold ph-x text-sm"></i>
+                                                        </button>
+                                                        <div class="absolute bottom-0 left-0 right-0 bg-elevate-primary/90 text-white text-[10px] font-bold py-1.5 text-center backdrop-blur-sm">Foto <span x-text="index + 1"></span></div>
                                                     </div>
                                                 </template>
                                             </div>
 
                                             @if($isOpen)
-                                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:bg-elevate-peach-light/20 hover:border-elevate-peach transition-all group/upload bg-elevate-soft/50">
+                                                <label x-show="allFiles.length < 5" class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:bg-elevate-peach-light/20 hover:border-elevate-peach transition-all group/upload bg-elevate-soft/50 mb-2">
                                                     <div class="flex flex-col items-center justify-center pt-2">
                                                         <div class="flex gap-2">
                                                             <i class="ph-duotone ph-camera text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-1 transition-colors"></i>
                                                             <i class="ph-duotone ph-images text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-1 transition-colors"></i>
                                                         </div>
-                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover/upload:text-elevate-peach-dark transition-colors mt-1">Jepret Kamera / Pilih Banyak Foto</p>
+                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover/upload:text-elevate-peach-dark transition-colors mt-1">Jepret Kamera / Pilih Foto</p>
                                                     </div>
-                                                    {{-- TAMBAHAN: multiple dan capture --}}
-                                                    <input type="file" name="photo_proof[]" accept="image/*" multiple capture="environment" class="hidden" 
-                                                           @change="photoPreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" />
+                                                    <input type="file" x-ref="photoInput" name="photo_proof[]" accept="image/*" multiple capture="environment" class="hidden" 
+                                                           @change="handleFileSelect($event)" />
                                                 </label>
+                                                <p x-show="allFiles.length >= 5" x-cloak class="text-[10px] text-center text-amber-600 font-bold bg-amber-100 p-2 rounded-lg border border-amber-200">
+                                                    Batas maksimal 5 foto telah tercapai.
+                                                </p>
                                             @endif
                                         </div>
                                         
