@@ -1,12 +1,9 @@
 <x-app-layout>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <a href="{{ route('letters.outgoing.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#56bbf1] mb-6 transition-colors group">
-                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Surat Keluar
-            </a>
+    <div class="max-w-4xl mx-auto space-y-6 font-sans text-slate-100 pb-10">
+        
+        <a href="{{ route('letters.outgoing.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#56bbf1] transition-colors group">
+            <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Surat Keluar
+        </a>
 
             <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden relative">
                 
@@ -35,12 +32,50 @@
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2 ml-1">Nomor Agenda</label>
-                                    <input type="text" name="nomor_agenda" value="{{ old('nomor_agenda', $nextAgendaKeluar) }}" readonly class="w-full px-4 py-3 rounded-2xl border border-white/5 bg-slate-900/40 text-slate-400 text-sm font-bold cursor-not-allowed">
+                                    <div class="flex items-center justify-between mb-2 ml-1">
+                                        <label class="block text-xs font-bold text-slate-300 uppercase">Nomor Agenda (Tahun Ini)</label>
+                                        <span class="text-[10px] text-slate-400 font-mono">Reset per tahun</span>
+                                    </div>
+                                    <input type="text" id="nomor_agenda" name="nomor_agenda" value="{{ old('nomor_agenda', $nextAgendaKeluar) }}" readonly class="w-full px-4 py-3 rounded-2xl border border-white/5 bg-slate-900/40 text-slate-400 text-sm font-bold cursor-not-allowed">
+                                    <p class="text-[11px] text-slate-500 mt-1.5 ml-1">Urutan agenda dinas pada tahun berjalan.</p>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2 ml-1">Nomor Surat</label>
-                                    <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" required placeholder="005/SMA/2026..." class="w-full px-4 py-3 rounded-2xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-bold text-white transition-all placeholder:text-slate-500">
+                                    <div class="flex items-center justify-between mb-2 ml-1">
+                                        <label class="block text-xs font-bold text-slate-300 uppercase">Nomor Surat</label>
+                                        <div class="flex items-center gap-2">
+                                            <span id="badge-mode-nomor" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 border border-sky-500/30 text-sky-300">
+                                                <i class="ph-bold ph-magic-wand"></i> Otomatis
+                                            </span>
+                                            <button type="button" id="btn-toggle-nomor-manual" onclick="toggleNomorSuratManual()" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition-all hover:scale-105 active:scale-95" title="Klik untuk mengedit nomor surat secara manual">
+                                                <i class="ph-bold ph-pencil-simple text-amber-400"></i> Edit Manual
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="text" id="nomor_surat" name="nomor_surat" value="{{ old('nomor_surat', $defaultNomorSurat) }}" required readonly class="w-full pl-4 pr-11 py-3 rounded-2xl border border-sky-500/40 bg-slate-900/80 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-bold text-sky-200 transition-all cursor-not-allowed">
+                                        <div id="icon-lock-nomor" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-sky-400 pointer-events-none" title="Nomor Terkunci Otomatis">
+                                            <i class="ph-bold ph-lock-simple text-base"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Quick format chips & helper info --}}
+                                    <div class="mt-2.5 space-y-1.5">
+                                        <p id="hint-nomor-surat" class="text-[11px] text-slate-400 leading-relaxed">
+                                            <i class="ph-bold ph-info text-[#56bbf1]"></i> Otomatis: urut dari <span class="text-sky-300 font-bold">01</span> sampai akhir tahun. Reset kembali ke <span class="text-sky-300 font-bold">01</span> di tahun baru.
+                                        </p>
+                                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Format Cepat:</span>
+                                            <button type="button" onclick="setQuickFormat('421.3')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-white/10 text-[10px] font-bold transition-all">
+                                                421.3 (Dinas)
+                                            </button>
+                                            <button type="button" onclick="setQuickFormat('094')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-white/10 text-[10px] font-bold transition-all">
+                                                094 (SPT)
+                                            </button>
+                                            <button type="button" onclick="setQuickFormatOnlyNumber()" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-sky-500/20 text-slate-300 hover:text-sky-300 border border-white/10 text-[10px] font-bold transition-all">
+                                                Nomor Saja ({{ $nextSequence }})
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-300 uppercase mb-2 ml-1">Tujuan / Penerima Surat</label>
@@ -135,10 +170,121 @@
                     </form>
                 </div>
             </div>
-        </div>
     </div>
 
     <script>
+        let isManualNomor = {{ old('nomor_surat') ? 'true' : 'false' }};
+        let currentSequence = '{{ $nextSequence }}';
+        let currentKode = '421.3';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isManualNomor) {
+                enableManualMode(false);
+            }
+
+            // Listener saat tanggal surat diubah
+            const tglInput = document.querySelector('input[name="tgl_surat"]');
+            if (tglInput) {
+                tglInput.addEventListener('change', function() {
+                    if (!isManualNomor) {
+                        fetchGeneratedNumber();
+                    }
+                });
+            }
+        });
+
+        function toggleNomorSuratManual() {
+            if (!isManualNomor) {
+                enableManualMode(true);
+            } else {
+                disableManualMode();
+            }
+        }
+
+        function enableManualMode(focus = true) {
+            isManualNomor = true;
+            const input = document.getElementById('nomor_surat');
+            const badge = document.getElementById('badge-mode-nomor');
+            const btn = document.getElementById('btn-toggle-nomor-manual');
+            const iconLock = document.getElementById('icon-lock-nomor');
+            const hint = document.getElementById('hint-nomor-surat');
+
+            input.readOnly = false;
+            input.classList.remove('cursor-not-allowed', 'text-sky-200', 'border-sky-500/40');
+            input.classList.add('text-white', 'border-amber-500/60', 'bg-slate-900');
+
+            badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300';
+            badge.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Mode Manual';
+
+            btn.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 transition-all hover:scale-105 active:scale-95';
+            btn.innerHTML = '<i class="ph-bold ph-arrows-clockwise text-sky-400"></i> Reset Otomatis';
+
+            iconLock.innerHTML = '<i class="ph-bold ph-lock-simple-open text-base text-amber-400"></i>';
+            hint.innerHTML = '<i class="ph-bold ph-pencil-simple text-amber-400"></i> <strong>Mode manual aktif</strong>: Anda bebas mengedit atau menyesuaikan nomor surat sesuai kebutuhan.';
+
+            if (focus) {
+                input.focus();
+                input.select();
+            }
+        }
+
+        function disableManualMode() {
+            isManualNomor = false;
+            const input = document.getElementById('nomor_surat');
+            const badge = document.getElementById('badge-mode-nomor');
+            const btn = document.getElementById('btn-toggle-nomor-manual');
+            const iconLock = document.getElementById('icon-lock-nomor');
+            const hint = document.getElementById('hint-nomor-surat');
+
+            input.readOnly = true;
+            input.classList.add('cursor-not-allowed', 'text-sky-200', 'border-sky-500/40');
+            input.classList.remove('text-white', 'border-amber-500/60');
+
+            badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 border border-sky-500/30 text-sky-300';
+            badge.innerHTML = '<i class="ph-bold ph-magic-wand"></i> Otomatis';
+
+            btn.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition-all hover:scale-105 active:scale-95';
+            btn.innerHTML = '<i class="ph-bold ph-pencil-simple text-amber-400"></i> Edit Manual';
+
+            iconLock.innerHTML = '<i class="ph-bold ph-lock-simple text-base text-sky-400"></i>';
+            hint.innerHTML = '<i class="ph-bold ph-info text-[#56bbf1]"></i> Otomatis: urut dari <span class="text-sky-300 font-bold">01</span> sampai akhir tahun. Reset kembali ke <span class="text-sky-300 font-bold">01</span> di tahun baru.';
+
+            fetchGeneratedNumber();
+        }
+
+        function fetchGeneratedNumber() {
+            const tglInput = document.querySelector('input[name="tgl_surat"]');
+            const isPenugasan = document.getElementById('toggle_penugasan')?.checked ? true : false;
+            const tgl = tglInput ? tglInput.value : '';
+
+            fetch(`{{ route('letters.outgoing.generate-number') }}?date=${tgl}&is_penugasan=${isPenugasan}&kode=${currentKode}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        currentSequence = data.formatted_sequence;
+                        document.getElementById('nomor_agenda').value = data.nomor_agenda;
+                        if (!isManualNomor) {
+                            document.getElementById('nomor_surat').value = data.nomor_surat;
+                        }
+                    }
+                })
+                .catch(err => console.error('Gagal generate nomor surat otomatis:', err));
+        }
+
+        function setQuickFormat(kode) {
+            currentKode = kode;
+            if (isManualNomor) {
+                disableManualMode();
+            } else {
+                fetchGeneratedNumber();
+            }
+        }
+
+        function setQuickFormatOnlyNumber() {
+            enableManualMode(true);
+            document.getElementById('nomor_surat').value = currentSequence;
+        }
+
         function toggleSPTFields() {
             const checkBox = document.getElementById('toggle_penugasan');
             const sptFields = document.getElementById('spt_fields');
@@ -148,6 +294,10 @@
                 sptFields.style.display = 'block';
                 sptFields.classList.remove('hidden');
                 inputs.forEach(input => input.required = true);
+                if (!isManualNomor) {
+                    currentKode = '094';
+                    fetchGeneratedNumber();
+                }
             } else {
                 sptFields.style.display = 'none';
                 sptFields.classList.add('hidden');
@@ -155,6 +305,10 @@
                     input.required = false;
                     input.value = '';
                 });
+                if (!isManualNomor) {
+                    currentKode = '421.3';
+                    fetchGeneratedNumber();
+                }
             }
         }
 

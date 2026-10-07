@@ -1,11 +1,7 @@
 <x-app-layout>
-    {{-- Load SweetAlert --}}
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            {{-- HERO SECTION --}}
+    <div class="space-y-8 font-sans text-slate-100">
+        
+        {{-- HERO SECTION --}}
             <div class="mb-8 relative z-10">
                 <x-hero-section
                     badge="ADMINISTRASI SURAT DINAS"
@@ -151,7 +147,11 @@
                                         
                                         {{-- Tombol Aksi (Detail, Edit, Hapus) --}}
                                         <div class="flex items-center gap-2 mt-1">
-                                            <button type="button" onclick="showDetailModal({{ json_encode($spt) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/10 transition-all" title="Lihat Detail">
+                                            <button type="button" 
+                                                    data-spt="{{ json_encode($spt) }}" 
+                                                    onclick="showDetailModal(JSON.parse(this.dataset.spt))" 
+                                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/10 transition-all" 
+                                                    title="Lihat Detail">
                                                 <i class="ph-bold ph-eye text-lg"></i>
                                             </button>
                                             <a href="{{ route('letters.spt.edit', $spt->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10 transition-all" title="Edit">
@@ -190,7 +190,6 @@
                     {{ $spts->withQueryString()->links() }}
                 </div>
             </div>
-        </div>
     </div>
 
     {{-- MODAL DETAIL SPT --}}

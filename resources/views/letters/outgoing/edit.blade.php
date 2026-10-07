@@ -1,12 +1,9 @@
 <x-app-layout>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <a href="{{ route('letters.outgoing.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#56bbf1] mb-6 transition-colors group">
-                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Surat Keluar
-            </a>
+    <div class="max-w-4xl mx-auto space-y-6 font-sans text-slate-100 pb-10">
+        
+        <a href="{{ route('letters.outgoing.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#56bbf1] transition-colors group">
+            <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Surat Keluar
+        </a>
 
             <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden relative">
                 
@@ -40,8 +37,14 @@
                                     <input type="text" name="nomor_agenda" value="{{ old('nomor_agenda', $letter->nomor_agenda) }}" required class="w-full px-4 py-3 rounded-2xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-bold text-white transition-all">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2 ml-1">Nomor Surat</label>
-                                    <input type="text" name="nomor_surat" value="{{ old('nomor_surat', $letter->nomor_surat) }}" required class="w-full px-4 py-3 rounded-2xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-bold text-white transition-all">
+                                    <div class="flex items-center justify-between mb-2 ml-1">
+                                        <label class="block text-xs font-bold text-slate-300 uppercase">Nomor Surat</label>
+                                        <button type="button" onclick="generateNomorBaruEdit()" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-sky-300 border border-white/10 transition-all hover:scale-105 active:scale-95" title="Generate nomor otomatis sesuai tanggal surat">
+                                            <i class="ph-bold ph-magic-wand"></i> Buat Otomatis
+                                        </button>
+                                    </div>
+                                    <input type="text" id="nomor_surat" name="nomor_surat" value="{{ old('nomor_surat', $letter->nomor_surat) }}" required class="w-full px-4 py-3 rounded-2xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-bold text-white transition-all">
+                                    <p class="text-[11px] text-slate-400 mt-1 ml-1">Anda dapat mengedit nomor surat ini secara manual atau klik <strong>Buat Otomatis</strong>.</p>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-300 uppercase mb-2 ml-1">Tujuan / Penerima Surat</label>
@@ -161,7 +164,6 @@
                     </form>
                 </div>
             </div>
-        </div>
     </div>
 
     <script>
@@ -179,6 +181,40 @@
                 sptFields.classList.add('hidden');
                 inputs.forEach(input => input.required = false);
             }
+        }
+
+        function generateNomorBaruEdit() {
+            const tgl = document.querySelector('input[name="tgl_surat"]')?.value || '';
+            const isPenugasan = document.getElementById('toggle_penugasan')?.checked ? true : false;
+            const kode = isPenugasan ? '094' : '421.3';
+
+            fetch(`{{ route('letters.outgoing.generate-number') }}?date=${tgl}&is_penugasan=${isPenugasan}&kode=${kode}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.nomor_surat) {
+                        Swal.fire({
+                            title: 'Gunakan Nomor Otomatis?',
+                            html: `Sistem menyarankan nomor berdasarkan tanggal surat:<br><span class="font-mono text-sky-300 font-bold text-base bg-slate-900 px-3 py-2 rounded-xl border border-sky-500/30 inline-block mt-3 shadow-inner">${data.nomor_surat}</span>`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Gunakan Nomor Ini',
+                            cancelButtonText: 'Batal',
+                            background: '#021124',
+                            color: '#fff',
+                            customClass: {
+                                popup: 'rounded-[2rem] font-sans border border-white/10 shadow-2xl',
+                                confirmButton: 'bg-gradient-to-r from-[#56bbf1] to-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:brightness-110 shadow-lg shadow-[#56bbf1]/20',
+                                cancelButton: 'bg-slate-800 text-slate-300 px-5 py-2.5 rounded-xl font-bold border border-white/10'
+                            },
+                            buttonsStyling: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                document.getElementById('nomor_surat').value = data.nomor_surat;
+                            }
+                        });
+                    }
+                })
+                .catch(err => console.error(err));
         }
 
         @if ($errors->any())
