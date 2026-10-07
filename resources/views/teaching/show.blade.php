@@ -69,8 +69,54 @@
                     </div>
                 @endif
             </div>
+        
+            {{-- BANNER: INFORMASI MATERI PERTEMUAN SEBELUMNYA --}}
+            @if($previousSession)
+                @php
+                    $prevStatus = $previousSession->material_status;
+                    $prevTopic = $previousSession->topic;
+                    $prevCoverage = $previousSession->material_coverage;
+                    $prevDate = $previousSession->date ? \Carbon\Carbon::parse($previousSession->date)->translatedFormat('l, d F Y') : '-';
+                @endphp
 
-            {{-- 2. HEADER SESI KELAS ELEVATE --}}
+                @if($prevStatus === 'belum_selesai' && $prevTopic)
+                    {{-- Banner KUNING - materi belum selesai, guru perlu melanjutkan --}}
+                    <div class="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-start gap-3 shadow-sm animate-fade-in">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="ph-bold ph-warning text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-black text-amber-800 text-sm mb-0.5">⚠️ Materi Belum Selesai dari Pertemuan Sebelumnya</p>
+                            <p class="text-xs font-semibold text-amber-700 mb-1">Pertemuan: {{ $prevDate }}</p>
+                            <div class="bg-amber-100 rounded-xl px-4 py-2.5 border border-amber-200">
+                                <p class="text-xs font-bold text-amber-900 mb-1">📚 Materi: <span class="font-black">{{ $prevTopic }}</span></p>
+                                @if($prevCoverage)
+                                    <p class="text-xs text-amber-800 font-medium"><span class="font-bold">Sudah disampaikan:</span> {{ $prevCoverage }}</p>
+                                @endif
+                            </div>
+                            <p class="text-[11px] text-amber-600 font-medium mt-1.5">Lanjutkan materi di atas pada pertemuan ini sebelum memulai materi baru.</p>
+                        </div>
+                    </div>
+                @elseif($prevTopic)
+                    {{-- Banner BIRU/HIJAU - materi sudah selesai, info saja --}}
+                    <div class="mb-4 rounded-2xl border border-sky-100 bg-sky-50/60 p-4 flex items-start gap-3 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <i class="ph-bold ph-book-open text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-black text-sky-800 text-sm mb-0.5">📖 Materi Pertemuan Sebelumnya</p>
+                            <p class="text-xs font-semibold text-sky-600 mb-1">{{ $prevDate }}</p>
+                            <div class="bg-sky-100/60 rounded-xl px-4 py-2 border border-sky-200">
+                                <p class="text-xs font-bold text-sky-900">{{ $prevTopic }}</p>
+                                @if($prevStatus === 'selesai')
+                                    <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200"><i class="ph-bold ph-check-circle"></i> Sudah Selesai</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             {{-- 2. HEADER SESI KELAS ELEVATE --}}
             <x-hero-section
                 badge="{{ $session->timetable->studentClass->name ?? 'Kelas' }}"
@@ -184,6 +230,54 @@
                                             <textarea name="activities" rows="3" x-model="journalActivities"
                                                 class="journal-input w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-medium py-4 px-5 bg-elevate-soft transition-all" 
                                                 placeholder="Deskripsi kegiatan..."></textarea>
+                                        </div>
+
+                                        {{-- SECTION: STATUS PENYELESAIAN MATERI --}}
+                                        <div class="rounded-2xl border-2 p-5 transition-all"
+                                             :class="materialStatus === 'belum_selesai' ? 'border-amber-200 bg-amber-50/50' : (materialStatus === 'selesai' ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-100 bg-slate-50/50')">
+                                            <label class="block text-xs font-bold uppercase tracking-wider mb-3 transition-colors"
+                                                   :class="materialStatus === 'belum_selesai' ? 'text-amber-700' : (materialStatus === 'selesai' ? 'text-emerald-700' : 'text-elevate-primary')"
+                                            >
+                                                <i class="ph-bold ph-flag-checkered mr-1"></i>
+                                                Status Penyelesaian Materi
+                                            </label>
+                                            
+                                            <input type="hidden" name="material_status" :value="materialStatus">
+
+                                            {{-- Toggle Tombol --}}
+                                            <div class="flex gap-2 mb-3">
+                                                <button type="button"
+                                                        @click="materialStatus = 'selesai'"
+                                                        class="flex-1 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 border-2 transition-all active:scale-95"
+                                                        :class="materialStatus === 'selesai' 
+                                                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20' 
+                                                            : 'bg-white text-slate-500 border-slate-200 hover:border-emerald-300 hover:text-emerald-700'">
+                                                    <i class="ph-bold ph-check-circle text-lg"></i>
+                                                    Materi Selesai
+                                                </button>
+                                                <button type="button"
+                                                        @click="materialStatus = 'belum_selesai'"
+                                                        class="flex-1 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 border-2 transition-all active:scale-95"
+                                                        :class="materialStatus === 'belum_selesai' 
+                                                            ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/20' 
+                                                            : 'bg-white text-slate-500 border-slate-200 hover:border-amber-300 hover:text-amber-700'">
+                                                    <i class="ph-bold ph-clock-countdown text-lg"></i>
+                                                    Belum Selesai
+                                                </button>
+                                            </div>
+
+                                            {{-- Textarea keterangan (muncul jika belum selesai) --}}
+                                            <div x-show="materialStatus === 'belum_selesai'" x-transition x-cloak>
+                                                <label class="block text-xs font-bold text-amber-700 mb-1.5 ml-1">Sudah sampai mana? <span class="text-amber-500">(agar pertemuan berikutnya bisa melanjutkan)</span></label>
+                                                <textarea x-model="materialCoverage" rows="2"
+                                                    class="journal-input w-full rounded-2xl border-amber-200 focus:bg-white focus:border-amber-400 focus:ring-amber-400/30 text-sm text-elevate-dark font-medium py-3 px-4 bg-white transition-all"
+                                                    placeholder="Contoh: Sudah sampai sub-bab 3.2 tentang persamaan linear satu variabel..."></textarea>
+                                            </div>
+
+                                            {{-- Hidden inputs agar selalu tersubmit ke server --}}
+                                            <input type="hidden" name="material_coverage" :value="materialStatus === 'belum_selesai' ? materialCoverage : ''">
+
+                                            <p x-show="!materialStatus" x-cloak class="text-[10px] text-slate-400 font-medium text-center pt-1">Pilih status agar guru berikutnya tahu kondisi materi.</p>
                                         </div>
                                         
                                         <div>
@@ -441,6 +535,10 @@
                 // TAMBAHAN: Fitur Auto-Save Jurnal
                 journalTopic: localStorage.getItem('journal_' + config.sessionId + '_topic') || {!! json_encode($session->topic ?? '') !!},
                 journalActivities: localStorage.getItem('journal_' + config.sessionId + '_activities') || {!! json_encode($session->activities ?? '') !!},
+                
+                // Status Penyelesaian Materi
+                materialStatus: {!! json_encode($session->material_status ?? '') !!} || null,
+                materialCoverage: {!! json_encode($session->material_coverage ?? '') !!},
 
                 init() {
                     // Watcher untuk menyimpan jurnal ke localStorage setiap kali ada huruf yang diketik

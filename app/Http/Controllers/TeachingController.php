@@ -102,7 +102,15 @@ class TeachingController extends Controller
             'alpha'      => $attendances->where('status', 'alpha')->count(),
         ];
 
-        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats'));
+        // Ambil sesi sebelumnya dari timetable (jadwal) yang sama
+        // Diurutkan berdasarkan tanggal terbaru SEBELUM sesi ini, lalu ambil yang paling terakhir
+        $previousSession = TeachingSession::where('schedule_id', $session->schedule_id)
+            ->where('id', '!=', $session->id)
+            ->where('date', '<', $session->date)
+            ->orderBy('date', 'desc')
+            ->first();
+
+        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats', 'previousSession'));
     }
 
     // --- HALAMAN EDIT (REVISI SETELAH TUTUP) ---
@@ -123,17 +131,22 @@ class TeachingController extends Controller
         $session = TeachingSession::findOrFail($id);
         
         $request->validate([
-            'topic' => 'required|string|max:255', 
-            'activities' => 'nullable|string',
-            'photo_proof' => 'nullable|image|max:5120', 
-            'video_link' => 'nullable|url',
+            'topic'             => 'required|string|max:255', 
+            'activities'        => 'nullable|string',
+            'photo_proof'       => 'nullable|image|max:5120', 
+            'video_link'        => 'nullable|url',
+            'material_status'   => 'nullable|in:selesai,belum_selesai',
+            'material_coverage' => 'nullable|string|max:1000',
         ]);
 
         $data = [
-            'topic' => $request->topic,
-            'activities' => $request->activities,
-            'reference_link' => $request->reference_link ?? null,
-            'video_link' => $request->video_link,
+            'topic'             => $request->topic,
+            'activities'        => $request->activities,
+            'reference_link'    => $request->reference_link ?? null,
+            'video_link'        => $request->video_link,
+            'material_status'   => $request->material_status,
+            // Hanya simpan material_coverage jika status belum_selesai
+            'material_coverage' => ($request->material_status === 'belum_selesai') ? $request->material_coverage : null,
         ];
 
         if ($request->hasFile('photo_proof')) {
