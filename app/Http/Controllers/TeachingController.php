@@ -143,7 +143,8 @@ class TeachingController extends Controller
         $request->validate([
             'topic'                => 'required|string|max:255', 
             'activities'           => 'nullable|string',
-            'photo_proof'          => 'nullable|image|max:5120', 
+            'photo_proof'          => 'nullable|array|max:5', // Maksimal 5 foto
+            'photo_proof.*'        => 'image|max:5120', 
             'video_link'           => 'nullable|url',
             'material_status'      => 'nullable|in:selesai,belum_selesai',
             'material_coverage'    => 'nullable|string|max:1000',
@@ -171,10 +172,27 @@ class TeachingController extends Controller
         ];
 
         if ($request->hasFile('photo_proof')) {
+            $photoPaths = [];
+            
+            // Hapus foto-foto lama
             if ($session->photo_proof) {
-                Storage::disk('public')->delete($session->photo_proof);
+                $oldPhotos = json_decode($session->photo_proof, true);
+                if (is_array($oldPhotos)) {
+                    foreach ($oldPhotos as $old) {
+                        Storage::disk('public')->delete($old);
+                    }
+                } else {
+                    // Backward compatibility (jika dulu format string biasa)
+                    Storage::disk('public')->delete($session->photo_proof);
+                }
             }
-            $data['photo_proof'] = $request->file('photo_proof')->store('jurnal-proof', 'public');
+
+            // Simpan foto-foto baru
+            foreach ($request->file('photo_proof') as $file) {
+                $photoPaths[] = $file->store('jurnal-proof', 'public');
+            }
+            
+            $data['photo_proof'] = json_encode($photoPaths);
         }
 
         $session->update($data);

@@ -420,29 +420,57 @@
                                             <p x-show="!hasHomework" x-cloak class="text-[10px] text-slate-400 font-medium text-center">Klik tombol di atas jika ada tugas untuk pertemuan ini.</p>
                                         </div>
 
-                                        <div>
-                                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi</label>
-                                            @if($session->photo_proof)
-                                                <div class="relative group h-40 rounded-2xl overflow-hidden border border-slate-200 mb-4 shadow-sm" x-show="!photoPreview">
-                                                    <img src="{{ asset('storage/' . $session->photo_proof) }}" class="w-full h-full object-cover">
-                                                    <a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="absolute inset-0 bg-elevate-dark/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 text-white font-bold text-sm gap-2">
-                                                        <i class="ph-bold ph-eye text-xl"></i> Lihat Foto
-                                                    </a>
+                                        <div x-data="{ photoPreviews: [] }">
+                                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi (Bisa lebih dari 1)</label>
+                                            
+                                            {{-- Tampilkan foto-foto lama jika ada --}}
+                                            @php
+                                                $existingPhotos = [];
+                                                if ($session->photo_proof) {
+                                                    $decoded = json_decode($session->photo_proof, true);
+                                                    if (is_array($decoded)) {
+                                                        $existingPhotos = $decoded;
+                                                    } else {
+                                                        $existingPhotos = [$session->photo_proof];
+                                                    }
+                                                }
+                                            @endphp
+
+                                            @if(count($existingPhotos) > 0)
+                                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4" x-show="photoPreviews.length === 0">
+                                                    @foreach($existingPhotos as $photo)
+                                                        <div class="relative group h-32 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                                                            <img src="{{ asset('storage/' . $photo) }}" class="w-full h-full object-cover">
+                                                            <a href="{{ asset('storage/' . $photo) }}" target="_blank" class="absolute inset-0 bg-elevate-dark/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 text-white font-bold text-sm gap-2">
+                                                                <i class="ph-bold ph-eye text-xl"></i> Lihat
+                                                            </a>
+                                                        </div>
+                                                    @endforeach
                                                 </div>
                                             @endif
 
-                                            <div class="relative h-40 rounded-2xl overflow-hidden border border-elevate-accent/50 mb-4 shadow-sm bg-elevate-primary/10" x-show="photoPreview" x-cloak>
-                                                <img :src="photoPreview" class="w-full h-full object-cover">
-                                                <div class="absolute bottom-0 left-0 right-0 bg-elevate-primary/90 text-white text-[10px] font-bold py-2 text-center backdrop-blur-sm">Foto Baru</div>
+                                            {{-- Tampilkan pratinjau foto baru --}}
+                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4" x-show="photoPreviews.length > 0" x-cloak>
+                                                <template x-for="preview in photoPreviews" :key="preview">
+                                                    <div class="relative h-32 rounded-2xl overflow-hidden border border-elevate-accent/50 shadow-sm bg-elevate-primary/10">
+                                                        <img :src="preview" class="w-full h-full object-cover">
+                                                        <div class="absolute bottom-0 left-0 right-0 bg-elevate-primary/90 text-white text-[10px] font-bold py-1.5 text-center backdrop-blur-sm">Foto Baru</div>
+                                                    </div>
+                                                </template>
                                             </div>
 
                                             @if($isOpen)
                                                 <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:bg-elevate-peach-light/20 hover:border-elevate-peach transition-all group/upload bg-elevate-soft/50">
                                                     <div class="flex flex-col items-center justify-center pt-2">
-                                                        <i class="ph-duotone ph-image text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-2 transition-colors"></i>
-                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover/upload:text-elevate-peach-dark transition-colors">Upload Foto Baru</p>
+                                                        <div class="flex gap-2">
+                                                            <i class="ph-duotone ph-camera text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-1 transition-colors"></i>
+                                                            <i class="ph-duotone ph-images text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-1 transition-colors"></i>
+                                                        </div>
+                                                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 group-hover/upload:text-elevate-peach-dark transition-colors mt-1">Jepret Kamera / Pilih Banyak Foto</p>
                                                     </div>
-                                                    <input type="file" name="photo_proof" accept="image/*" class="hidden" @change="photoPreview = URL.createObjectURL($event.target.files[0])" />
+                                                    {{-- TAMBAHAN: multiple dan capture --}}
+                                                    <input type="file" name="photo_proof[]" accept="image/*" multiple capture="environment" class="hidden" 
+                                                           @change="photoPreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" />
                                                 </label>
                                             @endif
                                         </div>
