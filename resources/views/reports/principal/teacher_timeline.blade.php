@@ -47,12 +47,17 @@
 
             {{-- TIMELINE KINERJA --}}
             <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 md:p-10 relative overflow-hidden mb-10">
-                <div class="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-100 pb-6">
                     <h3 class="font-black text-elevate-dark text-xl flex items-center gap-2">
                         <i class="ph-fill ph-git-commit text-elevate-primary"></i> Lini Masa Kinerja
                     </h3>
-                    <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
-                        Periode: {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
+                    <div class="flex items-center gap-3">
+                        <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+                            Periode: {{ \Carbon\Carbon::parse($month . '-01')->translatedFormat('F Y') }}
+                        </div>
+                        <a href="{{ route('reports.principal.teacher.print', ['id' => $teacher->id, 'month' => $month]) }}" target="_blank" class="px-4 py-2 bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white text-xs font-bold rounded-xl shadow-md shadow-sky-900/10 active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer">
+                            <i class="ph-bold ph-printer text-base"></i> Cetak PDF
+                        </a>
                     </div>
                 </div>
 
@@ -100,12 +105,12 @@
                                                     <i class="ph-bold ph-clock"></i> {{ $session->started_at ? \Carbon\Carbon::parse($session->started_at)->format('H:i') : '-' }} s/d {{ $session->ended_at ? \Carbon\Carbon::parse($session->ended_at)->format('H:i') : '-' }}
                                                 </div>
                                                 <span class="inline-block px-3 py-1.5 rounded-lg border border-slate-200 font-black text-[10px] bg-slate-50 text-slate-600 shadow-sm uppercase">
-                                                    {{ $session->timetable->studentClass->name ?? '-' }}
+                                                    {{ $session->schoolClass->name ?? ($session->timetable->studentClass->name ?? ($session->schedule->studentClass->name ?? '-')) }}
                                                 </span>
                                             </div>
 
                                             <h4 class="font-black text-elevate-dark text-lg leading-tight mb-2 group-hover:text-elevate-primary transition-colors">
-                                                {{ $session->timetable->subject->name ?? '-' }}
+                                                {{ $session->subject->name ?? ($session->timetable->subject->name ?? ($session->schedule->subject->name ?? '-')) }}
                                             </h4>
                                             
                                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-4">

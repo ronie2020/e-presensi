@@ -18,9 +18,11 @@
     'showcaseBubbles' => [],
     'ctaPrimaryText' => null,
     'ctaPrimaryHref' => null,
+    'ctaPrimaryTarget' => null,
     'ctaPrimaryIcon' => null,
     'ctaSecondaryText' => null,
     'ctaSecondaryHref' => null,
+    'ctaSecondaryTarget' => null,
     'ctaSecondaryIcon' => null,
 ])
 
@@ -149,7 +151,7 @@
             @elseif($ctaPrimaryText || $ctaSecondaryText)
                 <div class="flex flex-wrap items-center gap-3 pt-2">
                     @if($ctaPrimaryText && $ctaPrimaryHref)
-                        <a href="{{ $ctaPrimaryHref }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-[#0d52a1] text-white font-bold text-xs shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-95 transition-all border border-white/20">
+                        <a href="{{ $ctaPrimaryHref }}" @if($ctaPrimaryTarget) target="{{ $ctaPrimaryTarget }}" @endif class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-[#0d52a1] text-white font-bold text-xs shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.02] active:scale-95 transition-all border border-white/20">
                             @if($ctaPrimaryIcon)
                                 @php
                                     $pIcon = $ctaPrimaryIcon;
@@ -163,7 +165,7 @@
                     @endif
 
                     @if($ctaSecondaryText && $ctaSecondaryHref)
-                        <a href="{{ $ctaSecondaryHref }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs backdrop-blur-md border border-white/15 shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
+                        <a href="{{ $ctaSecondaryHref }}" @if($ctaSecondaryTarget) target="{{ $ctaSecondaryTarget }}" @endif class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white font-bold text-xs backdrop-blur-md border border-white/15 shadow-sm hover:scale-[1.02] active:scale-95 transition-all">
                             @if($ctaSecondaryIcon)
                                 @php
                                     $sIcon = $ctaSecondaryIcon;

@@ -808,7 +808,9 @@ Route::middleware('auth')->group(function () {
 
     // Laporan
     Route::get('/reports/principal', [\App\Http\Controllers\PrincipalReportController::class, 'index'])->name('reports.principal');
+    Route::get('/reports/principal/print', [\App\Http\Controllers\PrincipalReportController::class, 'print'])->name('reports.principal.print');
     Route::get('/reports/principal/teacher/{id}', [\App\Http\Controllers\PrincipalReportController::class, 'showTeacher'])->name('reports.principal.teacher');
+    Route::get('/reports/principal/teacher/{id}/print', [\App\Http\Controllers\PrincipalReportController::class, 'printTeacher'])->name('reports.principal.teacher.print');
     
     Route::get('/reports/teaching-journal', [ReportController::class, 'teachingJournal'])->name('reports.teaching_journal');
     Route::get('/reports/daily/print', [ReportController::class, 'printDaily'])->name('reports.printDaily');

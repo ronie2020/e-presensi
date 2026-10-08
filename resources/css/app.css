@@ -201,6 +201,16 @@ main select optgroup {
 }
 
 /* Translucent Neon Badges */
+main .bg-sky-100, main .bg-sky-50 {
+    background-color: rgba(14, 165, 233, 0.18) !important;
+    color: #38bdf8 !important;
+    border-color: rgba(14, 165, 233, 0.3) !important;
+}
+main .bg-cyan-100, main .bg-cyan-50 {
+    background-color: rgba(6, 182, 212, 0.18) !important;
+    color: #22d3ee !important;
+    border-color: rgba(6, 182, 212, 0.3) !important;
+}
 main .bg-emerald-100, main .bg-emerald-50 {
     background-color: rgba(16, 185, 129, 0.18) !important;
     color: #34d399 !important;

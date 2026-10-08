@@ -84,7 +84,7 @@
             </div>
 
             <!-- ====== KONTEN UTAMA ====== -->
-            <div class="flex-1 flex flex-col h-screen relative z-0 overflow-hidden transition-all duration-300">
+            <div class="flex-1 flex flex-col h-screen relative overflow-hidden transition-all duration-300">
                 
                 <!-- Header (ELEVATE DARK GLASSMORPHISM) -->
                 <header class="bg-[#031d3d]/90 backdrop-blur-2xl sticky top-0 z-30 border-b border-white/10 px-6 py-4 flex justify-between items-center shadow-[0_4px_30px_rgba(0,0,0,0.4)]">
@@ -201,8 +201,8 @@
                     </div>
                 </header>
 
-                <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-0 flex flex-col justify-between">
-                    <div class="max-w-7xl mx-auto relative z-10 w-full flex-1">
+                <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative flex flex-col justify-between">
+                    <div class="max-w-7xl mx-auto relative w-full flex-1">
                         {{ $slot ?? '' }}
                         @yield('content')
                     </div>
