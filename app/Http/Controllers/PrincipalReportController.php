@@ -67,7 +67,17 @@ class PrincipalReportController extends Controller
         $completionRate = $totalSessions > 0 ? round(($completedMaterials / $totalSessions) * 100) : 0;
 
         // Data untuk Dropdown Filter
-        $teachers = User::whereIn('role', ['teacher', 'admin', 'guru'])->orderBy('name')->get();
+        $teachers = User::whereHas('roles', function($q) {
+            $q->whereIn('name', [
+                'Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran', 
+                'Admin', 'Guru Piket' 
+            ]);
+        })->orderBy('name')->get();
+
+        if($teachers->isEmpty()) {
+            $teachers = User::orderBy('name')->get();
+        }
+
         $subjects = Subject::orderBy('name')->get();
         $classes = SchoolClass::orderBy('name')->get();
 
