@@ -53,7 +53,7 @@
         /* Perbaikan styling list html pada Pop-Up agar rapi saat diloloskan strip_tags */
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
         .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem; }
-        .prose p { margin-bottom: 0.75rem; }
+        .prose p, .prose div { margin-bottom: 0.75rem; }
         /* Dukungan alignment Quill & HTML Rich Text */
         .ql-align-center, [align="center"] { text-align: center !important; }
         .ql-align-right, [align="right"] { text-align: right !important; }
@@ -217,7 +217,7 @@
                         <span class="inline-flex items-center rounded-lg bg-elevate-accent/20 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-elevate-accent ring-1 ring-inset ring-elevate-accent/30 mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> {{ $popupCategory }}</span>
                         <h3 id="modal-title" class="text-2xl font-black text-white leading-tight">{{ $popupTitle }}</h3>
                     </div>
-                   <div class="prose prose-sm text-slate-300 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2">{!! $popupMessage !!}</div>
+                   <div class="prose prose-sm text-slate-300 mb-6 font-medium leading-relaxed overflow-y-auto max-h-48 pr-2 whitespace-pre-wrap">{!! $popupMessage !!}</div>
                     <div class="flex flex-col gap-3 mt-auto">
                         <button @click="closeInfoPopup(false)" class="w-full text-center justify-center items-center rounded-xl bg-gradient-to-r from-elevate-accent to-elevate-primary px-5 py-3.5 text-xs font-black text-white shadow-[0_0_20px_rgba(86,187,241,0.3)] hover:shadow-[0_0_30px_rgba(86,187,241,0.5)] transition-all">SAYA MENGERTI</button>
                         <button @click="closeInfoPopup(true)" class="text-xs font-bold text-slate-400 hover:text-elevate-accent transition-colors text-center py-2">Jangan tampilkan pengumuman ini lagi</button>
