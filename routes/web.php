@@ -807,6 +807,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/settings/academic/{id}', [AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
 
     // Laporan
+    Route::get('/reports/principal', [\App\Http\Controllers\PrincipalReportController::class, 'index'])->name('reports.principal');
+    Route::get('/reports/principal/teacher/{id}', [\App\Http\Controllers\PrincipalReportController::class, 'showTeacher'])->name('reports.principal.teacher');
+    
     Route::get('/reports/teaching-journal', [ReportController::class, 'teachingJournal'])->name('reports.teaching_journal');
     Route::get('/reports/daily/print', [ReportController::class, 'printDaily'])->name('reports.printDaily');
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');

@@ -186,6 +186,13 @@ return [
                 'roles' => ['Superadmin', 'Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas', 'Kepala Sekolah']
             ],
             [
+                'name' => 'Laporan KBM',
+                'route' => 'reports.principal',
+                'active_check' => 'reports.principal*',
+                'icon' => 'ph-books',
+                'roles' => ['Superadmin', 'Admin', 'Kepala Sekolah']
+            ],
+            [
                 'name' => 'Monitoring Jurnal',
                 'route' => 'reports.teaching_journal',
                 'active_check' => 'reports.teaching_journal',
