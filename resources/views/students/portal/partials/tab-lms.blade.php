@@ -455,7 +455,7 @@
                                         <h4 class="font-bold text-base text-elevate-dark group-hover:text-elevate-primary transition-colors line-clamp-2 leading-snug">
                                             {{ $material->title }}
                                         </h4>
-                                        <p class="text-xs text-slate-500 mt-2 line-clamp-2 font-medium">{{ $material->resume ?? 'Tidak ada deskripsi.' }}</p>
+                                        <p class="text-xs text-slate-500 mt-2 line-clamp-2 font-medium">{{ strip_tags($material->resume ?? 'Tidak ada deskripsi.') }}</p>
                                     </div>
 
                                     <div class="pt-4 border-t border-slate-100 mt-auto relative z-10 flex gap-2">
