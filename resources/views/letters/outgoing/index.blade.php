@@ -1,11 +1,7 @@
 <x-app-layout>
-    {{-- Load SweetAlert --}}
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            {{-- HERO SECTION --}}
+    <div class="space-y-8 font-sans text-slate-100">
+        
+        {{-- HERO SECTION --}}
             <div class="mb-8 relative z-10">
                 <x-hero-section
                     badge="ADMINISTRASI PERSURATAN"
@@ -34,48 +30,106 @@
                         </span>
                     </x-slot:chips>
                     <x-slot:cta>
-                        <a href="{{ route('letters.outgoing.create') }}"
-                           class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#56bbf1] to-blue-600 hover:brightness-110 text-white font-bold text-sm shadow-lg shadow-[#56bbf1]/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-                            <i class="ph-bold ph-plus-circle text-lg"></i>
-                            <span>Buat Surat Keluar</span>
-                        </a>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <a href="{{ route('letters.outgoing.create') }}"
+                               class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[#56bbf1] to-blue-600 hover:brightness-110 text-white font-bold text-sm shadow-lg shadow-[#56bbf1]/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                <i class="ph-bold ph-plus-circle text-lg"></i>
+                                <span>Buat Surat Keluar</span>
+                            </a>
+                            <a href="{{ route('letters.outgoing.print-agenda', request()->all()) }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all shadow-md hover:scale-[1.02]">
+                                <i class="ph-bold ph-printer text-base"></i>
+                                <span>Cetak Agenda</span>
+                            </a>
+                            <a href="{{ route('letters.outgoing.export-excel', request()->all()) }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all shadow-md hover:scale-[1.02]">
+                                <i class="ph-bold ph-file-xls text-base"></i>
+                                <span>Export Excel</span>
+                            </a>
+                        </div>
                     </x-slot:cta>
                     <x-slot:showcaseStats>
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
-                            <i class="ph-fill ph-paper-plane-tilt text-[#56bbf1] text-sm"></i>
-                            <span class="text-xs font-bold text-slate-300">Total Keluar:</span>
-                            <span class="text-sm font-black text-white font-mono">{{ $letters->total() }}</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                                <i class="ph-fill ph-paper-plane-tilt text-[#56bbf1] text-xs"></i>
+                                <span class="text-[11px] font-bold text-slate-300">Tahun Ini:</span>
+                                <span class="text-xs font-black text-white font-mono">{{ $stats['total_this_year'] ?? 0 }}</span>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                                <i class="ph-fill ph-warning-circle text-amber-400 text-xs"></i>
+                                <span class="text-[11px] font-bold text-slate-300">Penting:</span>
+                                <span class="text-xs font-black text-amber-300 font-mono">{{ $stats['total_penting'] ?? 0 }}</span>
+                            </div>
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md">
+                                <i class="ph-fill ph-briefcase text-emerald-400 text-xs"></i>
+                                <span class="text-[11px] font-bold text-slate-300">SPT:</span>
+                                <span class="text-xs font-black text-emerald-300 font-mono">{{ $stats['total_with_spt'] ?? 0 }}</span>
+                            </div>
                         </div>
                     </x-slot:showcaseStats>
                 </x-hero-section>
             </div>
 
-            {{-- Toolbar Pencarian & Tabel --}}
+            {{-- Toolbar Pencarian & Filter Lengkap --}}
             <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden">
                 
                 {{-- Toolbar (Search & Filter) --}}
-                <div class="p-6 border-b border-white/10 bg-white/5 flex flex-col xl:flex-row gap-4 justify-between items-center">
-                    <h3 class="font-black text-white text-lg flex items-center gap-2 whitespace-nowrap">
-                        <i class="ph-fill ph-list-dashes text-[#56bbf1]"></i> Data Surat Keluar
-                    </h3>
+                <div class="p-6 border-b border-white/10 bg-white/5 flex flex-col 2xl:flex-row gap-4 justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-black text-white text-lg flex items-center gap-2 whitespace-nowrap">
+                            <i class="ph-fill ph-list-dashes text-[#56bbf1]"></i> Data Surat Keluar
+                        </h3>
+                        <span class="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-slate-400 font-mono">
+                            {{ $letters->total() }} Data
+                        </span>
+                    </div>
                     
-                    <form action="{{ route('letters.outgoing.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
-                        <div class="relative w-full sm:w-64">
-                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor, perihal..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-medium text-white transition-all placeholder:text-slate-500">
-                            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                    <form action="{{ route('letters.outgoing.index') }}" method="GET" class="flex flex-wrap items-center gap-2.5 w-full 2xl:w-auto">
+                        {{-- Filter Tahun --}}
+                        <div class="relative w-full sm:w-32">
+                            <select name="year" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-xs font-bold text-white appearance-none transition-all cursor-pointer">
+                                <option value="" class="bg-slate-900 text-white">Semua Tahun</option>
+                                @foreach($availableYears as $yr)
+                                    <option value="{{ $yr }}" class="bg-slate-900 text-white" {{ request('year') == $yr ? 'selected' : '' }}>Th. {{ $yr }}</option>
+                                @endforeach
+                            </select>
+                            <i class="ph-bold ph-calendar-blank absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
                         </div>
-                        <div class="relative w-full sm:w-40">
-                            <select name="sifat_surat" onchange="this.form.submit()" class="w-full pl-4 pr-10 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-sm font-medium text-white appearance-none transition-all cursor-pointer">
+
+                        {{-- Filter Bulan --}}
+                        <div class="relative w-full sm:w-36">
+                            <select name="month" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-xs font-bold text-white appearance-none transition-all cursor-pointer">
+                                <option value="" class="bg-slate-900 text-white">Semua Bulan</option>
+                                @for($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}" class="bg-slate-900 text-white" {{ request('month') == $m ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                @endfor
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
+                        </div>
+
+                        {{-- Filter Sifat --}}
+                        <div class="relative w-full sm:w-36">
+                            <select name="sifat_surat" onchange="this.form.submit()" class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-xs font-bold text-white appearance-none transition-all cursor-pointer">
                                 <option value="" class="bg-slate-900 text-white">Semua Sifat</option>
                                 <option value="Biasa" class="bg-slate-900 text-white" {{ request('sifat_surat') == 'Biasa' ? 'selected' : '' }}>Biasa</option>
                                 <option value="Penting" class="bg-slate-900 text-white" {{ request('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
                                 <option value="Segera" class="bg-slate-900 text-white" {{ request('sifat_surat') == 'Segera' ? 'selected' : '' }}>Segera</option>
                             </select>
-                            <i class="ph-bold ph-caret-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
                         </div>
-                        @if(request('search') || request('sifat_surat'))
-                            <a href="{{ route('letters.outgoing.index') }}" class="px-4 py-2.5 bg-slate-800 text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 border border-white/10" title="Reset Filter">
-                                <i class="ph-bold ph-x"></i>
+
+                        {{-- Search Input --}}
+                        <div class="relative flex-1 sm:w-56 min-w-[200px]">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor, perihal..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-white/10 bg-slate-900/60 focus:border-[#56bbf1] focus:ring-1 focus:ring-[#56bbf1] text-xs font-medium text-white transition-all placeholder:text-slate-500">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        </div>
+
+                        @if(request('search') || request('sifat_surat') || request('year') || request('month'))
+                            <a href="{{ route('letters.outgoing.index') }}" class="px-3 py-2.5 bg-slate-800 text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-white/10" title="Reset Semua Filter">
+                                <i class="ph-bold ph-x text-sm"></i>
+                                <span class="hidden sm:inline">Reset</span>
                             </a>
                         @endif
                     </form>
@@ -104,8 +158,24 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-5 align-top">
-                                    <div class="font-bold text-white text-sm mb-2 leading-snug">{{ $letter->nomor_surat }}</div>
-                                    <span class="inline-flex px-2 py-1 rounded border border-white/10 bg-slate-800/80 text-[10px] font-bold text-slate-300 tracking-wider">
+                                    <div class="flex items-center gap-2 group/num mb-2">
+                                        <span class="font-bold text-white text-sm leading-snug">{{ $letter->nomor_surat }}</span>
+                                        <button type="button" 
+                                                onclick="openQuickEditNomorModal({{ $letter->id }}, '{{ addslashes($letter->nomor_surat) }}')" 
+                                                class="opacity-0 group-hover/num:opacity-100 transition-opacity p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-amber-400 focus:opacity-100" 
+                                                title="Edit Nomor Surat Cepat">
+                                            <i class="ph-bold ph-pencil-simple text-xs"></i>
+                                        </button>
+                                    </div>
+                                    @php
+                                        $sifatColors = [
+                                            'Penting' => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                                            'Segera'  => 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+                                            'Biasa'   => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+                                        ];
+                                        $sifatClass = $sifatColors[$letter->sifat_surat] ?? 'bg-slate-800/80 text-slate-300 border-white/10';
+                                    @endphp
+                                    <span class="inline-flex px-2.5 py-1 rounded-lg border {{ $sifatClass }} text-[11px] font-bold tracking-wider">
                                         {{ $letter->sifat_surat }}
                                     </span>
                                 </td>
@@ -132,7 +202,11 @@
 
                                         {{-- Tombol Aksi (Detail, Edit, Hapus) --}}
                                         <div class="flex items-center gap-2 mt-1">
-                                            <button type="button" onclick="showDetailModal({{ json_encode($letter) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/10 transition-all" title="Lihat Detail">
+                                            <button type="button" 
+                                                    data-letter="{{ json_encode($letter) }}" 
+                                                    onclick="showDetailModal(JSON.parse(this.dataset.letter))" 
+                                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-sky-400 hover:border-sky-500/30 hover:bg-sky-500/10 transition-all" 
+                                                    title="Lihat Detail">
                                                 <i class="ph-bold ph-eye text-lg"></i>
                                             </button>
                                             <a href="{{ route('letters.outgoing.edit', $letter->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10 transition-all" title="Edit">
@@ -172,7 +246,6 @@
                     {{ $letters->links() }}
                 </div>
             </div>
-        </div>
     </div>
 
     {{-- MODAL DETAIL SURAT --}}
@@ -228,12 +301,24 @@
                             <p id="modal_perihal" class="text-sm font-medium text-slate-300 leading-relaxed"></p>
                         </div>
 
+                        {{-- In-Modal Live Document Preview --}}
+                        <div id="modal_preview_wrapper" class="mb-6 hidden">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="ph-bold ph-eye text-sky-400"></i> Pratinjau Dokumen Lampiran
+                                </span>
+                                <span id="modal_preview_type_badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/5 border border-white/10 text-sky-300 uppercase"></span>
+                            </div>
+                            <div id="modal_preview_container" class="rounded-2xl border border-white/10 bg-slate-950/80 overflow-hidden flex items-center justify-center p-2 min-h-48 shadow-inner">
+                            </div>
+                        </div>
+
                         {{-- Modal Footer --}}
-                        <div class="pt-6 border-t border-white/10 flex items-center justify-between">
+                        <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
                             <div id="modal_lampiran_container">
                                 <!-- Tombol Lampiran diinject via JS -->
                             </div>
-                            <button onclick="closeDetailModal()" class="px-6 py-3 bg-slate-800 text-slate-300 rounded-xl font-bold text-sm hover:bg-slate-700 transition-colors border border-white/10">
+                            <button onclick="closeDetailModal()" class="px-6 py-2.5 bg-slate-800 text-slate-300 rounded-xl font-bold text-xs hover:bg-slate-700 transition-colors border border-white/10">
                                 Tutup Panel
                             </button>
                         </div>
@@ -256,6 +341,48 @@
             });
             Toast.fire({ icon: 'success', title: '{{ session('success') }}' });
         @endif
+
+        function openQuickEditNomorModal(id, currentNomor) {
+            Swal.fire({
+                title: 'Edit Nomor Surat',
+                text: 'Perbarui nomor surat keluar secara manual:',
+                input: 'text',
+                inputValue: currentNomor,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan Perubahan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                background: '#021124',
+                color: '#fff',
+                customClass: {
+                    popup: 'rounded-[2.5rem] font-sans border border-white/10 shadow-2xl',
+                    input: 'bg-slate-900 border-white/20 text-white font-bold rounded-xl text-center font-mono text-sm px-4 py-3',
+                    confirmButton: 'bg-gradient-to-r from-[#56bbf1] to-blue-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-[#56bbf1]/20 mx-2 hover:brightness-110',
+                    cancelButton: 'bg-slate-800 text-slate-300 px-6 py-2.5 rounded-xl font-bold border border-white/10 mx-2 hover:bg-slate-700'
+                },
+                buttonsStyling: false,
+                preConfirm: (newNomor) => {
+                    if (!newNomor || !newNomor.trim()) {
+                        Swal.showValidationMessage('Nomor surat tidak boleh kosong!');
+                        return false;
+                    }
+                    return newNomor.trim();
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/letters/outgoing/${id}/quick-update-nomor`;
+                    form.innerHTML = `
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="_method" value="PATCH">
+                        <input type="hidden" name="nomor_surat" value="${result.value.replace(/"/g, '&quot;')}">
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
 
         function confirmDelete(id) {
             Swal.fire({
@@ -300,16 +427,54 @@
             document.getElementById('modal_sifat').innerText = letter.sifat_surat;
             document.getElementById('modal_perihal').innerText = letter.perihal;
 
-            // Set Link Lampiran Jika Ada
+            // Set Link Lampiran & Live Preview Jika Ada
             const lampiranContainer = document.getElementById('modal_lampiran_container');
+            const previewWrapper = document.getElementById('modal_preview_wrapper');
+            const previewContainer = document.getElementById('modal_preview_container');
+            const previewBadge = document.getElementById('modal_preview_type_badge');
+
             if (letter.file_path) {
-                const fileUrl = '{{ asset("storage/") }}/' + letter.file_path;
+                const storageBase = '{{ asset("storage") }}';
+                const fileUrl = `${storageBase}/${letter.file_path.replace(/^\/+/, '')}`;
+                const ext = letter.file_path.split('.').pop().toLowerCase();
+
+                previewBadge.innerText = ext;
+                previewWrapper.classList.remove('hidden');
+
+                if (ext === 'pdf') {
+                    previewContainer.innerHTML = `
+                        <iframe src="${fileUrl}#toolbar=0" class="w-full h-80 rounded-xl border border-white/5 bg-slate-900" title="PDF Preview"></iframe>
+                    `;
+                } else if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                    previewContainer.innerHTML = `
+                        <div class="text-center p-2">
+                            <img src="${fileUrl}" alt="Lampiran" class="max-h-80 mx-auto rounded-xl object-contain shadow-2xl cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${fileUrl}', '_blank')" title="Klik untuk membuka ukuran penuh">
+                            <p class="text-[11px] text-slate-500 mt-2">Klik gambar untuk membuka resolusi penuh</p>
+                        </div>
+                    `;
+                } else {
+                    previewContainer.innerHTML = `
+                        <div class="py-8 text-center text-slate-400">
+                            <i class="ph-bold ph-file-text text-4xl text-[#56bbf1] mb-2 inline-block"></i>
+                            <p class="text-xs font-medium">Format file (${ext}) tidak mendukung pratinjau langsung.</p>
+                            <a href="${fileUrl}" target="_blank" class="text-xs text-sky-400 hover:underline font-bold mt-1 inline-block">Buka file di tab baru</a>
+                        </div>
+                    `;
+                }
+
                 lampiranContainer.innerHTML = `
-                    <a href="${fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 bg-[#56bbf1]/10 text-[#56bbf1] border border-[#56bbf1]/20 rounded-xl font-bold text-sm hover:bg-[#56bbf1] hover:text-slate-950 transition-all shadow-sm">
-                        <i class="ph-bold ph-download-simple"></i> Unduh Lampiran
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="${fileUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#56bbf1]/15 text-[#56bbf1] border border-[#56bbf1]/30 rounded-xl font-bold text-xs hover:bg-[#56bbf1] hover:text-slate-950 transition-all shadow-sm">
+                            <i class="ph-bold ph-arrow-square-out text-sm"></i> Buka Penuh
+                        </a>
+                        <a href="${fileUrl}" download class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 text-slate-200 border border-white/10 rounded-xl font-bold text-xs hover:bg-slate-700 transition-all">
+                            <i class="ph-bold ph-download-simple text-sm"></i> Unduh File
+                        </a>
+                    </div>
                 `;
             } else {
+                previewWrapper.classList.add('hidden');
+                previewContainer.innerHTML = '';
                 lampiranContainer.innerHTML = `
                     <span class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-800/40 text-slate-500 rounded-xl text-xs font-medium border border-white/5">
                         <i class="ph-bold ph-file-dashed text-sm"></i> Tidak Ada File

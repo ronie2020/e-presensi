@@ -862,6 +862,10 @@ Route::middleware('auth')->group(function () {
     // Persuratan
      Route::prefix('letters')->name('letters.')->group(function () {
         Route::resource('incoming', LetterIncomingController::class);
+        Route::get('outgoing/generate-number', [LetterOutgoingController::class, 'generateNumberAjax'])->name('outgoing.generate-number');
+        Route::patch('outgoing/{id}/quick-update-nomor', [LetterOutgoingController::class, 'quickUpdateNomor'])->name('outgoing.quick-update-nomor');
+        Route::get('outgoing/export-excel', [LetterOutgoingController::class, 'exportExcel'])->name('outgoing.export-excel');
+        Route::get('outgoing/print-agenda', [LetterOutgoingController::class, 'printAgenda'])->name('outgoing.print-agenda');
         Route::resource('outgoing', LetterOutgoingController::class); 
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
         Route::resource('spt', SptController::class);

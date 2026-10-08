@@ -76,66 +76,69 @@
                         </button>
                      </form>
             </div>
-            </div>
 
             @if($classId && $students->count() > 0)
-                <div class="animate-enter bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden" style="animation-delay: 200ms">                    
-                   <div class="p-6 md:p-8 border-b border-slate-100 bg-elevate-gradient-card flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="animate-enter bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl" style="animation-delay: 200ms">                    
+                   <div class="p-6 md:p-8 border-b border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
-                            <h3 class="font-black text-elevate-dark text-2xl mb-1">{{ optional($classes->where('id', $classId)->first())->name ?? 'Kelas' }}</h3>
-                            <p class="text-sm text-elevate-primary font-bold">{{ $startDate->translatedFormat('F Y') }}</p>
+                            <h3 class="font-black text-white text-2xl mb-1 flex items-center gap-2.5">
+                                <i class="ph-bold ph-chalkboard text-sky-400"></i> Kelas {{ optional($classes->where('id', $classId)->first())->name ?? 'Kelas' }}
+                            </h3>
+                            <p class="text-sm text-sky-300 font-bold flex items-center gap-1.5">
+                                <i class="ph-bold ph-calendar text-xs"></i> {{ $startDate->translatedFormat('F Y') }}
+                            </p>
                         </div>
                         <div class="flex gap-3">
-                             <div class="hidden sm:flex items-center gap-3 text-xs font-bold uppercase tracking-wider bg-white border border-slate-100 px-5 py-2.5 rounded-2xl shadow-sm text-slate-600">
+                             <div class="hidden sm:flex items-center gap-3 text-xs font-bold uppercase tracking-wider bg-white/5 border border-white/10 px-5 py-2.5 rounded-2xl shadow-sm text-slate-300">
                                 <span class="w-3 h-3 rounded-full bg-[#107C10]"></span> H
                                 <span class="w-3 h-3 rounded-full bg-[#D83B01] ml-2"></span> B
-                                <span class="w-3 h-3 rounded-full bg-elevate-primary ml-2"></span> S/I
+                                <span class="w-3 h-3 rounded-full bg-sky-400 ml-2"></span> S/I
                                 <span class="w-3 h-3 rounded-full bg-[#D13438] ml-2"></span> A
                             </div>
-                            <a href="{{ route('reports.printClassReport', request()->all()) }}" target="_blank" class="bg-white border border-slate-200 text-elevate-dark hover:text-white hover:bg-elevate-dark w-12 h-12 flex items-center justify-center rounded-2xl transition-colors shadow-sm no-print"><i class="ph-bold ph-printer text-xl"></i></a>
+                            <a href="{{ route('reports.printClassReport', request()->all()) }}" target="_blank" class="bg-white/10 border border-white/15 text-white hover:text-sky-300 hover:bg-white/20 w-12 h-12 flex items-center justify-center rounded-2xl transition-colors shadow-sm no-print" title="Cetak Laporan"><i class="ph-bold ph-printer text-xl"></i></a>
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto custom-scrollbar pb-2 bg-white">
+                    <div class="overflow-x-auto custom-scrollbar pb-2 bg-transparent">
                         <table class="w-full border-collapse text-sm text-left">
                             <thead>
-                                <tr class="bg-elevate-soft/50 border-b border-slate-100 text-elevate-dark">
-                                    <th rowspan="2" class="p-4 font-black uppercase text-[10px] tracking-wider text-center w-12 sticky left-0 z-20 bg-elevate-soft/90 backdrop-blur-sm shadow-[2px_0_5px_rgba(0,0,0,0.02)] align-middle">No</th>
-                                    <th rowspan="2" class="p-4 font-black uppercase text-[10px] tracking-wider min-w-[200px] sticky left-12 z-20 bg-elevate-soft/90 backdrop-blur-sm shadow-[2px_0_5px_rgba(0,0,0,0.02)] border-r border-slate-100 align-middle">Nama Siswa</th>
+                                <tr class="bg-[#021124]/80 border-b border-white/10 text-slate-200">
+                                    <th rowspan="2" class="p-4 font-black uppercase text-[10px] tracking-wider text-center w-12 sticky left-0 z-20 bg-[#031d3d] border-r border-white/10 align-middle">No</th>
+                                    <th rowspan="2" class="p-4 font-black uppercase text-[10px] tracking-wider min-w-[200px] sticky left-12 z-20 bg-[#031d3d] border-r border-white/10 align-middle">Nama Siswa</th>
                                     @foreach($dates as $date)
-                                        <th colspan="2" class="p-1.5 font-bold text-[10px] text-center border-r border-slate-100 {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : '' }}">{{ $date->format('d') }}</th>
+                                        <th colspan="2" class="p-1.5 font-bold text-[10px] text-center border-r border-white/10 {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-500/15 text-rose-300' : 'text-slate-300' }}">{{ $date->format('d') }}</th>
                                     @endforeach
-                                    <th rowspan="2" class="p-3 font-black text-[#107C10] bg-[#DFF6DD]/50 text-center w-12 border-l border-slate-100 align-middle">H</th>
-                                    <th rowspan="2" class="p-3 font-black text-[#D83B01] bg-[#FFEFD6]/50 text-center w-12 align-middle">B</th>
-                                    <th rowspan="2" class="p-3 font-black text-elevate-primary bg-elevate-soft/50 text-center w-12 align-middle">S</th>
-                                    <th rowspan="2" class="p-3 font-black text-elevate-dark bg-slate-100 text-center w-12 align-middle">I</th>
-                                    <th rowspan="2" class="p-3 font-black text-[#D13438] bg-[#FDE7E9]/50 text-center w-12 align-middle">A</th>
+                                    <th rowspan="2" class="p-3 font-black text-[#107C10] bg-[#107C10]/15 text-center w-12 border-l border-white/10 align-middle">H</th>
+                                    <th rowspan="2" class="p-3 font-black text-[#D83B01] bg-[#D83B01]/15 text-center w-12 align-middle">B</th>
+                                    <th rowspan="2" class="p-3 font-black text-sky-400 bg-sky-500/15 text-center w-12 align-middle">S</th>
+                                    <th rowspan="2" class="p-3 font-black text-slate-300 bg-white/5 text-center w-12 align-middle">I</th>
+                                    <th rowspan="2" class="p-3 font-black text-[#D13438] bg-[#D13438]/15 text-center w-12 align-middle">A</th>
                                 </tr>
-                                <tr class="bg-white border-b border-slate-100 text-slate-400">
+                                <tr class="bg-[#021124]/60 border-b border-white/10 text-slate-400">
                                     @foreach($dates as $date)
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-50 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-elevate-peach-light/20' : '' }}">M</th>
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-100 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-elevate-peach-light/20' : '' }}">P</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-white/5 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-500/10 text-rose-300/80' : '' }}">M</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-white/10 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-500/10 text-rose-300/80' : '' }}">P</th>
                                     @endforeach
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50">
+                            <tbody class="divide-y divide-white/5">
                                 @foreach($students as $index => $student)
-                                    <tr class="hover:bg-elevate-soft/30 transition-colors group">
-                                        <td class="p-4 text-center text-xs font-bold text-slate-400 sticky left-0 bg-white group-hover:bg-elevate-soft/10 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">{{ $index + 1 }}</td>
-                                        <td class="p-4 font-bold text-elevate-dark whitespace-nowrap sticky left-12 bg-white group-hover:bg-elevate-soft/10 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.02)] border-r border-slate-50">{{ data_get($student, 'name') }}</td>
+                                    <tr class="hover:bg-white/5 transition-colors group">
+                                        <td class="p-4 text-center text-xs font-bold text-slate-300 sticky left-0 bg-[#031d3d] group-hover:bg-[#082b54] z-10 border-r border-white/5">{{ $index + 1 }}</td>
+                                        <td class="p-4 font-bold text-white whitespace-nowrap sticky left-12 bg-[#031d3d] group-hover:bg-[#082b54] z-10 border-r border-white/10">{{ data_get($student, 'name') }}</td>
                                         @foreach($dates as $date)
                                             @php 
                                                 $dateStr = $date->format('Y-m-d');
-                                                $data = data_get($student, 'attendance_map.' . $dateStr, ['in_code' => '-', 'in_class' => 'text-slate-300', 'out_code' => '-', 'out_class' => 'text-slate-300']);
+                                                $data = data_get($student, 'attendance_map.' . $dateStr, ['in_code' => '-', 'in_class' => 'text-slate-400', 'out_code' => '-', 'out_class' => 'text-slate-400']);
                                             @endphp
-                                            <td class="p-1 text-center border-r border-slate-50 text-[10px] font-bold {{ $data['in_class'] ?? 'text-slate-300' }}">{{ $data['in_code'] ?? '-' }}</td>
-                                            <td class="p-1 text-center border-r border-slate-100 text-[10px] font-bold {{ $data['out_class'] ?? 'text-slate-300' }}">{{ $data['out_code'] ?? '-' }}</td>
+                                            <td class="p-1 text-center border-r border-white/5 text-[10px] font-bold {{ $data['in_class'] ?? 'text-slate-400' }}">{{ $data['in_code'] ?? '-' }}</td>
+                                            <td class="p-1 text-center border-r border-white/10 text-[10px] font-bold {{ $data['out_class'] ?? 'text-slate-400' }}">{{ $data['out_code'] ?? '-' }}</td>
                                         @endforeach
-                                        <td class="p-3 text-center font-black text-[#107C10] bg-[#DFF6DD]/30 text-xs border-l border-slate-50">{{ data_get($student, 'summary.H', 0) }}</td>
-                                        <td class="p-3 text-center font-black text-[#D83B01] bg-[#FFEFD6]/30 text-xs">{{ data_get($student, 'summary.B', 0) }}</td>
-                                        <td class="p-3 text-center font-black text-elevate-primary bg-elevate-soft/30 text-xs">{{ data_get($student, 'summary.S', 0) }}</td>
-                                        <td class="p-3 text-center font-black text-elevate-dark bg-slate-50 text-xs">{{ data_get($student, 'summary.I', 0) }}</td>
-                                        <td class="p-3 text-center font-black text-[#D13438] bg-[#FDE7E9]/30 text-xs">{{ data_get($student, 'summary.A', 0) }}</td>
+                                        <td class="p-3 text-center font-black text-[#107C10] bg-[#107C10]/10 text-xs border-l border-white/10">{{ data_get($student, 'summary.H', 0) }}</td>
+                                        <td class="p-3 text-center font-black text-[#D83B01] bg-[#D83B01]/10 text-xs">{{ data_get($student, 'summary.B', 0) }}</td>
+                                        <td class="p-3 text-center font-black text-sky-400 bg-sky-500/10 text-xs">{{ data_get($student, 'summary.S', 0) }}</td>
+                                        <td class="p-3 text-center font-black text-slate-300 bg-white/5 text-xs">{{ data_get($student, 'summary.I', 0) }}</td>
+                                        <td class="p-3 text-center font-black text-[#D13438] bg-[#D13438]/10 text-xs">{{ data_get($student, 'summary.A', 0) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

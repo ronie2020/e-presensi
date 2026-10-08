@@ -133,7 +133,7 @@
                                     </div>
                                     @if($history->jml_telat > 0)
                                         <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-500/30 text-amber-300 shadow-sm" title="Siswa Terlambat">
-                                            <i class="ph-fill ph-clock-warning text-amber-400 text-base"></i>
+                                            <i class="ph-fill ph-clock-countdown text-amber-400 text-base"></i>
                                             <span class="text-sm font-black">{{ $history->jml_telat }}</span>
                                         </div>
                                     @endif

@@ -1,11 +1,7 @@
 <x-app-layout>
-    {{-- Load SweetAlert --}}
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            {{-- HERO SECTION --}}
+    <div class="space-y-8 font-sans text-slate-100">
+        
+        {{-- HERO SECTION --}}
             <div class="mb-8 relative z-10">
                 <x-hero-section
                     badge="ADMINISTRASI PERSURATAN"
@@ -133,7 +129,11 @@
 
                                         {{-- Tombol Aksi (Detail, Edit, Hapus) --}}
                                         <div class="flex items-center gap-2 mt-1">
-                                            <button type="button" onclick="showDetailModal({{ json_encode($letter) }})" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 border border-white/15 text-slate-300 hover:text-[#56bbf1] hover:border-[#56bbf1]/50 hover:bg-[#56bbf1]/20 transition-all" title="Lihat Detail">
+                                            <button type="button" 
+                                                    data-letter="{{ json_encode($letter) }}" 
+                                                    onclick="showDetailModal(JSON.parse(this.dataset.letter))" 
+                                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 border border-white/15 text-slate-300 hover:text-[#56bbf1] hover:border-[#56bbf1]/50 hover:bg-[#56bbf1]/20 transition-all" 
+                                                    title="Lihat Detail">
                                                 <i class="ph-bold ph-eye text-lg"></i>
                                             </button>
                                             <a href="{{ route('letters.incoming.edit', $letter->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10 border border-white/15 text-slate-300 hover:text-amber-400 hover:border-amber-500/50 hover:bg-amber-500/20 transition-all" title="Edit">
@@ -173,7 +173,6 @@
                     {{ $letters->links() }}
                 </div>
             </div>
-        </div>
     </div>
 
     {{-- MODAL DETAIL SURAT MASUK --}}
@@ -308,7 +307,8 @@
             // Set Link Lampiran Jika Ada
             const lampiranContainer = document.getElementById('modal_lampiran_container');
             if (letter.file_path) {
-                const fileUrl = '{{ asset("storage/") }}/' + letter.file_path;
+                const storageBase = '{{ asset("storage") }}';
+                const fileUrl = `${storageBase}/${letter.file_path.replace(/^\/+/, '')}`;
                 lampiranContainer.innerHTML = `
                     <a href="${fileUrl}" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 bg-[#56bbf1]/10 border border-[#56bbf1]/20 text-[#56bbf1] rounded-xl font-bold text-sm hover:bg-[#56bbf1] hover:text-[#020b18] transition-all shadow-sm">
                         <i class="ph-bold ph-download-simple"></i> Unduh Lampiran

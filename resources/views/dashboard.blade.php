@@ -171,6 +171,9 @@
                         <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
                             <i class="ph-bold ph-check text-sky-400"></i> Notifikasi Terverifikasi
                         </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-semibold backdrop-blur-sm shadow-sm">
+                            <i class="ph-bold ph-clock text-sky-400"></i> Sinkron: {{ now()->translatedFormat('H:i') }} WIB
+                        </div>
                     </div>
                 </div>
                 
@@ -218,8 +221,13 @@
                             <span x-text="(loading && loadingTarget === 'month') ? '' : 'Bulanan'"></span>
                         </button>
                         
+                        {{-- Tombol Refresh Cepat --}}
+                        <button type="button" @click="window.location.reload()" class="ml-1 bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 border border-white/15 focus:outline-none active:scale-95 transition-all shadow-md flex items-center justify-center gap-2" title="Segarkan Data Real-Time" aria-label="Segarkan Data">
+                            <i class="ph-bold ph-arrows-clockwise text-lg text-sky-300" :class="loading ? 'animate-spin' : ''"></i>
+                        </button>
+                        
                         {{-- Tombol Cetak / Export PDF --}}
-                        <a href="{{ route('reports.printDaily', ['date' => request('date')]) }}" target="_blank" class="ml-2 bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 border border-white/15 focus:outline-none active:scale-95 transition-all shadow-md flex items-center justify-center gap-2" title="Cetak Laporan Harian" aria-label="Cetak Laporan">
+                        <a href="{{ route('reports.printDaily', ['date' => request('date')]) }}" target="_blank" class="ml-1 bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 border border-white/15 focus:outline-none active:scale-95 transition-all shadow-md flex items-center justify-center gap-2" title="Cetak Laporan Harian" aria-label="Cetak Laporan">
                             <i class="ph-bold ph-printer text-lg text-elevate-accent"></i>
                         </a>
                     </div>
@@ -293,18 +301,36 @@
         {{-- QUICK ACTIONS --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 lg:gap-5 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
             @php
-                $actions = [
-                    ['route' => 'students.index', 'icon' => 'ph-student', 'label' => 'Data Siswa', 'color' => 'sky'],
-                    ['route' => 'teacher.habits.index', 'icon' => 'ph-calendar-check', 'label' => '7 Kebiasaan', 'color' => 'emerald'],
-                    ['route' => 'cbt.index', 'icon' => 'ph-monitor-play', 'label' => 'Ujian CBT', 'color' => 'sky'],
-                    ['route' => 'lms.assignments.index', 'icon' => 'ph-pencil-simple', 'label' => 'Tugas & PR', 'color' => 'rose'],
-                    ['route' => 'lms.grades.index', 'icon' => 'ph-chart-bar', 'label' => 'Rekap Nilai', 'color' => 'emerald'],
-                    ['route' => 'reports.class', 'icon' => 'ph-files', 'label' => 'Laporan Kelas', 'color' => 'amber'],
-                    ['route' => 'admin.graduation.index', 'icon' => 'ph-envelope-open', 'label' => 'Kelulusan', 'color' => 'rose'],
-                    ['route' => 'admin.ppdb.index', 'icon' => 'ph-users', 'label' => 'SPMB/PPDB', 'color' => 'amber'],
-                    ['route' => 'letters.spt.index', 'icon' => 'ph-car-profile', 'label' => 'SPPD', 'color' => 'sky'],
-                    ['route' => 'library.dashboard', 'icon' => 'ph-book-open-text', 'label' => 'Perpustakaan', 'color' => 'purple']
-                ];
+                $userRole = Auth::user()->role ?? '';
+                $isGuru = str_contains(strtolower($userRole), 'guru') || (method_exists(Auth::user(), 'hasRole') && Auth::user()->hasRole(['Guru', 'Guru Mata Pelajaran', 'Wali Kelas']));
+                
+                if ($isGuru) {
+                    $actions = [
+                        ['route' => 'teaching.index', 'icon' => 'ph-chalkboard-teacher', 'label' => 'Jadwal Mengajar', 'color' => 'sky'],
+                        ['route' => 'teacher.habits.index', 'icon' => 'ph-calendar-check', 'label' => '7 Kebiasaan', 'color' => 'emerald'],
+                        ['route' => 'lms.assignments.index', 'icon' => 'ph-pencil-simple', 'label' => 'Tugas & PR', 'color' => 'rose'],
+                        ['route' => 'lms.grades.index', 'icon' => 'ph-chart-bar', 'label' => 'Rekap Nilai', 'color' => 'emerald'],
+                        ['route' => 'cbt.index', 'icon' => 'ph-monitor-play', 'label' => 'Ujian CBT', 'color' => 'sky'],
+                        ['route' => 'permit.index', 'icon' => 'ph-door-open', 'label' => 'Izin Siswa', 'color' => 'amber'],
+                        ['route' => 'reports.daily', 'icon' => 'ph-clipboard-text', 'label' => 'Rekap Harian', 'color' => 'sky'],
+                        ['route' => 'reports.class', 'icon' => 'ph-files', 'label' => 'Laporan Kelas', 'color' => 'amber'],
+                        ['route' => 'students.index', 'icon' => 'ph-student', 'label' => 'Data Siswa', 'color' => 'sky'],
+                        ['route' => 'library.dashboard', 'icon' => 'ph-book-open-text', 'label' => 'Perpustakaan', 'color' => 'purple']
+                    ];
+                } else {
+                    $actions = [
+                        ['route' => 'students.index', 'icon' => 'ph-student', 'label' => 'Data Siswa', 'color' => 'sky'],
+                        ['route' => 'reports.daily', 'icon' => 'ph-clipboard-text', 'label' => 'Rekap Absensi', 'color' => 'sky'],
+                        ['route' => 'admin.ppdb.index', 'icon' => 'ph-users', 'label' => 'SPMB/PPDB', 'color' => 'amber'],
+                        ['route' => 'admin.graduation.index', 'icon' => 'ph-envelope-open', 'label' => 'Kelulusan', 'color' => 'rose'],
+                        ['route' => 'letters.spt.index', 'icon' => 'ph-car-profile', 'label' => 'SPPD', 'color' => 'sky'],
+                        ['route' => 'cbt.index', 'icon' => 'ph-monitor-play', 'label' => 'Ujian CBT', 'color' => 'sky'],
+                        ['route' => 'lms.assignments.index', 'icon' => 'ph-pencil-simple', 'label' => 'Tugas & PR', 'color' => 'rose'],
+                        ['route' => 'teacher.habits.index', 'icon' => 'ph-calendar-check', 'label' => '7 Kebiasaan', 'color' => 'emerald'],
+                        ['route' => 'reports.class', 'icon' => 'ph-files', 'label' => 'Laporan Kelas', 'color' => 'amber'],
+                        ['route' => 'library.dashboard', 'icon' => 'ph-book-open-text', 'label' => 'Perpustakaan', 'color' => 'purple']
+                    ];
+                }
             @endphp
             
             @foreach($actions as $action)
@@ -367,7 +393,7 @@
                 };
             @endphp
 
-            <div onclick="showCardInfo('{{ $card['title'] }}', '{{ $card['value'] }}', '{{ $colorKey }}')" 
+            <div onclick="showCardInfo('{{ $card['title'] }}', '{{ $card['value'] }}', '{{ $colorKey }}', '{{ $card['action_url'] ?? '' }}', '{{ $card['action_label'] ?? '' }}')" 
                class="cursor-pointer animate-enter group bg-white rounded-[1.5rem] p-5 md:p-6 fluent-card {{ $theme['hover_border'] }} relative overflow-hidden flex flex-col justify-between h-full card-print"
                style="animation-delay: {{ ($index + 1) * 100 }}ms" tabindex="0" role="button" aria-label="Lihat detail {{ $card['title'] }}">
                 
@@ -393,10 +419,24 @@
                 </div>
                 <div class="relative z-10 mt-auto">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 truncate {{ str_replace('text-', 'group-hover:text-', $theme['text']) }} transition-colors">{{ $card['title'] }}</p>
-                    <h3 class="text-3xl md:text-4xl font-black text-elevate-dark tracking-tighter count-up" data-target="{{ $card['value'] }}">0</h3>
+                    <h3 class="text-3xl md:text-4xl font-black text-white tracking-tighter count-up" data-target="{{ $card['value'] }}">0</h3>
                     @if(isset($card['trend']) && $card['trend'] !== null)
                         <p class="text-[9px] text-slate-400 font-bold mt-1.5 uppercase tracking-wide">vs Kemarin</p>
                     @endif
+
+                    <div class="pt-2.5 border-t border-white/10 mt-3 font-semibold text-[10px]">
+                        @if(!empty($card['action_url']))
+                            <a href="{{ $card['action_url'] }}" onclick="event.stopPropagation()" class="flex items-center justify-between text-slate-400/80 group-hover:text-sky-300 hover:!text-white transition-colors py-0.5" title="Buka detail {{ $card['title'] }}">
+                                <span>Detail</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        @else
+                            <div class="flex items-center justify-between text-slate-400/80 group-hover:text-sky-300 transition-colors py-0.5">
+                                <span>Detail</span>
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
             @endforeach
@@ -586,7 +626,7 @@
                                 @php
                                     $type = $log->type;
                                     $statusText = $log->status;
-                                    $subText = 'Absensi Sekolah';
+                                    $subText = $log->student->schoolClass->name ?? 'Absensi Sekolah';
                                     $theme = ['bg_icon' => 'bg-sky-500/20', 'border_icon' => 'border-sky-500/30', 'text_icon' => 'text-sky-300', 'dot' => 'bg-sky-400', 'bg_badge' => 'bg-sky-500/20', 'text_badge' => 'text-sky-300'];
                                     $icon = 'ph-check-circle';
 
@@ -597,14 +637,21 @@
                                         $icon = 'ph-trophy'; $statusText = $log->activity; $subText = 'Ekstrakurikuler';
                                         $theme = ['bg_icon' => 'bg-amber-500/20', 'border_icon' => 'border-amber-500/30', 'text_icon' => 'text-amber-300', 'dot' => 'bg-amber-400', 'bg_badge' => 'bg-amber-500/20', 'text_badge' => 'text-amber-300'];
                                     } else {
-                                        if ($log->status == 'Terlambat') {
-                                            $icon = 'ph-clock-warning';
-                                            $theme = ['bg_icon' => 'bg-amber-500/20', 'border_icon' => 'border-amber-500/30', 'text_icon' => 'text-amber-300', 'dot' => 'bg-amber-400', 'bg_badge' => 'bg-amber-500/20', 'text_badge' => 'text-amber-300'];
+                                        if (in_array(strtolower($log->status), ['terlambat', 'telat'])) {
+                                            $icon = 'ph-clock-countdown';
+                                            $theme = ['bg_icon' => 'bg-amber-500/20', 'border_icon' => 'border-amber-500/30', 'text_icon' => 'text-amber-400', 'dot' => 'bg-amber-400', 'bg_badge' => 'bg-amber-500/20', 'text_badge' => 'text-amber-300'];
                                         } elseif ($type == 'Pulang') {
                                             $icon = 'ph-person-simple-walk'; $statusText = 'Pulang'; $subText = 'Selesai KBM';
                                             $theme = ['bg_icon' => 'bg-sky-500/20', 'border_icon' => 'border-sky-500/30', 'text_icon' => 'text-sky-300', 'dot' => 'bg-sky-400', 'bg_badge' => 'bg-sky-500/20', 'text_badge' => 'text-sky-300'];
+                                        } elseif (in_array(strtolower($log->status), ['sakit', 'izin'])) {
+                                            $icon = 'ph-envelope-open';
+                                            $theme = ['bg_icon' => 'bg-blue-500/20', 'border_icon' => 'border-blue-500/30', 'text_icon' => 'text-blue-300', 'dot' => 'bg-blue-400', 'bg_badge' => 'bg-blue-500/20', 'text_badge' => 'text-blue-300'];
+                                        } elseif (in_array(strtolower($log->status), ['alpa', 'alfa', 'alpha'])) {
+                                            $icon = 'ph-x-circle';
+                                            $theme = ['bg_icon' => 'bg-rose-500/20', 'border_icon' => 'border-rose-500/30', 'text_icon' => 'text-rose-400', 'dot' => 'bg-rose-400', 'bg_badge' => 'bg-rose-500/20', 'text_badge' => 'text-rose-300'];
                                         } else {
-                                            $subText = $log->student->schoolClass->name ?? '-';
+                                            $icon = 'ph-check-circle';
+                                            $theme = ['bg_icon' => 'bg-emerald-500/20', 'border_icon' => 'border-emerald-500/30', 'text_icon' => 'text-emerald-400', 'dot' => 'bg-emerald-400', 'bg_badge' => 'bg-emerald-500/20', 'text_badge' => 'text-emerald-300'];
                                         }
                                     }
                                 @endphp
@@ -696,13 +743,15 @@
                                     <td class="py-4 px-2">
                                         <div class="font-black text-white mb-2 text-base">{{ $rank->class_name }}</div>
                                         <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden shadow-inner max-w-[200px]">
-                                            @php $percent = min(100, ($rank->present_count / 40) * 100); @endphp
+                                            @php 
+                                                $percent = $rank->percentage ?? ($rank->total_students > 0 ? min(100, round(($rank->present_count / $rank->total_students) * 100)) : 0); 
+                                            @endphp
                                             <div class="h-2 rounded-full progress-bar-fill {{ $index == 0 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-elevate-primary to-sky-400' }}" data-width="{{ $percent }}%"></div>
                                         </div>
                                     </td>
                                     <td class="py-4 text-right pr-4 rounded-r-2xl">
                                         <div class="font-black text-white text-lg">{{ number_format($percent, 0) }}%</div>
-                                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest whitespace-nowrap mt-0.5"><span class="text-sky-300 bg-sky-500/20 px-1.5 py-0.5 rounded border border-sky-500/30">{{ $rank->present_count }}</span> Hadir</div>
+                                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest whitespace-nowrap mt-0.5"><span class="text-sky-300 bg-sky-500/20 px-1.5 py-0.5 rounded border border-sky-500/30">{{ $rank->present_count }}@if(isset($rank->total_students) && $rank->total_students > 0)/{{ $rank->total_students }}@endif</span> Hadir</div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -733,13 +782,15 @@
                                     <td class="py-4 px-2">
                                         <div class="font-black text-white mb-2 text-base">{{ $rank->class_name }}</div>
                                         <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden shadow-inner max-w-[200px]">
-                                            @php $percent = min(100, ($rank->absent_count / 40) * 100); @endphp
-                                            <div class="h-2 rounded-full progress-bar-fill bg-gradient-to-r from-rose-400 to-rose-600" data-width="{{ $percent }}%"></div>
+                                            @php 
+                                                $absentPercent = $rank->percentage ?? ($rank->total_students > 0 ? min(100, round(($rank->absent_count / $rank->total_students) * 100)) : 0); 
+                                            @endphp
+                                            <div class="h-2 rounded-full progress-bar-fill bg-gradient-to-r from-rose-400 to-rose-600" data-width="{{ $absentPercent }}%"></div>
                                         </div>
                                     </td>
                                     <td class="py-4 text-right pr-4 rounded-r-2xl">
-                                        <div class="font-black text-rose-400 text-lg">{{ $rank->absent_count }}</div>
-                                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest whitespace-nowrap mt-0.5">Tidak Hadir</div>
+                                        <div class="font-black text-rose-400 text-lg">{{ $rank->absent_count }}@if(isset($rank->total_students) && $rank->total_students > 0)<span class="text-xs text-slate-400 font-normal">/{{ $rank->total_students }}</span>@endif</div>
+                                        <div class="text-[10px] text-slate-400 font-black uppercase tracking-widest whitespace-nowrap mt-0.5">Tidak Hadir ({{ number_format($absentPercent, 0) }}%)</div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -759,17 +810,21 @@
             </div>
         </div>
 
-
-            </div>
-        </div>
     </div>
 
-    {{-- SCRIPT CHART.JS --}}
+    {{-- SCRIPT CHART.JS & SWEETALERT2 --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- SCRIPT INITIALIZATION & SWEETALERT CUSTOM FUNCTION --}}
     <script>
-        function showCardInfo(title, value, colorKey) {
+        function showCardInfo(title, value, colorKey, actionUrl, actionLabel) {
+            if (typeof Swal === 'undefined') {
+                if (actionUrl) {
+                    window.location.href = actionUrl;
+                }
+                return;
+            }
             let colorHex = '#56bbf1'; 
             if(colorKey === 'success') colorHex = '#10b981';
             if(colorKey === 'warning') colorHex = '#f59e0b';
@@ -777,25 +832,31 @@
             if(colorKey === 'info') colorHex = '#0d52a1';
             if(colorKey === 'neutral') colorHex = '#94a3b8';
 
+            let actionBtnHtml = actionUrl ? `
+                <div class="mt-6 flex justify-center">
+                    <a href="${actionUrl}" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-sky-600/30 transition-all hover:scale-105 active:scale-95">
+                        <i class="ph-bold ph-arrow-square-out text-base"></i> ${actionLabel || 'Buka Data Detail'}
+                    </a>
+                </div>
+            ` : '';
+
             Swal.fire({
                 title: `<span style="color: ${colorHex}; font-weight: 900; font-size: 1.5rem;">${title}</span>`,
                 html: `
-                    <div class="mt-4 mb-6">
+                    <div class="mt-4 mb-4">
                         <span class="text-6xl font-black text-white tracking-tighter">${value}</span>
                         <span class="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">Siswa</span>
                     </div>
-                    <p class="text-sm text-slate-300 leading-relaxed mb-6 font-medium">
-                        Untuk melihat daftar nama siswa secara spesifik, silakan buka menu <b class="text-sky-300">Data Siswa</b> atau menu <b class="text-sky-300">Laporan Kelas</b> di navigasi.
+                    <p class="text-sm text-slate-300 leading-relaxed font-medium">
+                        Rekapitulasi berdasarkan data kehadiran terkini. Klik tombol di bawah untuk melihat rincian daftar siswa.
                     </p>
-                    <div class="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-xs font-bold text-slate-400 shadow-inner">
-                        <i class="ph-duotone ph-info mr-1 text-sky-400"></i> Halaman tabel detail dalam tahap persiapan.
-                    </div>
+                    ${actionBtnHtml}
                 `,
                 icon: 'info',
                 background: '#031d3d',
                 color: '#ffffff',
-                confirmButtonColor: colorHex,
-                confirmButtonText: 'Tutup Info',
+                showConfirmButton: false,
+                showCloseButton: true,
                 showClass: {
                     popup: 'animate__animated animate__fadeInUp animate__faster'
                 },
@@ -803,8 +864,7 @@
                     popup: 'animate__animated animate__fadeOutDown animate__faster'
                 },
                 customClass: {
-                    popup: 'fluent-modal rounded-[2.5rem] p-4 border border-white/15',
-                    confirmButton: 'rounded-xl font-black uppercase tracking-widest text-xs px-8 py-4 transition-all hover:scale-105 hover:shadow-lg'
+                    popup: 'fluent-modal rounded-[2.5rem] p-6 border border-white/15 backdrop-blur-2xl'
                 }
             });
         }
