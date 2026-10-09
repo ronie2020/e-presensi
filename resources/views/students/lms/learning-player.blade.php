@@ -211,7 +211,7 @@
                                     </div>
                                     <div class="w-full h-[50vh] md:h-[65vh] rounded-xl overflow-hidden bg-elevate-soft/50 shadow-inner border border-elevate-soft embed-container">
                                         <div class="embed-loading bg-elevate-soft/50"><div class="animate-pulse flex flex-col items-center gap-3"><i class="ph-duotone ph-spinner-gap animate-spin text-4xl text-elevate-primary"></i><span class="text-xs font-bold text-elevate-primary">Memuat Dokumen...</span></div></div>
-                                        <iframe :src="activeItem.file_url + '#toolbar=0'" class="w-full h-full embed-iframe border-0" type="application/pdf"></iframe>
+                                        <iframe :src="getDocumentViewerUrl(activeItem.file_url)" class="w-full h-full embed-iframe border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" allowfullscreen></iframe>
                                     </div>
                                 </div>
                             </template>
@@ -672,6 +672,24 @@
                     if (url.includes('drive.google.com/file/d/')) {
                         return url.replace(/\/view.*$/, '/preview');
                     }
+                    return url;
+                },
+
+                getDocumentViewerUrl(url) {
+                    if (!url) return '';
+                    
+                    const lowerUrl = url.toLowerCase();
+                    // Jika itu PDF, browser bisa menampilkannya secara native
+                    if (lowerUrl.endsWith('.pdf')) {
+                        return url + '#toolbar=0';
+                    }
+                    
+                    // Jika itu file Office (Word, Excel, PowerPoint), gunakan Google Docs Viewer
+                    if (lowerUrl.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/)) {
+                        return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+                    }
+                    
+                    // Fallback
                     return url;
                 },
 
