@@ -149,7 +149,7 @@
                                     
                                     {{-- Render Deskripsi Pengantar --}}
                                     <template x-if="activeItem.content && activeItem.content.trim() !== '' && !activeItem.content.includes('Tidak ada konten pembelajaran')">
-                                        <div class="prose max-w-none text-elevate-dark/80 bg-elevate-soft/30 p-6 md:p-8 rounded-2xl border border-elevate-soft mb-8" x-html="activeItem.content"></div>
+                                        <div class="prose max-w-none text-elevate-dark/80 bg-elevate-soft/30 p-6 md:p-8 rounded-2xl border border-elevate-soft mb-8 whitespace-pre-wrap" x-html="activeItem.content"></div>
                                     </template>
                                     
                                     {{-- Render File Lampiran dari Backend --}}
@@ -254,7 +254,7 @@
                                         </div>
                                     </div>
                                     <div class="p-6 md:p-8">
-                                        <div class="prose max-w-none text-elevate-dark/80 mb-8 bg-elevate-soft/30 p-5 md:p-6 rounded-2xl border border-elevate-soft text-sm md:text-base" x-html="activeItem.content"></div>
+                                        <div class="prose max-w-none text-elevate-dark/80 mb-8 bg-elevate-soft/30 p-5 md:p-6 rounded-2xl border border-elevate-soft text-sm md:text-base whitespace-pre-wrap" x-html="activeItem.content"></div>
                                         
                                         <template x-if="activeItem.completed">
                                             <div class="bg-[#DFF6DD] text-[#107C10] p-5 md:p-6 rounded-2xl border border-[#B7DFB9] flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
