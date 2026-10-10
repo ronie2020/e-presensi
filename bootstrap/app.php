@@ -16,7 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // 1. DAFTAR ALIAS MIDDLEWARE
         $middleware->alias([
-            'seb' => \App\Http\Middleware\RequireSafeExamBrowser::class,
+            'seb'   => \App\Http\Middleware\RequireSafeExamBrowser::class,
+            'audit' => \App\Http\Middleware\AuditActivityMiddleware::class,
+        ]);
+
+        // 1b. AUDIT TRAIL LOGGING OTOMATIS
+        $middleware->web(append: [
+            \App\Http\Middleware\AuditActivityMiddleware::class,
         ]);
 
         // 2. MENGATASI ERROR 419 SAAT LOGOUT (CSRF EXCEPTION)

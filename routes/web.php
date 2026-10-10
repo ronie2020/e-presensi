@@ -806,7 +806,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/settings/academic/{id}/activate', [AcademicYearController::class, 'activate'])->name('settings.academic.activate');
     Route::delete('/settings/academic/{id}', [AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
 
-    // Laporan
+    // Laporan & Supervisi
+    Route::get('/admin/system-analytics', [\App\Http\Controllers\SystemAnalyticsController::class, 'index'])->name('system-analytics.index');
+    Route::get('/admin/system-analytics/print', [\App\Http\Controllers\SystemAnalyticsController::class, 'print'])->name('system-analytics.print');
+    
     Route::get('/reports/principal', [\App\Http\Controllers\PrincipalReportController::class, 'index'])->name('reports.principal');
     Route::get('/reports/principal/print', [\App\Http\Controllers\PrincipalReportController::class, 'print'])->name('reports.principal.print');
     Route::get('/reports/principal/teacher/{id}', [\App\Http\Controllers\PrincipalReportController::class, 'showTeacher'])->name('reports.principal.teacher');

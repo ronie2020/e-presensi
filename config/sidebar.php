@@ -26,6 +26,13 @@ return [
                 'roles' => ['Superadmin', 'Wali Kelas', 'Admin', 'Kepala Sekolah'] 
             ],
             [
+                'name' => 'Rekap Penggunaan Aplikasi',
+                'route' => 'system-analytics.index',
+                'active_check' => 'system-analytics.*',
+                'icon' => 'ph-chart-line-up',
+                'roles' => ['Superadmin', 'Admin', 'Kepala Sekolah']
+            ],
+            [
                 'name' => 'Profil Saya',
                 'route' => 'profile.edit',
                 'active_check' => 'profile.*',
@@ -544,7 +551,7 @@ return [
                 'route' => 'users.index',
                 'active_check' => 'users.*',
                 'icon' => 'ph-users',
-                'roles' => ['Admin'] // Superadmin punya menu sendiri di Panel Superadmin
+                'roles' => ['Superadmin', 'Admin']
             ],
             [
                 'name' => 'Jenis Pelanggaran',
@@ -560,19 +567,6 @@ return [
                 'icon' => 'ph-siren',
                 'roles' => ['Superadmin', 'Admin', 'Guru Piket', 'Kepala Sekolah']
             ]
-        ],
-
-        // =========================================================
-        // PANEL SUPERADMIN - Hanya terlihat oleh Superadmin
-        // =========================================================
-        'Panel Superadmin' => [
-            [
-                'name' => 'Manajemen Pengguna',
-                'route' => 'users.index',
-                'active_check' => 'users.*',
-                'icon' => 'ph-user-gear',
-                'roles' => ['Superadmin']
-            ],
         ],
     ],
 ];
