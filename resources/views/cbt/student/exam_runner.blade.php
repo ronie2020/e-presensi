@@ -41,8 +41,8 @@
             margin: 0; 
             padding: 0;
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #f8fafc; 
-            color: #1e293b; 
+            background-color: #020b18; 
+            color: #f1f5f9; 
             user-select: none; 
             -webkit-user-select: none; 
             overflow: hidden; 
@@ -53,22 +53,39 @@
         /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
         
         /* Security */
         @media print { body { display: none; } }
 
         /* Loader */
-        #loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #172554; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        #loading-overlay { position: fixed; inset: 0; background: #020b18; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
+        .spinner { width: 44px; height: 44px; border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Trix Editor Content Style */
-        .trix-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .trix-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
-        .trix-content blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; color: #64748b; font-style: italic; }
-        .trix-content img { max-width: 100%; height: auto; border-radius: 0.5rem; }
+        /* Trix Editor & Question Content Style in Dark Theme */
+        .exam-question-body,
+        .exam-question-body * {
+            color: #f1f5f9 !important;
+        }
+        .exam-question-body strong,
+        .exam-question-body b {
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+        .exam-question-body p {
+            margin-bottom: 0.75rem;
+            line-height: 1.75;
+        }
+        .exam-question-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #f1f5f9; }
+        .exam-question-body ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; color: #f1f5f9; }
+        .exam-question-body blockquote { border-left: 4px solid #38bdf8; padding-left: 1rem; color: #94a3b8; font-style: italic; }
+        .exam-question-body img { max-width: 100%; height: auto; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); margin: 0.75rem 0; }
+        .exam-question-body table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .exam-question-body table th,
+        .exam-question-body table td { border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 12px; color: #f1f5f9; }
+        .exam-question-body table th { background-color: rgba(255, 255, 255, 0.08); font-weight: 700; }
     </style>
 
     <script>
@@ -172,18 +189,21 @@
                             if (!q.question_type || q.question_type === 'choice') {
                                 try {
                                     let parsedOpts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || {});
-                                    let keys = Object.keys(parsedOpts).filter(k => k.length === 1 && parsedOpts[k] != null && parsedOpts[k] !== '');
-                                    
-                                    if(keys.length === 0) {
-                                        keys = ['A', 'B', 'C', 'D', 'E'].filter(k => parsedOpts['image_'+k] != null);
-                                    }
+                                    let keys = Object.keys(parsedOpts).filter(k => k.length === 1 && parsedOpts[k] != null && String(parsedOpts[k]).trim() !== '');
+                                    let hasImages = ['A', 'B', 'C', 'D', 'E'].some(k => parsedOpts['image_'+k] != null && parsedOpts['image_'+k] !== '');
 
-                                    if(keys.length === 0) keys = ['A', 'B', 'C', 'D', 'E'];
-
-                                    if (window.examData.randomizeOptions && keys.length > 0) {
-                                        keys = shuffleArray(keys, rand);
+                                    if (keys.length === 0 && !hasImages) {
+                                        // Tidak ada opsi teks maupun gambar -> Soal ini adalah Esai/Uraian!
+                                        q.question_type = 'essay';
+                                    } else {
+                                        if (keys.length === 0) {
+                                            keys = ['A', 'B', 'C', 'D', 'E'].filter(k => parsedOpts['image_'+k] != null);
+                                        }
+                                        if (window.examData.randomizeOptions && keys.length > 0) {
+                                            keys = shuffleArray(keys, rand);
+                                        }
+                                        q.displayKeys = keys;
                                     }
-                                    q.displayKeys = keys; 
                                 } catch (e) {
                                     q.displayKeys = ['A', 'B', 'C', 'D', 'E']; 
                                 }
@@ -659,6 +679,17 @@
                     }
                 },
 
+                // --- MEDIA & GAMBAR ---
+                getImageUrl(path) {
+                    if (!path) return '';
+                    let cleanPath = path.toString().replace(/\\/g, '/');
+                    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) return cleanPath;
+                    if (cleanPath.startsWith('/storage/')) return cleanPath;
+                    if (cleanPath.startsWith('storage/')) return '/' + cleanPath;
+                    if (cleanPath.startsWith('/')) return cleanPath;
+                    return '/storage/' + cleanPath;
+                },
+
                 // --- NAVIGASI UI ---
                 nextQuestion() { if (this.currentQuestion < this.totalQuestions - 1) this.currentQuestion++; },
                 prevQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },
@@ -674,12 +705,16 @@
 </head>
 
 {{-- PERBAIKAN TOTAL LAYOUT: Mencegah tombol bawah terpotong atau navbar hilang di HP Tiongkok --}}
-<body class="bg-slate-50 text-slate-800 antialiased overflow-hidden flex flex-col" style="height: 100vh; height: 100dvh;"
+<body class="bg-[#020b18] text-slate-100 antialiased overflow-hidden flex flex-col relative select-none" style="height: 100vh; height: 100dvh;"
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
     @online.window="isOnline = true; syncPendingAnswers()"
-    @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'error', title: 'Koneksi Terputus!', text: 'Jawaban disimpan di browser.', showConfirmButton: false, timer: 4000, customClass: {popup: 'rounded-xl mb-4'} })"
+    @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'error', title: 'Koneksi Terputus!', text: 'Jawaban disimpan di browser.', showConfirmButton: false, timer: 4000, customClass: {popup: 'rounded-2xl mb-4 bg-[#031d3d] text-white border border-white/10'} })"
     @focus.window="syncPendingAnswers()">
+
+    {{-- AMBIENT GLOW EFFECTS --}}
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    <div class="fixed bottom-10 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
     {{-- VIDEO KAMERA HIDDEN --}}
     <video id="webcam-video" autoplay playsinline muted style="position: fixed; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: -100;"></video>
@@ -687,31 +722,31 @@
     {{-- LOADING OVERLAY --}}
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Memuat Ruangan...</span>
+        <span class="text-xs font-bold text-sky-300 uppercase tracking-widest mt-2">Memuat Ruangan Ujian...</span>
     </div>
     
     {{-- MODAL ZOOM GAMBAR --}}
-    <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-blue-950/95 flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
-        <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
+    <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-[#020b18]/95 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
+        <img :src="zoomedImage" class="max-w-full max-h-full rounded-2xl shadow-2xl scale-100 transition-transform border border-white/10">
     </div>
 
     {{-- OVERLAY PELANGGARAN --}}
-    <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-blue-950/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
-        <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
-            <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
-            <h2 class="text-xl font-black text-slate-900 mb-2 uppercase">Pelanggaran Terdeteksi</h2>
+    <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-[#020b18]/95 backdrop-blur-xl z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
+        <div class="max-w-md w-full bg-[#031d3d] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl text-white">
+            <div class="w-16 h-16 bg-rose-500/20 border border-rose-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 text-rose-400 text-3xl shadow-inner"><i class="ph-fill ph-warning-octagon"></i></div>
+            <h2 class="text-xl font-black text-white mb-2 uppercase tracking-wide">Pelanggaran Terdeteksi</h2>
             
             <template x-if="violationCount < maxViolations">
                 <div>
-                    <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-600" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
-                    <button @click="showSecurityOverlay = false" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-cyan-600/30">Lanjutkan Mengerjakan</button>
+                    <p class="text-slate-300 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-400" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
+                    <button @click="showSecurityOverlay = false" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-sky-500/25">Lanjutkan Mengerjakan</button>
                 </div>
             </template>
 
             <template x-if="violationCount >= maxViolations">
                 <div>
-                    <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda telah melewati batas maksimal pelanggaran.<br><b class="text-rose-600">Sistem menghentikan ujian Anda secara otomatis.</b></p>
-                    <button @click="submitExam(true)" class="w-full bg-rose-600 hover:bg-rose-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-rose-600/30">
+                    <p class="text-slate-300 mb-6 text-sm font-medium leading-relaxed">Anda telah melewati batas maksimal pelanggaran.<br><b class="text-rose-400">Sistem menghentikan ujian Anda secara otomatis.</b></p>
+                    <button @click="submitExam(true)" class="w-full bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-rose-600/30">
                         Kumpulkan Sekarang
                     </button>
                 </div>
@@ -719,11 +754,11 @@
         </div>
     </div>
 
-    {{-- NAVBAR ATAS (shrink-0 mencegah terkompres) --}}
-    <nav class="shrink-0 bg-blue-950 text-white h-16 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-blue-900/50 z-50 relative">
+    {{-- NAVBAR ATAS --}}
+    <nav class="shrink-0 bg-[#020b18]/90 backdrop-blur-xl text-white h-16 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-white/10 z-50 relative">
         <div class="flex items-center gap-4 min-w-0 flex-1">
             <div class="flex items-center gap-3 shrink-0">
-                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-cyan-400 border border-white/10 shrink-0 overflow-hidden">
+                <div class="w-10 h-10 bg-sky-500/10 rounded-xl flex items-center justify-center text-sky-400 border border-sky-400/20 shrink-0 overflow-hidden shadow-inner">
                     @if(!empty($student->photo_path))
                         <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Foto" class="w-full h-full object-cover">
                     @else
@@ -732,14 +767,14 @@
                 </div>
                 <div class="hidden sm:block">
                     <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px] text-white">{{ $exam->title }}</h1>
-                    <p class="text-[10px] lg:text-xs text-cyan-300 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
+                    <p class="text-[10px] lg:text-xs text-sky-300 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
                 </div>
             </div>
 
             <div class="hidden md:block w-px h-8 bg-white/10 mx-2"></div>
 
             <div class="hidden md:flex items-center gap-3 min-w-0">
-                 <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold border border-cyan-400/50 shrink-0 shadow-sm overflow-hidden">
+                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold border border-sky-400/30 shrink-0 shadow-sm overflow-hidden">
                      @if(!empty($student->photo_path))
                          <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Avatar" class="w-full h-full object-cover">
                      @else
@@ -750,7 +785,7 @@
                      <p class="font-bold text-sm text-white truncate max-w-[150px]">
                          {{ $student->name ?? 'Peserta' }}
                      </p>
-                     <p class="text-[10px] text-cyan-200 font-bold truncate">
+                     <p class="text-[10px] text-sky-200/80 font-bold truncate">
                          {{ $student->nis ?? $student->username ?? '' }}
                      </p>
                  </div>
@@ -759,47 +794,47 @@
 
         <div class="flex items-center gap-3 md:gap-4 shrink-0">
             {{-- Tombol Ukuran Font --}}
-            <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg mr-2">
-                <span class="text-[10px] text-cyan-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
-                <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1" :class="fontSize === 1 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
-                <button @click="fontSize = 2" class="font-medium text-lg hover:text-white transition px-1" :class="fontSize === 2 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
-                <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1" :class="fontSize === 3 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
+            <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl mr-1">
+                <span class="text-[10px] text-sky-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
+                <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1.5 py-0.5 rounded" :class="fontSize === 1 ? 'text-white bg-sky-500/20 border border-sky-400/30 font-black' : 'text-slate-400'">A</button>
+                <button @click="fontSize = 2" class="font-medium text-lg hover:text-white transition px-1.5 py-0.5 rounded" :class="fontSize === 2 ? 'text-white bg-sky-500/20 border border-sky-400/30 font-black' : 'text-slate-400'">A</button>
+                <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1.5 py-0.5 rounded" :class="fontSize === 3 ? 'text-white bg-sky-500/20 border border-sky-400/30 font-black' : 'text-slate-400'">A</button>
             </div>
 
             {{-- Indikator Offline --}}
-            <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
+            <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-xl border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
             
             {{-- Indikator No Camera --}}
-            <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-white/10 text-cyan-200 px-3 py-1.5 rounded-lg text-xs font-bold" title="Kamera Tidak Aktif">
+            <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 text-sky-300 px-3 py-1.5 rounded-xl text-xs font-bold" title="Kamera Tidak Aktif">
                 <i class="ph-fill ph-video-camera-slash"></i>
             </div>
 
             {{-- Timer --}}
-            <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition-colors" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-cyan-50'">
-                <i class="ph-bold ph-timer text-lg"></i>
-                <span x-text="formattedTime" class="font-mono font-bold text-lg"></span>
+            <div class="flex items-center gap-2 bg-white/5 px-3.5 py-1.5 rounded-xl border border-white/10 transition-colors shadow-sm" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-sky-300'">
+                <i class="ph-bold ph-timer text-lg text-sky-400"></i>
+                <span x-text="formattedTime" class="font-mono font-bold text-lg text-white"></span>
             </div>
             
             {{-- Tombol Hamburger Map Soal --}}
-            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition active:scale-95">
+            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 border border-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition active:scale-95">
                 <i class="ph-bold" :class="showMobileMap ? 'ph-x' : 'ph-squares-four'"></i>
             </button>
         </div>
     </nav>
 
     {{-- PROGRESS BAR HORIZONTAL --}}
-    <div x-show="examType !== 'google_form'" class="shrink-0 h-1.5 w-full bg-blue-900 relative z-40 overflow-hidden">
-        <div class="h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
+    <div x-show="examType !== 'google_form'" class="shrink-0 h-1.5 w-full bg-[#020b18] border-b border-white/5 relative z-40 overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-sky-400 to-blue-500 transition-all duration-500 ease-out shadow-[0_0_12px_rgba(56,189,248,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
-    {{-- KONTEN UTAMA (flex-1 min-h-0 adalah KUNCI agar tinggi tidak melebar) --}}
+    {{-- KONTEN UTAMA --}}
     <div class="flex-1 min-h-0 relative flex w-full">
         
         @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
-            <main class="flex-1 flex flex-col h-full bg-slate-100 relative z-0">
-                <div class="bg-cyan-50/80 backdrop-blur-sm border-b border-cyan-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
-                    <p class="text-xs font-bold text-cyan-800 flex items-center gap-2">
-                        <i class="ph-fill ph-warning-circle text-cyan-600 text-lg"></i> 
+            <main class="flex-1 flex flex-col h-full bg-[#020b18] relative z-0">
+                <div class="bg-sky-500/10 backdrop-blur-sm border-b border-sky-400/20 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
+                    <p class="text-xs font-bold text-sky-200 flex items-center gap-2">
+                        <i class="ph-fill ph-warning-circle text-sky-400 text-lg"></i> 
                         Pastikan Anda menekan tombol "Kirim / Submit" pada formulir di bawah sebelum mengklik tombol selesai.
                     </p>
                 </div>
@@ -808,13 +843,13 @@
                     <iframe src="{{ $exam->google_form_url }}" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
                 </div>
                 
-                <div class="shrink-0 p-4 bg-white border-t border-slate-200 flex justify-between items-center relative z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div class="shrink-0 p-4 bg-[#031d3d]/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center relative z-10 shadow-2xl pb-[calc(1rem+env(safe-area-inset-bottom))]">
                     <div class="hidden sm:block">
-                        <p class="text-xs font-bold text-slate-500">Ujian Berbasis Google Form</p>
+                        <p class="text-xs font-bold text-slate-400">Ujian Berbasis Google Form</p>
                     </div>
                     <button @click="finishExam" 
                             class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-                            :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-lg shadow-blue-950/20'">
+                            :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-white/10 text-slate-400 border border-white/10 hover:bg-white/15' : 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/25'">
                         <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-check-circle'"></i>
                         <span x-text="timeLeft > (effectiveDuration * 0.25) ? 'Waktu Tunggu...' : 'Selesai & Keluar'"></span> 
                     </button>
@@ -823,24 +858,26 @@
         @else
 
         <main class="flex-1 flex flex-col w-full max-w-4xl mx-auto p-0 sm:p-4 md:p-6 lg:p-8 h-full relative z-10 min-h-0">
-            <div class="bg-white sm:rounded-[2rem] shadow-sm border-0 sm:border border-slate-200 flex-1 flex flex-col w-full h-full overflow-hidden relative min-h-0">
+            <div class="bg-[#031d3d]/75 backdrop-blur-2xl sm:rounded-[2.5rem] shadow-2xl border border-white/10 flex-1 flex flex-col w-full h-full overflow-hidden relative min-h-0">
                 
                 {{-- Judul Bar Soal (shrink-0) --}}
-                <div class="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
+                <div class="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 flex justify-between items-center bg-white/[0.03]">
+                    <span class="bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-lg shadow-sky-500/20 flex items-center gap-1.5">
+                        <i class="ph-bold ph-article"></i> Soal No. <span x-text="currentQuestion + 1"></span>
+                    </span>
                     
                     <div class="flex items-center gap-4">
-                        <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-cyan-600 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> <span class="hidden sm:inline">Menyimpan</span></span>
-                        <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check text-base"></i> <span class="hidden sm:inline">Tersimpan</span></span>
-                        <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle text-base"></i> <span class="hidden sm:inline">Error / Offline</span></span>
+                        <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-sky-400 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> <span class="hidden sm:inline">Menyimpan</span></span>
+                        <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-400 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check text-base"></i> <span class="hidden sm:inline">Tersimpan</span></span>
+                        <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-400 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle text-base"></i> <span class="hidden sm:inline">Error / Offline</span></span>
                         
                         <label class="flex items-center gap-2 cursor-pointer select-none group">
                             <div class="relative shrink-0">
                                 <input type="checkbox" class="peer sr-only" x-model="markedQuestions[questions[currentQuestion]?.id]" @change="saveToLocal()">
-                                <div class="w-5 h-5 rounded border-2 border-slate-300 peer-checked:bg-amber-400 peer-checked:border-amber-400 transition-colors"></div>
-                                <i class="ph-bold ph-check text-white text-xs absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100"></i>
+                                <div class="w-5 h-5 rounded-lg border-2 border-white/20 bg-white/5 peer-checked:bg-amber-500 peer-checked:border-amber-400 transition-all shadow-sm"></div>
+                                <i class="ph-bold ph-check text-slate-950 text-xs absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100 font-black"></i>
                             </div>
-                            <span class="text-xs font-bold text-slate-500 uppercase group-hover:text-amber-500 transition">Ragu</span>
+                            <span class="text-xs font-bold text-slate-400 uppercase group-hover:text-amber-400 transition">Ragu</span>
                         </label>
                     </div>
                 </div>
@@ -852,20 +889,21 @@
                             {{-- Gambar Soal --}}
                             <template x-if="questions[currentQuestion].question_image">
                                 <div class="mb-6 relative group w-fit">
-                                    <img :src="'/storage/' + questions[currentQuestion].question_image" 
-                                         onerror="this.style.display='none'" 
-                                         @click="zoomedImage = '/storage/' + questions[currentQuestion].question_image"
-                                         class="max-h-[300px] w-auto rounded-2xl border border-slate-200 shadow-sm cursor-zoom-in transition group-hover:brightness-90">
+                                    <img :src="getImageUrl(questions[currentQuestion].question_image)" 
+                                         onerror="this.classList.add('opacity-40'); this.title='Gambar tidak dapat dimuat';" 
+                                         @click="zoomedImage = getImageUrl(questions[currentQuestion].question_image)"
+                                         class="max-h-[350px] w-auto rounded-2xl border border-white/10 shadow-lg cursor-zoom-in transition group-hover:brightness-110 object-contain">
                                     <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                                        <span class="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><i class="ph-bold ph-magnifying-glass-plus"></i></span>
+                                        <span class="bg-black/60 text-white p-2.5 rounded-full backdrop-blur-md border border-white/20"><i class="ph-bold ph-magnifying-glass-plus text-lg"></i></span>
                                     </div>
                                 </div>
                             </template>
                             
                             {{-- Teks Soal --}}
-                            <div class="prose prose-slate max-w-none mb-8 select-text trix-content">
-                                <div class="font-medium text-slate-800 leading-relaxed transition-all duration-300" 
+                            <div class="prose prose-invert max-w-none mb-8 select-text trix-content">
+                                <div class="exam-question-body font-normal text-slate-100 leading-relaxed transition-all duration-300" 
                                      :class="{'text-base': fontSize === 1, 'text-xl': fontSize === 2, 'text-2xl': fontSize === 3}"
+                                     @click="$event.target.tagName === 'IMG' ? (zoomedImage = $event.target.src) : null"
                                      x-html="questions[currentQuestion].question_text"></div>
                             </div>
 
@@ -874,20 +912,20 @@
                                 <div class="space-y-3">
                                     <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
                                         
-                                        <label class="relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group active:scale-[0.99] touch-manipulation" 
-                                               :class="answers[questions[currentQuestion].id] === optionKey ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30'">
+                                        <label class="relative flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-200 group active:scale-[0.99] touch-manipulation" 
+                                               :class="answers[questions[currentQuestion].id] === optionKey ? 'border-sky-400 bg-sky-500/20 shadow-lg shadow-sky-500/10 ring-1 ring-sky-400/50' : 'border-white/10 bg-white/[0.03] hover:border-sky-400/40 hover:bg-white/[0.07]'">
                                             
                                             <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
                                                    @change="selectAnswer(questions[currentQuestion].id, optionKey)" 
                                                    x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
                                             
-                                            <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
-                                                 :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-cyan-400 group-hover:text-cyan-600'">
+                                            <div class="w-10 h-10 rounded-full border flex items-center justify-center font-black text-sm shrink-0 transition-all shadow-sm relative" 
+                                                 :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-gradient-to-tr from-sky-500 to-blue-600 border-sky-300 text-white shadow-sky-500/30 ring-2 ring-sky-400/40' : 'bg-white/10 border-white/20 text-slate-300 group-hover:border-sky-400 group-hover:text-white'">
                                                 
                                                 <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
                                                       x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
                                                 
-                                                <i class="ph-bold ph-spinner animate-spin text-lg" 
+                                                <i class="ph-bold ph-spinner animate-spin text-lg text-white" 
                                                    x-show="savingQuestionId === questions[currentQuestion].id && answers[questions[currentQuestion].id] === optionKey" style="display: none;"></i>
                                             </div>
                                             
@@ -897,13 +935,15 @@
                                                     catch(e) { return {}; } 
                                                 } 
                                             }">
-                                                <span class="font-medium transition-colors block" 
-                                                      :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-cyan-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
+                                                <span class="font-medium transition-colors block leading-relaxed" 
+                                                      :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-white font-semibold': answers[questions[currentQuestion].id] === optionKey, 'text-slate-200': answers[questions[currentQuestion].id] !== optionKey}">
                                                     <span x-text="parsedOptions[optionKey]"></span>
                                                 </span>
                                                 
                                                 <template x-if="parsedOptions['image_' + optionKey]">
-                                                    <img :src="'/storage/' + parsedOptions['image_' + optionKey]" class="mt-3 max-h-32 rounded-xl border border-slate-200 shadow-sm object-contain">
+                                                    <img :src="getImageUrl(parsedOptions['image_' + optionKey])" 
+                                                         @click.stop="zoomedImage = getImageUrl(parsedOptions['image_' + optionKey])"
+                                                         class="mt-3 max-h-36 rounded-xl border border-white/10 shadow-md object-contain bg-black/20 p-1 cursor-zoom-in hover:brightness-110 transition">
                                                 </template>
                                             </div>
                                         </label>
@@ -914,22 +954,22 @@
                             {{-- TIPE 2: BENAR / SALAH --}}
                             <template x-if="questions[currentQuestion].question_type === 'true_false'">
                                 <div class="grid grid-cols-2 gap-4">
-                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
-                                           :class="answers[questions[currentQuestion].id] === 'A' ? 'border-emerald-500 bg-emerald-50 shadow-lg' : 'border-slate-100 bg-white hover:border-emerald-200'">
+                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
+                                           :class="answers[questions[currentQuestion].id] === 'A' ? 'border-emerald-400 bg-emerald-500/25 shadow-lg shadow-emerald-500/20 ring-1 ring-emerald-400' : 'border-white/10 bg-white/[0.03] hover:border-emerald-400/40 hover:bg-emerald-500/10'">
                                         <input type="radio" :name="'q_' + questions[currentQuestion].id" value="A" 
                                                 @change="selectAnswer(questions[currentQuestion].id, 'A')" 
                                                 x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
-                                        <i class="ph-fill ph-check-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-500' : 'text-slate-300'"></i>
-                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-700' : 'text-slate-500'">BENAR</span>
+                                        <i class="ph-fill ph-check-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-400' : 'text-slate-500'"></i>
+                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'A' ? 'text-emerald-300' : 'text-slate-300'">BENAR</span>
                                     </label>
                                     
-                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
-                                           :class="answers[questions[currentQuestion].id] === 'B' ? 'border-rose-500 bg-rose-50 shadow-lg' : 'border-slate-100 bg-white hover:border-rose-200'">
+                                    <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border cursor-pointer transition-all duration-200 active:scale-[0.99] touch-manipulation" 
+                                           :class="answers[questions[currentQuestion].id] === 'B' ? 'border-rose-400 bg-rose-500/25 shadow-lg shadow-rose-500/20 ring-1 ring-rose-400' : 'border-white/10 bg-white/[0.03] hover:border-rose-400/40 hover:bg-rose-500/10'">
                                         <input type="radio" :name="'q_' + questions[currentQuestion].id" value="B" 
                                                 @change="selectAnswer(questions[currentQuestion].id, 'B')" 
                                                 x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
-                                        <i class="ph-fill ph-x-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-500' : 'text-slate-300'"></i>
-                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-700' : 'text-slate-500'">SALAH</span>
+                                        <i class="ph-fill ph-x-circle text-4xl" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-400' : 'text-slate-500'"></i>
+                                        <span class="font-black text-lg" :class="answers[questions[currentQuestion].id] === 'B' ? 'text-rose-300' : 'text-slate-300'">SALAH</span>
                                     </label>
                                 </div>
                             </template>
@@ -939,16 +979,16 @@
                                 <div class="relative">
                                     <textarea x-model="answers[questions[currentQuestion].id]" 
                                         @input.debounce.1000ms="selectAnswer(questions[currentQuestion].id, $event.target.value)" 
-                                        class="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all font-medium text-slate-700 leading-relaxed text-lg" 
+                                        class="w-full h-44 p-4 rounded-2xl border border-white/15 bg-white/5 focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20 transition-all font-medium text-white placeholder-slate-400 leading-relaxed text-lg" 
                                         placeholder="Ketik jawaban Anda di sini..."></textarea>
                                     
-                                    <div class="absolute top-4 right-4 text-cyan-600" x-show="savingQuestionId === questions[currentQuestion].id">
+                                    <div class="absolute top-4 right-4 text-sky-400" x-show="savingQuestionId === questions[currentQuestion].id">
                                         <i class="ph-bold ph-spinner animate-spin text-xl"></i>
                                     </div>
 
                                     <div class="flex items-center gap-2 mt-3 text-slate-400">
-                                        <i class="ph-fill ph-info text-cyan-500"></i>
-                                        <p class="text-xs font-bold">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
+                                        <i class="ph-fill ph-info text-sky-400"></i>
+                                        <p class="text-xs font-bold text-slate-400">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
                                     </div>
                                 </div>
                             </template>
@@ -956,13 +996,13 @@
                             {{-- TIPE 4: MENJODOHKAN --}}
                             <template x-if="questions[currentQuestion].question_type === 'matching'">
                                 <div class="space-y-4">
-                                    <p class="text-sm text-slate-500 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
+                                    <p class="text-sm text-slate-300 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
                                     <template x-for="(pair, idx) in questions[currentQuestion].options.pairs" :key="idx">
-                                        <div class="flex flex-col sm:flex-row items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                                            <div class="flex-1 font-medium text-slate-800 bg-white p-3 rounded-lg border border-slate-100 shadow-sm w-full text-center sm:text-left" x-text="pair.left"></div>
-                                            <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-cyan-400 text-xl font-bold"></i>
+                                        <div class="flex flex-col sm:flex-row items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
+                                            <div class="flex-1 font-semibold text-white bg-white/10 p-3.5 rounded-xl border border-white/10 shadow-sm w-full text-center sm:text-left" x-text="pair.left"></div>
+                                            <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-sky-400 text-xl font-bold"></i>
                                             <div class="flex-1 w-full relative">
-                                                <select class="w-full rounded-xl border-slate-300 text-sm font-bold text-slate-700 focus:ring-cyan-500 py-3 px-4 shadow-sm touch-manipulation"
+                                                <select class="w-full rounded-xl border-white/20 bg-[#021124] text-sm font-bold text-white focus:ring-sky-500 py-3 px-4 shadow-sm touch-manipulation"
                                                         @change="updateMatching(questions[currentQuestion].id, pair.left, $event.target.value)">
                                                     <option value="" selected disabled>-- Pilih Pasangan --</option>
                                                     <template x-for="pOption in questions[currentQuestion].options.pairs" :key="pOption.right">
@@ -981,21 +1021,21 @@
                     </template>
                 </div>
 
-                {{-- Tombol Bawah (shrink-0 mengamankan tombol agar tidak tertelan konten atasnya) --}}
-                <div class="shrink-0 p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6 shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.05)]">
+                {{-- Tombol Bawah --}}
+                <div class="shrink-0 p-4 md:p-6 bg-[#031d3d]/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center relative z-10 pb-[calc(1rem+env(safe-area-inset-bottom))] md:pb-6">
                     <button @click="prevQuestion" :disabled="currentQuestion === 0" 
-                            class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900 touch-manipulation">
+                            class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 touch-manipulation">
                         <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                     </button>
                     
                     <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" 
-                            class="px-6 py-3 rounded-xl font-bold bg-cyan-600 text-white hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 flex items-center gap-2 transition-all active:scale-95 touch-manipulation">
+                            class="px-6 py-3 rounded-xl font-bold bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/25 flex items-center gap-2 transition-all active:scale-95 touch-manipulation">
                         <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                     </button>
                     
                     <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" 
                             class="px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95 touch-manipulation"
-                            :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-blue-950/30'">
+                            :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-white/10 text-slate-400 border border-white/10 hover:bg-white/15' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'">
                         <span>Kumpulkan</span> 
                         <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-check-circle'"></i>
                     </button>
@@ -1004,21 +1044,21 @@
         </main>
 
         {{-- SIDEBAR NAVIGASI SOAL --}}
-        <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col max-h-[100dvh]" 
+        <aside class="fixed inset-y-0 right-0 w-80 bg-[#020b18]/95 backdrop-blur-2xl shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-white/10 flex flex-col max-h-[100dvh]" 
                :class="showMobileMap ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
             
-            <div class="shrink-0 p-4 lg:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                    <i class="ph-fill ph-squares-four text-cyan-500"></i> Navigasi Soal
+            <div class="shrink-0 p-4 lg:p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.03]">
+                <h3 class="font-black text-white text-lg flex items-center gap-2">
+                    <i class="ph-fill ph-squares-four text-sky-400"></i> Navigasi Soal
                 </h3>
-                <button @click="showMobileMap = false" class="lg:hidden text-slate-400 hover:text-slate-700">
+                <button @click="showMobileMap = false" class="lg:hidden text-slate-400 hover:text-white">
                     <i class="ph-bold ph-x text-xl"></i>
                 </button>
             </div>
 
-            <div class="shrink-0 p-4 bg-blue-950/5 border-b border-blue-900/10 flex justify-between items-center">
+            <div class="shrink-0 p-4 bg-white/[0.02] border-b border-white/10 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-cyan-100 font-bold shadow-md border border-blue-800 overflow-hidden">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md border border-sky-400/30 overflow-hidden">
                         @if(!empty($student->photo_path))
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Avatar" class="w-full h-full object-cover">
                         @else
@@ -1026,8 +1066,8 @@
                         @endif
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">{{ $student->name ?? 'Peserta' }}</p>
-                        <p class="text-[10px] text-cyan-600 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
+                        <p class="text-sm font-bold text-white truncate">{{ $student->name ?? 'Peserta' }}</p>
+                        <p class="text-[10px] text-sky-300 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
                     </div>
                 </div>
             </div>
@@ -1036,38 +1076,38 @@
                 <div class="grid grid-cols-5 gap-3">
                     <template x-for="(q, index) in questions" :key="index">
                         <button @click="jumpTo(index)" 
-                                class="aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all shadow-sm border-2 relative touch-manipulation" 
+                                class="aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all shadow-sm border relative touch-manipulation" 
                                 :class="{ 
-                                    'border-blue-950 bg-white ring-2 ring-blue-950 ring-offset-2 z-10 scale-110': currentQuestion === index, 
-                                    'bg-cyan-500 text-white border-cyan-500': (answers[q.id] && Object.keys(answers[q.id] || {}).length > 0) && !markedQuestions[q.id] && currentQuestion !== index, 
-                                    'bg-amber-400 text-white border-amber-400': markedQuestions[q.id], 
-                                    'bg-white text-slate-600 border-slate-200 hover:border-cyan-300': (!answers[q.id] || Object.keys(answers[q.id] || {}).length === 0) && !markedQuestions[q.id] && currentQuestion !== index 
+                                    'border-sky-400 bg-sky-500/30 text-white ring-2 ring-sky-400 ring-offset-2 ring-offset-[#020b18] z-10 scale-110 shadow-lg shadow-sky-500/30': currentQuestion === index, 
+                                    'bg-sky-500/20 text-sky-200 border-sky-400/50 hover:bg-sky-500/30': (answers[q.id] && Object.keys(answers[q.id] || {}).length > 0) && !markedQuestions[q.id] && currentQuestion !== index, 
+                                    'bg-amber-500/25 text-amber-200 border-amber-400/60 hover:bg-amber-500/35': markedQuestions[q.id] && currentQuestion !== index, 
+                                    'bg-white/5 text-slate-300 border-white/10 hover:border-sky-400/40 hover:bg-white/10': (!answers[q.id] || Object.keys(answers[q.id] || {}).length === 0) && !markedQuestions[q.id] && currentQuestion !== index 
                                 }">
                             <span x-text="index + 1"></span>
-                            <span x-show="markedQuestions[q.id]" class="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white"></span>
+                            <span x-show="markedQuestions[q.id]" class="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full border-2 border-[#020b18]"></span>
                         </button>
                     </template>
                 </div>
             </div>
             
-            <div class="shrink-0 p-4 lg:p-6 border-t border-slate-100 bg-slate-50 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-                <div class="grid grid-cols-2 gap-4 mb-4 text-[10px] uppercase font-bold text-slate-500">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Dijawab</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-white border-2 border-slate-300"></span> Kosong</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Ragu</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-blue-950"></span> Aktif</div>
+            <div class="shrink-0 p-4 lg:p-6 border-t border-white/10 bg-white/[0.02] pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <div class="grid grid-cols-2 gap-4 mb-4 text-[10px] uppercase font-bold text-slate-400">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-sky-400/80 border border-sky-300"></span> Dijawab</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-white/10 border border-white/20"></span> Kosong</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400 border border-amber-300"></span> Ragu</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-sky-400 bg-sky-500/30"></span> Aktif</div>
                 </div>
                 
                 <button @click="finishExam()" 
                         class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 touch-manipulation"
-                        :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:shadow-xl hover:bg-blue-900'">
+                        :class="timeLeft > (effectiveDuration * 0.25) ? 'bg-white/10 text-slate-400 border border-white/10' : 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-sky-500/25'">
                     <i class="ph-bold" :class="timeLeft > (effectiveDuration * 0.25) ? 'ph-lock' : 'ph-paper-plane-right'"></i> 
                     <span x-text="timeLeft > (effectiveDuration * 0.25) ? 'Terkunci (Waktu Minimal)' : 'Kumpulkan Jawaban'"></span>
                 </button>
             </div>
         </aside>
         
-        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-blue-950/50 z-30 lg:hidden backdrop-blur-sm"></div>
+        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-[#020b18]/70 z-30 lg:hidden backdrop-blur-sm"></div>
         
         @endif
     </div>

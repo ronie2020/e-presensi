@@ -220,6 +220,26 @@ class StudentExamController extends Controller
                 }
             }
             
+            // Jaga-jaga: Jika tipe soal adalah 'choice' tapi semua opsi kosong, otomatis perlakukan sebagai 'essay'
+            if ($q->question_type === 'choice' || empty($q->question_type)) {
+                $hasValidOpt = false;
+                if (is_array($opts)) {
+                    foreach ($opts as $k => $v) {
+                        if (!str_starts_with($k, 'image_') && !empty(trim((string)$v))) {
+                            $hasValidOpt = true;
+                            break;
+                        }
+                        if (str_starts_with($k, 'image_') && !empty($v)) {
+                            $hasValidOpt = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$hasValidOpt) {
+                    $q->question_type = 'essay';
+                }
+            }
+
             $q->saved_answer = $saved;
             return $q;
         });       

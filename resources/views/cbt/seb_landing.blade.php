@@ -5,51 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Ujian Online') }}</title>
+    <title>{{ config('app.name', 'Portal Keamanan Ujian - SMPN 3 Lakbok') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
     
-    {{-- FIX SEB: Async scripts agar tidak memblokir render --}}
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
-    
-    {{-- SweetAlert2 untuk Alert Fungsional --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        html { scroll-behavior: smooth; }
+        [x-cloak] { display: none !important; }
+
+        .bg-grid-dark {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+    </style>
 </head>
-<body class="font-sans antialiased bg-[#f8fafc] text-[#2c3f61]">
+<body class="font-sans antialiased bg-[#021124] text-white min-h-screen relative overflow-x-hidden selection:bg-sky-500 selection:text-white">
     
-    <!-- NAVBAR (MICROSOFT ELEVATE THEME - GLASSMORPHISM) -->
-    <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-200/60 fixed w-full z-50 top-0 shadow-sm">
+    <!-- GLOBAL FIXED BACKGROUND -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+        <div class="absolute inset-0 bg-[#021124]"></div>
+        <div class="absolute inset-0 bg-cover bg-center opacity-10 filter blur-[14px] scale-110 contrast-125 saturate-50" 
+             style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(13,82,161,0.2)_0%,_rgba(2,17,36,0.85)_50%,_#021124_100%)]"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-[#021124] via-[#021124]/95 to-[#0d52a1]/25"></div>
+        <div class="absolute inset-0 bg-grid-dark opacity-35"></div>
+
+        <div class="absolute -top-32 -left-32 w-[600px] h-[600px] bg-sky-500/15 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute top-1/3 right-1/4 w-[550px] h-[550px] bg-blue-600/20 rounded-full blur-[180px] pointer-events-none"></div>
+        <div class="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-sky-400/10 rounded-full blur-[150px] pointer-events-none"></div>
+    </div>
+
+    <!-- NAVBAR DARK GLASSMORPHISM -->
+    <nav class="bg-[#031d3d]/90 backdrop-blur-2xl border-b border-white/15 sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
+            <div class="flex justify-between h-20 items-center">
                 <!-- Logo & Judul -->
-                <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] rounded-2xl flex items-center justify-center text-white shadow-md shadow-[#56bbf1]/30">
-                        <i class="ph-bold ph-student text-2xl"></i>
+                <div class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 bg-gradient-to-br from-sky-400 via-blue-600 to-sky-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-sky-500/30 p-0.5">
+                        <div class="w-full h-full bg-[#021124] rounded-[14px] flex items-center justify-center text-sky-300 text-xl">
+                            <i class="ph-bold ph-shield-check"></i>
+                        </div>
                     </div>
                     <div class="leading-tight">
-                        <h1 class="font-black text-[#2c3f61] text-lg tracking-tight">Portal Ujian</h1>
-                        <p class="text-[10px] font-bold text-[#0d52a1] uppercase tracking-widest">Siswa</p>
+                        <h1 class="font-black text-white text-base sm:text-lg tracking-tight">Portal Ujian</h1>
+                        <p class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Siswa &bull; CBT Security</p>
                     </div>
                 </div>
 
                 <!-- Menu Kanan (User Info & Logout) -->
                 <div class="flex items-center gap-4">
-                    <div class="hidden md:block text-right mr-2">
+                    <div class="hidden sm:block text-right mr-2">
                         @if(Auth::guard('student')->check())
-                            <p class="text-sm font-bold text-[#2c3f61]">{{ Auth::guard('student')->user()->name }}</p>
-                            <p class="text-xs text-slate-400 font-mono font-bold">{{ Auth::guard('student')->user()->student_id }}</p>
+                            <p class="text-sm font-bold text-white flex items-center justify-end gap-1.5">
+                                <span>{{ Auth::guard('student')->user()->name }}</span>
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            </p>
+                            <p class="text-[10px] text-slate-400 font-mono">NISN: {{ Auth::guard('student')->user()->student_id }}</p>
                         @endif
                     </div>
 
                     <!-- Tombol Logout -->
                     <form id="logoutForm" method="POST" action="{{ route('student.logout') }}">
                         @csrf
-                        <button type="button" onclick="confirmLogout()" class="px-4 py-2.5 bg-white hover:bg-rose-50 border border-rose-100 hover:border-rose-200 text-rose-500 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                            <i class="ph-bold ph-power text-lg"></i>
+                        <button type="button" onclick="confirmLogout()" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                            <i class="ph-bold ph-power text-base"></i>
                             <span class="hidden sm:inline">Keluar</span>
                         </button>
                     </form>
@@ -59,17 +87,10 @@
     </nav>
 
     <!-- CONTENT WRAPPER -->
-    <div class="pt-28 pb-12 min-h-screen relative overflow-hidden">
-        {{-- Background Decoration (Elevate Soft Cyan) --}}
-        <div class="absolute inset-0 z-0 pointer-events-none">
-            <div class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#e5eff5]/80 to-transparent"></div>
-            <div class="absolute -top-32 -right-32 w-96 h-96 bg-[#56bbf1]/10 rounded-full blur-3xl"></div>
-            <div class="absolute top-40 -left-32 w-80 h-80 bg-[#f4d1c0]/20 rounded-full blur-3xl"></div>
-        </div>
-
+    <div class="pt-8 pb-16 min-h-[calc(100vh-80px)] relative overflow-hidden flex flex-col justify-center">
         @if(isset($header))
             <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-[#56bbf1]/5 border border-slate-100">
+                <div class="bg-gradient-to-b from-[#031d3d]/90 to-[#020b18] rounded-[2rem] p-6 shadow-2xl border border-white/10">
                     {{ $header }}
                 </div>
             </header>
@@ -90,44 +111,38 @@
                 timer: 4000,
                 timerProgressBar: true,
                 customClass: {
-                    popup: 'rounded-2xl shadow-xl border border-slate-100 mt-20'
+                    popup: 'rounded-2xl shadow-xl border border-white/10 bg-slate-900 text-white mt-20'
                 },
                 didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
                 }
             });
 
-            @if(session('success')) Toast.fire({ icon: 'success', title: '{!! session('success') !!}' }); @endif
-            @if(session('error')) Toast.fire({ icon: 'error', title: '{!! session('error') !!}' }); @endif
-            @if(session('warning')) Toast.fire({ icon: 'warning', title: '{!! session('warning') !!}' }); @endif
-            @if(session('info')) Toast.fire({ icon: 'info', title: '{!! session('info') !!}' }); @endif
+            @if(session('success'))
+                Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+            @endif
+
+            @if(session('error'))
+                Toast.fire({ icon: 'error', title: "{{ session('error') }}" });
+            @endif
         });
 
         function confirmLogout() {
             Swal.fire({
-                title: 'Akhiri Sesi?',
-                text: "Anda akan keluar dari portal ujian. Pastikan semua ujian Anda telah selesai dikumpulkan.",
+                title: 'Konfirmasi Keluar?',
+                text: "Anda akan keluar dari sesi ujian siswa ini.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
+                cancelButtonColor: '#475569',
                 confirmButtonText: 'Ya, Keluar',
                 cancelButtonText: 'Batal',
                 customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl font-bold px-6 py-3',
-                    cancelButton: 'rounded-xl font-bold px-6 py-3'
+                    popup: 'rounded-[2rem] bg-slate-900 text-white border border-white/10'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Memproses...',
-                        text: 'Sedang mengeluarkan akun Anda',
-                        allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading() },
-                        customClass: { popup: 'rounded-[2rem]' }
-                    });
                     document.getElementById('logoutForm').submit();
                 }
             });

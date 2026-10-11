@@ -38,17 +38,25 @@ class QuestionsImport implements ToCollection, WithHeadingRow
 
             // Membersihkan nilai yang null agar tidak tersimpan sebagai null di array
             $options = array_filter($options, function($value) {
-                return !is_null($value) && $value !== '';
+                return !is_null($value) && trim((string)$value) !== '';
             });
+
+            // Deteksi tipe soal: jika ada kolom 'tipe' gunakan itu, jika opsi kosong maka otomatis essay
+            $explicitType = strtolower(trim($row['tipe'] ?? $row['type'] ?? ''));
+            if (in_array($explicitType, ['choice', 'essay', 'true_false', 'matching'])) {
+                $questionType = $explicitType;
+            } else {
+                $questionType = empty($options) ? 'essay' : 'choice';
+            }
 
             // Menyimpan baris soal ke dalam Database sesuai target (Bank atau Ujian)
             CbtQuestion::create([
                 'cbt_exam_id'          => $this->is_bank ? null : $this->target_id,
                 'cbt_question_bank_id' => $this->is_bank ? $this->target_id : null,
-                'question_type'        => 'choice', // Secara default dari excel kita anggap Pilihan Ganda
+                'question_type'        => $questionType,
                 'question_text'        => $row['soal'],
-                'options'              => $options, // Tergantung dari konfigurasi $casts di model CbtQuestion (pastikan ada 'options' => 'array')
-                'correct_answer'       => strtoupper(trim($row['jawaban'] ?? 'A')),
+                'options'              => $options,
+                'correct_answer'       => trim($row['jawaban'] ?? ($questionType === 'choice' ? 'A' : '')),
                 'score_weight'         => (int) ($row['bobot'] ?? 2),
             ]);
         }
