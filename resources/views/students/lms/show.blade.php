@@ -67,6 +67,7 @@
                     <div class="bg-elevate-peach p-2 rounded-xl text-white"><i class="ph-fill ph-warning-circle text-xl"></i></div>
                     <span class="font-bold text-sm">{{ session('error') }}</span>
                 </div>
+            @endif
             @if(isset($progressPercent) && $progressPercent >= 100)
                 <div class="animate-enter mb-6 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 text-white p-6 rounded-[2rem] shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-amber-400/40">
                     <div class="flex items-center gap-4">

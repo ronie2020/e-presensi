@@ -130,7 +130,7 @@
                                 <i class="ph-fill ph-info text-emerald-400 text-lg shrink-0"></i>
                                 <p class="text-[11px] font-medium leading-snug">Pastikan pengaturan privasi Google Form Anda sudah disetting menjadi <strong>"Publik"</strong> atau dapat diakses oleh siswa agar form dapat dimuat di dalam sistem.</p>
                             </div>
-                            @error('google_form_url') <p class="text-xs text-rose-400 mt-1 font-bold">{{ $message }}</p> @error
+                            @error('google_form_url') <p class="text-xs text-rose-400 mt-1 font-bold">{{ $message }}</p> @enderror
                         </div>
 
                         <hr class="border-white/10">
@@ -314,4 +314,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>t>
+</x-app-layout>

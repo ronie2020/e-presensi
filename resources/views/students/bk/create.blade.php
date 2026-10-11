@@ -142,7 +142,7 @@
                             <p class="text-rose-400 text-xs mt-2 font-bold flex items-center gap-1">
                                 <i class="ph-bold ph-warning"></i> {{ $message }}
                             </p> 
-                        @error
+                        @enderror
                     </div>
 
                     <div>
