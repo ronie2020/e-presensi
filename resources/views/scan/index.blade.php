@@ -731,7 +731,7 @@
                 document.getElementById('no-log-entry').classList.toggle('hidden', count > 0);
             }
 
-            const processAttendanceData = async (studentId) => {
+            const processAttendanceData = async (studentId, verifyMethod = 'qr', confidenceScore = null) => {
                 if (state.isProcessing) return false;
                 if (state.processedQr.has(studentId)) return false; 
 
@@ -759,7 +759,9 @@
                             type: finalType, 
                             extra_id: state.extraId ? state.extraId : null, 
                             lat: state.lat,   
-                            long: state.long  
+                            long: state.long,
+                            verify_method: isFaceEngineActive ? 'face' : verifyMethod,
+                            confidence_score: confidenceScore
                         })
                     });
 
@@ -1064,8 +1066,9 @@
                         if (detection) {
                             const bestMatch = mobileFaceMatcher.findBestMatch(detection.descriptor);
                             if (bestMatch && bestMatch.label !== 'unknown' && bestMatch.distance < 0.45) {
-                                dom.scanStatus.innerHTML = `<i class="ph-bold ph-check text-emerald-500"></i> Wajah Terverifikasi!`;
-                                processAttendanceData(bestMatch.label);
+                                const confidence = Math.max(0, Math.min(100, Math.round((1 - bestMatch.distance) * 100)));
+                                dom.scanStatus.innerHTML = `<i class="ph-bold ph-check text-emerald-500"></i> Wajah Terverifikasi (${confidence}%)`;
+                                processAttendanceData(bestMatch.label, 'face', confidence);
                             }
                         }
                     } catch(e) {

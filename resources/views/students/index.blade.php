@@ -381,6 +381,11 @@
                                                                 <i class="ph-bold ph-wifi-high text-[10px] block"></i>
                                                             </div>
                                                         @endif
+                                                        @if($student->face_descriptor || $student->face_embedding)
+                                                            <div class="absolute -top-1 -right-1 bg-cyan-500 text-white rounded-full p-1 border-2 border-[#021124] shadow-sm" title="Wajah Terdaftar (Face Recognition Ready)">
+                                                                <i class="ph-bold ph-scan text-[10px] block"></i>
+                                                            </div>
+                                                        @endif
                                                     </div>
 
                                                     <div>

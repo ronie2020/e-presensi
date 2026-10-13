@@ -32,7 +32,10 @@ class AttendanceSiswa extends Model
         'lat_in',          
         'long_in',         
         'lat_out',         
-        'long_out',
+        // --- METODE SCAN & AUDIT TRAIL ---
+        'verify_method',    // face, rfid, qr, manual
+        'confidence_score', // akurasi face recognition (%)
+        'scanned_by',       // ID guru jika scan via HP guru
         
         'notes',
     ];
@@ -43,5 +46,13 @@ class AttendanceSiswa extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    /**
+     * Hubungan: Petugas/Guru yang memindai absensi.
+     */
+    public function scannedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'scanned_by');
     }
 }

@@ -458,4 +458,72 @@ class StudentController extends Controller
 
         return view('students.print_class_distribution', compact('classes', 'year'));
     }
+
+    /**
+     * Simpan / perbarui face embedding siswa.
+     */
+    public function updateFaceEmbedding(Request $request, Student $student)
+    {
+        $request->validate([
+            'embedding' => 'required|array',
+        ]);
+
+        $student->update([
+            'face_descriptor' => $request->embedding,
+            'face_registered_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data wajah ' . $student->name . ' berhasil disimpan!',
+        ]);
+    }
+
+    /**
+     * Hapus face embedding siswa.
+     */
+    public function deleteFaceEmbedding(Student $student)
+    {
+        $student->update([
+            'face_descriptor' => null,
+            'face_registered_at' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data wajah ' . $student->name . ' berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * Ambil seluruh descriptor wajah siswa aktif untuk scanner.
+     */
+    public function getFaceDescriptors(Request $request)
+    {
+        $query = Student::where('status', 'active')
+            ->whereNotNull('face_descriptor')
+            ->select('id', 'name', 'student_id', 'nisn', 'class_id', 'face_descriptor', 'photo_path')
+            ->with('schoolClass:id,name');
+
+        if ($request->filled('class_id')) {
+            $query->where('class_id', $request->class_id);
+        }
+
+        $students = $query->get()->map(function($s) {
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'student_id' => $s->student_id ?? $s->nisn,
+                'class_name' => $s->schoolClass->name ?? '-',
+                'photo_url' => $s->photo_path ? asset('storage/' . $s->photo_path) : null,
+                'descriptor' => $s->face_descriptor,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $students->count(),
+            'students' => $students,
+        ]);
+    }
 }

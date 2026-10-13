@@ -34,16 +34,20 @@ class ActivityLog extends Model
         return $this->belongsTo(Student::class);
     }
 
-    /**
-     * ==========================================
-     * JEMBATAN ACCESSOR (SOLUSI ANTI-ERROR)
-     * ==========================================
-     * Jika ada halaman / tampilan lama yang memanggil $log->type, 
-     * fungsi ini akan otomatis membelokkannya ke nilai $log->activity_type.
-     * Sehingga tidak akan ada error "Property [type] does not exist".
-     */
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->type)) {
+                $model->type = $model->activity_type ?? 'Aktivitas';
+            }
+            if (empty($model->activity_type)) {
+                $model->activity_type = $model->type;
+            }
+        });
+    }
+
     public function getTypeAttribute()
     {
-        return $this->activity_type;
+        return $this->attributes['type'] ?? $this->activity_type;
     }
 }

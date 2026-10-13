@@ -87,10 +87,13 @@ public function showScanner(AttendanceService $attendanceService)
 public function processScan(Request $request, AttendanceService $attendanceService)
 {
     $request->validate([
-        'student_id' => 'required|string|max:50',
-        'type'       => 'required|in:Harian,Masuk,Pulang,Dhuha,Dhuhur,Ekstrakurikuler,Makan', 
-        'extra_id'   => 'nullable|exists:extracurriculars,id',
-        'lat' => 'nullable', 'long' => 'nullable',
+        'student_id'       => 'required|string|max:50',
+        'type'             => 'required|in:Harian,Masuk,Pulang,Dhuha,Dhuhur,Ekstrakurikuler,Makan', 
+        'extra_id'         => 'nullable|exists:extracurriculars,id',
+        'lat'              => 'nullable', 
+        'long'             => 'nullable',
+        'verify_method'    => 'nullable|string|in:qr,rfid,face,manual',
+        'confidence_score' => 'nullable|numeric',
     ]);
 
     $student = Student::where('student_id', $request->student_id)->orWhere('nisn', $request->student_id)->first();
@@ -106,11 +109,20 @@ public function processScan(Request $request, AttendanceService $attendanceServi
             case 'Harian':
             case 'Masuk':
             case 'Pulang':
-                // Tentukan Masuk vs Pulang berdasarkan jam server lokal WIB jika mode Harian
+                // Tentukan Masuk vs Pulang berdasarkan riwayat kehadiran siswa hari ini jika mode Harian
                 $scheduleStartOut = $schedule->start_out ?? '14:00:00';
                 $determinedType = $request->type;
                 if ($request->type === 'Harian') {
-                    $determinedType = ($scanTime->format('H:i:s') < $scheduleStartOut) ? 'Masuk' : 'Pulang';
+                    $existing = AttendanceSiswa::where('student_id', $student->id)
+                        ->where('attendance_date', $scanTime->toDateString())
+                        ->whereIn('type', ['Masuk', 'Pulang', 'Harian'])
+                        ->first();
+
+                    $hasClockedIn = $existing && $existing->time_in && $existing->time_in != '00:00:00';
+
+                    // Jika belum absen masuk hari ini, selalu catat sebagai Masuk (Hadir / Terlambat)
+                    // Jika sudah absen masuk, arahkan ke Pulang
+                    $determinedType = !$hasClockedIn ? 'Masuk' : 'Pulang';
                 }
                 $res = $attendanceService->processDailyScan($student, $scanTime, $request->lat, $request->long, $schedule, 'guru_' . $determinedType);
                 break;
@@ -130,6 +142,23 @@ public function processScan(Request $request, AttendanceService $attendanceServi
 
         if (!$res['success']) {
             return response()->json(['message' => $res['message']], $res['code']);
+        }
+
+        // Catat metode scan (face, rfid, qr) & guru yang scan jika ada
+        if (isset($res['model']) && $res['model'] instanceof AttendanceSiswa) {
+            $updateData = [];
+            if ($request->filled('verify_method')) {
+                $updateData['verify_method'] = $request->verify_method;
+            }
+            if ($request->filled('confidence_score')) {
+                $updateData['confidence_score'] = $request->confidence_score;
+            }
+            if (\Illuminate\Support\Facades\Auth::check()) {
+                $updateData['scanned_by'] = \Illuminate\Support\Facades\Auth::id();
+            }
+            if (!empty($updateData)) {
+                $res['model']->update($updateData);
+            }
         }
 
         // Notif WA
@@ -175,6 +204,8 @@ private function formatScanData($item) {
     return [
         'student_name' => $studentName,
         'student_id'   => $studentId,
+        'verify_method'=> $item->verify_method ?? 'qr',
+        'confidence_score' => $item->confidence_score,
         'time_in'      => $item->time_in ? Carbon::parse($item->time_in, 'Asia/Jakarta')->format('H:i') : null,
         'time_out'     => $item->time_out ? Carbon::parse($item->time_out, 'Asia/Jakarta')->format('H:i') : null,
         'status'       => $item->status,

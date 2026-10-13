@@ -145,6 +145,48 @@
                                     <input type="file" name="photo" id="photo-input" accept="image/*" class="hidden"/>
                                     <p class="text-[11px] text-slate-400 font-medium">Format: JPG/PNG, Max: 2MB</p>
                                 </div>
+
+                                {{-- BIOMETRIK WAJAH (FACE RECOGNITION) --}}
+                                <div class="w-full bg-[#021124]/90 border border-white/10 rounded-2xl p-4 shadow-lg flex flex-col gap-3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-sky-400">
+                                            <i class="ph-bold ph-scan text-sm"></i>
+                                            <span>Biometrik Wajah</span>
+                                        </div>
+                                        <div id="face-status-badge">
+                                            @if($student->face_embedding)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                    <i class="ph-bold ph-check-circle text-xs"></i> Terdaftar
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                                    <i class="ph-bold ph-warning-circle text-xs"></i> Belum Ada
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                                        Daftarkan pola wajah siswa untuk absensi otomatis via kamera HP guru / kiosk gerbang.
+                                    </p>
+
+                                    <div class="flex flex-col gap-2 pt-1">
+                                        {{-- Tombol Ambil via Kamera --}}
+                                        <button type="button" id="btn-open-face-cam" class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-sky-900/30 transition-all active:scale-95">
+                                            <i class="ph-bold ph-camera text-sm"></i> Ambil via Kamera
+                                        </button>
+
+                                        {{-- Tombol Ekstrak dari Foto Profil --}}
+                                        <button type="button" id="btn-extract-from-photo" class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition-all active:scale-95">
+                                            <i class="ph-bold ph-sparkle text-sm text-sky-400"></i> Scan dari Foto Ini
+                                        </button>
+
+                                        {{-- Tombol Hapus Data Wajah --}}
+                                        <button type="button" id="btn-delete-face" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[11px] font-bold transition-all active:scale-95 {{ $student->face_embedding ? '' : 'hidden' }}">
+                                            <i class="ph-bold ph-trash"></i> Hapus Wajah
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -635,13 +677,341 @@
         </div>
     </div>
 
-    {{-- Script Flatpickr & SweetAlert --}}
+    {{-- MODAL KAMERA DAFTAR WAJAH --}}
+    <div id="face-cam-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
+        <div class="bg-[#021124] border border-white/20 rounded-[2.5rem] max-w-lg w-full p-6 text-white shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30 shadow-inner">
+                        <i class="ph-bold ph-scan text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-white">Perekaman Wajah Siswa</h4>
+                        <p class="text-xs text-sky-400 font-semibold">{{ $student->name }} ({{ $student->student_id ?? $student->nisn }})</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-close-face-cam" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-colors">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+
+            {{-- Video Container with Face Guide --}}
+            <div class="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
+                <video id="face-video" class="w-full h-full object-cover -scale-x-100" autoplay playsinline muted></video>
+                <canvas id="face-canvas-overlay" class="absolute inset-0 w-full h-full pointer-events-none -scale-x-100"></canvas>
+                
+                {{-- Oval Guide Overlay --}}
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                    <div id="face-oval-guide" class="w-44 h-56 rounded-full border-2 border-dashed border-sky-400/70 shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all"></div>
+                </div>
+
+                {{-- Status Text & Camera Switch --}}
+                <div class="absolute bottom-3 inset-x-3 flex justify-between items-center pointer-events-none">
+                    <span id="face-detect-status" class="px-3 py-1 rounded-full text-[10px] font-bold bg-black/70 backdrop-blur-md text-amber-300 border border-white/10 flex items-center gap-1.5 shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Menunggu Wajah...
+                    </span>
+                    <button type="button" id="btn-switch-camera" class="pointer-events-auto px-3 py-1.5 rounded-full text-[10px] font-bold bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/20 flex items-center gap-1.5 transition-all shadow-md active:scale-95">
+                        <i class="ph-bold ph-camera-rotate text-xs"></i> Putar Kamera
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-slate-400 text-center mt-3 leading-relaxed">
+                Posisikan wajah tepat di dalam lingkaran oval dengan pencahayaan yang terang dan pandangan lurus.
+            </p>
+
+            <div class="flex items-center gap-3 mt-5">
+                <button type="button" id="btn-cancel-face-modal" class="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition-all border border-white/10">
+                    Batal
+                </button>
+                <button type="button" id="btn-capture-face" disabled class="flex-1 py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-900/40">
+                    <i class="ph-bold ph-check text-base"></i>
+                    <span>Simpan Pola Wajah</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script Flatpickr, SweetAlert & Face-API --}}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const MODEL_URL = "{{ asset('models') }}";
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let modelsLoaded = false;
+            let videoStream = null;
+            let currentFacingMode = 'user';
+            let detectInterval = null;
+            let latestDescriptor = null;
+
+            async function ensureModelsLoaded() {
+                if (modelsLoaded) return true;
+                Swal.fire({
+                    title: 'Memuat Model AI...',
+                    text: 'Menyiapkan modul deteksi wajah lokal (offline)...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading(),
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
+
+                try {
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                    ]);
+                    modelsLoaded = true;
+                    Swal.close();
+                    return true;
+                } catch (e) {
+                    console.error("Gagal load face models:", e);
+                    Swal.fire('Gagal Memuat Model', 'Gagal memuat file model AI: ' + e.message, 'error');
+                    return false;
+                }
+            }
+
+            async function saveFaceEmbedding(embeddingArray) {
+                Swal.fire({
+                    title: 'Menyimpan Wajah...',
+                    text: 'Menyimpan pola biometrik siswa ke database...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading(),
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
+
+                try {
+                    const res = await fetch("{{ route('students.updateFaceEmbedding', $student->id) }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify({ embedding: embeddingArray })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        document.getElementById('face-status-badge').innerHTML = `
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                <i class="ph-bold ph-check-circle text-xs"></i> Terdaftar
+                            </span>
+                        `;
+                        const delBtn = document.getElementById('btn-delete-face');
+                        if (delBtn) delBtn.classList.remove('hidden');
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Wajah Berhasil Didaftarkan!',
+                            text: data.message,
+                            confirmButtonColor: '#0284c7',
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
+                    } else {
+                        Swal.fire('Gagal', data.message || 'Gagal menyimpan wajah.', 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Error Server', 'Terjadi kesalahan saat menyimpan data: ' + err.message, 'error');
+                }
+            }
+
+            // A. EKSTRAKSI DARI FOTO PROFIL
+            const btnExtract = document.getElementById('btn-extract-from-photo');
+            if (btnExtract) {
+                btnExtract.addEventListener('click', async function() {
+                    const img = document.getElementById('photo-preview');
+                    if (!img || !img.complete || img.naturalWidth === 0) {
+                        Swal.fire('Foto Kosong', 'Foto profil belum tersedia atau belum termuat.', 'warning');
+                        return;
+                    }
+
+                    const ok = await ensureModelsLoaded();
+                    if (!ok) return;
+
+                    Swal.fire({
+                        title: 'Menganalisis Foto...',
+                        text: 'Mendeteksi titik koordinat wajah siswa...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading(),
+                        customClass: { popup: 'rounded-[2rem]' }
+                    });
+
+                    try {
+                        const detection = await faceapi.detectSingleFace(
+                            img,
+                            new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })
+                        ).withFaceLandmarks(true).withFaceDescriptor();
+
+                        if (!detection) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Wajah Tidak Ditemukan',
+                                text: 'AI tidak dapat mendeteksi wajah dengan jelas dari foto ini. Pastikan foto menghadap depan, atau gunakan tombol "Ambil via Kamera".',
+                                confirmButtonColor: '#0284c7',
+                                customClass: { popup: 'rounded-[2rem]' }
+                            });
+                            return;
+                        }
+
+                        await saveFaceEmbedding(Array.from(detection.descriptor));
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire('Gagal', 'Terjadi kesalahan saat memproses foto: ' + err.message, 'error');
+                    }
+                });
+            }
+
+            // B. AMBIL WAJAH VIA LIVE CAMERA
+            const modalCam = document.getElementById('face-cam-modal');
+            const videoEl = document.getElementById('face-video');
+            const statusBadge = document.getElementById('face-detect-status');
+            const ovalGuide = document.getElementById('face-oval-guide');
+            const captureBtn = document.getElementById('btn-capture-face');
+
+            async function startCamera() {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(t => t.stop());
+                }
+                latestDescriptor = null;
+                captureBtn.disabled = true;
+
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: currentFacingMode,
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: false
+                    });
+                    videoEl.srcObject = videoStream;
+                    await videoEl.play();
+                    startDetectionLoop();
+                } catch (err) {
+                    console.error("Akses kamera gagal:", err);
+                    Swal.fire('Izin Kamera Ditolak', 'Tidak dapat mengakses kamera. Pastikan browser diizinkan mengakses kamera.', 'error');
+                    closeCameraModal();
+                }
+            }
+
+            function startDetectionLoop() {
+                if (detectInterval) clearInterval(detectInterval);
+
+                detectInterval = setInterval(async () => {
+                    if (videoEl.paused || videoEl.ended || !modelsLoaded) return;
+
+                    const detection = await faceapi.detectSingleFace(
+                        videoEl,
+                        new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.45 })
+                    ).withFaceLandmarks(true).withFaceDescriptor();
+
+                    if (detection) {
+                        latestDescriptor = detection.descriptor;
+                        captureBtn.disabled = false;
+                        ovalGuide.classList.remove('border-sky-400/70', 'shadow-[0_0_20px_rgba(56,189,248,0.3)]');
+                        ovalGuide.classList.add('border-emerald-400', 'shadow-[0_0_25px_rgba(52,211,153,0.6)]');
+                        statusBadge.className = 'px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-950/80 backdrop-blur-md text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5 shadow-md';
+                        statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Wajah Siap Direkam!';
+                    } else {
+                        latestDescriptor = null;
+                        captureBtn.disabled = true;
+                        ovalGuide.classList.remove('border-emerald-400', 'shadow-[0_0_25px_rgba(52,211,153,0.6)]');
+                        ovalGuide.classList.add('border-sky-400/70', 'shadow-[0_0_20px_rgba(56,189,248,0.3)]');
+                        statusBadge.className = 'px-3 py-1 rounded-full text-[10px] font-bold bg-black/70 backdrop-blur-md text-amber-300 border border-white/10 flex items-center gap-1.5 shadow-md';
+                        statusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> Menunggu Wajah...';
+                    }
+                }, 250);
+            }
+
+            function closeCameraModal() {
+                if (detectInterval) {
+                    clearInterval(detectInterval);
+                    detectInterval = null;
+                }
+                if (videoStream) {
+                    videoStream.getTracks().forEach(t => t.stop());
+                    videoStream = null;
+                }
+                modalCam.classList.add('hidden');
+            }
+
+            const btnOpenCam = document.getElementById('btn-open-face-cam');
+            if (btnOpenCam) {
+                btnOpenCam.addEventListener('click', async function() {
+                    const ok = await ensureModelsLoaded();
+                    if (!ok) return;
+                    modalCam.classList.remove('hidden');
+                    startCamera();
+                });
+            }
+
+            document.getElementById('btn-close-face-cam')?.addEventListener('click', closeCameraModal);
+            document.getElementById('btn-cancel-face-modal')?.addEventListener('click', closeCameraModal);
+
+            document.getElementById('btn-switch-camera')?.addEventListener('click', function() {
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                startCamera();
+            });
+
+            captureBtn?.addEventListener('click', async function() {
+                if (!latestDescriptor) return;
+                const descriptorArray = Array.from(latestDescriptor);
+                closeCameraModal();
+                await saveFaceEmbedding(descriptorArray);
+            });
+
+            // C. HAPUS DATA WAJAH
+            const btnDeleteFace = document.getElementById('btn-delete-face');
+            if (btnDeleteFace) {
+                btnDeleteFace.addEventListener('click', async function() {
+                    const result = await Swal.fire({
+                        title: 'Hapus Pola Wajah?',
+                        text: 'Siswa ini tidak akan dapat melakukan absensi via Face Recognition sampai didaftarkan kembali.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Hapus Data',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true,
+                        customClass: { popup: 'rounded-[2rem]' }
+                    });
+
+                    if (result.isConfirmed) {
+                        try {
+                            const res = await fetch("{{ route('students.deleteFaceEmbedding', $student->id) }}", {
+                                method: 'DELETE',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                }
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                document.getElementById('face-status-badge').innerHTML = `
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                        <i class="ph-bold ph-warning-circle text-xs"></i> Belum Ada
+                                    </span>
+                                `;
+                                btnDeleteFace.classList.add('hidden');
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus',
+                                    text: data.message,
+                                    confirmButtonColor: '#0284c7',
+                                    customClass: { popup: 'rounded-[2rem]' }
+                                });
+                            }
+                        } catch (err) {
+                            Swal.fire('Error', 'Gagal menghapus data wajah: ' + err.message, 'error');
+                        }
+                    }
+                });
+            }
             // 1. INISIALISASI DATEPICKER (Flatpickr)
             flatpickr(".datepicker", {
                 altInput: true,

@@ -11,17 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('teaching_sessions', function (Blueprint $table) {
-            // 1. Hapus ikatan Foreign Key yang lama
-            // Sesuai dengan pesan error Anda, nama constraint-nya adalah: teaching_sessions_schedule_id_foreign
-            //$table->dropForeign('teaching_sessions_schedule_id_foreign');
-            
-            // 2. Buat ikatan Foreign Key yang baru menunjuk ke tabel 'timetables'
+        Schema::disableForeignKeyConstraints();
+
+        // Cari semua Foreign Key constraint yang menempel pada kolom schedule_id di teaching_sessions
+        $foreignKeys = \Illuminate\Support\Facades\DB::select("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = DATABASE() 
+              AND TABLE_NAME = 'teaching_sessions' 
+              AND COLUMN_NAME = 'schedule_id' 
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        ");
+
+        Schema::table('teaching_sessions', function (Blueprint $table) use ($foreignKeys) {
+            foreach ($foreignKeys as $fk) {
+                $table->dropForeign($fk->CONSTRAINT_NAME);
+            }
+
+            // Buat ikatan Foreign Key yang baru menunjuk ke tabel 'timetables'
             $table->foreign('schedule_id')
                   ->references('id')
                   ->on('timetables')
                   ->onDelete('cascade');
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -29,15 +43,29 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('teaching_sessions', function (Blueprint $table) {
-            // Hapus ikatan ke timetables
-            $table->dropForeign(['schedule_id']);
-            
+        Schema::disableForeignKeyConstraints();
+
+        $foreignKeys = \Illuminate\Support\Facades\DB::select("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = DATABASE() 
+              AND TABLE_NAME = 'teaching_sessions' 
+              AND COLUMN_NAME = 'schedule_id' 
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        ");
+
+        Schema::table('teaching_sessions', function (Blueprint $table) use ($foreignKeys) {
+            foreach ($foreignKeys as $fk) {
+                $table->dropForeign($fk->CONSTRAINT_NAME);
+            }
+
             // Kembalikan ikatan ke schedules (tabel lama)
             $table->foreign('schedule_id')
                   ->references('id')
                   ->on('schedules')
                   ->onDelete('cascade');
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 };

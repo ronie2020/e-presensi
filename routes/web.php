@@ -413,6 +413,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/students/print-class-distribution', [StudentController::class, 'printClassDistribution'])->name('students.print_class_distribution'); // <-- ROUTE BARU CETAK PEMBAGIAN KELAS
     Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');   
+    Route::post('/students/{student}/face-embedding', [StudentController::class, 'updateFaceEmbedding'])->name('students.updateFaceEmbedding');
+    Route::delete('/students/{student}/face-embedding', [StudentController::class, 'deleteFaceEmbedding'])->name('students.deleteFaceEmbedding');
+    Route::get('/api/face-descriptors', [StudentController::class, 'getFaceDescriptors'])->name('students.getFaceDescriptors');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
 

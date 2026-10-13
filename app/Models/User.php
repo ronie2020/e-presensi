@@ -10,7 +10,61 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
+    use HasRoles {
+        hasRole as spatieHasRole;
+        hasAnyRole as spatieHasAnyRole;
+    }
+
+    /**
+     * Cek role dengan fallback ke kolom 'role' jika Spatie belum tersinkron
+     */
+    public function hasRole($roles, ?string $guard = null): bool
+    {
+        try {
+            if ($this->spatieHasRole($roles, $guard)) {
+                return true;
+            }
+        } catch (\Throwable $e) {}
+
+        $roles = is_array($roles) ? $roles : [$roles];
+        $userRole = $this->role ?? null;
+        if (!empty($userRole)) {
+            $userRoles = is_array($userRole) 
+                ? $userRole 
+                : (json_decode($userRole, true) ?? explode(',', $userRole));
+            $userRoles = array_map('trim', (array) $userRoles);
+            
+            return !empty(array_intersect($roles, $userRoles));
+        }
+
+        return false;
+    }
+
+    /**
+     * Cek any role dengan fallback ke kolom 'role' jika Spatie belum tersinkron
+     */
+    public function hasAnyRole(...$roles): bool
+    {
+        try {
+            if ($this->spatieHasAnyRole(...$roles)) {
+                return true;
+            }
+        } catch (\Throwable $e) {}
+
+        $roles = collect($roles)->flatten();
+        $userRole = $this->role ?? null;
+        if (!empty($userRole)) {
+            $userRoles = is_array($userRole) 
+                ? $userRole 
+                : (json_decode($userRole, true) ?? explode(',', $userRole));
+            $userRoles = array_map('trim', (array) $userRoles);
+            
+            return $roles->intersect($userRoles)->isNotEmpty();
+        }
+
+        return false;
+    }
 
     /**
      * The attributes that are mass assignable.

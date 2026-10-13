@@ -157,6 +157,19 @@ class Student extends Authenticatable
     ];
 
     /**
+     * Jembatan kompatibilitas: face_embedding alias untuk face_descriptor
+     */
+    public function getFaceEmbeddingAttribute()
+    {
+        return $this->face_descriptor;
+    }
+
+    public function setFaceEmbeddingAttribute($value)
+    {
+        $this->attributes['face_descriptor'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    /**
      * Password untuk login siswa (default menggunakan NIS/Student ID)
      */
     public function getAuthPassword()
