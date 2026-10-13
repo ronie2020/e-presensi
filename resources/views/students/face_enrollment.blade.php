@@ -429,44 +429,54 @@
                         clearInterval(this.detectionInterval);
                         this.detectionInterval = null;
                     }
+                    this.isDetecting = false;
 
                     this.detectionInterval = setInterval(async () => {
-                        if (!this.modelsLoaded || !this.cameraActive || video.paused || video.ended) return;
+                        // Guard Mutex: Hindari penumpukan antrean tensor di HP
+                        if (this.isDetecting || !this.modelsLoaded || !this.cameraActive || video.paused || video.ended || video.videoWidth === 0) return;
 
-                        // Sesuaikan ukuran kanvas dengan video
-                        const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
-                        faceapi.matchDimensions(canvas, displaySize);
+                        this.isDetecting = true;
 
-                        // Deteksi wajah tunggal dengan landmarks & descriptor
-                        const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
-                            .withFaceLandmarks()
-                            .withFaceDescriptor();
+                        try {
+                            // Sesuaikan ukuran kanvas dengan video
+                            const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
+                            faceapi.matchDimensions(canvas, displaySize);
 
-                        const ctx = canvas.getContext('2d');
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            // OPTIMASI: inputSize 160 (50% lebih hemat kalkulasi dari 224)
+                            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
 
-                        if (detection) {
-                            this.currentDetection = detection;
-                            this.updateCaptureButtonState();
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                            // Gambar kotak deteksi halus
-                            const resized = faceapi.resizeResults(detection, displaySize);
-                            const box = resized.detection.box;
-                            
-                            ctx.strokeStyle = '#38bdf8';
-                            ctx.lineWidth = 3;
-                            ctx.strokeRect(box.x, box.y, box.width, box.height);
+                            if (detection) {
+                                this.currentDetection = detection;
+                                this.updateCaptureButtonState();
 
-                            banner.className = 'bg-emerald-950/90 backdrop-blur-md px-4 py-2 rounded-xl border border-emerald-500/40 text-xs font-black text-emerald-300 flex items-center gap-2 shadow-lg';
-                            banner.innerHTML = '<i class="ph-fill ph-check-circle text-base text-emerald-400"></i> Wajah Terdeteksi Siap Direkam!';
-                        } else {
-                            this.currentDetection = null;
-                            this.updateCaptureButtonState();
+                                // Gambar kotak deteksi halus
+                                const resized = faceapi.resizeResults(detection, displaySize);
+                                const box = resized.detection.box;
+                                
+                                ctx.strokeStyle = '#38bdf8';
+                                ctx.lineWidth = 3;
+                                ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-                            banner.className = 'bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-slate-400 flex items-center gap-2 shadow-lg';
-                            banner.innerHTML = '<i class="ph-bold ph-scan text-sky-400 animate-pulse text-base"></i> Hadapkan wajah tegak ke kamera...';
+                                banner.className = 'bg-emerald-950/90 backdrop-blur-md px-4 py-2 rounded-xl border border-emerald-500/40 text-xs font-black text-emerald-300 flex items-center gap-2 shadow-lg';
+                                banner.innerHTML = '<i class="ph-fill ph-check-circle text-base text-emerald-400"></i> Wajah Terdeteksi Siap Direkam!';
+                            } else {
+                                this.currentDetection = null;
+                                this.updateCaptureButtonState();
+
+                                banner.className = 'bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-slate-400 flex items-center gap-2 shadow-lg';
+                                banner.innerHTML = '<i class="ph-bold ph-scan text-sky-400 animate-pulse text-base"></i> Hadapkan wajah tegak ke kamera...';
+                            }
+                        } catch (err) {
+                            console.warn('Face loop error:', err);
+                        } finally {
+                            this.isDetecting = false;
                         }
-                    }, 200);
+                    }, 240);
                 },
 
                 updateCaptureButtonState() {

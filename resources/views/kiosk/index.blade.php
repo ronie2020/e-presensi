@@ -337,59 +337,65 @@
         }
     }
 
+    let isKioskDetecting = false;
     function startKioskAiLoop(video) {
         const canvas = document.getElementById('kiosk-ai-canvas');
         if (!canvas) return;
 
         setInterval(async () => {
-            if (window.isProcessing || !video || video.paused || video.ended || video.videoWidth === 0) {
+            if (isKioskDetecting || window.isProcessing || !video || video.paused || video.ended || video.videoWidth === 0) {
                 return;
             }
 
-            if (canvas.width !== video.videoWidth) {
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                offscreenCanvas.width = video.videoWidth;
-                offscreenCanvas.height = video.videoHeight;
-            }
+            isKioskDetecting = true;
+            try {
+                if (canvas.width !== video.videoWidth) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    offscreenCanvas.width = video.videoWidth;
+                    offscreenCanvas.height = video.videoHeight;
+                }
 
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // A. Cek QR Code dengan jsQR jika siswa menyodorkan kartu
-            if (window.jsQR) {
-                try {
-                    offscreenCtx.drawImage(video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
-                    const imgData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-                    const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
-                    if (code && code.data && code.data.trim()) {
-                        triggerIdentifiedScan(code.data.trim(), 'qr');
-                        return;
-                    }
-                } catch (e) {}
-            }
-
-            // B. Cek Deteksi Wajah dengan face-api.js
-            if (isKioskAiReady && kioskFaceMatcher && window.faceapi) {
-                try {
-                    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
-                        .withFaceLandmarks()
-                        .withFaceDescriptor();
-
-                    if (detection) {
-                        const bestMatch = kioskFaceMatcher.findBestMatch(detection.descriptor);
-                        const box = detection.detection.box;
-                        const isMatch = bestMatch.label !== 'unknown' && bestMatch.distance < 0.45;
-                        
-                        ctx.strokeStyle = isMatch ? '#10b981' : '#38bdf8';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(box.x, box.y, box.width, box.height);
-
-                        if (isMatch) {
-                            triggerIdentifiedScan(bestMatch.label, 'face');
+                // A. Cek QR Code dengan jsQR jika siswa menyodorkan kartu
+                if (window.jsQR) {
+                    try {
+                        offscreenCtx.drawImage(video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                        const imgData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
+                        if (code && code.data && code.data.trim()) {
+                            triggerIdentifiedScan(code.data.trim(), 'qr');
+                            return;
                         }
-                    }
-                } catch (e) {}
+                    } catch (e) {}
+                }
+
+                // B. Cek Deteksi Wajah dengan face-api.js (inputSize: 160)
+                if (isKioskAiReady && kioskFaceMatcher && window.faceapi) {
+                    try {
+                        const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 }))
+                            .withFaceLandmarks()
+                            .withFaceDescriptor();
+
+                        if (detection) {
+                            const bestMatch = kioskFaceMatcher.findBestMatch(detection.descriptor);
+                            const box = detection.detection.box;
+                            const isMatch = bestMatch.label !== 'unknown' && bestMatch.distance < 0.45;
+                            
+                            ctx.strokeStyle = isMatch ? '#10b981' : '#38bdf8';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+                            if (isMatch) {
+                                triggerIdentifiedScan(bestMatch.label, 'face');
+                            }
+                        }
+                    } catch (e) {}
+                }
+            } finally {
+                isKioskDetecting = false;
             }
         }, 220);
     }

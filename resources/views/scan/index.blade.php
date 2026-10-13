@@ -1045,15 +1045,19 @@
 
                 dom.scanStatus.innerHTML = `<i class="ph-bold ph-user-focus text-emerald-500"></i> Arahkan Kamera ke Wajah Siswa`;
 
+            let isMobileFaceDetecting = false;
+
                 if (faceCheckInterval) clearInterval(faceCheckInterval);
+                isMobileFaceDetecting = false;
                 faceCheckInterval = setInterval(async () => {
-                    if (!isFaceEngineActive || state.isProcessing || !mobileFaceMatcher || !window.faceapi) return;
+                    if (isMobileFaceDetecting || !isFaceEngineActive || state.isProcessing || !mobileFaceMatcher || !window.faceapi) return;
 
                     const videoEl = document.querySelector('#qr-reader video');
                     if (!videoEl || videoEl.paused || videoEl.ended || videoEl.videoWidth === 0) return;
 
+                    isMobileFaceDetecting = true;
                     try {
-                        const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                        const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 }))
                             .withFaceLandmarks()
                             .withFaceDescriptor();
 
@@ -1064,7 +1068,10 @@
                                 processAttendanceData(bestMatch.label);
                             }
                         }
-                    } catch(e) {}
+                    } catch(e) {
+                    } finally {
+                        isMobileFaceDetecting = false;
+                    }
                 }, 280);
             }
             

@@ -834,6 +834,7 @@
                 faceMatcher: null,
                 faceCheckInterval: null,
                 isFaceProcessing: false,
+                isDetectingFace: false,
                 lastScannedFaces: {},
                 faceStatusText: 'Arahkan kamera ke wajah siswa...',
 
@@ -1181,6 +1182,7 @@
                 },
 
                 stopFaceCamera() {
+                    this.isDetectingFace = false;
                     if (this.faceCheckInterval) {
                         clearInterval(this.faceCheckInterval);
                         this.faceCheckInterval = null;
@@ -1198,37 +1200,41 @@
                     if (!video || !canvas) return;
 
                     if (this.faceCheckInterval) clearInterval(this.faceCheckInterval);
+                    this.isDetectingFace = false;
 
                     this.faceCheckInterval = setInterval(async () => {
-                        if (!this.showCamera || this.scanEngine !== 'face' || !this.faceModelsLoaded || video.paused || video.ended) return;
+                        // Guard Mutex: Lewati jika frame sebelumnya belum selesai dihitung oleh prosesor HP
+                        if (this.isDetectingFace || !this.showCamera || this.scanEngine !== 'face' || !this.faceModelsLoaded || video.paused || video.ended || video.videoWidth === 0) return;
 
-                        const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
-                        faceapi.matchDimensions(canvas, displaySize);
+                        this.isDetectingFace = true;
 
-                        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
-                            .withFaceLandmarks()
-                            .withFaceDescriptors();
+                        try {
+                            const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
+                            faceapi.matchDimensions(canvas, displaySize);
 
-                        const ctx = canvas.getContext('2d');
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            // OPTIMASI: gunakan detectSingleFace dengan inputSize: 160 (50% lebih ringan daripada 224)
+                            const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
 
-                        if (!detections || detections.length === 0) {
-                            if (!this.isFaceProcessing) {
-                                this.faceStatusText = 'Arahkan kamera ke wajah siswa...';
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                            if (!detection) {
+                                if (!this.isFaceProcessing) {
+                                    this.faceStatusText = 'Arahkan kamera ke wajah siswa...';
+                                }
+                                return;
                             }
-                            return;
-                        }
 
-                        const resized = faceapi.resizeResults(detections, displaySize);
-
-                        for (const d of resized) {
-                            const box = d.detection.box;
+                            const resized = faceapi.resizeResults(detection, displaySize);
+                            const box = resized.detection.box;
                             let label = 'Wajah Terdeteksi';
                             let boxColor = '#38bdf8';
 
                             if (this.faceMatcher) {
-                                const bestMatch = this.faceMatcher.findBestMatch(d.descriptor);
-                                if (bestMatch.label !== 'unknown') {
+                                const bestMatch = this.faceMatcher.findBestMatch(detection.descriptor);
+                                if (bestMatch.label !== 'unknown' && bestMatch.distance < 0.45) {
                                     const studentId = parseInt(bestMatch.label);
                                     const matchStudent = this.faceDescriptors.find(s => s.student_id === studentId);
                                     const studentName = matchStudent ? matchStudent.name : 'Siswa #' + studentId;
@@ -1262,8 +1268,12 @@
                             // Teks Nama
                             ctx.fillStyle = '#ffffff';
                             ctx.fillText(label, box.x + 5, box.y - 6);
+                        } catch (err) {
+                            console.warn('Face loop error:', err);
+                        } finally {
+                            this.isDetectingFace = false;
                         }
-                    }, 250);
+                    }, 280);
                 },
 
                 async submitFaceAttendance(studentId, studentName) {
