@@ -120,7 +120,17 @@ class TeachingController extends Controller
             }
         }
 
-        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats', 'previousSession', 'pendingHomework'));
+        // Data Face Descriptors siswa di kelas ini yang sudah terekam wajahnya
+        $faceDescriptors = $allStudents->filter(fn($s) => !empty($s->face_descriptor))->map(function($s) {
+            return [
+                'student_id' => $s->id,
+                'name' => $s->name,
+                'nisn' => $s->nisn,
+                'descriptor' => $s->face_descriptor,
+            ];
+        })->values();
+
+        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats', 'previousSession', 'pendingHomework', 'faceDescriptors'));
     }
 
     // --- HALAMAN EDIT (REVISI SETELAH TUTUP) ---
@@ -323,19 +333,32 @@ class TeachingController extends Controller
         return view('teaching.history', compact('histories', 'filterType', 'filterValue', 'filterLabel'));
     }
 
-    // --- SCAN RFID ---
+    // --- SCAN PRESENSI (RFID / QR CODE / FACE RECOGNITION AI) ---
     public function scan(Request $request)
     {
-        $request->validate(['rfid' => 'required', 'session_id' => 'required']);
+        $request->validate([
+            'session_id' => 'required|exists:teaching_sessions,id',
+            'rfid' => 'nullable|string',
+            'student_id' => 'nullable|integer'
+        ]);
 
-        $student = Student::where('student_id', $request->rfid)->orWhere('nis', $request->rfid)->first();
+        $student = null;
+        if ($request->filled('student_id')) {
+            $student = Student::find($request->student_id);
+        } elseif ($request->filled('rfid')) {
+            $student = Student::where('student_id', $request->rfid)->orWhere('nis', $request->rfid)->first();
+        }
 
-        if (!$student) return response()->json(['status' => 'error', 'message' => 'Kartu tidak dikenali']);
+        if (!$student) return response()->json(['status' => 'error', 'message' => 'Siswa tidak ditemukan']);
 
         $session = TeachingSession::with('timetable')->find($request->session_id);
 
+        if (!$session) {
+            return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid']);
+        }
+
         if ($student->class_id != $session->timetable->class_id) {
-            return response()->json(['status' => 'error', 'message' => 'Siswa salah kelas!']);
+            return response()->json(['status' => 'error', 'message' => 'Siswa bukan anggota kelas ini!']);
         }
 
         $existing = ClassAttendance::where('teaching_session_id', $session->id)->where('student_id', $student->id)->first();

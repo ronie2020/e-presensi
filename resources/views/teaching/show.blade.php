@@ -40,11 +40,12 @@
     @push('scripts')
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
     @endpush
 
     {{-- TAMBAHAN: state filterTab ditambahkan ke komponen Alpine induk --}}
     <div class="py-6 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20" 
-         x-data="teachingSession({ sessionId: {{ $session->id }}, stats: {{ json_encode($stats) }} })">
+         x-data="teachingSession({ sessionId: {{ $session->id }}, stats: {{ json_encode($stats) }}, faceDescriptors: {{ json_encode($faceDescriptors ?? []) }} })">
          
         {{-- Efek Latar Belakang Halus --}}
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
@@ -202,40 +203,127 @@
                 {{-- KOLOM KIRI (SCANNER & JURNAL) --}}
                 <div class="xl:col-span-4 space-y-6 h-fit xl:sticky xl:top-6 order-1">
                     
-                    {{-- 3. BOX SCANNER --}}
+                    {{-- 3. BOX SCANNER MULTI-MODAL (FACE AI / QR / RFID) --}}
                     @if($isOpen)
                         <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 sm:p-8 relative overflow-hidden group">
                             <div class="relative z-10">
-                                <div class="flex items-center justify-between mb-5">
+                                
+                                {{-- Header & Info Enrolment --}}
+                                <div class="flex items-center justify-between mb-4">
                                     <h3 class="font-black text-elevate-dark flex items-center gap-3 text-lg">
-                                        <div class="w-10 h-10 rounded-xl bg-elevate-peach/20 text-elevate-peach-dark flex items-center justify-center border border-elevate-peach/30"><i class="ph-bold ph-scan text-xl"></i></div>
-                                        Scanner
+                                        <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center border border-sky-500/20">
+                                            <i class="ph-bold" :class="scanEngine === 'face' ? 'ph-user-focus' : (scanEngine === 'qr' ? 'ph-qr-code' : 'ph-identification-card')"></i>
+                                        </div>
+                                        <span>Scanner Presensi</span>
                                     </h3>
-                                    <button @click="toggleScanMode()" 
-                                            class="text-[10px] font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-2"
-                                            :class="isScanMode ? 'bg-elevate-primary text-white border-elevate-primary shadow-sm' : 'bg-elevate-soft text-slate-500 border-slate-200'">
-                                        <span class="w-2 h-2 rounded-full" :class="isScanMode ? 'bg-white animate-pulse' : 'bg-slate-400'"></span>
-                                        <span x-text="isScanMode ? 'AUTO FOCUS' : 'MANUAL'"></span>
+                                    
+                                    {{-- Badge Info Wajah Terdaftar di Kelas Ini --}}
+                                    <div class="text-[11px] font-bold px-3 py-1 rounded-xl border flex items-center gap-1.5"
+                                         :class="totalEnrolledFaces > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'">
+                                        <i class="ph-bold" :class="totalEnrolledFaces > 0 ? 'ph-check-circle text-emerald-500' : 'ph-warning text-amber-500'"></i>
+                                        <span x-text="totalEnrolledFaces + ' Wajah Terdaftar'"></span>
+                                    </div>
+                                </div>
+
+                                {{-- Pilihan Metode / Engine Switcher --}}
+                                <div class="grid grid-cols-3 gap-1.5 p-1.5 bg-slate-100 rounded-2xl mb-4">
+                                    <button type="button" @click="setScanEngine('face')"
+                                            class="py-2.5 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all"
+                                            :class="scanEngine === 'face' ? 'bg-white text-sky-600 shadow-sm border border-slate-200/60' : 'text-slate-500 hover:text-slate-800'">
+                                        <i class="ph-bold ph-user-focus text-base"></i>
+                                        <span>AI Wajah</span>
+                                    </button>
+                                    <button type="button" @click="setScanEngine('qr')"
+                                            class="py-2.5 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all"
+                                            :class="scanEngine === 'qr' ? 'bg-white text-emerald-600 shadow-sm border border-slate-200/60' : 'text-slate-500 hover:text-slate-800'">
+                                        <i class="ph-bold ph-qr-code text-base"></i>
+                                        <span>QR Kartu</span>
+                                    </button>
+                                    <button type="button" @click="setScanEngine('rfid')"
+                                            class="py-2.5 px-2 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all"
+                                            :class="scanEngine === 'rfid' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60' : 'text-slate-500 hover:text-slate-800'">
+                                        <i class="ph-bold ph-keyboard text-base"></i>
+                                        <span>RFID / NIS</span>
                                     </button>
                                 </div>
 
-                                <div class="mb-5 relative group/input">
-                                    <input type="text" id="rfidInput" x-model="rfidCode" @keydown.enter.prevent="submitScan()"
-                                        @blur="keepFocus($event)" :disabled="!isScanMode && !showCamera"
-                                        class="w-full bg-elevate-soft border border-slate-200 focus:bg-white focus:border-elevate-accent text-elevate-dark rounded-2xl text-center font-mono text-xl tracking-[0.2em] py-5 transition-all focus:ring-elevate-accent/30 uppercase placeholder:text-slate-400 shadow-inner disabled:opacity-50 font-black"
-                                        placeholder="TAP KARTU / NIS..." autocomplete="off">
+                                {{-- JIKA ENGINE = RFID / MANUAL INPUT --}}
+                                <div x-show="scanEngine === 'rfid'" x-transition class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-500">Tap kartu RFID / ketik NIS:</span>
+                                        <button @click="toggleScanMode()" 
+                                                class="text-[10px] font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5"
+                                                :class="isScanMode ? 'bg-elevate-primary text-white border-elevate-primary shadow-sm' : 'bg-elevate-soft text-slate-500 border-slate-200'">
+                                            <span class="w-2 h-2 rounded-full" :class="isScanMode ? 'bg-white animate-pulse' : 'bg-slate-400'"></span>
+                                            <span x-text="isScanMode ? 'AUTO FOCUS' : 'MANUAL'"></span>
+                                        </button>
+                                    </div>
+                                    <div class="relative group/input">
+                                        <input type="text" id="rfidInput" x-model="rfidCode" @keydown.enter.prevent="submitScan()"
+                                            @blur="keepFocus($event)" :disabled="!isScanMode && !showCamera"
+                                            class="w-full bg-elevate-soft border border-slate-200 focus:bg-white focus:border-elevate-accent text-elevate-dark rounded-2xl text-center font-mono text-xl tracking-[0.2em] py-5 transition-all focus:ring-elevate-accent/30 uppercase placeholder:text-slate-400 shadow-inner disabled:opacity-50 font-black"
+                                            placeholder="TAP KARTU / NIS..." autocomplete="off">
+                                    </div>
                                 </div>
 
-                                <button @click="toggleCamera()" type="button" class="w-full py-4 bg-white hover:bg-elevate-soft text-elevate-dark font-bold rounded-2xl border-2 border-slate-100 transition-colors flex items-center justify-center gap-2 text-sm shadow-sm mb-4 active:scale-95">
-                                    <i class="ph-bold ph-camera text-xl"></i>
-                                    <span x-text="showCamera ? 'Tutup Kamera' : 'Buka Kamera HP'"></span>
-                                </button>
+                                {{-- JIKA ENGINE = KAMERA (AI WAJAH / QR CODE) --}}
+                                <div x-show="scanEngine !== 'rfid'">
+                                    {{-- Tombol Buka / Tutup Kamera --}}
+                                    <button @click="toggleCamera()" type="button" 
+                                            class="w-full py-3.5 px-4 font-black rounded-2xl border-2 transition-all flex items-center justify-center gap-2 text-xs shadow-sm mb-3 active:scale-95"
+                                            :class="showCamera ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100' : 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800'">
+                                        <i class="ph-bold" :class="showCamera ? 'ph-x-circle text-lg' : 'ph-camera text-lg'"></i>
+                                        <span x-text="showCamera ? 'Tutup Kamera' : (scanEngine === 'face' ? 'Buka Kamera AI Wajah' : 'Buka Kamera QR Code')"></span>
+                                    </button>
 
-                                <div x-show="showCamera" x-transition class="mt-4 bg-slate-900 rounded-[1.5rem] overflow-hidden border border-slate-200 relative shadow-inner">
-                                    <div id="reader" class="w-full bg-slate-900"></div>
+                                    {{-- CONTAINER KAMERA --}}
+                                    <div x-show="showCamera" x-transition class="space-y-3">
+                                        
+                                        {{-- 1. Viewfinder AI Face Recognition --}}
+                                        <div x-show="scanEngine === 'face'" class="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden border-2 border-slate-700 shadow-inner group">
+                                            <video id="face-video" autoplay muted playsinline class="w-full h-full object-cover transition-transform duration-300" :class="facingMode === 'user' ? 'transform -scale-x-100' : ''"></video>
+                                            <canvas id="face-canvas" class="absolute inset-0 w-full h-full pointer-events-none transition-transform duration-300" :class="facingMode === 'user' ? 'transform -scale-x-100' : ''"></canvas>
+
+                                            {{-- Floating Controls Top Bar --}}
+                                            <div class="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-auto z-20">
+                                                <div class="px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md border border-white/10 text-[10px] font-bold text-slate-200 flex items-center gap-1.5 shadow-lg">
+                                                    <i class="ph-bold" :class="facingMode === 'environment' ? 'ph-camera text-sky-400' : 'ph-user-focus text-amber-400'"></i>
+                                                    <span x-text="facingMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan'"></span>
+                                                </div>
+
+                                                <button type="button" @click="switchCamera()" 
+                                                    title="Putar Kamera"
+                                                    class="w-9 h-9 rounded-full bg-slate-900/85 hover:bg-sky-600 active:scale-95 text-white backdrop-blur-md border border-white/20 flex items-center justify-center text-lg shadow-xl transition-all hover:scale-105 group/btn">
+                                                    <i class="ph-bold ph-camera-rotate group-hover/btn:rotate-180 transition-transform duration-300"></i>
+                                                </button>
+                                            </div>
+
+                                            {{-- Oval Guide Overlay --}}
+                                            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                                <div class="w-44 h-56 border-2 border-dashed border-sky-400/40 rounded-[3rem] flex flex-col items-center justify-between py-2 shadow-[0_0_20px_rgba(56,189,248,0.15)]">
+                                                    <span class="text-[9px] font-bold text-sky-300 bg-black/60 px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm">Wajah Siswa</span>
+                                                </div>
+                                            </div>
+
+                                            {{-- Status Banner Realtime di Bawah Video --}}
+                                            <div class="absolute bottom-3 inset-x-3 flex justify-center pointer-events-none z-20">
+                                                <div class="bg-slate-900/90 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-2 shadow-lg transition-all truncate">
+                                                    <i class="ph-bold ph-scan text-sky-400 animate-pulse text-base"></i>
+                                                    <span x-text="faceStatusText">Arahkan kamera ke wajah siswa...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- 2. Viewfinder QR Code --}}
+                                        <div x-show="scanEngine === 'qr'" class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 relative shadow-inner">
+                                            <div id="reader" class="w-full bg-slate-900"></div>
+                                        </div>
+
+                                    </div>
                                 </div>
 
-                                <p class="mt-4 text-xs font-mono font-bold text-slate-500 text-center bg-elevate-soft p-3 rounded-xl border border-slate-100" x-text="statusMessage">Menunggu input...</p>
+                                {{-- Pesan Status Feedback --}}
+                                <p class="mt-4 text-xs font-mono font-bold text-slate-500 text-center bg-elevate-soft p-3 rounded-xl border border-slate-100 truncate" x-text="statusMessage">Menunggu input...</p>
                             </div>
                         </div>
                     @else
@@ -737,6 +825,18 @@
                 isScanMode: true,
                 filterTab: 'all', // TAMBAHAN: Inisialisasi status filter tab
 
+                // PROPERTI FACE RECOGNITION AI & MULTI-MODAL SCAN
+                scanEngine: 'face',
+                facingMode: (window.innerWidth <= 768) ? 'environment' : 'user',
+                faceDescriptors: config.faceDescriptors || [],
+                totalEnrolledFaces: (config.faceDescriptors || []).length,
+                faceModelsLoaded: false,
+                faceMatcher: null,
+                faceCheckInterval: null,
+                isFaceProcessing: false,
+                lastScannedFaces: {},
+                faceStatusText: 'Arahkan kamera ke wajah siswa...',
+
                 // TAMBAHAN: Fitur Auto-Save Jurnal
                 journalTopic: localStorage.getItem('journal_' + config.sessionId + '_topic') || {!! json_encode($session->topic ?? '') !!},
                 journalActivities: localStorage.getItem('journal_' + config.sessionId + '_activities') || {!! json_encode($session->activities ?? '') !!},
@@ -960,12 +1060,261 @@
                     if(this.isScanMode) document.getElementById('rfidInput').focus({ preventScroll: true });
                 },
 
+                setScanEngine(engine) {
+                    if (this.scanEngine === engine) return;
+                    const wasCameraOpen = this.showCamera;
+
+                    this.stopFaceCamera();
+                    this.stopScanner();
+                    this.showCamera = false;
+
+                    this.scanEngine = engine;
+
+                    if (wasCameraOpen && (engine === 'face' || engine === 'qr')) {
+                        this.showCamera = true;
+                        this.$nextTick(() => {
+                            if (engine === 'face') this.startFaceCamera();
+                            if (engine === 'qr') this.startScanner();
+                        });
+                    } else if (engine === 'rfid') {
+                        this.$nextTick(() => {
+                            const input = document.getElementById('rfidInput');
+                            if (input) input.focus({ preventScroll: true });
+                        });
+                    }
+                },
+
                 toggleCamera() {
                     this.showCamera = !this.showCamera;
-                    if (this.showCamera) this.$nextTick(() => { this.startScanner(); }); else this.stopScanner();
+                    if (this.showCamera) {
+                        this.$nextTick(() => {
+                            if (this.scanEngine === 'face') {
+                                this.startFaceCamera();
+                            } else if (this.scanEngine === 'qr') {
+                                this.startScanner();
+                            }
+                        });
+                    } else {
+                        this.stopFaceCamera();
+                        this.stopScanner();
+                    }
+                },
+
+                async switchCamera() {
+                    this.facingMode = (this.facingMode === 'environment') ? 'user' : 'environment';
+                    if (this.showCamera) {
+                        if (this.scanEngine === 'face') {
+                            this.faceStatusText = 'Memutar kamera...';
+                            await this.startFaceCamera();
+                        } else if (this.scanEngine === 'qr') {
+                            this.startScanner();
+                        }
+                    }
+                },
+
+                async startFaceCamera() {
+                    this.stopScanner();
+                    const video = document.getElementById('face-video');
+                    if (!video) return;
+
+                    // Load Models jika belum
+                    if (!this.faceModelsLoaded && window.faceapi) {
+                        this.faceStatusText = 'Memuat Model AI Wajah...';
+                        try {
+                            const MODEL_URL = '{{ asset("models") }}';
+                            await Promise.all([
+                                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                            ]);
+
+                            // Inisialisasi FaceMatcher dari deskriptor kelas ini
+                            if (this.faceDescriptors && this.faceDescriptors.length > 0) {
+                                const labeled = this.faceDescriptors.map(item => {
+                                    const desc = new Float32Array(item.descriptor);
+                                    return new faceapi.LabeledFaceDescriptors(String(item.student_id), [desc]);
+                                });
+                                this.faceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
+                            }
+                            this.faceModelsLoaded = true;
+                        } catch (err) {
+                            console.error('Gagal memuat model AI:', err);
+                            this.faceStatusText = 'Gagal memuat model AI';
+                            return;
+                        }
+                    }
+
+                    if (video.srcObject) {
+                        video.srcObject.getTracks().forEach(t => t.stop());
+                        video.srcObject = null;
+                    }
+
+                    try {
+                        let stream;
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({
+                                video: {
+                                    width: { ideal: 640 },
+                                    height: { ideal: 480 },
+                                    facingMode: { ideal: this.facingMode }
+                                }
+                            });
+                        } catch (e) {
+                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        }
+
+                        video.srcObject = stream;
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            this.startFaceLoop();
+                        };
+                    } catch (err) {
+                        console.error('Akses kamera gagal:', err);
+                        this.faceStatusText = 'Izin kamera ditolak';
+                        Swal.fire({
+                            title: 'Kamera Error',
+                            text: 'Pastikan browser diizinkan mengakses kamera.',
+                            icon: 'error',
+                            customClass: { popup: 'rounded-[2rem] shadow-2xl' }
+                        });
+                    }
+                },
+
+                stopFaceCamera() {
+                    if (this.faceCheckInterval) {
+                        clearInterval(this.faceCheckInterval);
+                        this.faceCheckInterval = null;
+                    }
+                    const video = document.getElementById('face-video');
+                    if (video && video.srcObject) {
+                        video.srcObject.getTracks().forEach(t => t.stop());
+                        video.srcObject = null;
+                    }
+                },
+
+                startFaceLoop() {
+                    const video = document.getElementById('face-video');
+                    const canvas = document.getElementById('face-canvas');
+                    if (!video || !canvas) return;
+
+                    if (this.faceCheckInterval) clearInterval(this.faceCheckInterval);
+
+                    this.faceCheckInterval = setInterval(async () => {
+                        if (!this.showCamera || this.scanEngine !== 'face' || !this.faceModelsLoaded || video.paused || video.ended) return;
+
+                        const displaySize = { width: video.videoWidth || 640, height: video.videoHeight || 480 };
+                        faceapi.matchDimensions(canvas, displaySize);
+
+                        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                            .withFaceLandmarks()
+                            .withFaceDescriptors();
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        if (!detections || detections.length === 0) {
+                            if (!this.isFaceProcessing) {
+                                this.faceStatusText = 'Arahkan kamera ke wajah siswa...';
+                            }
+                            return;
+                        }
+
+                        const resized = faceapi.resizeResults(detections, displaySize);
+
+                        for (const d of resized) {
+                            const box = d.detection.box;
+                            let label = 'Wajah Terdeteksi';
+                            let boxColor = '#38bdf8';
+
+                            if (this.faceMatcher) {
+                                const bestMatch = this.faceMatcher.findBestMatch(d.descriptor);
+                                if (bestMatch.label !== 'unknown') {
+                                    const studentId = parseInt(bestMatch.label);
+                                    const matchStudent = this.faceDescriptors.find(s => s.student_id === studentId);
+                                    const studentName = matchStudent ? matchStudent.name : 'Siswa #' + studentId;
+                                    label = studentName;
+                                    boxColor = '#10b981';
+
+                                    // Cooldown 3.5 detik per siswa
+                                    const now = Date.now();
+                                    const lastSeen = this.lastScannedFaces[studentId] || 0;
+                                    if (now - lastSeen > 3500 && !this.isFaceProcessing) {
+                                        this.lastScannedFaces[studentId] = now;
+                                        this.submitFaceAttendance(studentId, studentName);
+                                    }
+                                } else {
+                                    label = 'Bukan Siswa Kelas Ini';
+                                    boxColor = '#f59e0b';
+                                }
+                            }
+
+                            // Gambar Bounding Box
+                            ctx.strokeStyle = boxColor;
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+                            // Background Label
+                            ctx.fillStyle = boxColor;
+                            ctx.font = 'bold 12px sans-serif';
+                            const textWidth = ctx.measureText(label).width;
+                            ctx.fillRect(box.x, box.y - 22, textWidth + 10, 22);
+
+                            // Teks Nama
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(label, box.x + 5, box.y - 6);
+                        }
+                    }, 250);
+                },
+
+                async submitFaceAttendance(studentId, studentName) {
+                    this.isFaceProcessing = true;
+                    this.faceStatusText = 'Memproses: ' + studentName + '...';
+
+                    try {
+                        const response = await fetch('{{ route("teaching.scan") }}', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json', 
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
+                            },
+                            body: JSON.stringify({ student_id: studentId, session_id: this.sessionId })
+                        });
+                        const data = await response.json();
+
+                        if (data.status === 'success') {
+                            this.faceStatusText = '✅ ' + studentName + ' HADIR!';
+                            this.statusMessage = 'OK: ' + studentName;
+                            window.dispatchEvent(new CustomEvent('update-status-' + studentId, { detail: { status: 'present' } }));
+
+                            let rowEl = document.getElementById('student-row-' + studentId);
+                            if (rowEl) {
+                                let alpineEl = Alpine.$data(rowEl);
+                                if (alpineEl) this.updateLocalStats(alpineEl.status, 'present');
+                                rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+
+                            playBeep('success');
+                            this.showToast('success', studentName + ' Hadir!');
+                        } else if (data.status === 'warning') {
+                            this.faceStatusText = 'ℹ️ ' + studentName + ' sudah hadir';
+                            this.statusMessage = studentName + ' sudah hadir';
+                        } else {
+                            this.faceStatusText = '⚠️ ' + data.message;
+                            this.statusMessage = 'GAGAL: ' + data.message;
+                            playBeep('error');
+                            this.showToast('error', data.message);
+                        }
+                    } catch (e) {
+                        console.error('Submit face attendance error:', e);
+                        this.faceStatusText = 'Error koneksi server';
+                    } finally {
+                        this.isFaceProcessing = false;
+                    }
                 },
 
                 startScanner() {
+                    this.stopFaceCamera();
                     if (this.html5QrcodeScanner) {
                         try {
                             this.html5QrcodeScanner.stop().catch(() => {});
@@ -981,24 +1330,6 @@
                         }
                     };
 
-                    // Aktifkan continuous autofocus agar kamera menyesuaikan jarak secara dinamis
-                    const lockCameraFocus = () => {
-                        setTimeout(() => {
-                            const videoEl = document.querySelector('#reader video');
-                            if (!videoEl) return;
-                            const stream = videoEl.srcObject;
-                            if (!stream) return;
-                            const track = stream.getVideoTracks()[0];
-                            if (!track) return;
-                            
-                            const capabilities = track.getCapabilities ? track.getCapabilities() : {};
-
-                            if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-                                track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
-                            }
-                        }, 1500);
-                    };
-                    
                     const onScanSuccess = (decodedText) => { 
                         if (!this.loading) { 
                             this.rfidCode = decodedText; 
@@ -1008,31 +1339,19 @@
                         } 
                     };
 
-                    // Coba kamera belakang (Mobile / HP)
                     this.html5QrcodeScanner.start(
-                        { facingMode: "environment" }, 
+                        { facingMode: this.facingMode }, 
                         config,
                         onScanSuccess,
                         (errorMessage) => { }
-                    ).then(() => {
-                        lockCameraFocus();
-                    }).catch(err => {
-                        // Fallback ke kamera depan / Webcam PC
+                    ).catch(err => {
                         this.html5QrcodeScanner.start(
-                            { facingMode: "user" }, 
+                            { facingMode: (this.facingMode === 'environment' ? 'user' : 'environment') }, 
                             config,
                             onScanSuccess,
                             (errorMessage) => { }
-                        ).then(() => {
-                            lockCameraFocus();
-                        }).catch(e => {
-                            this.statusMessage = "Error Kamera: Izin ditolak atau kamera tidak ditemukan.";
-                            Swal.fire({
-                                title: 'Kamera Error', 
-                                text: 'Pastikan Anda menggunakan HTTPS dan memberikan izin kamera.', 
-                                icon: 'error',
-                                customClass: { popup: 'rounded-[2rem] shadow-2xl' }
-                            });
+                        ).catch(e => {
+                            this.statusMessage = "Error Kamera QR: Izin ditolak.";
                         });
                     });
                 },
