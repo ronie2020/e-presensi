@@ -955,7 +955,11 @@
                         config, 
                         onScanSuccess
                     ).then(() => {
-                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan`;
+                        if (isFaceEngineActive) {
+                            dom.scanStatus.innerHTML = `<i class="ph-bold ph-user-focus text-emerald-500"></i> Arahkan Kamera ke Wajah Siswa`;
+                        } else {
+                            dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan`;
+                        }
                     }).catch(err => {
                         handleError('Gagal memuat kamera tujuan.');
                         console.warn(err);

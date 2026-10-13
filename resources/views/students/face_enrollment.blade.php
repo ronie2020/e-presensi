@@ -87,8 +87,22 @@
                         <div class="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden border-2 border-slate-700 shadow-inner group">
                             
                             {{-- Elemen Video & Canvas --}}
-                            <video id="webcam-video" autoplay muted playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
-                            <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100"></canvas>
+                            <video id="webcam-video" autoplay muted playsinline class="w-full h-full object-cover transition-transform duration-300" :class="facingMode === 'user' ? 'transform -scale-x-100' : ''"></video>
+                            <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none transition-transform duration-300" :class="facingMode === 'user' ? 'transform -scale-x-100' : ''"></canvas>
+
+                            {{-- Floating Bar: Status Mode Kamera & Tombol Switch Cepat --}}
+                            <div class="absolute top-4 inset-x-4 flex items-center justify-between pointer-events-auto z-20">
+                                <div class="px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-white/10 text-[11px] font-bold text-slate-200 flex items-center gap-1.5 shadow-lg">
+                                    <i class="ph-bold" :class="facingMode === 'environment' ? 'ph-camera text-sky-400' : 'ph-user-focus text-amber-400'"></i>
+                                    <span x-text="facingMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan (Selfie)'"></span>
+                                </div>
+
+                                <button type="button" @click="switchCamera()" 
+                                    title="Putar Kamera (Depan / Belakang)"
+                                    class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-slate-900/85 hover:bg-sky-600 active:scale-95 text-white backdrop-blur-md border border-white/20 flex items-center justify-center text-lg sm:text-xl shadow-xl transition-all hover:scale-105 group/flip">
+                                    <i class="ph-bold ph-camera-rotate group-hover/flip:rotate-180 transition-transform duration-300"></i>
+                                </button>
+                            </div>
 
                             {{-- Bingkai Panduan Oval / Lingkaran Wajah --}}
                             <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
@@ -99,7 +113,7 @@
                             </div>
 
                             {{-- Banner Indikator Deteksi Realtime --}}
-                            <div class="absolute bottom-4 inset-x-4 flex justify-center pointer-events-none">
+                            <div class="absolute bottom-4 inset-x-4 flex justify-center pointer-events-none z-20">
                                 <div id="detection-banner" class="bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-xs font-bold text-slate-300 flex items-center gap-2 shadow-lg transition-all">
                                     <i class="ph-bold ph-scan text-sky-400 animate-pulse text-base"></i>
                                     <span>Menunggu deteksi wajah...</span>
@@ -133,7 +147,13 @@
                             </div>
 
                             {{-- Action Buttons --}}
-                            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                                {{-- Tombol Putar Kamera di Kontrol Bawah --}}
+                                <button type="button" @click="switchCamera()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-2 border border-slate-700 transition-all active:scale-95 shadow-sm">
+                                    <i class="ph-bold ph-camera-rotate text-base text-sky-400"></i>
+                                    <span x-text="facingMode === 'environment' ? 'Putar ke Depan' : 'Putar ke Belakang'"></span>
+                                </button>
+
                                 <button type="button" @click="toggleCamera()" class="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs flex items-center gap-2 border border-slate-700 transition-all">
                                     <i class="ph-bold ph-arrows-clockwise text-base"></i>
                                     <span x-text="cameraActive ? 'Restart Cam' : 'Buka Cam'"></span>
@@ -275,11 +295,13 @@
                 })),
                 searchQuery: '',
                 selectedStudent: null,
+                facingMode: (window.innerWidth <= 768) ? 'environment' : 'user', // Default belakang di HP, depan di PC/Laptop
                 cameraActive: false,
                 modelsLoaded: false,
                 isDetecting: false,
                 currentDetection: null,
                 canCapture: false,
+                detectionInterval: null,
 
                 get filteredStudents() {
                     if (!this.searchQuery) return this.studentsList;
@@ -323,10 +345,28 @@
 
                 async startCamera() {
                     const video = document.getElementById('webcam-video');
+                    
+                    // Matikan stream lama jika masih berjalan
+                    if (video.srcObject) {
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        video.srcObject = null;
+                    }
+
                     try {
-                        const stream = await navigator.mediaDevices.getUserMedia({
-                            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
-                        });
+                        let stream;
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({
+                                video: { 
+                                    width: { ideal: 640 }, 
+                                    height: { ideal: 480 }, 
+                                    facingMode: { ideal: this.facingMode } 
+                                }
+                            });
+                        } catch (constraintErr) {
+                            console.warn('Gagal dengan constraint facingMode, fallback ke video default:', constraintErr);
+                            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        }
+
                         video.srcObject = stream;
                         this.cameraActive = true;
 
@@ -346,12 +386,30 @@
                     }
                 },
 
+                async switchCamera() {
+                    const banner = document.getElementById('detection-banner');
+                    if (banner) {
+                        banner.className = 'bg-sky-950/90 backdrop-blur-md px-4 py-2 rounded-xl border border-sky-500/40 text-xs font-bold text-sky-300 flex items-center gap-2 shadow-lg';
+                        banner.innerHTML = '<i class="ph-bold ph-circle-notch animate-spin text-base text-sky-400"></i> Memutar kamera...';
+                    }
+
+                    // Balik facingMode
+                    this.facingMode = (this.facingMode === 'environment') ? 'user' : 'environment';
+
+                    // Restart kamera
+                    await this.startCamera();
+                },
+
                 toggleCamera() {
                     const video = document.getElementById('webcam-video');
                     if (video.srcObject) {
                         video.srcObject.getTracks().forEach(track => track.stop());
                         video.srcObject = null;
                         this.cameraActive = false;
+                        if (this.detectionInterval) {
+                            clearInterval(this.detectionInterval);
+                            this.detectionInterval = null;
+                        }
                     } else {
                         this.startCamera();
                     }
@@ -367,7 +425,12 @@
                     const canvas = document.getElementById('overlay-canvas');
                     const banner = document.getElementById('detection-banner');
 
-                    setInterval(async () => {
+                    if (this.detectionInterval) {
+                        clearInterval(this.detectionInterval);
+                        this.detectionInterval = null;
+                    }
+
+                    this.detectionInterval = setInterval(async () => {
                         if (!this.modelsLoaded || !this.cameraActive || video.paused || video.ended) return;
 
                         // Sesuaikan ukuran kanvas dengan video
@@ -431,9 +494,12 @@
                     snapCanvas.width = video.videoWidth || 640;
                     snapCanvas.height = video.videoHeight || 480;
                     const sCtx = snapCanvas.getContext('2d');
-                    // Cermin balik agar orientasi normal
-                    sCtx.translate(snapCanvas.width, 0);
-                    sCtx.scale(-1, 1);
+                    
+                    // Cermin balik hanya jika kamera depan agar orientasi foto normal
+                    if (this.facingMode === 'user') {
+                        sCtx.translate(snapCanvas.width, 0);
+                        sCtx.scale(-1, 1);
+                    }
                     sCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
                     const imageBase64 = snapCanvas.toDataURL('image/jpeg', 0.85);
 
