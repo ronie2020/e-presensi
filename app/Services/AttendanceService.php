@@ -283,10 +283,9 @@ class AttendanceService
      */
     public function logActivity($student, $type, $name, $desc, $points) 
     {
-        // BENAR-BENAR BERSIH: Kita hanya mengirim data untuk kolom yang pasti ada di database.
-        // HAPUS key 'type' secara permanen dari blok create ini!
         ActivityLog::create([
             'student_id'    => $student->id, 
+            'type'          => $type,
             'activity_type' => $type, 
             'activity_name' => $name,
             'description'   => $desc, 

@@ -125,6 +125,8 @@ class Student extends Authenticatable
         // 12. LAINNYA
         'rfid_id', 
         'photo_path', 
+        'face_descriptor',
+        'face_registered_at',
         'status', 
         'score', 
         'ramadan_points',
@@ -139,6 +141,8 @@ class Student extends Authenticatable
      */
     protected $casts = [
         'is_validated' => 'boolean',    
+        'face_descriptor' => 'array',
+        'face_registered_at' => 'datetime',
         'dob' => 'date',
         'birth_date' => 'date',
         'accepted_date' => 'date',

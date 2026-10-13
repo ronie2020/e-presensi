@@ -2,6 +2,7 @@
     {{-- 1. LIBRARY PENDUKUNG --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     {{-- 2. CUSTOM STYLES --}}
     @push('styles')
@@ -170,6 +171,17 @@
                         
                         {{-- Tombol Aksi Bawah Scanner --}}
                         <div class="mt-5 grid grid-cols-2 gap-3">
+                            <!-- 0. Tombol Ganti Mode: QR vs Wajah -->
+                            <button id="btn-toggle-engine" onclick="toggleScanEngine()" class="col-span-2 py-3 px-4 rounded-xl border border-sky-300 text-sky-800 bg-sky-50/80 hover:bg-sky-100 font-bold text-xs flex items-center justify-between gap-2 shadow-sm transition-all active:scale-95">
+                                <span class="flex items-center gap-2">
+                                    <i id="engine-icon" class="ph-bold ph-qr-code text-lg text-sky-600"></i>
+                                    <span id="engine-label">Metode: <strong>Scan QR Kartu</strong></span>
+                                </span>
+                                <span class="text-[10px] bg-white border border-sky-300 text-sky-700 px-2.5 py-1 rounded-lg uppercase tracking-wider font-extrabold flex items-center gap-1.5 shadow-xs">
+                                    <i class="ph-bold ph-arrows-left-right"></i> Ganti ke Wajah Siswa
+                                </span>
+                            </button>
+
                             <!-- 1. Tombol Ketik NISN -->
                             <button onclick="showManualInput()" class="py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-elevate-peach-light hover:text-elevate-primary hover:border-elevate-peach/50 transition-all flex items-center justify-center gap-2 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-keyboard text-lg"></i> Ketik NISN
@@ -967,6 +979,90 @@
                     startNewCamera();
                 }
             };
+            
+            // ==============================================================
+            // LOGIKA DUAL ENGINE: QR CODE & FACE RECOGNITION MOBILE
+            // ==============================================================
+            let isFaceEngineActive = false;
+            let mobileFaceMatcher = null;
+            let isMobileFaceModelsLoaded = false;
+            let faceCheckInterval = null;
+
+            window.toggleScanEngine = async () => {
+                initAudio();
+                isFaceEngineActive = !isFaceEngineActive;
+                const btn = document.getElementById('btn-toggle-engine');
+                const icon = document.getElementById('engine-icon');
+                const label = document.getElementById('engine-label');
+
+                if (isFaceEngineActive) {
+                    btn.className = "col-span-2 py-3 px-4 rounded-xl border border-emerald-300 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 font-bold text-xs flex items-center justify-between gap-2 shadow-sm transition-all active:scale-95";
+                    icon.className = "ph-bold ph-user-focus text-lg text-emerald-600 animate-pulse";
+                    label.innerHTML = "Metode: <strong>Scan Wajah Siswa (AI)</strong>";
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-circle-notch animate-spin text-emerald-500"></i> Menyiapkan AI Wajah...`;
+
+                    await initMobileFaceRecognition();
+                } else {
+                    btn.className = "col-span-2 py-3 px-4 rounded-xl border border-sky-300 text-sky-800 bg-sky-50/80 hover:bg-sky-100 font-bold text-xs flex items-center justify-between gap-2 shadow-sm transition-all active:scale-95";
+                    icon.className = "ph-bold ph-qr-code text-lg text-sky-600";
+                    label.innerHTML = "Metode: <strong>Scan QR Kartu</strong>";
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan QR`;
+
+                    if (faceCheckInterval) clearInterval(faceCheckInterval);
+                }
+            };
+
+            async function initMobileFaceRecognition() {
+                if (!isMobileFaceModelsLoaded && window.faceapi) {
+                    try {
+                        const MODEL_URL = '{{ asset("models") }}';
+                        await Promise.all([
+                            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                        ]);
+
+                        const res = await fetch('{{ route("kiosk.face-descriptors") }}');
+                        const json = await res.json();
+                        if (json.status === 'success' && json.data && json.data.length > 0) {
+                            const labeled = json.data.map(item => {
+                                const desc = new Float32Array(item.descriptor);
+                                return new faceapi.LabeledFaceDescriptors(String(item.student_id), [desc]);
+                            });
+                            mobileFaceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
+                        }
+                        isMobileFaceModelsLoaded = true;
+                    } catch(e) {
+                        console.error('Gagal memuat AI wajah di HP:', e);
+                        dom.scanStatus.innerHTML = `<span class="text-rose-500">Gagal memuat model AI wajah</span>`;
+                        return;
+                    }
+                }
+
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-user-focus text-emerald-500"></i> Arahkan Kamera ke Wajah Siswa`;
+
+                if (faceCheckInterval) clearInterval(faceCheckInterval);
+                faceCheckInterval = setInterval(async () => {
+                    if (!isFaceEngineActive || state.isProcessing || !mobileFaceMatcher || !window.faceapi) return;
+
+                    const videoEl = document.querySelector('#qr-reader video');
+                    if (!videoEl || videoEl.paused || videoEl.ended || videoEl.videoWidth === 0) return;
+
+                    try {
+                        const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                            .withFaceLandmarks()
+                            .withFaceDescriptor();
+
+                        if (detection) {
+                            const bestMatch = mobileFaceMatcher.findBestMatch(detection.descriptor);
+                            if (bestMatch && bestMatch.label !== 'unknown' && bestMatch.distance < 0.45) {
+                                dom.scanStatus.innerHTML = `<i class="ph-bold ph-check text-emerald-500"></i> Wajah Terverifikasi!`;
+                                processAttendanceData(bestMatch.label);
+                            }
+                        }
+                    } catch(e) {}
+                }, 280);
+            }
             
             checkAutoMode(new Date());
         });

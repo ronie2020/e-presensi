@@ -69,6 +69,10 @@
                                 <span>Registrasi Siswa</span>
                                 <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </button>
+                            <a href="{{ route('face-recognition.index') }}" class="bg-sky-500/10 hover:bg-sky-500/20 border border-sky-400/30 hover:border-sky-400/50 text-sky-200 hover:text-white px-5 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
+                                <i class="ph-bold ph-user-focus text-lg text-sky-400"></i>
+                                <span>Studio Wajah AI</span>
+                            </a>
                             <a href="{{ route('students.export') }}" class="bg-white/10 hover:bg-white/20 border border-white/15 hover:border-sky-400/40 text-white px-5 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-sm backdrop-blur-md active:scale-95">
                                 <i class="ph-bold ph-microsoft-excel-logo text-lg text-emerald-400"></i>
                                 <span>Export Excel</span>
@@ -417,6 +421,10 @@
 
                                                     <a href="{{ route('students.edit', array_merge(['student' => $student->id], request()->query())) }}" class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-amber-300 hover:border-amber-500/40 hover:bg-amber-500/20 flex items-center justify-center transition-all shadow-sm" title="Edit Data">
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                                    </a>
+
+                                                    <a href="{{ route('face-recognition.index', ['search' => $student->student_id ?: $student->nisn ?: $student->name]) }}" class="w-9 h-9 rounded-xl {{ $student->face_descriptor ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'bg-white/5 border-white/10 text-slate-400 hover:text-sky-300 hover:border-sky-400/40 hover:bg-sky-500/20' }} border flex items-center justify-center transition-all shadow-sm" title="{{ $student->face_descriptor ? 'Wajah Terdaftar (Kelola)' : 'Rekam Wajah AI' }}">
+                                                        <i class="ph-bold {{ $student->face_descriptor ? 'ph-user-check' : 'ph-user-focus' }} text-lg"></i>
                                                     </a>
                                                     
                                                     <div x-data="{ open: false }" class="relative">

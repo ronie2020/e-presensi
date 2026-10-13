@@ -16,6 +16,10 @@
     $holidayReason = isset($holidayReason) ? $holidayReason : null;
 @endphp
 
+{{-- AI & BARCODE ENGINE --}}
+<script src="{{ asset('js/face-api.min.js') }}"></script>
+<script src="{{ asset('js/jsQR.js') }}"></script>
+
 <!-- LAYER START KIOSK -->
 <div id="start-overlay" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center cursor-pointer transition-all duration-700 backdrop-blur-md overflow-hidden" onclick="startKiosk()">
     <div class="absolute inset-0 bg-cover bg-center opacity-65 filter brightness-80 contrast-110 pointer-events-none" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
@@ -87,26 +91,34 @@
                 <!-- BOX SCANNER TARGET -->
                 <div id="status-box" class="w-full flex-1 min-h-0 relative bg-slate-950/70 rounded-[2rem] border border-slate-700/50 shadow-inner overflow-hidden flex flex-col justify-center items-center group">
                     
+                    <!-- Background Video Stream untuk Face & QR Recognition -->
+                    <video id="kiosk-cam" autoplay muted playsinline class="absolute inset-0 w-full h-full object-cover transform -scale-x-100 opacity-40 group-hover:opacity-75 transition-opacity z-0"></video>
+                    <canvas id="kiosk-ai-canvas" class="absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100 z-10"></canvas>
+
                     <!-- Scanner decorative corners (Thicker & brighter) -->
-                    <div class="absolute top-6 left-6 w-10 h-10 border-t-4 border-l-4 border-blue-500/60 rounded-tl-2xl transition-colors duration-300 group-hover:border-blue-400"></div>
-                    <div class="absolute top-6 right-6 w-10 h-10 border-t-4 border-r-4 border-blue-500/60 rounded-tr-2xl transition-colors duration-300 group-hover:border-blue-400"></div>
-                    <div class="absolute bottom-6 left-6 w-10 h-10 border-b-4 border-l-4 border-blue-500/60 rounded-bl-2xl transition-colors duration-300 group-hover:border-blue-400"></div>
-                    <div class="absolute bottom-6 right-6 w-10 h-10 border-b-4 border-r-4 border-blue-500/60 rounded-br-2xl transition-colors duration-300 group-hover:border-blue-400"></div>
+                    <div class="absolute top-6 left-6 w-10 h-10 border-t-4 border-blue-500/60 rounded-tl-2xl transition-colors duration-300 group-hover:border-blue-400 z-20"></div>
+                    <div class="absolute top-6 right-6 w-10 h-10 border-t-4 border-r-4 border-blue-500/60 rounded-tr-2xl transition-colors duration-300 group-hover:border-blue-400 z-20"></div>
+                    <div class="absolute bottom-6 left-6 w-10 h-10 border-b-4 border-l-4 border-blue-500/60 rounded-bl-2xl transition-colors duration-300 group-hover:border-blue-400 z-20"></div>
+                    <div class="absolute bottom-6 right-6 w-10 h-10 border-b-4 border-r-4 border-blue-500/60 rounded-br-2xl transition-colors duration-300 group-hover:border-blue-400 z-20"></div>
                     
                     <!-- Scanning Laser Line Animation -->
-                    <div class="absolute top-0 left-0 w-full h-[2px] bg-blue-400/90 shadow-[0_0_20px_2px_#60a5fa] animate-scan-line z-0"></div>
+                    <div class="absolute top-0 left-0 w-full h-[2px] bg-blue-400/90 shadow-[0_0_20px_2px_#60a5fa] animate-scan-line z-20"></div>
 
                     <!-- STANDBY STATE -->
-                    <div id="state-standby" class="flex flex-col items-center justify-center p-6 relative z-10 transition-all duration-300 w-full">
-                        <div class="w-28 h-28 mb-8 relative group-hover:scale-110 transition-transform duration-700">
+                    <div id="state-standby" class="flex flex-col items-center justify-center p-6 relative z-20 transition-all duration-300 w-full">
+                        <div class="flex items-center gap-2 bg-blue-900/60 border border-blue-500/40 px-4 py-1.5 rounded-full mb-5 shadow-lg backdrop-blur-md">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="ai-kiosk-badge" class="text-[10px] font-bold text-blue-200 uppercase tracking-widest">Multi-Modal: Wajah • QR Card • RFID</span>
+                        </div>
+                        <div class="w-24 h-24 mb-5 relative group-hover:scale-105 transition-transform duration-500">
                             <div class="absolute inset-0 bg-blue-500/30 blur-2xl rounded-full group-hover:bg-blue-500/40 transition-colors"></div>
-                            <div class="w-full h-full bg-slate-800/80 backdrop-blur-md rounded-3xl border-2 border-slate-600 shadow-2xl flex items-center justify-center relative">
-                                <i class="ph-duotone ph-scan text-6xl text-blue-400 drop-shadow-md group-hover:text-white transition-colors"></i>
+                            <div class="w-full h-full bg-slate-900/80 backdrop-blur-md rounded-3xl border-2 border-slate-600 shadow-2xl flex items-center justify-center relative">
+                                <i class="ph-duotone ph-scan text-5xl text-blue-400 drop-shadow-md group-hover:text-white transition-colors"></i>
                             </div>
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-black text-white tracking-widest text-center drop-shadow-lg group-hover:text-blue-200 transition-colors">SIAP SCAN KARTU</h2>
-                        <p class="text-slate-400 text-sm mt-3 font-bold tracking-wide text-center bg-slate-900/50 px-4 py-1.5 rounded-full border border-slate-800">Tempelkan kartu identitas (RFID) pada area scanner</p>
-                        <p id="ekskul-name-display" class="hidden text-rose-400 mt-5 font-black text-xs bg-rose-500/10 border border-rose-500/30 px-6 py-2.5 rounded-full uppercase tracking-widest shadow-[0_0_20px_rgba(225,29,72,0.15)]"></p>
+                        <h2 class="text-2xl md:text-3xl font-black text-white tracking-widest text-center drop-shadow-lg group-hover:text-blue-200 transition-colors">SIAP PRESENSI</h2>
+                        <p class="text-slate-300 text-xs mt-2 font-bold tracking-wide text-center bg-slate-900/70 px-4 py-1.5 rounded-full border border-slate-800 backdrop-blur-sm">Arahkan Wajah, Tunjukkan QR, atau Tap Kartu RFID</p>
+                        <p id="ekskul-name-display" class="hidden text-rose-400 mt-4 font-black text-xs bg-rose-500/10 border border-rose-500/30 px-6 py-2.5 rounded-full uppercase tracking-widest shadow-[0_0_20px_rgba(225,29,72,0.15)]"></p>
                     </div>
 
                     <!-- RESULT STATE -->
@@ -245,9 +257,15 @@
 
 </div>
 
-<!-- LOGIKA JAVASCRIPT & ALPINE.JS (TETAP SAMA 100%) -->
+<!-- LOGIKA JAVASCRIPT & ALPINE.JS (HYBRID AI MULTI-MODAL) -->
 <script>
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let kioskCamStream = null;
+    let kioskFaceMatcher = null;
+    let isKioskAiReady = false;
+    let recentFaceScans = {};
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
     function startKiosk() {
         const overlay = document.getElementById('start-overlay');
@@ -261,9 +279,138 @@
         if (audioCtx.state === 'suspended') audioCtx.resume();
         window.isProcessing = false;
         document.getElementById('scan-input').focus();
+
+        // Aktifkan Kamera & AI Biometrik Multi-Modal
+        initKioskAIAndCamera();
+    }
+
+    async function initKioskAIAndCamera() {
+        const video = document.getElementById('kiosk-cam');
+        const badgeEl = document.getElementById('ai-kiosk-badge');
+        if (!video) return;
+
+        try {
+            if (badgeEl) badgeEl.textContent = 'Menghubungkan Kamera & AI...';
+            
+            // 1. Nyalakan Kamera Webcam Kiosk
+            kioskCamStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
+            });
+            video.srcObject = kioskCamStream;
+            await video.play().catch(e => console.log('Auto play info:', e));
+
+            // 2. Muat Model AI Wajah (face-api.js lokal)
+            if (window.faceapi) {
+                const MODEL_URL = '{{ asset("models") }}';
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                ]);
+                
+                // 3. Ambil data descriptor siswa dari server
+                try {
+                    const res = await fetch('{{ route("kiosk.face-descriptors") }}');
+                    const json = await res.json();
+                    if (json.status === 'success' && json.data && json.data.length > 0) {
+                        const labeled = json.data.map(item => {
+                            const descriptor = new Float32Array(item.descriptor);
+                            return new faceapi.LabeledFaceDescriptors(String(item.student_id), [descriptor]);
+                        });
+                        kioskFaceMatcher = new faceapi.FaceMatcher(labeled, 0.45);
+                        console.log(`AI Kiosk: Siap dengan ${json.count} wajah siswa terdaftar.`);
+                    }
+                } catch(e) {
+                    console.warn('Gagal memuat descriptor wajah untuk Kiosk:', e);
+                }
+
+                isKioskAiReady = true;
+                if (badgeEl) badgeEl.textContent = 'Multi-Modal: Wajah • QR Card • RFID Aktif';
+            }
+
+            // 4. Jalankan AI Real-time Loop
+            startKioskAiLoop(video);
+
+        } catch (err) {
+            console.warn('Kamera Kiosk tidak dapat diaktifkan, beralih ke RFID only:', err);
+            if (badgeEl) badgeEl.textContent = 'Mode RFID Reader USB Aktif';
+        }
+    }
+
+    function startKioskAiLoop(video) {
+        const canvas = document.getElementById('kiosk-ai-canvas');
+        if (!canvas) return;
+
+        setInterval(async () => {
+            if (window.isProcessing || !video || video.paused || video.ended || video.videoWidth === 0) {
+                return;
+            }
+
+            if (canvas.width !== video.videoWidth) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                offscreenCanvas.width = video.videoWidth;
+                offscreenCanvas.height = video.videoHeight;
+            }
+
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // A. Cek QR Code dengan jsQR jika siswa menyodorkan kartu
+            if (window.jsQR) {
+                try {
+                    offscreenCtx.drawImage(video, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                    const imgData = offscreenCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+                    const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
+                    if (code && code.data && code.data.trim()) {
+                        triggerIdentifiedScan(code.data.trim(), 'qr');
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // B. Cek Deteksi Wajah dengan face-api.js
+            if (isKioskAiReady && kioskFaceMatcher && window.faceapi) {
+                try {
+                    const detection = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+
+                    if (detection) {
+                        const bestMatch = kioskFaceMatcher.findBestMatch(detection.descriptor);
+                        const box = detection.detection.box;
+                        const isMatch = bestMatch.label !== 'unknown' && bestMatch.distance < 0.45;
+                        
+                        ctx.strokeStyle = isMatch ? '#10b981' : '#38bdf8';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+                        if (isMatch) {
+                            triggerIdentifiedScan(bestMatch.label, 'face');
+                        }
+                    }
+                } catch (e) {}
+            }
+        }, 220);
+    }
+
+    function triggerIdentifiedScan(identifier, source) {
+        if (window.isProcessing) return;
+
+        const now = Date.now();
+        // Cooldown 8 detik agar siswa yang masih berdiri di depan kamera tidak di-scan berulang
+        if (recentFaceScans[identifier] && (now - recentFaceScans[identifier] < 8000)) {
+            return;
+        }
+
+        recentFaceScans[identifier] = now;
+        window.processScanExternal(identifier);
     }
 
     function exitKiosk() {
+        if (kioskCamStream) {
+            kioskCamStream.getTracks().forEach(track => track.stop());
+        }
         if (document.exitFullscreen) document.exitFullscreen();
         window.location.href = "{{ route('landing') }}"; 
     }
@@ -674,7 +821,11 @@
             processScan(scanData, false);
         });
 
-         async function processScan(data, isRetry = false) {
+        window.processScanExternal = function(id) {
+            processScan(id, false);
+        };
+
+        async function processScan(data, isRetry = false) {
             window.isProcessing = true; scanInput.blur();
             
             stateStandby.classList.add('hidden');

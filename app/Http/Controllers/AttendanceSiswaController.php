@@ -149,11 +149,12 @@ public function processScan(Request $request, AttendanceService $attendanceServi
 // --- HELPER FUNCTIONS ---
 private function logActivity($student, $type, $name, $desc, $points) {
     ActivityLog::create([
-        'student_id' => $student->id, 
+        'student_id'    => $student->id, 
+        'type'          => $type,
         'activity_type' => $type, 
         'activity_name' => $name,
-        'description' => $desc, 
-        'point_earned' => $points
+        'description'   => $desc, 
+        'point_earned'  => $points
     ]);
     if($points != 0) $student->increment('score', $points);
 }
