@@ -48,6 +48,13 @@ class FaceRecognitionController extends Controller
         $totalActive = Student::where('status', 'active')->count();
         $totalRegistered = Student::where('status', 'active')->whereNotNull('face_descriptor')->count();
         $totalUnregistered = $totalActive - $totalRegistered;
+        
+        // Kandidat siap diekstrak massal (punya pas foto resmi tapi belum ada biometrik)
+        $totalCandidates = Student::where('status', 'active')
+            ->whereNotNull('photo_path')
+            ->where('photo_path', '!=', '')
+            ->whereNull('face_descriptor')
+            ->count();
 
         return view('students.face_enrollment', compact(
             'classes',
@@ -57,8 +64,46 @@ class FaceRecognitionController extends Controller
             'statusFilter',
             'totalActive',
             'totalRegistered',
-            'totalUnregistered'
+            'totalUnregistered',
+            'totalCandidates'
         ));
+    }
+
+    /**
+     * Endpoint API: Ambil daftar siswa yang memiliki foto namun belum terdaftar biometriknya untuk ekstraksi massal.
+     */
+    public function batchCandidates(Request $request)
+    {
+        $classId = $request->get('class_id');
+
+        $query = Student::where('status', 'active')
+            ->whereNotNull('photo_path')
+            ->where('photo_path', '!=', '')
+            ->whereNull('face_descriptor');
+
+        if ($classId) {
+            $query->where('class_id', $classId);
+        }
+
+        $students = $query->with('schoolClass:id,name')
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'student_id' => $s->student_id,
+                    'nisn' => $s->nisn,
+                    'name' => $s->name,
+                    'class_name' => $s->schoolClass ? $s->schoolClass->name : '-',
+                    'photo_url' => $s->photo_path ? (str_starts_with($s->photo_path, 'http') ? $s->photo_path : asset('storage/' . $s->photo_path)) : null,
+                ];
+            });
+
+        return response()->json([
+            'status' => 'success',
+            'count' => $students->count(),
+            'students' => $students
+        ]);
     }
 
     /**
@@ -112,9 +157,10 @@ class FaceRecognitionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'student_id' => 'required',
-            'descriptor' => 'required|array|min:128|max:128',
-            'image' => 'nullable|string', // Base64 dataURL opsional untuk foto terbaru
+            'student_id'     => 'required',
+            'descriptor'     => 'required|array|min:128|max:128',
+            'image'          => 'nullable|string', // Base64 dataURL opsional untuk foto terbaru
+            'set_as_profile' => 'nullable|boolean', // Opsi izin operator untuk menyimpan foto profil
         ]);
 
         $student = Student::where('id', $request->student_id)
@@ -129,14 +175,17 @@ class FaceRecognitionController extends Controller
         }
 
         try {
-            // Jika ada foto base64 yang dikirimkan saat capture
-            if ($request->filled('image') && str_starts_with($request->image, 'data:image')) {
+            $photoUpdated = false;
+
+            // Hanya perbarui foto profil siswa jika operator secara eksplisit mengizinkan
+            if ($request->boolean('set_as_profile') && $request->filled('image') && str_starts_with($request->image, 'data:image')) {
                 $imageParts = explode(';base64,', $request->image);
                 if (count($imageParts) === 2) {
                     $imageBase64 = base64_decode($imageParts[1]);
                     $fileName = 'students/faces/' . $student->id . '_' . time() . '.jpg';
                     Storage::disk('public')->put($fileName, $imageBase64);
                     $student->photo_path = $fileName;
+                    $photoUpdated = true;
                 }
             }
 
@@ -145,9 +194,13 @@ class FaceRecognitionController extends Controller
             $student->face_registered_at = Carbon::now();
             $student->save();
 
+            $message = $photoUpdated 
+                ? "Wajah dan foto profil {$student->name} berhasil diperbarui!"
+                : "Wajah biometrik {$student->name} berhasil didaftarkan! (Foto resmi tetap terlindungi)";
+
             return response()->json([
                 'status' => 'success',
-                'message' => "Wajah {$student->name} berhasil didaftarkan!",
+                'message' => $message,
                 'student' => [
                     'id' => $student->id,
                     'name' => $student->name,

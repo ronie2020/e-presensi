@@ -407,6 +407,7 @@ Route::middleware('auth')->group(function () {
     // Manajemen Master Data (SISWA & KELAS)
     // =========================================================================
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
+    Route::post('/students/import-photos', [StudentController::class, 'importPhotos'])->name('students.importPhotos');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
     Route::get('/students/export-attendance', [StudentController::class, 'exportAttendance'])->name('students.exportAttendance'); 
     Route::get('/students/print-batch', [StudentController::class, 'printBatch'])->name('students.printBatch');
@@ -422,6 +423,7 @@ Route::middleware('auth')->group(function () {
     // --- BIOMETRIK FACE RECOGNITION SISWA ---
     Route::prefix('face-recognition')->name('face-recognition.')->group(function () {
         Route::get('/', [FaceRecognitionController::class, 'index'])->name('index');
+        Route::get('/batch-candidates', [FaceRecognitionController::class, 'batchCandidates'])->name('batch-candidates');
         Route::post('/store', [FaceRecognitionController::class, 'store'])->name('store');
         Route::delete('/{id}', [FaceRecognitionController::class, 'destroy'])->name('destroy');
     });

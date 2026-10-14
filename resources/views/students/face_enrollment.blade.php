@@ -39,18 +39,22 @@
                     </div>
 
                     {{-- STATISTIK KARTU KECIL --}}
-                    <div class="flex items-center gap-3 bg-slate-900/80 border border-white/10 rounded-2xl p-4 backdrop-blur-md shrink-0">
-                        <div class="text-center px-3 border-r border-slate-700">
-                            <span class="text-2xl font-black text-white">{{ $totalActive }}</span>
-                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aktif</span>
+                    <div class="flex items-center gap-2 sm:gap-3 bg-slate-900/80 border border-white/10 rounded-2xl p-3 sm:p-4 backdrop-blur-md shrink-0 flex-wrap sm:flex-nowrap">
+                        <div class="text-center px-2.5 sm:px-3 border-r border-slate-700">
+                            <span class="text-xl sm:text-2xl font-black text-white">{{ $totalActive }}</span>
+                            <span class="block text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aktif</span>
                         </div>
-                        <div class="text-center px-3 border-r border-slate-700">
-                            <span class="text-2xl font-black text-emerald-400">{{ $totalRegistered }}</span>
-                            <span class="block text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Sudah Wajah</span>
+                        <div class="text-center px-2.5 sm:px-3 border-r border-slate-700">
+                            <span class="text-xl sm:text-2xl font-black text-emerald-400">{{ $totalRegistered }}</span>
+                            <span class="block text-[9px] sm:text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Wajah AI</span>
                         </div>
-                        <div class="text-center px-3">
-                            <span class="text-2xl font-black text-amber-400">{{ $totalUnregistered }}</span>
-                            <span class="block text-[10px] font-bold text-amber-300 uppercase tracking-wider">Belum</span>
+                        <div class="text-center px-2.5 sm:px-3 border-r border-slate-700">
+                            <span class="text-xl sm:text-2xl font-black text-amber-400">{{ $totalUnregistered }}</span>
+                            <span class="block text-[9px] sm:text-[10px] font-bold text-amber-300 uppercase tracking-wider">Belum</span>
+                        </div>
+                        <div class="text-center px-2.5 sm:px-3">
+                            <span class="text-xl sm:text-2xl font-black text-cyan-400">{{ $totalCandidates }}</span>
+                            <span class="block text-[9px] sm:text-[10px] font-bold text-cyan-300 uppercase tracking-wider">Foto Siap</span>
                         </div>
                     </div>
                 </div>
@@ -120,9 +124,28 @@
                                 </div>
                             </div>
 
-                            {{-- Countdown Overlay saat Capture --}}
-                            <div id="countdown-overlay" class="hidden absolute inset-0 bg-sky-950/70 backdrop-blur-sm z-30 flex items-center justify-center">
-                                <span id="countdown-number" class="text-8xl font-black text-white animate-ping">3</span>
+                            {{-- Multi-Sample Countdown & Capture Progress Overlay --}}
+                            <div id="countdown-overlay" class="hidden absolute inset-0 bg-sky-950/85 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center">
+                                <div id="countdown-container" class="flex flex-col items-center justify-center">
+                                    <span id="countdown-number" class="text-8xl font-black text-white animate-pulse drop-shadow-[0_0_25px_rgba(56,189,248,0.8)]">2</span>
+                                    <p class="text-xs font-bold text-sky-300 uppercase tracking-widest mt-3">Bersiap Di Depan Kamera</p>
+                                </div>
+                                <div id="multisample-container" class="hidden flex flex-col items-center justify-center space-y-3">
+                                    <div class="relative w-20 h-20 flex items-center justify-center">
+                                        <div class="absolute inset-0 rounded-full border-4 border-sky-500/20"></div>
+                                        <div class="absolute inset-0 rounded-full border-4 border-sky-400 border-t-transparent animate-spin"></div>
+                                        <i class="ph-bold ph-scan text-3xl text-sky-300"></i>
+                                    </div>
+                                    <div>
+                                        <h4 id="multisample-status" class="text-base sm:text-lg font-black text-white">Mengambil Sampel 1/3...</h4>
+                                        <p id="multisample-subtext" class="text-xs text-slate-300 font-medium">Harap jangan bergerak</p>
+                                    </div>
+                                    <div class="flex items-center gap-2.5 mt-2">
+                                        <span id="sample-dot-1" class="w-3.5 h-3.5 rounded-full bg-slate-700 transition-all border border-white/10"></span>
+                                        <span id="sample-dot-2" class="w-3.5 h-3.5 rounded-full bg-slate-700 transition-all border border-white/10"></span>
+                                        <span id="sample-dot-3" class="w-3.5 h-3.5 rounded-full bg-slate-700 transition-all border border-white/10"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -166,6 +189,41 @@
                             </div>
                         </div>
 
+                        {{-- STATUS PROTEKSI FOTO RESMI & OPSI PROFIL SEMENTARA --}}
+                        <div x-show="selectedStudent" class="mt-4 p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                            <div class="flex items-center gap-2.5">
+                                <template x-if="selectedStudent && selectedStudent.photo">
+                                    <div class="flex items-center gap-2 text-emerald-400">
+                                        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                                            <i class="ph-bold ph-shield-check text-base"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-emerald-300">Foto Profil Resmi Terpasang</span>
+                                            <p class="text-[11px] text-slate-400">Pas foto resmi terlindungi & aman (kamera hanya merekam pola AI tanpa menimpa foto).</p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="selectedStudent && !selectedStudent.photo">
+                                    <div class="flex items-center gap-2 text-amber-300">
+                                        <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+                                            <i class="ph-bold ph-warning-circle text-base"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-amber-300">Belum Ada Pas Foto Resmi</span>
+                                            <p class="text-[11px] text-slate-400">Default: Kamera hanya merekam biometrik AI untuk menjaga kerapian dokumen resmi sekolah.</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template x-if="selectedStudent && !selectedStudent.photo">
+                                <label class="inline-flex items-center gap-2 cursor-pointer select-none bg-slate-900 hover:bg-slate-850 px-3 py-1.5 rounded-xl border border-slate-700/80 transition-all shrink-0">
+                                    <input type="checkbox" x-model="saveAsProfilePhoto" class="rounded border-slate-600 bg-slate-950 text-sky-500 focus:ring-sky-500 h-4 w-4">
+                                    <span class="text-[11px] font-bold text-slate-300">Gunakan sebagai foto profil sementara</span>
+                                </label>
+                            </template>
+                        </div>
+
                         {{-- FITUR EXTRA: Ekstrak dari Foto Profil Lama --}}
                         <div x-show="selectedStudent && selectedStudent.photo" class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between">
                             <span class="text-xs text-slate-400">Siswa ini memiliki foto profil resmi di database.</span>
@@ -181,7 +239,7 @@
                     
                     <div class="bg-slate-900/80 border border-slate-800 rounded-[2rem] p-6 shadow-2xl flex flex-col h-[700px]">
                         
-                        <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-800">
+                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-800">
                             <div>
                                 <h3 class="text-base font-black text-white">Daftar Antrean Siswa</h3>
                                 <p class="text-xs text-slate-400">Pilih siswa untuk direkam wajahnya</p>
@@ -189,6 +247,25 @@
                             <div class="text-xs bg-slate-800 px-3 py-1 rounded-lg text-slate-300 font-bold border border-slate-700">
                                 <span x-text="studentsList.length"></span> Siswa
                             </div>
+                        </div>
+
+                        {{-- TOMBOL EKSTRAKSI MASSAL DARI FOTO RESMI (1-KLIK) --}}
+                        <div class="mb-3">
+                            <button type="button" @click="startBatchExtraction()" 
+                                    class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 border border-emerald-400/30 flex items-center justify-between transition-all active:scale-[0.98]">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0 shadow-inner">
+                                        <i class="ph-bold ph-sparkle text-base"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <span class="block text-[11px] font-black uppercase tracking-wider">Ekstrak Wajah Massal</span>
+                                        <span class="block text-[10px] text-emerald-100 font-normal">Auto-scan biometrik dari pas foto resmi</span>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full bg-white/20 text-[10px] font-black tracking-wide border border-white/20">
+                                    {{ $totalCandidates }} Siap
+                                </span>
+                            </button>
                         </div>
 
                         {{-- FILTER KELAS & SEARCH --}}
@@ -269,10 +346,111 @@
                             </template>
                         </div>
 
-                        {{-- Pagination link jika ada --}}
-                        <div class="mt-4 pt-3 border-t border-slate-800 text-xs">
-                            {{ $students->links() }}
-                        </div>
+                        {{-- Pagination Khusus AI Studio (Kompak, Responsif & Tidak Overflow) --}}
+                        @if ($students->hasPages())
+                            <div class="mt-3 pt-3 border-t border-slate-800/80 flex flex-col gap-2 shrink-0">
+                                {{-- Baris 1: Info Ringkasan Siswa & Dropdown Lompat Halaman Cepat --}}
+                                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                    <span>
+                                        Data <strong class="text-white">{{ $students->firstItem() }}-{{ $students->lastItem() }}</strong> dari <strong class="text-sky-400">{{ $students->total() }}</strong>
+                                    </span>
+
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[10px] text-slate-400">Hal:</span>
+                                        <select onchange="window.location.href=this.value" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-0.5 text-[10px] text-sky-400 font-bold focus:ring-sky-500 focus:border-sky-500 cursor-pointer">
+                                            @for ($p = 1; $p <= $students->lastPage(); $p++)
+                                                <option value="{{ $students->url($p) }}" {{ $students->currentPage() == $p ? 'selected' : '' }}>
+                                                    {{ $p }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                        <span class="text-[10px] text-slate-400">/ {{ $students->lastPage() }}</span>
+                                    </div>
+                                </div>
+
+                                {{-- Baris 2: Tombol Navigasi Halaman yang Rapi & Pas di Kolom --}}
+                                <div class="flex items-center justify-center gap-1 flex-wrap">
+                                    {{-- Tombol Pertama & Sebelumnya --}}
+                                    @if ($students->onFirstPage())
+                                        <span class="w-7 h-7 rounded-lg bg-slate-950/60 border border-slate-800/70 text-slate-600 flex items-center justify-center text-xs cursor-not-allowed" title="Halaman Pertama">
+                                            <i class="ph-bold ph-caret-double-left"></i>
+                                        </span>
+                                        <span class="w-7 h-7 rounded-lg bg-slate-950/60 border border-slate-800/70 text-slate-600 flex items-center justify-center text-xs cursor-not-allowed" title="Halaman Sebelumnya">
+                                            <i class="ph-bold ph-caret-left"></i>
+                                        </span>
+                                    @else
+                                        <a href="{{ $students->url(1) }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm active:scale-95" title="Halaman Pertama">
+                                            <i class="ph-bold ph-caret-double-left"></i>
+                                        </a>
+                                        <a href="{{ $students->previousPageUrl() }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm active:scale-95" title="Halaman Sebelumnya">
+                                            <i class="ph-bold ph-caret-left"></i>
+                                        </a>
+                                    @endif
+
+                                    {{-- Nomor Halaman (Maksimal 3-5 nomor di sekitar halaman saat ini) --}}
+                                    @php
+                                        $cur = $students->currentPage();
+                                        $last = $students->lastPage();
+                                        $start = max(1, $cur - 1);
+                                        $end = min($last, $cur + 1);
+
+                                        if ($cur <= 2) {
+                                            $end = min($last, 3);
+                                        }
+                                        if ($cur >= $last - 1) {
+                                            $start = max(1, $last - 2);
+                                        }
+                                    @endphp
+
+                                    @if ($start > 1)
+                                        <a href="{{ $students->url(1) }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[11px] font-bold transition-all">
+                                            1
+                                        </a>
+                                        @if ($start > 2)
+                                            <span class="w-3 text-center text-slate-600 text-[10px]">..</span>
+                                        @endif
+                                    @endif
+
+                                    @for ($page = $start; $page <= $end; $page++)
+                                        @if ($page == $cur)
+                                            <span class="w-7 h-7 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 text-white font-black flex items-center justify-center text-[11px] shadow-md shadow-sky-500/25 border border-sky-400">
+                                                {{ $page }}
+                                            </span>
+                                        @else
+                                            <a href="{{ $students->url($page) }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[11px] font-bold transition-all shadow-sm active:scale-95">
+                                                {{ $page }}
+                                            </a>
+                                        @endif
+                                    @endfor
+
+                                    @if ($end < $last)
+                                        @if ($end < $last - 1)
+                                            <span class="w-3 text-center text-slate-600 text-[10px]">..</span>
+                                        @endif
+                                        <a href="{{ $students->url($last) }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-[11px] font-bold transition-all">
+                                            {{ $last }}
+                                        </a>
+                                    @endif
+
+                                    {{-- Tombol Berikutnya & Terakhir --}}
+                                    @if ($students->hasMorePages())
+                                        <a href="{{ $students->nextPageUrl() }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm active:scale-95" title="Halaman Berikutnya">
+                                            <i class="ph-bold ph-caret-right"></i>
+                                        </a>
+                                        <a href="{{ $students->url($last) }}" class="w-7 h-7 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm active:scale-95" title="Halaman Terakhir">
+                                            <i class="ph-bold ph-caret-double-right"></i>
+                                        </a>
+                                    @else
+                                        <span class="w-7 h-7 rounded-lg bg-slate-950/60 border border-slate-800/70 text-slate-600 flex items-center justify-center text-xs cursor-not-allowed" title="Halaman Berikutnya">
+                                            <i class="ph-bold ph-caret-right"></i>
+                                        </span>
+                                        <span class="w-7 h-7 rounded-lg bg-slate-950/60 border border-slate-800/70 text-slate-600 flex items-center justify-center text-xs cursor-not-allowed" title="Halaman Terakhir">
+                                            <i class="ph-bold ph-caret-double-right"></i>
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -295,6 +473,7 @@
                 })),
                 searchQuery: '',
                 selectedStudent: null,
+                saveAsProfilePhoto: false, // Flag opsi simpan foto ke profil
                 facingMode: (window.innerWidth <= 768) ? 'environment' : 'user', // Default belakang di HP, depan di PC/Laptop
                 cameraActive: false,
                 modelsLoaded: false,
@@ -417,6 +596,7 @@
 
                 selectStudent(student) {
                     this.selectedStudent = student;
+                    this.saveAsProfilePhoto = false; // Reset toggle saat berganti siswa
                     this.updateCaptureButtonState();
                 },
 
@@ -487,34 +667,129 @@
                     if (!this.canCapture) return;
 
                     const overlay = document.getElementById('countdown-overlay');
+                    const countContainer = document.getElementById('countdown-container');
                     const numberEl = document.getElementById('countdown-number');
+                    const multiContainer = document.getElementById('multisample-container');
+                    const multiStatus = document.getElementById('multisample-status');
+                    const multiSub = document.getElementById('multisample-subtext');
+                    const dots = [
+                        document.getElementById('sample-dot-1'),
+                        document.getElementById('sample-dot-2'),
+                        document.getElementById('sample-dot-3')
+                    ];
                     const video = document.getElementById('webcam-video');
 
+                    // 1. Tampilkan Countdown Awal
                     overlay.classList.remove('hidden');
+                    countContainer.classList.remove('hidden');
+                    multiContainer.classList.add('hidden');
 
                     for (let i = 2; i >= 1; i--) {
                         numberEl.textContent = i;
-                        await new Promise(r => setTimeout(r, 600));
+                        await new Promise(r => setTimeout(r, 550));
+                    }
+
+                    // 2. Alihkan ke Indikator Multi-Sample (3 Sampel AI)
+                    countContainer.classList.add('hidden');
+                    multiContainer.classList.remove('hidden');
+
+                    const totalSamples = 3;
+                    const collectedDescriptors = [];
+                    let bestImageBase64 = null;
+
+                    dots.forEach(d => { if (d) d.className = 'w-3.5 h-3.5 rounded-full bg-slate-700 transition-all border border-white/10'; });
+
+                    for (let sample = 1; sample <= totalSamples; sample++) {
+                        if (multiStatus) multiStatus.textContent = `Mengambil Sampel ${sample}/${totalSamples}...`;
+                        if (multiSub) {
+                            multiSub.textContent = sample === 1 
+                                ? 'Menganalisis koordinat kontur wajah...' 
+                                : (sample === 2 ? 'Menstabilkan sudut dan pencahayaan...' : 'Menghitung akurasi 128-vektor biometrik...');
+                        }
+                        if (dots[sample - 1]) dots[sample - 1].className = 'w-3.5 h-3.5 rounded-full bg-sky-400 animate-pulse border border-sky-300';
+
+                        try {
+                            // Deteksi langsung dari frame webcam saat ini
+                            const detection = await faceapi.detectSingleFace(
+                                video, 
+                                new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.45 })
+                            ).withFaceLandmarks().withFaceDescriptor();
+
+                            if (detection && detection.descriptor) {
+                                collectedDescriptors.push(detection.descriptor);
+                                if (dots[sample - 1]) dots[sample - 1].className = 'w-3.5 h-3.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-500/50 border border-emerald-300';
+
+                                // Simpan frame foto saat sampel ke-2 (posisi paling stabil)
+                                if (!bestImageBase64 || sample === 2) {
+                                    const snapCanvas = document.createElement('canvas');
+                                    snapCanvas.width = video.videoWidth || 640;
+                                    snapCanvas.height = video.videoHeight || 480;
+                                    const sCtx = snapCanvas.getContext('2d');
+                                    if (this.facingMode === 'user') {
+                                        sCtx.translate(snapCanvas.width, 0);
+                                        sCtx.scale(-1, 1);
+                                    }
+                                    sCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+                                    bestImageBase64 = snapCanvas.toDataURL('image/jpeg', 0.85);
+                                }
+                            } else {
+                                if (dots[sample - 1]) dots[sample - 1].className = 'w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-300';
+                            }
+                        } catch (err) {
+                            console.warn(`Error on capture sample ${sample}:`, err);
+                        }
+
+                        // Jeda singkat antar sampel agar variasi mikro-ekspresi & sensor noise cancelation optimal
+                        if (sample < totalSamples) {
+                            await new Promise(r => setTimeout(r, 220));
+                        }
                     }
 
                     overlay.classList.add('hidden');
 
-                    // Ambil Frame Foto saat ini sebagai base64 preview
-                    const snapCanvas = document.createElement('canvas');
-                    snapCanvas.width = video.videoWidth || 640;
-                    snapCanvas.height = video.videoHeight || 480;
-                    const sCtx = snapCanvas.getContext('2d');
-                    
-                    // Cermin balik hanya jika kamera depan agar orientasi foto normal
-                    if (this.facingMode === 'user') {
-                        sCtx.translate(snapCanvas.width, 0);
-                        sCtx.scale(-1, 1);
+                    // 3. Kalkulasi Vektor Rata-Rata (Mathematical Mean of 128-D Coordinate Vector)
+                    let finalDescriptor = null;
+                    if (collectedDescriptors.length > 0) {
+                        const count = collectedDescriptors.length;
+                        const avgVector = new Float32Array(128);
+                        for (let i = 0; i < 128; i++) {
+                            let sum = 0;
+                            for (let k = 0; k < count; k++) {
+                                sum += collectedDescriptors[k][i];
+                            }
+                            avgVector[i] = sum / count;
+                        }
+                        finalDescriptor = avgVector;
+                    } else if (this.currentDetection) {
+                        // Fallback ke deteksi terakhir loop realtime jika proses multi-sampel gagal
+                        finalDescriptor = this.currentDetection.descriptor;
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Wajah Tidak Tertangkap',
+                            text: 'AI tidak dapat menangkap wajah dengan jelas saat pengambilan sampel. Pastikan pencahayaan cukup dan hadapkan wajah tegak ke kamera.',
+                            background: '#0f172a',
+                            color: '#fff'
+                        });
+                        return;
                     }
-                    sCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
-                    const imageBase64 = snapCanvas.toDataURL('image/jpeg', 0.85);
 
-                    // Kirim Descriptor ke Server
-                    await this.saveDescriptorToServer(this.currentDetection.descriptor, imageBase64);
+                    // Fallback gambar jika belum terbentuk
+                    if (!bestImageBase64) {
+                        const snapCanvas = document.createElement('canvas');
+                        snapCanvas.width = video.videoWidth || 640;
+                        snapCanvas.height = video.videoHeight || 480;
+                        const sCtx = snapCanvas.getContext('2d');
+                        if (this.facingMode === 'user') {
+                            sCtx.translate(snapCanvas.width, 0);
+                            sCtx.scale(-1, 1);
+                        }
+                        sCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
+                        bestImageBase64 = snapCanvas.toDataURL('image/jpeg', 0.85);
+                    }
+
+                    // Kirim Descriptor Vektor Rata-Rata ke Server
+                    await this.saveDescriptorToServer(finalDescriptor, bestImageBase64);
                 },
 
                 async extractFromProfilePhoto() {
@@ -581,7 +856,8 @@
                         const payload = {
                             student_id: this.selectedStudent.id,
                             descriptor: Array.from(descriptorArray),
-                            image: imageBase64
+                            image: imageBase64,
+                            set_as_profile: this.saveAsProfilePhoto
                         };
 
                         const res = await fetch('{{ route("face-recognition.store") }}', {
@@ -599,15 +875,27 @@
                         if (res.ok) {
                             // Tandai siswa ini sebagai sudah memiliki wajah
                             this.selectedStudent.has_face = true;
-                            if (data.student && data.student.photo_path) {
-                                this.selectedStudent.photo = data.student.photo_path;
+                            
+                            // Sinkronkan ke daftar siswa
+                            const targetInList = this.studentsList.find(s => s.id === this.selectedStudent.id);
+                            if (targetInList) {
+                                targetInList.has_face = true;
                             }
+
+                            // Perbarui foto hanya jika operator mencentang opsi simpan profil
+                            if (this.saveAsProfilePhoto && data.student && data.student.photo_path) {
+                                this.selectedStudent.photo = data.student.photo_path;
+                                if (targetInList) {
+                                    targetInList.photo = data.student.photo_path;
+                                }
+                            }
+                            this.saveAsProfilePhoto = false;
 
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Berhasil!',
                                 text: data.message,
-                                timer: 1500,
+                                timer: 2000,
                                 showConfirmButton: false,
                                 background: '#0f172a',
                                 color: '#fff'
@@ -617,6 +905,7 @@
                             const nextStudent = this.studentsList.find(s => !s.has_face);
                             if (nextStudent) {
                                 this.selectedStudent = nextStudent;
+                                this.saveAsProfilePhoto = false;
                             }
 
                         } else {
@@ -631,6 +920,251 @@
                             color: '#fff'
                         });
                     }
+                },
+
+                async startBatchExtraction() {
+                    if (!this.modelsLoaded) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Model AI Belum Siap',
+                            text: 'Mohon tunggu beberapa detik hingga file model AI selesai dimuat.',
+                            background: '#0f172a',
+                            color: '#fff'
+                        });
+                        return;
+                    }
+
+                    const currentClassId = '{{ $selectedClassId }}';
+                    const totalCandidateCount = {{ $totalCandidates }};
+
+                    const { value: scope } = await Swal.fire({
+                        title: 'Ekstraksi Biometrik Massal',
+                        html: `
+                            <p class="text-xs text-slate-300 mb-4 text-left leading-relaxed">
+                                AI akan membaca pas foto resmi siswa secara otomatis, mendeteksi koordinat wajah, dan mendaftarkan 128-vektor biometrik untuk absensi kiosk.
+                            </p>
+                            <div class="text-left space-y-2 text-xs font-bold text-slate-200">
+                                <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer hover:border-emerald-500 transition-all">
+                                    <input type="radio" name="batch_scope" value="class" checked class="text-emerald-500 focus:ring-emerald-400 h-4 w-4">
+                                    <div>
+                                        <span class="block">${currentClassId ? 'Hanya Kelas Terpilih Saat Ini' : 'Sesuai Filter Kelas Aktif'}</span>
+                                        <span class="text-[10px] font-normal text-slate-400">Memproses siswa di kelas ini yang memiliki pas foto resmi.</span>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-800/80 border border-slate-700 cursor-pointer hover:border-emerald-500 transition-all">
+                                    <input type="radio" name="batch_scope" value="all" class="text-emerald-500 focus:ring-emerald-400 h-4 w-4">
+                                    <div>
+                                        <span class="block">Seluruh Siswa Sekolah (${totalCandidateCount} Siswa Siap)</span>
+                                        <span class="text-[10px] font-normal text-slate-400">Memindai semua siswa dari seluruh kelas sekaligus.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="ph-bold ph-play mr-1"></i> Mulai Ekstrak AI',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#475569',
+                        background: '#0f172a',
+                        color: '#fff',
+                        preConfirm: () => {
+                            const checked = document.querySelector('input[name="batch_scope"]:checked');
+                            return checked ? checked.value : 'class';
+                        }
+                    });
+
+                    if (!scope) return;
+
+                    let url = '{{ route("face-recognition.batch-candidates") }}';
+                    if (scope === 'class' && currentClassId) {
+                        url += `?class_id=${currentClassId}`;
+                    }
+
+                    Swal.fire({
+                        title: 'Menyiapkan Data...',
+                        text: 'Mengambil daftar antrean siswa dengan pas foto...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading(),
+                        background: '#0f172a',
+                        color: '#fff'
+                    });
+
+                    let candidates = [];
+                    try {
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        candidates = data.students || [];
+                    } catch (e) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal mengambil data: ' + e.message, background: '#0f172a', color: '#fff' });
+                        return;
+                    }
+
+                    if (candidates.length === 0) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Tidak Ada Antrean',
+                            text: 'Semua siswa yang memiliki pas foto sudah terdaftar biometrik wajahnya!',
+                            background: '#0f172a',
+                            color: '#fff'
+                        });
+                        return;
+                    }
+
+                    let isCancelled = false;
+                    let successCount = 0;
+                    let failedCount = 0;
+                    let failedList = [];
+
+                    Swal.fire({
+                        title: 'Ekstraksi AI Sedang Berjalan...',
+                        html: `
+                            <div class="space-y-4 my-2 text-left">
+                                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                                    <div id="batch-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span id="batch-progress-text" class="text-slate-300 font-bold">0 / ${candidates.length}</span>
+                                    <span id="batch-progress-percent" class="text-emerald-400 font-black font-mono">0%</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+                                    <img id="batch-current-img" src="" class="w-11 h-11 rounded-lg object-cover bg-slate-800 border border-slate-700 shrink-0">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] text-slate-400 uppercase tracking-wider">Sedang Memproses:</p>
+                                        <h4 id="batch-current-name" class="text-xs font-bold text-white truncate">-</h4>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-[11px] font-mono">
+                                    <span class="text-emerald-400">✓ Berhasil: <strong id="batch-stat-success">0</strong></span>
+                                    <span class="text-rose-400">✗ Gagal/Buram: <strong id="batch-stat-fail">0</strong></span>
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        cancelButtonText: 'Hentikan Proses',
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        background: '#0f172a',
+                        color: '#fff',
+                        didOpen: async () => {
+                            const pBar = document.getElementById('batch-progress-bar');
+                            const pText = document.getElementById('batch-progress-text');
+                            const pPercent = document.getElementById('batch-progress-percent');
+                            const cImg = document.getElementById('batch-current-img');
+                            const cName = document.getElementById('batch-current-name');
+                            const sSuccess = document.getElementById('batch-stat-success');
+                            const sFail = document.getElementById('batch-stat-fail');
+
+                            for (let i = 0; i < candidates.length; i++) {
+                                if (isCancelled) break;
+
+                                const student = candidates[i];
+                                const currentIdx = i + 1;
+                                const percent = Math.round((currentIdx / candidates.length) * 100);
+
+                                if (pBar) pBar.style.width = `${percent}%`;
+                                if (pText) pText.textContent = `${currentIdx} / ${candidates.length}`;
+                                if (pPercent) pPercent.textContent = `${percent}%`;
+                                if (cName) cName.textContent = `${student.name} (${student.class_name})`;
+                                if (cImg) cImg.src = student.photo_url;
+
+                                try {
+                                    // 1. Muat Pas Foto Resmi Siswa
+                                    const img = new Image();
+                                    img.crossOrigin = 'anonymous';
+                                    img.src = student.photo_url;
+                                    await new Promise((resolve, reject) => {
+                                        img.onload = resolve;
+                                        img.onerror = () => reject(new Error('Gagal memuat foto'));
+                                    });
+
+                                    // 2. Deteksi Titik Wajah via AI
+                                    const detection = await faceapi.detectSingleFace(
+                                        img, 
+                                        new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.35 })
+                                    ).withFaceLandmarks().withFaceDescriptor();
+
+                                    if (!detection) {
+                                        failedCount++;
+                                        failedList.push(`${student.name} (Wajah tidak terdeteksi)`);
+                                        if (sFail) sFail.textContent = failedCount;
+                                        continue;
+                                    }
+
+                                    // 3. Simpan ke Server (set_as_profile: false agar pas foto resmi tetap terjaga)
+                                    const payload = {
+                                        student_id: student.id,
+                                        descriptor: Array.from(detection.descriptor),
+                                        image: null,
+                                        set_as_profile: false
+                                    };
+
+                                    const storeRes = await fetch('{{ route("face-recognition.store") }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json'
+                                        },
+                                        body: JSON.stringify(payload)
+                                    });
+
+                                    if (storeRes.ok) {
+                                        successCount++;
+                                        if (sSuccess) sSuccess.textContent = successCount;
+
+                                        // Tandai di daftar siswa lokal jika ada
+                                        const local = this.studentsList.find(s => s.id === student.id);
+                                        if (local) local.has_face = true;
+                                    } else {
+                                        failedCount++;
+                                        failedList.push(`${student.name} (Gagal simpan server)`);
+                                        if (sFail) sFail.textContent = failedCount;
+                                    }
+
+                                } catch (err) {
+                                    failedCount++;
+                                    failedList.push(`${student.name} (${err.message || 'Error'})`);
+                                    if (sFail) sFail.textContent = failedCount;
+                                }
+
+                                // Jeda 30ms agar rendering UI tetap mulus
+                                await new Promise(r => setTimeout(r, 30));
+                            }
+
+                            // Tampilkan Laporan Hasil
+                            Swal.fire({
+                                icon: successCount > 0 ? 'success' : 'warning',
+                                title: 'Ekstraksi Massal Selesai!',
+                                html: `
+                                    <div class="space-y-3 text-left text-xs my-2">
+                                        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center justify-between">
+                                            <span>Berhasil Didaftarkan Biometrik:</span>
+                                            <strong class="text-sm font-black">${successCount} Siswa</strong>
+                                        </div>
+                                        ${failedCount > 0 ? `
+                                            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                                                <span class="font-bold block mb-1">Dilewati / Gagal Deteksi (${failedCount} Siswa):</span>
+                                                <div class="max-h-28 overflow-y-auto custom-scrollbar text-[11px] space-y-1">
+                                                    ${failedList.map(item => `<div>• ${item}</div>`).join('')}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `,
+                                confirmButtonText: 'Segarkan Halaman',
+                                confirmButtonColor: '#0284c7',
+                                background: '#0f172a',
+                                color: '#fff'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        }
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.cancel) {
+                            isCancelled = true;
+                        }
+                    });
                 },
 
                 async deleteFace(student) {

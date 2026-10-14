@@ -367,6 +367,91 @@ class StudentController extends Controller
     }
 
     /**
+     * Import massal pas foto siswa via file ZIP (nama file = NISN / NIS / student_id).
+     */
+    public function importPhotos(Request $request)
+    {
+        $request->validate([
+            'zip_file' => 'required|file|mimes:zip|max:102400', // Maksimal 100MB
+        ]);
+
+        $zip = new \ZipArchive();
+        $file = $request->file('zip_file');
+
+        if ($zip->open($file->getRealPath()) !== true) {
+            return redirect()->back()->with('error', 'Gagal membuka file ZIP. Pastikan file arsip valid dan tidak korup.');
+        }
+
+        $imported = 0;
+        $unmatched = [];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $filename = $zip->getNameIndex($i);
+
+            // Lewati direktori dan file metadata/tersembunyi
+            if (str_ends_with($filename, '/') || str_contains($filename, '__MACOSX') || str_starts_with(basename($filename), '.')) {
+                continue;
+            }
+
+            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedExtensions)) {
+                continue;
+            }
+
+            // Ambil identifier (NISN / NIS / ID) dari nama file tanpa ekstensi
+            $rawName = pathinfo($filename, PATHINFO_FILENAME);
+            $cleanCode = trim($rawName);
+
+            if (empty($cleanCode)) {
+                continue;
+            }
+
+            // Cari siswa berdasarkan NISN, NIS, atau student_id
+            $student = Student::where('nisn', $cleanCode)
+                ->orWhere('nis', $cleanCode)
+                ->orWhere('student_id', $cleanCode)
+                ->first();
+
+            if ($student) {
+                $fileContent = $zip->getFromIndex($i);
+                if ($fileContent) {
+                    $newFileName = 'students/photos/' . $student->id . '_' . time() . '.' . $ext;
+                    Storage::disk('public')->put($newFileName, $fileContent);
+
+                    // Hapus foto lama fisik jika ada
+                    if ($student->photo_path && !str_starts_with($student->photo_path, 'http') && Storage::disk('public')->exists($student->photo_path)) {
+                        Storage::disk('public')->delete($student->photo_path);
+                    }
+
+                    $student->photo_path = $newFileName;
+                    $student->save();
+                    $imported++;
+                }
+            } else {
+                $unmatched[] = basename($filename);
+            }
+        }
+
+        $zip->close();
+
+        if ($imported === 0 && count($unmatched) === 0) {
+            return redirect()->back()->with('error', 'File ZIP tidak berisi file gambar JPG/PNG yang valid.');
+        }
+
+        $msg = "Berhasil mengimpor {$imported} pas foto resmi siswa!";
+        if (count($unmatched) > 0) {
+            $unmatchedPreview = implode(', ', array_slice($unmatched, 0, 5));
+            if (count($unmatched) > 5) {
+                $unmatchedPreview .= ' (dan ' . (count($unmatched) - 5) . ' lainnya)';
+            }
+            $msg .= " Catatan: " . count($unmatched) . " foto tidak cocok dengan NIS/NISN siswa: [{$unmatchedPreview}].";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
      * Export data ke Excel.
      */
     public function export()
@@ -465,17 +550,40 @@ class StudentController extends Controller
     public function updateFaceEmbedding(Request $request, Student $student)
     {
         $request->validate([
-            'embedding' => 'required|array',
+            'embedding'      => 'required|array',
+            'image'          => 'nullable|string',
+            'set_as_profile' => 'nullable|boolean',
         ]);
 
-        $student->update([
-            'face_descriptor' => $request->embedding,
+        $updateData = [
+            'face_descriptor'    => $request->embedding,
             'face_registered_at' => now(),
-        ]);
+        ];
+
+        $photoUpdated = false;
+
+        // Hanya perbarui foto profil jika operator sengaja memilih opsi tersebut
+        if ($request->boolean('set_as_profile') && $request->filled('image') && str_starts_with($request->image, 'data:image')) {
+            $imageParts = explode(';base64,', $request->image);
+            if (count($imageParts) === 2) {
+                $imageBase64 = base64_decode($imageParts[1]);
+                $fileName = 'students/faces/' . $student->id . '_' . time() . '.jpg';
+                Storage::disk('public')->put($fileName, $imageBase64);
+                $updateData['photo_path'] = $fileName;
+                $photoUpdated = true;
+            }
+        }
+
+        $student->update($updateData);
+
+        $message = $photoUpdated
+            ? 'Pola wajah dan foto profil ' . $student->name . ' berhasil diperbarui!'
+            : 'Pola wajah ' . $student->name . ' berhasil disimpan! (Foto resmi tetap terlindungi)';
 
         return response()->json([
-            'success' => true,
-            'message' => 'Data wajah ' . $student->name . ' berhasil disimpan!',
+            'success'   => true,
+            'message'   => $message,
+            'photo_url' => $student->photo_path ? asset('storage/' . $student->photo_path) : null,
         ]);
     }
 

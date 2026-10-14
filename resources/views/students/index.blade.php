@@ -281,6 +281,33 @@
                             </div>
                         </div>
 
+                        {{-- IMPORT MASSAL PAS FOTO RESMI (ZIP) --}}
+                        <div class="bg-gradient-to-br from-sky-500/10 via-indigo-500/10 to-blue-500/10 rounded-[2.5rem] border border-sky-500/30 p-6 relative overflow-hidden group hover:shadow-xl transition-all backdrop-blur-xl">
+                            <div class="relative z-10">
+                                <h3 class="text-sm font-black text-sky-300 mb-1 flex items-center gap-2">
+                                    <i class="ph-bold ph-file-zip text-sky-400 text-lg"></i> Import Pas Foto (ZIP)
+                                </h3>
+                                <p class="text-[10px] text-slate-300 mb-4 font-bold leading-relaxed">
+                                    Upload file <strong class="text-white">.ZIP</strong> pas foto. Nama file foto harus sesuai <strong class="text-sky-300">NISN</strong> atau <strong class="text-sky-300">NIS</strong> siswa (contoh: <code class="bg-black/50 px-1 py-0.5 rounded text-sky-200">0101782738.jpg</code>).
+                                </p>
+                                
+                                <form id="import-photo-form" action="{{ route('students.importPhotos') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
+                                    @csrf
+                                    <label for="zip_file_upload" class="flex-1 cursor-pointer">
+                                        <div class="bg-slate-900/80 border border-dashed border-sky-400/40 rounded-xl py-3 px-4 text-center transition-all hover:border-sky-400 hover:bg-sky-500/20 truncate">
+                                            <span class="text-xs font-bold text-sky-300 truncate flex items-center justify-center gap-2">
+                                                <i class="ph-bold ph-archive"></i> Pilih File ZIP...
+                                            </span>
+                                        </div>
+                                        <input type="file" name="zip_file" id="zip_file_upload" accept=".zip" required class="hidden" onchange="this.previousElementSibling.querySelector('span').innerHTML = '<i class=\'ph-bold ph-check\'></i> ' + (this.files[0] ? this.files[0].name.substring(0, 14) + '...' : 'ZIP Dipilih')">
+                                    </label>
+                                    <button type="submit" class="py-3 px-5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl transition-colors text-xs shadow-md shadow-sky-500/20 flex items-center gap-2 border border-sky-400/30 shrink-0">
+                                        <span>Upload</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

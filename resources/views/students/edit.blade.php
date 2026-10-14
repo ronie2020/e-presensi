@@ -720,6 +720,21 @@
                 Posisikan wajah tepat di dalam lingkaran oval dengan pencahayaan yang terang dan pandangan lurus.
             </p>
 
+            @if($student->photo_path)
+                <div class="mt-3 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5 text-xs text-emerald-300">
+                    <i class="ph-bold ph-shield-check text-lg text-emerald-400 shrink-0"></i>
+                    <span>Pas foto resmi siswa aman & terlindungi (tidak akan tertimpa jepretan kamera).</span>
+                </div>
+            @else
+                <div class="mt-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex items-start gap-2.5 text-xs text-slate-300">
+                    <input type="checkbox" id="check-save-profile-photo" class="mt-0.5 rounded border-slate-600 bg-slate-950 text-sky-500 focus:ring-sky-400 h-4 w-4">
+                    <label for="check-save-profile-photo" class="cursor-pointer select-none">
+                        <span class="font-bold text-white block">Jadikan juga sebagai Foto Profil Sementara</span>
+                        <span class="text-[11px] text-slate-400">Siswa ini belum memiliki pas foto resmi. Centang jika ingin jepretan kamera ini digunakan sementara di Buku Induk & Kartu Siswa.</span>
+                    </label>
+                </div>
+            @endif
+
             <div class="flex items-center gap-3 mt-5">
                 <button type="button" id="btn-cancel-face-modal" class="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition-all border border-white/10">
                     Batal
@@ -732,7 +747,67 @@
         </div>
     </div>
 
-    {{-- Script Flatpickr, SweetAlert & Face-API --}}
+    {{-- MODAL CROPPER PAS FOTO 3X4 --}}
+    <div id="crop-photo-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
+        <div class="bg-[#021124] border border-white/20 rounded-[2.5rem] max-w-md w-full p-6 text-white shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30">
+                        <i class="ph-bold ph-crop text-lg"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-white">Sesuaikan Pas Foto Resmi (3:4)</h4>
+                        <p class="text-[11px] text-slate-400">Posisikan wajah siswa di tengah bingkai</p>
+                    </div>
+                </div>
+                <button type="button" id="btn-cancel-crop" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            {{-- Cropper Container --}}
+            <div class="relative w-full aspect-[3/4] max-h-[380px] bg-black/90 rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
+                <img id="cropper-target-img" src="" class="max-w-full block">
+            </div>
+
+            {{-- Controls Toolbar --}}
+            <div class="flex items-center justify-between gap-2 mt-4 px-1 shrink-0 text-xs text-slate-400">
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="btn-crop-zoom-in" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all" title="Perbesar">
+                        <i class="ph-bold ph-magnifying-glass-plus text-base"></i>
+                    </button>
+                    <button type="button" id="btn-crop-zoom-out" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all" title="Perkecil">
+                        <i class="ph-bold ph-magnifying-glass-minus text-base"></i>
+                    </button>
+                    <button type="button" id="btn-crop-rotate-left" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all" title="Putar Kiri">
+                        <i class="ph-bold ph-arrow-counter-clockwise text-base"></i>
+                    </button>
+                    <button type="button" id="btn-crop-rotate-right" class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition-all" title="Putar Kanan">
+                        <i class="ph-bold ph-arrow-clockwise text-base"></i>
+                    </button>
+                    <button type="button" id="btn-crop-reset" class="px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 text-[11px] font-bold transition-all" title="Reset">
+                        Reset
+                    </button>
+                </div>
+                <span class="text-[11px] font-mono text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-400/20 font-bold">Rasio 3:4</span>
+            </div>
+
+            {{-- Action Buttons --}}
+            <div class="flex items-center gap-3 mt-5 shrink-0">
+                <button type="button" id="btn-crop-dismiss" class="flex-1 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-bold transition-all border border-white/10">
+                    Batal
+                </button>
+                <button type="button" id="btn-crop-apply" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-900/40">
+                    <i class="ph-bold ph-check text-base"></i>
+                    <span>Terapkan Pas Foto</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Script Flatpickr, SweetAlert, Cropper & Face-API --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -774,7 +849,7 @@
                 }
             }
 
-            async function saveFaceEmbedding(embeddingArray) {
+            async function saveFaceEmbedding(embeddingArray, imageBase64 = null, setAsProfile = false) {
                 Swal.fire({
                     title: 'Menyimpan Wajah...',
                     text: 'Menyimpan pola biometrik siswa ke database...',
@@ -791,7 +866,11 @@
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': csrfToken
                         },
-                        body: JSON.stringify({ embedding: embeddingArray })
+                        body: JSON.stringify({ 
+                            embedding: embeddingArray,
+                            image: imageBase64,
+                            set_as_profile: setAsProfile
+                        })
                     });
                     const data = await res.json();
 
@@ -803,6 +882,13 @@
                         `;
                         const delBtn = document.getElementById('btn-delete-face');
                         if (delBtn) delBtn.classList.remove('hidden');
+
+                        if (data.photo_url) {
+                            const photoPreview = document.getElementById('photo-preview');
+                            if (photoPreview) {
+                                photoPreview.src = data.photo_url;
+                            }
+                        }
 
                         Swal.fire({
                             icon: 'success',
@@ -959,9 +1045,84 @@
 
             captureBtn?.addEventListener('click', async function() {
                 if (!latestDescriptor) return;
-                const descriptorArray = Array.from(latestDescriptor);
+
+                const origBtnHtml = captureBtn.innerHTML;
+                captureBtn.disabled = true;
+
+                // Indikator Progress Multi-Sample
+                const totalSamples = 3;
+                const collectedDescriptors = [];
+                let imageBase64 = null;
+
+                const checkSaveProfile = document.getElementById('check-save-profile-photo');
+                const setAsProfile = checkSaveProfile ? checkSaveProfile.checked : false;
+
+                for (let sample = 1; sample <= totalSamples; sample++) {
+                    captureBtn.innerHTML = `
+                        <i class="ph-bold ph-circle-notch animate-spin text-base"></i>
+                        <span>Sampel Biometrik ${sample}/${totalSamples}...</span>
+                    `;
+                    statusBadge.className = 'px-3 py-1 rounded-full text-[10px] font-bold bg-sky-950/90 backdrop-blur-md text-sky-300 border border-sky-500/40 flex items-center gap-1.5 shadow-md';
+                    statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span> Mengambil Sampel ${sample}/${totalSamples}...`;
+
+                    try {
+                        const detection = await faceapi.detectSingleFace(
+                            videoEl,
+                            new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.45 })
+                        ).withFaceLandmarks(true).withFaceDescriptor();
+
+                        if (detection && detection.descriptor) {
+                            collectedDescriptors.push(detection.descriptor);
+
+                            // Simpan snapshot foto untuk profil jika dipilih
+                            if (setAsProfile && (!imageBase64 || sample === 2) && videoEl) {
+                                const snapCanvas = document.createElement('canvas');
+                                snapCanvas.width = videoEl.videoWidth || 640;
+                                snapCanvas.height = videoEl.videoHeight || 480;
+                                const sCtx = snapCanvas.getContext('2d');
+                                if (currentFacingMode === 'user') {
+                                    sCtx.translate(snapCanvas.width, 0);
+                                    sCtx.scale(-1, 1);
+                                }
+                                sCtx.drawImage(videoEl, 0, 0, snapCanvas.width, snapCanvas.height);
+                                imageBase64 = snapCanvas.toDataURL('image/jpeg', 0.85);
+                            }
+                        }
+                    } catch (err) {
+                        console.warn(`Error on capture sample ${sample}:`, err);
+                    }
+
+                    if (sample < totalSamples) {
+                        await new Promise(r => setTimeout(r, 220));
+                    }
+                }
+
+                // Kalkulasi rata-rata vektor 128-D
+                let finalDescriptor = null;
+                if (collectedDescriptors.length > 0) {
+                    const count = collectedDescriptors.length;
+                    const avgVector = new Float32Array(128);
+                    for (let i = 0; i < 128; i++) {
+                        let sum = 0;
+                        for (let k = 0; k < count; k++) {
+                            sum += collectedDescriptors[k][i];
+                        }
+                        avgVector[i] = sum / count;
+                    }
+                    finalDescriptor = avgVector;
+                } else if (latestDescriptor) {
+                    finalDescriptor = latestDescriptor;
+                } else {
+                    captureBtn.disabled = false;
+                    captureBtn.innerHTML = origBtnHtml;
+                    Swal.fire('Gagal Merekam', 'AI tidak dapat merekam wajah. Pastikan wajah terlihat jelas di kamera.', 'warning');
+                    return;
+                }
+
+                captureBtn.innerHTML = origBtnHtml;
                 closeCameraModal();
-                await saveFaceEmbedding(descriptorArray);
+
+                await saveFaceEmbedding(Array.from(finalDescriptor), imageBase64, setAsProfile);
             });
 
             // C. HAPUS DATA WAJAH
@@ -1021,19 +1182,100 @@
                 disableMobile: "true"
             });
 
-            // 2. PREVIEW FOTO
+            // 2. PREVIEW FOTO & CROPPER INTERAKTIF RASIO 3:4
             const photoInput = document.getElementById('photo-input');
-            if(photoInput) {
+            const cropModal = document.getElementById('crop-photo-modal');
+            const cropperImg = document.getElementById('cropper-target-img');
+            let cropperInstance = null;
+
+            if (photoInput && cropModal) {
                 photoInput.addEventListener('change', function(event) {
                     const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            document.getElementById('photo-preview').src = e.target.result;
-                            formIsDirty = true; // Tandai form berubah jika ganti foto
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        cropperImg.src = e.target.result;
+                        cropModal.classList.remove('hidden');
+
+                        if (cropperInstance) {
+                            cropperInstance.destroy();
                         }
-                        reader.readAsDataURL(file);
+
+                        // Inisialisasi Cropper dengan rasio terkunci 3:4 (standar pas foto)
+                        setTimeout(() => {
+                            cropperInstance = new Cropper(cropperImg, {
+                                aspectRatio: 3 / 4,
+                                viewMode: 1,
+                                autoCropArea: 0.9,
+                                background: false,
+                                responsive: true,
+                                checkOrientation: false,
+                            });
+                        }, 100);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                function closeCropModal() {
+                    if (cropperInstance) {
+                        cropperInstance.destroy();
+                        cropperInstance = null;
                     }
+                    cropModal.classList.add('hidden');
+                }
+
+                document.getElementById('btn-cancel-crop')?.addEventListener('click', closeCropModal);
+                document.getElementById('btn-crop-dismiss')?.addEventListener('click', closeCropModal);
+
+                document.getElementById('btn-crop-zoom-in')?.addEventListener('click', () => cropperInstance?.zoom(0.1));
+                document.getElementById('btn-crop-zoom-out')?.addEventListener('click', () => cropperInstance?.zoom(-0.1));
+                document.getElementById('btn-crop-rotate-left')?.addEventListener('click', () => cropperInstance?.rotate(-90));
+                document.getElementById('btn-crop-rotate-right')?.addEventListener('click', () => cropperInstance?.rotate(90));
+                document.getElementById('btn-crop-reset')?.addEventListener('click', () => cropperInstance?.reset());
+
+                document.getElementById('btn-crop-apply')?.addEventListener('click', function() {
+                    if (!cropperInstance) return;
+
+                    const canvas = cropperInstance.getCroppedCanvas({
+                        width: 600,
+                        height: 800,
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high'
+                    });
+
+                    canvas.toBlob(function(blob) {
+                        if (!blob) return;
+
+                        // Perbarui elemen preview foto di halaman edit
+                        const photoPreview = document.getElementById('photo-preview');
+                        if (photoPreview) {
+                            photoPreview.src = canvas.toDataURL('image/jpeg', 0.9);
+                        }
+
+                        // Gantikan file di photoInput dengan blob hasil crop via DataTransfer
+                        try {
+                            const croppedFile = new File([blob], 'pas_foto_3x4.jpg', { type: 'image/jpeg' });
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(croppedFile);
+                            photoInput.files = dataTransfer.files;
+                        } catch (err) {
+                            console.warn('DataTransfer fallback:', err);
+                        }
+
+                        formIsDirty = true;
+                        closeCropModal();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pas Foto 3:4 Diterapkan',
+                            text: 'Foto berhasil dipotong proporsional. Jangan lupa klik "Simpan Perubahan Data" di bawah.',
+                            timer: 2200,
+                            showConfirmButton: false,
+                            background: '#0f172a',
+                            color: '#fff'
+                        });
+                    }, 'image/jpeg', 0.9);
                 });
             }
 
