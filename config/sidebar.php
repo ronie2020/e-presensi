@@ -327,6 +327,13 @@ return [
         ],
         'Pusat Layanan Siswa' => [
             [
+                'name' => 'Tiket Kendala Aplikasi',
+                'route' => 'admin.help-tickets.index',
+                'active_check' => 'admin.help-tickets.*',
+                'icon' => 'ph-lifebuoy',
+                'roles' => ['Superadmin', 'Admin', 'Kepala Sekolah', 'Guru Piket', 'TU']
+            ],
+            [
                 'name' => 'Buku Penghubung',
                 'route' => 'liaison.index', 
                 'active_check' => 'liaison.*',

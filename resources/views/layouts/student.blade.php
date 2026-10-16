@@ -163,6 +163,10 @@
             </div>
         </footer>
     </div>
+    
+    {{-- Widget Bantuan & Lapor Kendala Siswa --}}
+    <x-student-help-widget />
+
     @stack('scripts')
 </body>
 </html>

@@ -41,6 +41,7 @@ use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\StudentPermitController; 
 use App\Http\Controllers\PiketController;
 use App\Http\Controllers\StudentHelpController;
+use App\Http\Controllers\HelpTicketController;
 use App\Http\Controllers\ClassReportController;
 use App\Http\Controllers\PromotionController;
 
@@ -169,6 +170,9 @@ Route::prefix('student-help')->name('student.help.')->group(function() {
     Route::get('/search-nisn', [StudentHelpController::class, 'searchNisn'])->name('search-nisn');
     Route::get('/data', [StudentHelpController::class, 'getHelpData'])->name('data');
 });
+
+// --- PENGAJUAN KENDALA / TIKET BANTUAN SISTEM (SISWA & GURU) ---
+Route::post('/help-tickets', [HelpTicketController::class, 'store'])->name('help-tickets.store');
 
 // =========================================================================
 //  2. SISTEM SISWA (LOGIN & AREA SISWA)
@@ -1002,7 +1006,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/education', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeEducation'])->name('edu.store');
         Route::put('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateEducation'])->name('edu.update');
         Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
-    });    
+    });
+
+    // --- MANAJEMEN TIKET KENDALA APLIKASI (HELPDESK ADMIN) ---
+    Route::prefix('admin/help-tickets')->name('admin.help-tickets.')->group(function () {
+        Route::get('/', [HelpTicketController::class, 'index'])->name('index');
+        Route::put('/{id}', [HelpTicketController::class, 'updateStatus'])->name('update');
+        Route::delete('/{id}', [HelpTicketController::class, 'destroy'])->name('destroy');
+    });
 
 });
 

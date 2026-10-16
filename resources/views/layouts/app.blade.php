@@ -115,6 +115,15 @@
                             <span>Portal</span>
                         </a>
 
+                        <!-- Tombol Bantuan / Lapor Kendala untuk Guru & Admin -->
+                        <button type="button" 
+                                onclick="window.dispatchEvent(new CustomEvent('open-help-ticket-modal'))" 
+                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white border border-amber-400/30 text-xs font-bold transition-all cursor-pointer" 
+                                title="Laporkan Kendala Aplikasi">
+                            <i class="ph-bold ph-lifebuoy text-amber-400"></i>
+                            <span class="hidden sm:inline">Lapor Kendala</span>
+                        </button>
+
                         <!-- Dropdown User -->
                        <div class="relative" x-data="{ open: false }" @click.away="open = false">
                             <button @click="open = !open" class="flex items-center gap-3 p-1.5 pr-4 rounded-[1.25rem] bg-white/5 border border-white/15 hover:border-elevate-accent/50 hover:bg-white/10 hover:shadow-lg transition-all focus:outline-none group">
@@ -251,6 +260,9 @@
             });
         </script>
         
+        {{-- Widget Bantuan & Lapor Kendala --}}
+        <x-student-help-widget />
+
         @stack('scripts')
     </body>
 </html>

@@ -1,7 +1,30 @@
 {{-- 
-    KOMPONEN WIDGET BUTUH BANTUAN SISWA (SIMADU CARE)
-    Dapat disematkan di layout publik, portal siswa, login CBT, dan login LMS.
+    KOMPONEN WIDGET BUTUH BANTUAN & LAPOR KENDALA SISWA/GURU (SIMADU CARE)
+    Dapat disematkan di layout publik, portal siswa, login CBT, login LMS, dan dashboard admin.
 --}}
+@php
+    $currentUser = Auth::user();
+    $currentStudent = Auth::guard('student')->user();
+    $defaultReporter = 'siswa';
+    $defaultName = '';
+    $defaultIdentity = '';
+    $defaultClassOrRole = '';
+    $defaultPhone = '';
+
+    if ($currentUser) {
+        $defaultReporter = 'guru';
+        $defaultName = $currentUser->name;
+        $defaultClassOrRole = is_array($currentUser->role) ? implode(', ', $currentUser->role) : ($currentUser->role ?? 'Guru / Pegawai');
+        $defaultPhone = $currentUser->phone ?? '';
+    } elseif ($currentStudent) {
+        $defaultReporter = 'siswa';
+        $defaultName = $currentStudent->name;
+        $defaultIdentity = $currentStudent->student_id ?: ($currentStudent->nisn ?: $currentStudent->nis);
+        $defaultClassOrRole = $currentStudent->schoolClass->name ?? '';
+        $defaultPhone = $currentStudent->phone ?? '';
+    }
+@endphp
+
 <div x-data="studentHelpWidget()" x-cloak class="relative z-[9999]" id="student-help-widget-root">
 
     {{-- 1. FLOATING BUTTON & SPEECH BUBBLE (PERSIS REFERENSI USER) --}}
@@ -16,12 +39,12 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 translate-x-0 scale-100"
              x-transition:leave-end="opacity-0 translate-x-4 scale-95"
-             @click="openHelpModal('nisn')"
+             @click="openHelpModal('lapor')"
              class="mr-2 sm:mr-3 relative cursor-pointer filter drop-shadow-xl animate-float-gentle">
             
             <div class="bg-white text-slate-900 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 border-2 border-sky-400/30 flex items-center gap-2.5 shadow-2xl relative">
                 
-                {{-- Tombol Toggle Oranye (Panah Chevron <) --}}
+                {{-- Tombol Toggle Oranye (Panah Chevron >) --}}
                 <button type="button" 
                         @click.stop="bubbleVisible = false" 
                         title="Sembunyikan pesan"
@@ -31,8 +54,11 @@
 
                 {{-- Teks Balon --}}
                 <div class="leading-tight">
-                    <span class="block text-[11px] sm:text-xs font-black text-[#032b5b] tracking-tight">Butuh bantuan?</span>
-                    <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500 block">Klik di sini &bull; Cek NISN / Bantuan</span>
+                    <span class="block text-[11px] sm:text-xs font-black text-[#032b5b] tracking-tight flex items-center gap-1">
+                        <span>Butuh Bantuan?</span>
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    </span>
+                    <span class="text-[9px] sm:text-[10px] font-semibold text-slate-500 block">Lapor Kendala &bull; Cek NISN &bull; CS WA</span>
                 </div>
 
                 {{-- Segitiga Balon (Speech Bubble Arrow) Mengarah ke Avatar --}}
@@ -52,7 +78,7 @@
                 
                 {{-- Foto Avatar Helpdesk --}}
                 <img src="{{ asset('img/helpdesk-operator.png') }}" 
-                     alt="Bantuan Siswa" 
+                     alt="Bantuan & Layanan Kendala" 
                      class="w-full h-full object-cover rounded-full"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                 
@@ -62,9 +88,9 @@
                 </div>
             </button>
 
-            {{-- Tombol Kecil Biru Double Arrow (>>) di Sudut Kanan Bawah --}}
+            {{-- Tombol Kecil Biru di Sudut Kanan Bawah --}}
             <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-blue-600 border-2 border-white text-white flex items-center justify-center shadow-md">
-                <i class="ph-bold ph-chats text-xs" :class="isOpen ? 'ph-x' : 'ph-chats'"></i>
+                <i class="ph-bold" :class="isOpen ? 'ph-x' : 'ph-chats'"></i>
             </div>
 
             {{-- Status Online Indicator (Green Dot) --}}
@@ -93,7 +119,7 @@
          aria-modal="true">
         
         {{-- Backdrop Blur Overlay --}}
-        <div class="fixed inset-0 bg-[#021124]/80 backdrop-blur-md transition-opacity"
+        <div class="fixed inset-0 bg-[#021124]/85 backdrop-blur-md transition-opacity"
              x-show="isOpen"
              x-transition:enter="ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -130,7 +156,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-black text-lg text-white leading-tight flex items-center gap-2">
-                                        Pusat Bantuan Siswa
+                                        Pusat Bantuan & Kendala
                                     </h3>
                                     <p class="text-xs text-sky-300 font-semibold mt-0.5">SIMADU Care &bull; SMPN 3 Lakbok</p>
                                 </div>
@@ -145,6 +171,16 @@
 
                         {{-- NAVIGATION TABS --}}
                         <div class="flex items-center gap-1.5 mt-5 bg-black/40 p-1.5 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar">
+                            {{-- Tab Lapor Kendala --}}
+                            <button type="button" 
+                                    @click="activeTab = 'lapor'"
+                                    :class="activeTab === 'lapor' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'"
+                                    class="flex-1 py-2 px-3 rounded-lg text-xs transition-all whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer">
+                                <i class="ph-bold ph-megaphone-simple"></i>
+                                <span>Lapor Kendala</span>
+                            </button>
+                            
+                            {{-- Tab Cari NISN --}}
                             <button type="button" 
                                     @click="activeTab = 'nisn'"
                                     :class="activeTab === 'nisn' ? 'bg-sky-500 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'"
@@ -152,13 +188,17 @@
                                 <i class="ph-bold ph-magnifying-glass"></i>
                                 <span>Cari NISN</span>
                             </button>
+
+                            {{-- Tab Kendala CBT --}}
                             <button type="button" 
                                     @click="activeTab = 'cbt'"
                                     :class="activeTab === 'cbt' ? 'bg-sky-500 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'"
                                     class="flex-1 py-2 px-3 rounded-lg text-xs transition-all whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer">
                                 <i class="ph-bold ph-monitor-play"></i>
-                                <span>Kendala CBT</span>
+                                <span>Ujian CBT</span>
                             </button>
+
+                            {{-- Tab WhatsApp --}}
                             <button type="button" 
                                     @click="activeTab = 'kontak'"
                                     :class="activeTab === 'kontak' ? 'bg-sky-500 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'"
@@ -166,6 +206,8 @@
                                 <i class="ph-bold ph-whatsapp-logo"></i>
                                 <span>WhatsApp</span>
                             </button>
+
+                            {{-- Tab FAQ --}}
                             <button type="button" 
                                     @click="activeTab = 'faq'"
                                     :class="activeTab === 'faq' ? 'bg-sky-500 text-white font-black shadow-md' : 'text-slate-300 hover:text-white font-bold'"
@@ -178,6 +220,188 @@
 
                     {{-- BODY CONTENT DRAWER --}}
                     <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 custom-scrollbar relative z-10 text-sm">
+
+                        {{-- ======================================================== --}}
+                        {{-- TAB 0: LAPORKAN KENDALA (AJUAN SISWA & GURU)              --}}
+                        {{-- ======================================================== --}}
+                        <div x-show="activeTab === 'lapor'" class="space-y-4">
+                            
+                            {{-- STATE SUKSES SETELAH KIRIM TIKET --}}
+                            <div x-show="submitSuccess" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 class="p-6 rounded-2xl bg-[#021124] border border-emerald-400/30 text-center space-y-4 shadow-2xl">
+                                
+                                <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 mx-auto flex items-center justify-center text-3xl shadow-inner">
+                                    <i class="ph-bold ph-check-circle"></i>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-base font-black text-white">Ajuan Kendala Berhasil Dikirim!</h4>
+                                    <p class="text-xs text-slate-300 mt-1">
+                                        Tim IT & Admin SIMADU SMPN 3 Lakbok telah menerima tiket kendala Anda.
+                                    </p>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nomor Tiket Anda</p>
+                                    <p class="text-lg font-black font-mono text-sky-400 tracking-wider" x-text="submittedTicket?.ticket_code"></p>
+                                    <p class="text-[10px] text-slate-400">Simpan nomor ini untuk konfirmasi ke admin.</p>
+                                </div>
+
+                                <div class="space-y-2 pt-2">
+                                    <a :href="submittedTicket?.wa_link" 
+                                       target="_blank"
+                                       class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-95">
+                                        <i class="ph-bold ph-whatsapp-logo text-base"></i>
+                                        <span>Konfirmasi ke WhatsApp Admin Sekarang</span>
+                                    </a>
+
+                                    <button type="button" 
+                                            @click="resetTicketForm()"
+                                            class="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white font-bold text-xs transition">
+                                        Kirim Kendala Lain
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- FORM INPUT LAPOR KENDALA --}}
+                            <div x-show="!submitSuccess" class="space-y-4">
+                                
+                                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-400/30 flex items-start gap-3">
+                                    <i class="ph-bold ph-warning-circle text-xl text-amber-400 shrink-0 mt-0.5"></i>
+                                    <div class="text-xs text-slate-200 leading-relaxed">
+                                        <span class="font-bold text-white block mb-0.5">Mengalami kendala pada aplikasi?</span>
+                                        Silakan isi form di bawah. Laporan Anda langsung masuk ke Dashboard Admin/Guru Piket dan Tim IT SIMADU.
+                                    </div>
+                                </div>
+
+                                <form @submit.prevent="submitTicket()" class="space-y-3.5">
+                                    
+                                    {{-- Peran Pelapor --}}
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Saya Melapor Sebagai: *</label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <button type="button" 
+                                                    @click="formData.reporter_type = 'siswa'"
+                                                    :class="formData.reporter_type === 'siswa' ? 'bg-sky-500 text-white font-black border-sky-400' : 'bg-[#021124] text-slate-300 border-white/10'"
+                                                    class="py-2 px-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                                <i class="ph-bold ph-student"></i> Siswa
+                                            </button>
+                                            <button type="button" 
+                                                    @click="formData.reporter_type = 'guru'"
+                                                    :class="formData.reporter_type === 'guru' ? 'bg-purple-600 text-white font-black border-purple-400' : 'bg-[#021124] text-slate-300 border-white/10'"
+                                                    class="py-2 px-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                                <i class="ph-bold ph-chalkboard-teacher"></i> Guru/PTK
+                                            </button>
+                                            <button type="button" 
+                                                    @click="formData.reporter_type = 'umum'"
+                                                    :class="formData.reporter_type === 'umum' ? 'bg-slate-600 text-white font-black border-slate-400' : 'bg-[#021124] text-slate-300 border-white/10'"
+                                                    class="py-2 px-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                                <i class="ph-bold ph-user"></i> Umum
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- Nama & NISN / NIP --}}
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-300 mb-1">Nama Lengkap *</label>
+                                            <input type="text" 
+                                                   x-model="formData.name" 
+                                                   required 
+                                                   placeholder="Nama Anda"
+                                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-semibold text-xs focus:border-sky-400 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-300 mb-1" x-text="formData.reporter_type === 'guru' ? 'NIP / NUPTK' : 'NISN / NIS'"></label>
+                                            <input type="text" 
+                                                   x-model="formData.identity_number" 
+                                                   placeholder="Nomor identitas (opsional)"
+                                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-mono text-xs focus:border-sky-400 outline-none">
+                                        </div>
+                                    </div>
+
+                                    {{-- Kelas/Jabatan & No WhatsApp --}}
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-300 mb-1" x-text="formData.reporter_type === 'guru' ? 'Mata Pelajaran / Tugas' : 'Kelas'"></label>
+                                            <input type="text" 
+                                                   x-model="formData.class_or_role" 
+                                                   placeholder="Contoh: Kelas 7A / Guru IPA"
+                                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-semibold text-xs focus:border-sky-400 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-slate-300 mb-1">No. WhatsApp Aktif</label>
+                                            <input type="text" 
+                                                   x-model="formData.phone" 
+                                                   placeholder="08xxxxxxxxxx"
+                                                   class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-mono text-xs focus:border-sky-400 outline-none">
+                                        </div>
+                                    </div>
+
+                                    {{-- Kategori Kendala --}}
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Kategori Kendala *</label>
+                                        <select x-model="formData.category" 
+                                                required 
+                                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-semibold text-xs focus:border-sky-400 outline-none">
+                                            <option value="Kendala Ujian CBT / Reset Token">Ujian CBT / Reset Sesi / Token Salah</option>
+                                            <option value="Gagal Login / Lupa Akun">Gagal Login / Lupa Akun / Password</option>
+                                            <option value="Kendala Presensi / Scan Wajah">Presensi Online / Scan Wajah Kamera Gagal</option>
+                                            <option value="Kendala Input Nilai / Rapor (Guru)">Input Nilai / Cetak Rapor (Guru)</option>
+                                            <option value="Kendala Jurnal Mengajar / Inval (Guru)">Jurnal Mengajar / Guru Piket Inval (Guru)</option>
+                                            <option value="Error Halaman / Tampilan Blank">Error Halaman / Tampilan Blank / Tombol Macet</option>
+                                            <option value="Lainnya">Lainnya</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Deskripsi Masalah --}}
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Ceritakan Kendala yang Ditemukan *</label>
+                                        <textarea x-model="formData.description" 
+                                                  required 
+                                                  rows="3" 
+                                                  placeholder="Jelaskan apa yang terjadi, apa pesan errornya, atau langkah yang dicoba..."
+                                                  class="w-full px-3.5 py-2.5 rounded-xl bg-[#021124] border border-white/20 text-white font-medium text-xs focus:border-sky-400 outline-none placeholder:text-slate-500"></textarea>
+                                    </div>
+
+                                    {{-- Lampiran Screenshot --}}
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 mb-1">Lampirkan Screenshot / Foto Error (Opsional)</label>
+                                        <input type="file" 
+                                               @change="handleFileUpload($event)"
+                                               accept="image/*"
+                                               class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
+                                        <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 3MB)</p>
+                                    </div>
+
+                                    {{-- Tombol Kirim --}}
+                                    <div class="pt-2">
+                                        <button type="submit" 
+                                                :disabled="isSubmitting"
+                                                class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-white font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 transition-all active:scale-98 disabled:opacity-50 cursor-pointer">
+                                            <template x-if="!isSubmitting">
+                                                <span class="flex items-center gap-2">
+                                                    <i class="ph-bold ph-paper-plane-tilt text-base"></i>
+                                                    <span>Kirim Laporan Kendala</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="isSubmitting">
+                                                <span class="flex items-center gap-2">
+                                                    <i class="ph-bold ph-spinner animate-spin text-base"></i>
+                                                    <span>Sedang mengirim tiket...</span>
+                                                </span>
+                                            </template>
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+                        </div>
 
                         {{-- ======================================================== --}}
                         {{-- TAB 1: PENCARIAN NISN MANDIRI                            --}}
@@ -262,7 +486,7 @@
                                  class="text-center py-8 p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-slate-400">
                                 <i class="ph-bold ph-magnifying-glass text-3xl text-slate-500 mb-2 block"></i>
                                 <p class="text-xs font-bold text-white">Nama tidak ditemukan</p>
-                                <p class="text-[11px] text-slate-400 mt-1">Coba gunakan nama panggilan atau hubungi wali kelas Anda melalui WhatsApp.</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Coba gunakan nama panggilan atau laporkan kendala ke admin di tab "Lapor Kendala".</p>
                             </div>
 
                             <div x-show="!isSearching && searchQuery.length < 2 && searchResults.length === 0"
@@ -300,11 +524,16 @@
                                 <p class="text-xs text-slate-300 leading-relaxed pl-7">
                                     Jika browser Anda tidak sengaja tertutup atau perangkat mati mendadak, Anda perlu meminta Proktor untuk melakukan <strong>Reset Sesi Ujian</strong> agar dapat login kembali.
                                 </p>
-                                <div class="pl-7 pt-1">
+                                <div class="pl-7 pt-1 flex flex-wrap gap-2">
+                                    <button type="button" 
+                                            @click="activeTab = 'lapor'; formData.category = 'Kendala Ujian CBT / Reset Token'; formData.description = 'Mohon reset sesi ujian CBT saya karena browser tertutup otomatis.'"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-white border border-amber-400/30 text-xs font-bold transition">
+                                        <i class="ph-bold ph-ticket text-sm"></i> Ajukan Reset di Tab Lapor
+                                    </button>
                                     <a :href="'https://wa.me/6285135961994?text=' + encodeURIComponent('Halo Proktor CBT SMPN 3 Lakbok, saya membutuhkan reset sesi ujian CBT karena kendala teknis.')" 
                                        target="_blank"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white border border-emerald-400/30 text-xs font-bold transition active:scale-95">
-                                        <i class="ph-bold ph-whatsapp-logo text-sm"></i> Minta Reset Sesi via WhatsApp
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-white border border-emerald-400/30 text-xs font-bold transition">
+                                        <i class="ph-bold ph-whatsapp-logo text-sm"></i> WhatsApp Proktor
                                     </a>
                                 </div>
                             </div>
@@ -350,7 +579,7 @@
                                         <p class="text-[11px] text-slate-400">Kendala Akun, Presensi, Data Siswa</p>
                                     </div>
                                 </div>
-                                <a :href="'https://wa.me/6285135961994?text=' + encodeURIComponent('Halo Admin/Operator SMPN 3 Lakbok, saya siswa membutuhkan bantuan terkait...')" 
+                                <a :href="'https://wa.me/6285135961994?text=' + encodeURIComponent('Halo Admin/Operator SMPN 3 Lakbok, saya membutuhkan bantuan terkait...')" 
                                    target="_blank"
                                    class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-98">
                                     <i class="ph-bold ph-chat-circle-dots text-base"></i>
@@ -410,7 +639,7 @@
                         <span>&copy; {{ date('Y') }} SMP Negeri 3 Lakbok</span>
                         <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            Layanan Aktif
+                            Helpdesk Aktif
                         </span>
                     </div>
 
@@ -441,7 +670,7 @@
         return {
             isOpen: false,
             bubbleVisible: true,
-            activeTab: 'nisn',
+            activeTab: 'lapor',
             searchQuery: '',
             selectedClassId: '',
             isSearching: false,
@@ -449,10 +678,26 @@
             classList: [],
             toastMessage: '',
 
+            // State Lapor Kendala
+            isSubmitting: false,
+            submitSuccess: false,
+            submittedTicket: null,
+            screenshotFile: null,
+            formData: {
+                reporter_type: '{{ $defaultReporter }}',
+                name: '{{ addslashes($defaultName) }}',
+                identity_number: '{{ addslashes($defaultIdentity) }}',
+                class_or_role: '{{ addslashes($defaultClassOrRole) }}',
+                phone: '{{ addslashes($defaultPhone) }}',
+                category: 'Gagal Login / Lupa Akun',
+                description: '',
+                page_url: window.location.href,
+            },
+
             faqList: [
                 {
                     q: 'Bagaimana cara masuk jika saya lupa NISN?',
-                    a: 'Gunakan fitur "Cari NISN" di tab pertama widget ini. Cukup masukkan nama Anda, dan sistem akan menampilkan NISN Anda untuk langsung disalin.',
+                    a: 'Gunakan fitur "Cari NISN" di tab widget ini. Cukup masukkan nama Anda, dan sistem akan menampilkan NISN Anda untuk langsung disalin.',
                     open: true
                 },
                 {
@@ -466,8 +711,8 @@
                     open: false
                 },
                 {
-                    q: 'Bagaimana cara mengunduh Kartu Pelajar Digital?',
-                    a: 'Masuk ke Portal Siswa, kemudian buka tab "Biodata", lalu klik tombol "Cetak Kartu Pelajar".',
+                    q: 'Bagaimana cara melacak tindak lanjut kendala saya?',
+                    a: 'Setelah mengirim kendala, Anda akan mendapatkan kode tiket (contoh: HLP-20261016-XXXX). Anda bisa langsung chat admin via tombol WhatsApp yang disediakan.',
                     open: false
                 }
             ],
@@ -482,15 +727,80 @@
                         }
                     })
                     .catch(() => {});
+
+                // Event listener global untuk trigger dari halaman manapun
+                window.addEventListener('open-help-ticket-modal', (e) => {
+                    const tab = (e.detail && e.detail.tab) ? e.detail.tab : 'lapor';
+                    this.openHelpModal(tab);
+                });
             },
 
             toggleHelpModal() {
                 this.isOpen = !this.isOpen;
             },
 
-            openHelpModal(tab = 'nisn') {
+            openHelpModal(tab = 'lapor') {
                 this.activeTab = tab;
                 this.isOpen = true;
+            },
+
+            handleFileUpload(event) {
+                const files = event.target.files;
+                if (files && files.length > 0) {
+                    this.screenshotFile = files[0];
+                } else {
+                    this.screenshotFile = null;
+                }
+            },
+
+            submitTicket() {
+                this.isSubmitting = true;
+
+                const bodyData = new FormData();
+                bodyData.append('_token', '{{ csrf_token() }}');
+                bodyData.append('reporter_type', this.formData.reporter_type);
+                bodyData.append('name', this.formData.name);
+                bodyData.append('identity_number', this.formData.identity_number || '');
+                bodyData.append('class_or_role', this.formData.class_or_role || '');
+                bodyData.append('phone', this.formData.phone || '');
+                bodyData.append('category', this.formData.category);
+                bodyData.append('description', this.formData.description);
+                bodyData.append('page_url', window.location.href);
+
+                if (this.screenshotFile) {
+                    bodyData.append('screenshot', this.screenshotFile);
+                }
+
+                fetch('{{ route("help-tickets.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: bodyData
+                })
+                .then(res => res.json())
+                .then(res => {
+                    this.isSubmitting = false;
+                    if (res.success) {
+                        this.submitSuccess = true;
+                        this.submittedTicket = res;
+                        this.showToast('Tiket kendala berhasil dikirim!');
+                    } else {
+                        alert(res.message || 'Gagal mengirim tiket kendala. Silakan coba lagi.');
+                    }
+                })
+                .catch(err => {
+                    this.isSubmitting = false;
+                    alert('Terjadi kesalahan jaringan saat mengirim laporan. Silakan periksa koneksi Anda.');
+                });
+            },
+
+            resetTicketForm() {
+                this.submitSuccess = false;
+                this.submittedTicket = null;
+                this.screenshotFile = null;
+                this.formData.description = '';
             },
 
             searchStudents() {
@@ -528,14 +838,13 @@
                     navigator.clipboard.writeText(nisn);
                 }
 
-                // 2. Jika ada input NISN di halaman saat ini (misal di halaman login / portal)
+                // 2. Jika ada input NISN di halaman saat ini
                 const inputEl = document.querySelector('input[name="student_id"]') || 
                                 document.querySelector('#student_id') ||
                                 document.querySelector('input[name="nisn"]');
 
                 if (inputEl) {
                     inputEl.value = nisn;
-                    // Trigger input event agar v-model/x-model tersinkron
                     inputEl.dispatchEvent(new Event('input', { bubbles: true }));
                     inputEl.focus();
                 }

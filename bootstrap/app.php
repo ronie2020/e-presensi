@@ -25,26 +25,22 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AuditActivityMiddleware::class,
         ]);
 
-        // 2. MENGATASI ERROR 419 SAAT LOGOUT (CSRF EXCEPTION)
+        // 2. MENGATASI ERROR 419 (CSRF EXCEPTION)
         $middleware->validateCsrfTokens(except: [
             'logout',           
             'student/logout',   
+            'kiosk/process',
+            'help-tickets',
         ]);
 
         // 3. LOGIKA REDIRECT USER YANG BELUM LOGIN
         $middleware->redirectGuestsTo(function (Request $request) {
-            // Perbaikan: Menambahkan cek untuk 'students/*' (jamak) dan 'portal/*'
             if ($request->is('student/*') || $request->is('students/*') || $request->is('portal/*')) {
                 return route('student.login');
             }
             
-            // Default ke Login Guru
             return route('login');
         });
-        // 4. MENGATASI ERROR 419 SAAT SCAN QR CODE (CSRF EXCEPTION)
-        $middleware->validateCsrfTokens(except: [
-            'kiosk/process', // <-- Ubah dari 'scan' menjadi ini
-        ]);
 
 
     })
