@@ -296,6 +296,9 @@
         }
     </script>
     
+    {{-- WIDGET BUTUH BANTUAN SISWA (SIMADU CARE) --}}
+    <x-student-help-widget />
+
     @stack('scripts')
 </body>
 </html>

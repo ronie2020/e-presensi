@@ -234,5 +234,7 @@
         </p>
     </footer>
 
+    <!-- WIDGET BUTUH BANTUAN SISWA -->
+    <x-student-help-widget />
 </body>
 </html>

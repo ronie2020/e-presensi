@@ -40,6 +40,7 @@ use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\StudentPermitController; 
 use App\Http\Controllers\PiketController;
+use App\Http\Controllers\StudentHelpController;
 use App\Http\Controllers\ClassReportController;
 use App\Http\Controllers\PromotionController;
 
@@ -162,6 +163,12 @@ Route::get('/katalog/baca/{book}', [BookController::class, 'read'])->name('libra
 
 // --- ROUTE PUBLIK PREVIEW LMS (KATALOG BELAJAR) ---
 Route::get('/belajar/materi/{id}', [StudentLmsController::class, 'publicPreview'])->name('lms.public.preview');
+
+// --- PUSAT BANTUAN SISWA (HELPDESK & CARI NISN) ---
+Route::prefix('student-help')->name('student.help.')->group(function() {
+    Route::get('/search-nisn', [StudentHelpController::class, 'searchNisn'])->name('search-nisn');
+    Route::get('/data', [StudentHelpController::class, 'getHelpData'])->name('data');
+});
 
 // =========================================================================
 //  2. SISTEM SISWA (LOGIN & AREA SISWA)
