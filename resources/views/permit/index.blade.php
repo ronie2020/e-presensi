@@ -97,7 +97,7 @@
                                 </span>
                                 Pos Piket Digital
                             </div>
-                            <nav class="flex items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/15">
+                            <nav class="flex flex-wrap items-center gap-1.5 bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/15">
                                 <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-500/30 text-sky-200 border border-sky-400/40 shadow-sm flex items-center gap-1.5">
                                     <i class="ph-bold ph-shield-check"></i> Pos Piket
                                 </span>
@@ -106,6 +106,12 @@
                                 </a>
                                 <a href="{{ route('permit.analytics') }}" class="px-3 py-1 rounded-full text-xs font-bold text-slate-300 hover:text-white hover:bg-white/15 transition-all flex items-center gap-1.5">
                                     <i class="ph-bold ph-chart-polar text-amber-400"></i> Analitik
+                                </a>
+                                <a href="{{ route('permit.schedules') }}" class="px-3 py-1 rounded-full text-xs font-bold text-emerald-300 hover:text-white hover:bg-emerald-500/20 border border-emerald-400/30 transition-all flex items-center gap-1.5">
+                                    <i class="ph-bold ph-calendar-check text-emerald-400"></i> Jadwal Piket
+                                </a>
+                                <a href="{{ route('permit.journal.print', ['date' => $todayDate]) }}" target="_blank" class="px-3 py-1 rounded-full text-xs font-bold text-amber-300 hover:text-white hover:bg-amber-500/20 border border-amber-400/30 transition-all flex items-center gap-1.5">
+                                    <i class="ph-bold ph-printer text-amber-400"></i> Cetak Jurnal
                                 </a>
                             </nav>
                         </div>
@@ -166,8 +172,136 @@
                 </div>
             </div>
 
-            {{-- MAIN CONTENT GRID --}}
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+            {{-- TAB & DIALOG STATE (ALPINE.JS) --}}
+            <div x-data="{ 
+                activePiketTab: 'permits', 
+                modalInvalOpen: false,
+                modalEditInvalOpen: false,
+                editInval: {
+                    id: '',
+                    absent_teacher_id: '',
+                    reason: 'Sakit',
+                    class_id: '',
+                    subject_id: '',
+                    timeslot_info: '',
+                    inval_teacher_id: '',
+                    assignment_notes: '',
+                    status: 'Menunggu Pengganti'
+                },
+                openEditInval(inval) {
+                    this.editInval = {
+                        id: inval.id,
+                        absent_teacher_id: inval.absent_teacher_id || '',
+                        reason: inval.reason || 'Sakit',
+                        class_id: inval.class_id || '',
+                        subject_id: inval.subject_id || '',
+                        timeslot_info: inval.timeslot_info || '',
+                        inval_teacher_id: inval.inval_teacher_id || '',
+                        assignment_notes: inval.assignment_notes || '',
+                        status: inval.status || 'Menunggu Pengganti'
+                    };
+                    this.modalEditInvalOpen = true;
+                }
+            }" class="space-y-6 md:space-y-8">
+                
+                {{-- FLASH NOTIFICATIONS --}}
+                @if(session('success'))
+                <div class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-sm font-bold flex items-center gap-3 backdrop-blur-md animate-enter">
+                    <i class="ph-bold ph-check-circle text-2xl text-emerald-400 shrink-0"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+                @endif
+                @if(session('error'))
+                <div class="p-4 rounded-2xl bg-rose-500/20 border border-rose-400/40 text-rose-200 text-sm font-bold flex items-center gap-3 backdrop-blur-md animate-enter">
+                    <i class="ph-bold ph-warning-circle text-2xl text-rose-400 shrink-0"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+                @endif
+
+                {{-- BANNER PETUGAS PIKET HARI INI --}}
+                <div class="bg-[#031d3d]/80 backdrop-blur-xl border border-white/15 rounded-[2rem] p-5 sm:p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400 shrink-0">
+                            <i class="ph-bold ph-users-three text-2xl"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-sky-300 font-bold uppercase tracking-widest block">Petugas Piket Hari Ini</span>
+                            <h3 class="text-base sm:text-lg font-black text-white">
+                                {{ $todayName }}, {{ \Carbon\Carbon::parse($todayDate)->translatedFormat('d F Y') }}
+                            </h3>
+                        </div>
+                    </div>
+
+                    {{-- Daftar Petugas --}}
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                        @forelse($todayPiketStaff as $staff)
+                        <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#021124]/80 border border-white/10 shadow-sm group">
+                            <div class="w-7 h-7 rounded-full bg-slate-800 border border-white/20 overflow-hidden shrink-0 flex items-center justify-center text-[10px] font-bold text-sky-300">
+                                @if($staff->teacher->photo_path)
+                                    <img src="{{ asset('storage/' . $staff->teacher->photo_path) }}" alt="" class="w-full h-full object-cover">
+                                @else
+                                    {{ substr($staff->teacher->name, 0, 2) }}
+                                @endif
+                            </div>
+                            <div class="text-left">
+                                <div class="text-xs font-bold text-white leading-tight flex items-center gap-1">
+                                    {{ $staff->teacher->name }}
+                                    @if($staff->is_coordinator)
+                                        <span class="px-1 py-0.2 rounded text-[8px] bg-amber-500/20 text-amber-300 border border-amber-400/30 font-black">KOOR</span>
+                                    @endif
+                                </div>
+                                <span class="text-[9px] font-bold text-sky-400/80">{{ $staff->post_location }}</span>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="flex items-center gap-3 text-slate-400 text-xs font-semibold">
+                            <span>Belum ada jadwal piket untuk hari {{ $todayName }}.</span>
+                            <a href="{{ route('permit.schedules') }}" class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 text-sky-300 text-xs font-bold transition-all">
+                                + Atur Jadwal
+                            </a>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                {{-- TAB SWITCHER MENU (MODERN PILL TABS) --}}
+                <div class="flex flex-wrap items-center gap-2 p-1.5 bg-[#031d3d]/90 backdrop-blur-xl rounded-2xl border border-white/15 shadow-lg">
+                    <button type="button" @click="activePiketTab = 'permits'"
+                        :class="activePiketTab === 'permits' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/20 font-black' : 'text-slate-300 hover:text-white hover:bg-white/5 font-bold'"
+                        class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-shield-check text-lg"></i>
+                        <span>Izin Siswa (Live)</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white">{{ $activePermits->count() }}</span>
+                    </button>
+
+                    <button type="button" @click="activePiketTab = 'inval'"
+                        :class="activePiketTab === 'inval' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/20 font-black' : 'text-slate-300 hover:text-white hover:bg-white/5 font-bold'"
+                        class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-chalkboard-teacher text-lg"></i>
+                        <span>Guru Absen & Inval</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white">{{ $todayJournal->invals->count() }}</span>
+                    </button>
+
+                    <button type="button" @click="activePiketTab = 'guests'"
+                        :class="activePiketTab === 'guests' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/20 font-black' : 'text-slate-300 hover:text-white hover:bg-white/5 font-bold'"
+                        class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-book-open-user text-lg"></i>
+                        <span>Buku Tamu Piket</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-white/20 text-white">{{ $todayJournal->guests->count() }}</span>
+                    </button>
+
+                    <button type="button" @click="activePiketTab = 'journal'"
+                        :class="activePiketTab === 'journal' ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/20 font-black' : 'text-slate-300 hover:text-white hover:bg-white/5 font-bold'"
+                        class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-note-pencil text-lg"></i>
+                        <span>Catatan Jurnal & Kejadian</span>
+                    </button>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- TAB 1: IZIN SISWA (SCANNER & LIVE MONITORING ASLI)      --}}
+                {{-- ======================================================== --}}
+                <div x-show="activePiketTab === 'permits'" x-transition class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
                 
                 {{-- KOLOM KIRI: SCANNER & INPUT (Sticky) --}}
                 <div class="lg:col-span-5 space-y-6 md:space-y-8 lg:sticky lg:top-6">
@@ -381,9 +515,639 @@
                         </div>
                     </div>
                 </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- TAB 2: GURU ABSEN & PENUGASAN INVAL (PENGGANTI)          --}}
+                {{-- ======================================================== --}}
+                <div x-show="activePiketTab === 'inval'" x-transition class="space-y-6">
+                    <div class="bg-[#031d3d]/90 backdrop-blur-xl border border-white/15 rounded-[2.5rem] p-6 sm:p-8 shadow-xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h3 class="text-xl font-black text-white flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 flex items-center justify-center">
+                                        <i class="ph-bold ph-chalkboard-teacher text-xl"></i>
+                                    </div>
+                                    Catatan Guru Tidak Hadir & Inval Hari Ini
+                                </h3>
+                                <p class="text-xs text-slate-300 mt-1">Catat guru yang berhalangan hadir dan tentukan guru pengganti (inval) agar kelas tidak kosong.</p>
+                            </div>
+
+                            <button type="button" @click="modalInvalOpen = true" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all flex items-center gap-2 active:scale-95">
+                                <i class="ph-bold ph-plus text-lg"></i> + Catat Guru Absen / Inval
+                            </button>
+                        </div>
+
+                        {{-- TABEL INVAL --}}
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-white/10 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                                        <th class="py-3 px-4">Guru Tidak Hadir</th>
+                                        <th class="py-3 px-4">Alasan</th>
+                                        <th class="py-3 px-4">Kelas & Jam</th>
+                                        <th class="py-3 px-4">Mapel</th>
+                                        <th class="py-3 px-4">Guru Inval (Pengganti)</th>
+                                        <th class="py-3 px-4">Status</th>
+                                        <th class="py-3 px-4 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5 text-sm">
+                                    @forelse($todayJournal->invals as $inval)
+                                    <tr class="hover:bg-white/[0.03] transition-colors">
+                                        <td class="py-3.5 px-4 font-bold text-white">
+                                            {{ $inval->absentTeacher->name ?? '-' }}
+                                        </td>
+                                        <td class="py-3.5 px-4">
+                                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold 
+                                                {{ $inval->reason === 'Sakit' ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30' : 
+                                                   ($inval->reason === 'Dinas Luar' ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30' : 'bg-slate-500/20 text-slate-300 border border-slate-400/30') }}">
+                                                {{ $inval->reason }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-slate-300 font-semibold">
+                                            <span class="font-bold text-white">{{ $inval->schoolClass->name ?? '-' }}</span>
+                                            <span class="text-xs text-sky-400 block">{{ $inval->timeslot_info ?: 'Jam KBM' }}</span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-slate-300">
+                                            {{ $inval->subject->name ?? '-' }}
+                                        </td>
+                                        <td class="py-3.5 px-4">
+                                            @if($inval->invalTeacher)
+                                                <div class="font-bold text-emerald-300 flex items-center gap-1.5">
+                                                    <i class="ph-bold ph-check-circle"></i>
+                                                    {{ $inval->invalTeacher->name }}
+                                                </div>
+                                            @else
+                                                <span class="text-xs italic text-rose-300 font-bold bg-rose-500/20 px-2.5 py-1 rounded-lg border border-rose-400/30">
+                                                    Belum Ada Pengganti
+                                                </span>
+                                            @endif
+                                            @if($inval->assignment_notes)
+                                                <p class="text-[11px] text-slate-400 italic mt-1 line-clamp-1">Tugas: "{{ $inval->assignment_notes }}"</p>
+                                            @endif
+                                        </td>
+                                        <td class="py-3.5 px-4">
+                                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold 
+                                                {{ $inval->status === 'Terisi' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 
+                                                   ($inval->status === 'Selesai' ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30' : 'bg-rose-500/20 text-rose-300 border border-rose-400/30') }}">
+                                                {{ $inval->status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <button type="button" 
+                                                    @click="openEditInval({{ json_encode([
+                                                        'id' => $inval->id,
+                                                        'absent_teacher_id' => $inval->absent_teacher_id,
+                                                        'reason' => $inval->reason,
+                                                        'class_id' => $inval->class_id,
+                                                        'subject_id' => $inval->subject_id,
+                                                        'timeslot_info' => $inval->timeslot_info,
+                                                        'inval_teacher_id' => $inval->inval_teacher_id,
+                                                        'assignment_notes' => $inval->assignment_notes,
+                                                        'status' => $inval->status,
+                                                    ]) }})"
+                                                    class="p-2 rounded-xl text-slate-400 hover:text-sky-300 hover:bg-sky-500/10 transition-colors cursor-pointer" 
+                                                    title="Edit Data Inval">
+                                                    <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                                </button>
+                                                <form action="{{ route('permit.inval.destroy', $inval->id) }}" method="POST" onsubmit="return confirm('Hapus catatan inval ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" title="Hapus">
+                                                        <i class="ph-bold ph-trash text-lg"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="7" class="py-12 text-center text-slate-400">
+                                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-3 border border-white/10">
+                                                <i class="ph-bold ph-check text-2xl text-emerald-400"></i>
+                                            </div>
+                                            <p class="font-bold text-sm text-white">Seluruh Guru Hadir</p>
+                                            <p class="text-xs text-slate-400 mt-1">Belum ada catatan guru yang berhalangan hadir pada hari ini.</p>
+                                            <button type="button" @click="modalInvalOpen = true" class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/30 font-bold text-xs transition-all cursor-pointer active:scale-95">
+                                                <i class="ph-bold ph-plus-circle text-base"></i> + Catat Guru Tidak Hadir & Inval Sekarang
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- TAB 3: BUKU TAMU MEJA PIKET                              --}}
+                {{-- ======================================================== --}}
+                <div x-show="activePiketTab === 'guests'" x-transition class="space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        {{-- Form Input Tamu (Kiri) --}}
+                        <div class="lg:col-span-4 bg-[#031d3d]/90 backdrop-blur-xl border border-white/15 rounded-[2.5rem] p-6 sm:p-8 shadow-xl">
+                            <h3 class="font-black text-lg text-white mb-6 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 flex items-center justify-center">
+                                    <i class="ph-bold ph-user-plus text-xl"></i>
+                                </div>
+                                Form Tamu Datang
+                            </h3>
+
+                            <form action="{{ route('permit.guest.store') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <input type="hidden" name="piket_journal_id" value="{{ $todayJournal->id }}">
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Nama Tamu</label>
+                                    <input type="text" name="guest_name" required placeholder="Nama Lengkap Tamu" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Asal Instansi / Lembaga</label>
+                                    <input type="text" name="institution" placeholder="Contoh: Dinas Pendidikan, Orang Tua Siswa" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">No. HP / WA</label>
+                                        <input type="text" name="phone" placeholder="08..." class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Jam Datang</label>
+                                        <input type="time" name="time_in" value="{{ \Carbon\Carbon::now(config('app.timezone', 'Asia/Jakarta'))->format('H:i') }}" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Bertemu Dengan</label>
+                                    <input type="text" name="meet_with" placeholder="Contoh: Kepala Sekolah, Bpk. Guru X" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Keperluan / Agenda</label>
+                                    <textarea name="purpose" rows="2" required placeholder="Maksud kunjungan..." class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30 outline-none"></textarea>
+                                </div>
+
+                                <div class="flex items-center gap-2 pt-1">
+                                    <input type="checkbox" name="is_vip" value="1" id="is_vip" class="rounded border-slate-700 text-sky-500 focus:ring-sky-400 bg-slate-900">
+                                    <label for="is_vip" class="text-xs font-bold text-slate-300 cursor-pointer">Tamu VIP (Tampilkan di Layar Lobi)</label>
+                                </div>
+
+                                <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all active:scale-95 flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Buku Tamu
+                                </button>
+                            </form>
+                        </div>
+
+                        {{-- Tabel Daftar Tamu Hari Ini (Kanan) --}}
+                        <div class="lg:col-span-8 bg-[#031d3d]/90 backdrop-blur-xl border border-white/15 rounded-[2.5rem] p-6 sm:p-8 shadow-xl">
+                            <h3 class="font-black text-lg text-white mb-6 flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 text-sky-400 border border-white/15 flex items-center justify-center">
+                                    <i class="ph-bold ph-address-book text-xl"></i>
+                                </div>
+                                Tamu Berkunjung Hari Ini ({{ $todayJournal->guests->count() }})
+                            </h3>
+
+                            <div class="overflow-x-auto custom-scrollbar">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="border-b border-white/10 text-[11px] font-black uppercase tracking-wider text-slate-400">
+                                            <th class="py-3 px-3">Tamu</th>
+                                            <th class="py-3 px-3">Instansi</th>
+                                            <th class="py-3 px-3">Bertemu</th>
+                                            <th class="py-3 px-3">Keperluan</th>
+                                            <th class="py-3 px-3">Waktu</th>
+                                            <th class="py-3 px-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5 text-sm">
+                                        @forelse($todayJournal->guests as $guest)
+                                        <tr class="hover:bg-white/[0.03] transition-colors">
+                                            <td class="py-3.5 px-3">
+                                                <div class="font-bold text-white flex items-center gap-1.5">
+                                                    {{ $guest->guest_name }}
+                                                    @if($guest->is_vip)
+                                                        <span class="px-1.5 py-0.5 rounded text-[8px] bg-amber-500/20 text-amber-300 border border-amber-400/40 font-black">VIP</span>
+                                                    @endif
+                                                </div>
+                                                @if($guest->phone)
+                                                    <span class="text-xs text-slate-400 block">{{ $guest->phone }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3.5 px-3 text-slate-300 font-semibold">{{ $guest->institution ?: '-' }}</td>
+                                            <td class="py-3.5 px-3 text-sky-300 font-bold">{{ $guest->meet_with ?: '-' }}</td>
+                                            <td class="py-3.5 px-3 text-slate-300 max-w-xs truncate">{{ $guest->purpose }}</td>
+                                            <td class="py-3.5 px-3">
+                                                <span class="font-mono text-xs font-bold text-white block">
+                                                    {{ substr($guest->time_in, 0, 5) }} 
+                                                    @if($guest->time_out)
+                                                        - {{ substr($guest->time_out, 0, 5) }}
+                                                    @endif
+                                                </span>
+                                                @if(!$guest->time_out)
+                                                    <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Sedang Berkunjung</span>
+                                                @else
+                                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Selesai</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3.5 px-3 text-center">
+                                                <div class="flex items-center justify-center gap-1">
+                                                    @if(!$guest->time_out)
+                                                    <form action="{{ route('permit.guest.checkout', $guest->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold border border-emerald-400/30 transition-all" title="Check-out">
+                                                            Check-out
+                                                        </button>
+                                                    </form>
+                                                    @endif
+
+                                                    <form action="{{ route('permit.guest.destroy', $guest->id) }}" method="POST" onsubmit="return confirm('Hapus data tamu ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 transition-colors" title="Hapus">
+                                                            <i class="ph-bold ph-trash text-base"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="6" class="py-10 text-center text-slate-400">
+                                                <i class="ph-duotone ph-users text-4xl mb-2 opacity-50 text-sky-400"></i>
+                                                <p class="font-bold text-sm text-white">Belum Ada Tamu Hari Ini</p>
+                                                <p class="text-xs text-slate-400 mt-1">Input data tamu melalui formulir di sebelah kiri.</p>
+                                            </td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ======================================================== --}}
+                {{-- TAB 4: CATATAN KHUSUS & JURNAL PIKET                     --}}
+                {{-- ======================================================== --}}
+                <div x-show="activePiketTab === 'journal'" x-transition class="space-y-6">
+                    <div class="bg-[#031d3d]/90 backdrop-blur-xl border border-white/15 rounded-[2.5rem] p-6 sm:p-8 shadow-xl max-w-4xl mx-auto">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h3 class="text-xl font-black text-white flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 flex items-center justify-center">
+                                        <i class="ph-bold ph-note-pencil text-xl"></i>
+                                    </div>
+                                    Buku Jurnal & Catatan Khusus Piket
+                                </h3>
+                                <p class="text-xs text-slate-300 mt-1">Catat kejadian penting, insiden ketertiban, dan kondisi umum jalannya KBM.</p>
+                            </div>
+
+                            <a href="{{ route('permit.journal.print', ['date' => $todayDate]) }}" target="_blank" class="px-5 py-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 font-bold text-sm shadow-sm transition-all flex items-center gap-2">
+                                <i class="ph-bold ph-printer text-lg"></i> Cetak Dokumen PDF
+                            </a>
+                        </div>
+
+                        <form action="{{ route('permit.journal.save') }}" method="POST" class="space-y-6">
+                            @csrf
+                            <input type="hidden" name="date" value="{{ $todayDate }}">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {{-- Cuaca --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Kondisi Cuaca</label>
+                                    <select name="weather" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="Cerah" {{ $todayJournal->weather === 'Cerah' ? 'selected' : '' }}>☀️ Cerah</option>
+                                        <option value="Berawan" {{ $todayJournal->weather === 'Berawan' ? 'selected' : '' }}>⛅ Berawan</option>
+                                        <option value="Hujan Ringan" {{ $todayJournal->weather === 'Hujan Ringan' ? 'selected' : '' }}>🌦️ Hujan Ringan</option>
+                                        <option value="Hujan Lebat" {{ $todayJournal->weather === 'Hujan Lebat' ? 'selected' : '' }}>⛈️ Hujan Lebat</option>
+                                    </select>
+                                </div>
+
+                                {{-- Koordinator Piket --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Koordinator Piket Hari Ini</label>
+                                    <select name="coordinator_id" class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#021124] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="">-- Pilih Koordinator --</option>
+                                        @foreach($allTeachers as $teacher)
+                                            <option value="{{ $teacher->id }}" {{ $todayJournal->coordinator_id == $teacher->id ? 'selected' : '' }}>
+                                                {{ $teacher->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Catatan Umum --}}
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Catatan Khusus / Insiden / Ketertiban</label>
+                                <textarea name="general_notes" rows="6" placeholder="Tuliskan catatan kejadian penting hari ini, seperti keterlambatan massal, masalah sarana kelas, atau pembinaan siswa..." class="w-full px-4 py-3.5 rounded-2xl border border-white/15 bg-[#021124] text-white font-medium text-sm focus:border-sky-400 outline-none leading-relaxed">{{ $todayJournal->general_notes }}</textarea>
+                            </div>
+
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="submit" class="py-3.5 px-8 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all active:scale-95 flex items-center gap-2">
+                                    <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Catatan Jurnal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- MODAL TAMBAH INVAL (MULTI-KELAS) --}}
+                <div x-show="modalInvalOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-[#021124]/85 backdrop-blur-md" @click="modalInvalOpen = false"></div>
+                    
+                    <div x-data="{
+                        slots: [
+                            { class_id: '', subject_id: '', timeslot_info: '', inval_teacher_id: '', assignment_notes: '' }
+                        ],
+                        addSlot() {
+                            this.slots.push({ class_id: '', subject_id: '', timeslot_info: '', inval_teacher_id: '', assignment_notes: '' });
+                        },
+                        removeSlot(idx) {
+                            if (this.slots.length > 1) {
+                                this.slots.splice(idx, 1);
+                            }
+                        }
+                    }" class="bg-[#031d3d] border border-white/20 w-full max-w-3xl rounded-[2.5rem] shadow-2xl p-6 sm:p-8 relative z-10 animate-enter max-h-[92vh] overflow-y-auto custom-scrollbar text-white">
+                        
+                        {{-- Modal Header --}}
+                        <div class="flex justify-between items-start mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h3 class="font-black text-xl text-white flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 flex items-center justify-center">
+                                        <i class="ph-bold ph-chalkboard-teacher text-lg"></i>
+                                    </div>
+                                    Catat Guru Absen & Penugasan Inval
+                                </h3>
+                                <p class="text-xs text-slate-300 mt-1">Dapat menambahkan beberapa jadwal kelas sekaligus yang ditinggalkan guru bersangkutan hari ini.</p>
+                            </div>
+                            <button type="button" @click="modalInvalOpen = false" class="p-2 rounded-full bg-white/10 text-slate-400 hover:text-white hover:bg-white/20 transition cursor-pointer">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+
+                        <form action="{{ route('permit.inval.store') }}" method="POST" class="space-y-6">
+                            @csrf
+                            <input type="hidden" name="piket_journal_id" value="{{ $todayJournal->id }}">
+
+                            {{-- SECTION 1: IDENTITAS GURU & ALASAN --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-[#021124]/70 border border-white/10">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <i class="ph-bold ph-user text-sky-400"></i> Guru yang Tidak Hadir <span class="text-rose-400">*</span>
+                                    </label>
+                                    <select name="absent_teacher_id" required class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="">-- Pilih Guru --</option>
+                                        @foreach($allTeachers as $teacher)
+                                            <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <i class="ph-bold ph-info text-amber-400"></i> Alasan Berhalangan <span class="text-rose-400">*</span>
+                                    </label>
+                                    <select name="reason" required class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="Sakit">🤒 Sakit</option>
+                                        <option value="Izin">✉️ Izin Kepentingan Pribadi</option>
+                                        <option value="Dinas Luar">🏛️ Dinas Luar / SPPD / Pelatihan</option>
+                                        <option value="Tanpa Keterangan">❓ Tanpa Keterangan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- SECTION 2: DAFTAR KELAS & JAM MENGAJAR (DYNAMIC REPEATER) --}}
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="text-xs font-black text-sky-300 uppercase tracking-wider flex items-center gap-2">
+                                        <i class="ph-bold ph-list-numbers text-base"></i> Daftar Kelas & Jam Mengajar yang Ditinggalkan
+                                    </h4>
+                                    <button type="button" @click="addSlot()" class="px-3.5 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/40 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95">
+                                        <i class="ph-bold ph-plus-circle text-sm"></i> + Tambah Kelas
+                                    </button>
+                                </div>
+
+                                {{-- SLOT CARDS LOOP --}}
+                                <div class="space-y-4">
+                                    <template x-for="(slot, index) in slots" :key="index">
+                                        <div class="p-5 rounded-2xl bg-[#021124]/90 border border-white/15 shadow-md relative group space-y-3">
+                                            {{-- Slot Badge & Delete --}}
+                                            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[11px] font-black uppercase tracking-wider">
+                                                    <i class="ph-bold ph-chalkboard"></i>
+                                                    <span x-text="'Kelas Mengajar #' + (index + 1)"></span>
+                                                </span>
+
+                                                <button type="button" x-show="slots.length > 1" @click="removeSlot(index)" class="text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition-colors px-2 py-1 rounded-lg hover:bg-rose-500/10 cursor-pointer">
+                                                    <i class="ph-bold ph-trash text-sm"></i> Hapus Kelas Ini
+                                                </button>
+                                            </div>
+
+                                            {{-- Grid: Kelas & Mapel --}}
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Kelas <span class="text-rose-400">*</span></label>
+                                                    <select :name="'slots[' + index + '][class_id]'" x-model="slot.class_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs focus:border-sky-400 outline-none">
+                                                        <option value="">-- Pilih Kelas --</option>
+                                                        @foreach($allClasses as $class)
+                                                            <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Mata Pelajaran <span class="text-rose-400">*</span></label>
+                                                    <select :name="'slots[' + index + '][subject_id]'" x-model="slot.subject_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs focus:border-sky-400 outline-none">
+                                                        <option value="">-- Pilih Mapel --</option>
+                                                        @foreach($allSubjects as $subj)
+                                                            <option value="{{ $subj->id }}">{{ $subj->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {{-- Grid: Jam Ke & Guru Pengganti --}}
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Jam Pelajaran Ke-</label>
+                                                    <input type="text" :name="'slots[' + index + '][timeslot_info]'" x-model="slot.timeslot_info" placeholder="Contoh: Jam 1-2 atau Jam 3-4" class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs focus:border-sky-400 outline-none">
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Guru Pengganti (Inval)</label>
+                                                    <select :name="'slots[' + index + '][inval_teacher_id]'" x-model="slot.inval_teacher_id" class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs focus:border-sky-400 outline-none">
+                                                        <option value="">-- Belum Ada / Tugas Mandiri --</option>
+                                                        @foreach($allTeachers as $teacher)
+                                                            <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {{-- Tugas Mandiri untuk Kelas Ini --}}
+                                            <div>
+                                                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Tugas / Instruksi untuk Kelas Ini</label>
+                                                <input type="text" :name="'slots[' + index + '][assignment_notes]'" x-model="slot.assignment_notes" placeholder="Tugas yang ditinggalkan, misal: Mengerjakan LKS hal 24-25..." class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-medium text-xs focus:border-sky-400 outline-none">
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- Tombol Tambah Baris Kelas Baru --}}
+                                <button type="button" @click="addSlot()" class="w-full py-3 rounded-2xl border-2 border-dashed border-sky-400/30 bg-sky-500/5 hover:bg-sky-500/15 text-sky-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98">
+                                    <i class="ph-bold ph-plus-circle text-base"></i> + Tambah Kelas & Jam Mengajar Lainnya
+                                </button>
+                            </div>
+
+                            {{-- FOOTER MODAL --}}
+                            <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                                <button type="button" @click="modalInvalOpen = false" class="px-5 py-3 rounded-xl bg-white/10 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer">Batal</button>
+                                <button type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/25 transition-all flex items-center gap-2 active:scale-95 cursor-pointer">
+                                    <i class="ph-bold ph-floppy-disk text-base"></i> Simpan Semua Jadwal Inval
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- MODAL EDIT INVAL --}}
+                <div x-show="modalEditInvalOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-[#021124]/85 backdrop-blur-md" @click="modalEditInvalOpen = false"></div>
+                    
+                    <div class="bg-[#031d3d] border border-white/20 w-full max-w-2xl rounded-[2.5rem] shadow-2xl p-6 sm:p-8 relative z-10 animate-enter max-h-[92vh] overflow-y-auto custom-scrollbar text-white">
+                        
+                        {{-- Modal Header --}}
+                        <div class="flex justify-between items-start mb-6 pb-4 border-b border-white/10">
+                            <div>
+                                <h3 class="font-black text-xl text-white flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center justify-center">
+                                        <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                    </div>
+                                    Edit Catatan Inval & Guru Absen
+                                </h3>
+                                <p class="text-xs text-slate-300 mt-1">Perbarui rincian ketidakhadiran, kelas, jam mengajar, penugasan, atau guru pengganti (inval).</p>
+                            </div>
+                            <button type="button" @click="modalEditInvalOpen = false" class="p-2 rounded-full bg-white/10 text-slate-400 hover:text-white hover:bg-white/20 transition cursor-pointer">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+
+                        <form :action="'{{ url('/permit/inval') }}/' + editInval.id" method="POST" class="space-y-6">
+                            @csrf
+                            @method('PUT')
+
+                            {{-- SECTION 1: IDENTITAS GURU & ALASAN --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-[#021124]/70 border border-white/10">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <i class="ph-bold ph-user text-sky-400"></i> Guru yang Tidak Hadir <span class="text-rose-400">*</span>
+                                    </label>
+                                    <select name="absent_teacher_id" x-model="editInval.absent_teacher_id" required class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="">-- Pilih Guru --</option>
+                                        @foreach($allTeachers as $teacher)
+                                            <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <i class="ph-bold ph-info text-amber-400"></i> Alasan Berhalangan <span class="text-rose-400">*</span>
+                                    </label>
+                                    <select name="reason" x-model="editInval.reason" required class="w-full px-4 py-3 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-sm focus:border-sky-400 outline-none">
+                                        <option value="Sakit">🤒 Sakit</option>
+                                        <option value="Izin">✉️ Izin Kepentingan Pribadi</option>
+                                        <option value="Dinas Luar">🏛️ Dinas Luar / SPPD / Pelatihan</option>
+                                        <option value="Tanpa Keterangan">❓ Tanpa Keterangan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- SECTION 2: KELAS, MAPEL & JAM PELAJARAN --}}
+                            <div class="p-5 rounded-2xl bg-[#021124]/70 border border-white/10 space-y-4">
+                                <h4 class="text-xs font-black text-sky-300 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="ph-bold ph-chalkboard text-base"></i> Kelas & Jadwal Pelajaran
+                                </h4>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Kelas <span class="text-rose-400">*</span></label>
+                                        <select name="class_id" x-model="editInval.class_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs sm:text-sm focus:border-sky-400 outline-none">
+                                            <option value="">-- Pilih Kelas --</option>
+                                            @foreach($allClasses as $class)
+                                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Mata Pelajaran <span class="text-rose-400">*</span></label>
+                                        <select name="subject_id" x-model="editInval.subject_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs sm:text-sm focus:border-sky-400 outline-none">
+                                            <option value="">-- Pilih Mapel --</option>
+                                            @foreach($allSubjects as $subj)
+                                                <option value="{{ $subj->id }}">{{ $subj->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Jam Pelajaran Ke-</label>
+                                    <input type="text" name="timeslot_info" x-model="editInval.timeslot_info" placeholder="Contoh: Jam 1-2 atau Jam 3-4" class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs sm:text-sm focus:border-sky-400 outline-none">
+                                </div>
+                            </div>
+
+                            {{-- SECTION 3: GURU PENGGANTI (INVAL), TUGAS & STATUS --}}
+                            <div class="p-5 rounded-2xl bg-[#021124]/70 border border-white/10 space-y-4">
+                                <h4 class="text-xs font-black text-emerald-300 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="ph-bold ph-user-switch text-base"></i> Penugasan Guru Inval & Catatan
+                                </h4>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Guru Pengganti (Inval)</label>
+                                        <select name="inval_teacher_id" x-model="editInval.inval_teacher_id" @change="if(editInval.inval_teacher_id && editInval.status === 'Menunggu Pengganti') editInval.status = 'Terisi'; if(!editInval.inval_teacher_id && editInval.status === 'Terisi') editInval.status = 'Menunggu Pengganti';" class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs sm:text-sm focus:border-sky-400 outline-none">
+                                            <option value="">-- Belum Ada / Tugas Mandiri --</option>
+                                            @foreach($allTeachers as $teacher)
+                                                <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Status Penugasan <span class="text-rose-400">*</span></label>
+                                        <select name="status" x-model="editInval.status" required class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-bold text-xs sm:text-sm focus:border-sky-400 outline-none">
+                                            <option value="Menunggu Pengganti">⏳ Menunggu Pengganti</option>
+                                            <option value="Terisi">✅ Terisi</option>
+                                            <option value="Selesai">🎉 Selesai</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Tugas / Catatan untuk Kelas</label>
+                                    <textarea name="assignment_notes" x-model="editInval.assignment_notes" rows="2" placeholder="Catatan tugas yang ditinggalkan oleh guru..." class="w-full px-3.5 py-2.5 rounded-xl border border-white/15 bg-[#031d3d] text-white font-medium text-xs sm:text-sm focus:border-sky-400 outline-none resize-none"></textarea>
+                                </div>
+                            </div>
+
+                            {{-- FOOTER MODAL --}}
+                            <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+                                <button type="button" @click="modalEditInvalOpen = false" class="px-5 py-3 rounded-xl bg-white/10 text-slate-300 hover:text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer">Batal</button>
+                                <button type="submit" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2 active:scale-95 cursor-pointer">
+                                    <i class="ph-bold ph-check text-base"></i> Simpan Perubahan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
-        </div>
-    </div>
 
     {{-- MODAL IZIN KELUAR --}}
     <div id="permitModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 sm:p-6">

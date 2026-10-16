@@ -27,13 +27,13 @@ class User extends Authenticatable
             }
         } catch (\Throwable $e) {}
 
-        $roles = is_array($roles) ? $roles : [$roles];
+        $roles = collect($roles)->flatten()->map(fn($r) => is_string($r) ? trim($r) : (string)$r)->toArray();
         $userRole = $this->role ?? null;
         if (!empty($userRole)) {
             $userRoles = is_array($userRole) 
                 ? $userRole 
-                : (json_decode($userRole, true) ?? explode(',', $userRole));
-            $userRoles = array_map('trim', (array) $userRoles);
+                : (json_decode($userRole, true) ?? explode(',', (string)$userRole));
+            $userRoles = collect($userRoles)->flatten()->map(fn($r) => is_string($r) ? trim($r) : (string)$r)->toArray();
             
             return !empty(array_intersect($roles, $userRoles));
         }
@@ -52,13 +52,13 @@ class User extends Authenticatable
             }
         } catch (\Throwable $e) {}
 
-        $roles = collect($roles)->flatten();
+        $roles = collect($roles)->flatten()->map(fn($r) => is_string($r) ? trim($r) : (string)$r);
         $userRole = $this->role ?? null;
         if (!empty($userRole)) {
             $userRoles = is_array($userRole) 
                 ? $userRole 
-                : (json_decode($userRole, true) ?? explode(',', $userRole));
-            $userRoles = array_map('trim', (array) $userRoles);
+                : (json_decode($userRole, true) ?? explode(',', (string)$userRole));
+            $userRoles = collect($userRoles)->flatten()->map(fn($r) => is_string($r) ? trim($r) : (string)$r);
             
             return $roles->intersect($userRoles)->isNotEmpty();
         }

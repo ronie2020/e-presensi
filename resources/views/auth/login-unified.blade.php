@@ -293,19 +293,20 @@
                                   x-data="{ isLoggingIn: false }" @submit="isLoggingIn = true">
                                 @csrf
 
-                                <!-- Email / NIP -->
+                                <!-- Email / NIP / Username -->
                                 <div class="space-y-1">
-                                    <label for="email" class="text-[11px] font-black text-slate-300 uppercase tracking-wider">Email / NIP</label>
+                                    <label for="email" class="text-[11px] font-black text-slate-300 uppercase tracking-wider">Email / NIP / Username</label>
                                     <div class="relative group">
                                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 group-focus-within:text-elevate-accent transition-colors">
-                                            <i class="ph-duotone ph-envelope-simple text-lg"></i>
+                                            <i class="ph-duotone ph-user-circle text-lg"></i>
                                         </div>
                                         <input id="email"
                                             class="block w-full rounded-xl border border-white/20 bg-black/25 py-3 pl-10 pr-3.5 text-xs text-white placeholder-slate-400 focus:border-elevate-accent focus:bg-black/35 focus:ring-1 focus:ring-elevate-accent transition-all outline-none"
-                                            type="email" name="email" :value="old('email')"
+                                            type="text" name="email" :value="old('email')"
                                             required autofocus autocomplete="username"
-                                            placeholder="nama@sekolah.sch.id" />
+                                            placeholder="Email, NIP, atau nama pengguna" />
                                     </div>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">Bisa gunakan email sekolah, NIP, atau nama pengguna.</p>
                                     <x-input-error :messages="$errors->get('email')" class="mt-1 text-[11px] text-rose-300 font-semibold" />
                                 </div>
 

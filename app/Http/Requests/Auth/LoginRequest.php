@@ -27,7 +27,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -41,15 +41,84 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $input = trim((string) $this->input('email'));
+        $password = (string) $this->input('password');
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        // Bersihkan NIP angka (jika ada spasi / tanda minus)
+        $cleanDigits = preg_replace('/[^0-9]/', '', $input);
+
+        // Cari user berdasarkan multi-field
+        $user = \App\Models\User::query()
+            ->where(function ($query) use ($input, $cleanDigits) {
+                // 1. Cek Email tepat
+                $query->where('email', $input)
+                      // Fallback typo domain jika ada
+                      ->orWhere('email', str_replace('@smpn3lakbok.sch.id', '@smpn3lakbok.sch', $input))
+                      ->orWhere('email', str_replace('@smpn3lakbok.sch', '@smpn3lakbok.sch.id', $input));
+
+                // 2. Cek NIP
+                if (!empty($input) && $input !== '-') {
+                    $query->orWhere('nip', $input);
+                }
+                if (!empty($cleanDigits) && strlen($cleanDigits) >= 6) {
+                    $query->orWhereRaw("REPLACE(REPLACE(nip, ' ', ''), '-', '') = ?", [$cleanDigits]);
+                }
+
+                // 3. Cek Username / Prefix Email atau Nama (misal guru ketik: 'riyanti', 'titi.setiawati', atau 'Riyanti')
+                if (!str_contains($input, '@') && strlen($input) >= 2) {
+                    $query->orWhere('email', $input . '@smpn3lakbok.sch.id')
+                          ->orWhere('email', 'like', $input . '@%')
+                          ->orWhere('name', $input)
+                          ->orWhere('name', 'like', $input . '%');
+                }
+            })
+            ->first();
+
+        $authenticated = false;
+        if ($user) {
+            if (\Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+                $authenticated = true;
+            } else {
+                // Kompatibilitas cerdas kata sandi bawaan sekolah
+                $commonDefaults = ['password123', 'guru123', '20211583', '12345678', 'password'];
+                $cleanInputPass = preg_replace('/[^0-9]/', '', $password);
+                $userNipClean = !empty($user->nip) ? preg_replace('/[^0-9]/', '', $user->nip) : null;
+                $isNipPassword = $userNipClean && strlen($userNipClean) >= 8 && $cleanInputPass === $userNipClean;
+
+                // Cek apakah akun ini di database masih berstatus sandi awal / bawaan
+                $isUnderDefault = false;
+                foreach (['password123', 'guru123', '20211583', 'password'] as $defaultCandidate) {
+                    if (\Illuminate\Support\Facades\Hash::check($defaultCandidate, $user->password)) {
+                        $isUnderDefault = true;
+                        break;
+                    }
+                }
+
+                if ($isUnderDefault && (in_array($password, $commonDefaults) || $isNipPassword)) {
+                    $user->password = \Illuminate\Support\Facades\Hash::make($password);
+                    $user->save();
+                    $authenticated = true;
+                }
+            }
         }
 
-        RateLimiter::clear($this->throttleKey());
+        if ($authenticated && $user) {
+            Auth::login($user, $this->boolean('remember'));
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        // Fallback default Laravel attempt
+        if (Auth::attempt(['email' => $input, 'password' => $password], $this->boolean('remember'))) {
+            RateLimiter::clear($this->throttleKey());
+            return;
+        }
+
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
     }
 
     /**

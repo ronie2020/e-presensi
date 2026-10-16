@@ -39,6 +39,7 @@ use App\Http\Controllers\GraduationController;
 use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\StudentPermitController; 
+use App\Http\Controllers\PiketController;
 use App\Http\Controllers\ClassReportController;
 use App\Http\Controllers\PromotionController;
 
@@ -646,6 +647,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/export', [StudentPermitController::class, 'export'])->name('export');        
         Route::post('/scan', [StudentPermitController::class, 'scan'])->name('scan');
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
+
+        //--- E-Jurnal Piket, Inval, Buku Tamu, & Jadwal Piket
+        Route::get('/schedules', [PiketController::class, 'schedulesIndex'])->name('schedules');
+        Route::post('/schedules', [PiketController::class, 'schedulesStore'])->name('schedules.store');
+        Route::delete('/schedules/{id}', [PiketController::class, 'schedulesDestroy'])->name('schedules.destroy');
+        Route::post('/journal/save', [PiketController::class, 'saveJournal'])->name('journal.save');
+        Route::post('/inval/store', [PiketController::class, 'storeInval'])->name('inval.store');
+        Route::put('/inval/{id}', [PiketController::class, 'updateInval'])->name('inval.update');
+        Route::delete('/inval/{id}', [PiketController::class, 'destroyInval'])->name('inval.destroy');
+        Route::post('/guest/store', [PiketController::class, 'storeGuest'])->name('guest.store');
+        Route::post('/guest/{id}/checkout', [PiketController::class, 'checkoutGuest'])->name('guest.checkout');
+        Route::delete('/guest/{id}', [PiketController::class, 'destroyGuest'])->name('guest.destroy');
+        Route::get('/journal/print', [PiketController::class, 'printJournal'])->name('journal.print');
     });
 
       // Rute Monitoring Pemulihan Poin (Amnesti & Decay)

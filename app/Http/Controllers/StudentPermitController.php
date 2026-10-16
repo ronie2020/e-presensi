@@ -17,6 +17,13 @@ class StudentPermitController extends Controller
      */
     public function index()
     {
+        $today = Carbon::now(config('app.timezone', 'Asia/Jakarta'));
+        $dayNames = [0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu'];
+        $todayName = $dayNames[$today->dayOfWeek];
+        $todayDate = $today->toDateString();
+
+        $activeYear = \App\Models\AcademicYear::active();
+
         // Mengambil data siswa yang sedang diluar (Status OUT)
         $activePermits = StudentPermit::with(['student.schoolClass']) 
             ->where('status', 'OUT')
@@ -31,7 +38,45 @@ class StudentPermitController extends Controller
             ->limit(10)
             ->get();
 
-        return view('permit.index', compact('activePermits', 'todayHistory'));
+        // Mengambil Petugas Piket Terjadwal Hari Ini
+        $todayPiketStaff = \App\Models\PiketSchedule::with('teacher')
+            ->where('day_name', $todayName)
+            ->when($activeYear, fn($q) => $q->where('academic_year_id', $activeYear->id))
+            ->orderBy('order_number')
+            ->get();
+
+        // Jurnal Piket Hari Ini (Auto-Create Draft jika belum ada)
+        $todayJournal = \App\Models\PiketJournal::with([
+            'coordinator',
+            'invals.absentTeacher',
+            'invals.invalTeacher',
+            'invals.schoolClass',
+            'invals.subject',
+            'guests'
+        ])->firstOrCreate(
+            ['date' => $todayDate],
+            [
+                'academic_year_id' => $activeYear->id ?? null,
+                'weather'          => 'Cerah',
+                'status'           => 'draft',
+            ]
+        );
+
+        $allTeachers = \App\Models\User::orderBy('name')->get();
+        $allClasses = \App\Models\SchoolClass::orderBy('name')->get();
+        $allSubjects = \App\Models\Subject::orderBy('name')->get();
+
+        return view('permit.index', compact(
+            'activePermits',
+            'todayHistory',
+            'todayPiketStaff',
+            'todayJournal',
+            'allTeachers',
+            'allClasses',
+            'allSubjects',
+            'todayName',
+            'todayDate'
+        ));
     }
 
     /**
