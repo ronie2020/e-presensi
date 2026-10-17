@@ -178,6 +178,9 @@
                                             <option value="Guru Piket" class="bg-slate-900 text-white">Guru Piket</option>
                                             <option value="Kepala Sekolah" class="bg-slate-900 text-white">Kepala Sekolah</option>
                                             <option value="Admin" class="bg-slate-900 text-white">Admin (IT)</option>
+                                            @if(Auth::user()->hasRole('Superadmin'))
+                                                <option value="Superadmin" class="bg-slate-900 text-purple-300 font-bold">Superadmin</option>
+                                            @endif
                                         </select>
                                         <p class="text-[10px] text-slate-400 mt-2 ml-1 font-medium">
                                             *Tahan tombol <kbd class="bg-slate-800 px-1 rounded border border-white/10 text-slate-300">CTRL</kbd> atau <kbd class="bg-slate-800 px-1 rounded border border-white/10 text-slate-300">CMD</kbd> untuk memilih > 1 role.
@@ -353,6 +356,7 @@
                                                         @foreach($user->roles as $roleItem)
                                                             @php
                                                                 $badgeClass = match($roleItem->name) {
+                                                                    'Superadmin' => 'bg-purple-500/20 text-purple-300 border-purple-500/30',
                                                                     'Admin' => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
                                                                     'Kepala Sekolah' => 'bg-sky-500/20 text-sky-300 border-sky-400/30',
                                                                     'TU' => 'bg-slate-800 text-slate-300 border-white/10',

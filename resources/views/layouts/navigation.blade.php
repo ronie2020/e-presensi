@@ -120,6 +120,9 @@
             {{-- LOGIKA FILTER MULTI-ROLE (MENGGUNAKAN SPATIE) --}}
             @php
                 $visibleItems = collect($items)->filter(function ($item) {
+                    if (auth()->user()->hasRole('Superadmin')) {
+                        return true;
+                    }
                     if (!isset($item['roles']) || in_array('*', $item['roles'])) {
                         return true;
                     }

@@ -117,6 +117,15 @@ use App\Http\Controllers\RamadanReportController;
 // =========================================================================
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+Route::get('/superadmin', function () {
+    return redirect()->route('dashboard');
+})->middleware('auth');
+Route::get('/super-admin', function () {
+    return redirect()->route('dashboard');
+})->middleware('auth');
+Route::get('/admin', function () {
+    return redirect()->route('dashboard');
+})->middleware('auth');
 Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
 Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
 Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 

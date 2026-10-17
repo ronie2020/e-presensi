@@ -53,9 +53,7 @@ class SuperadminSeeder extends Seeder
         }
 
         // Pastikan role Superadmin ter-assign ke akun ini
-        if (!$superadmin->hasRole('Superadmin')) {
-            $superadmin->assignRole('Superadmin');
-            $this->command->info('   Role Superadmin berhasil di-assign.');
-        }
+        $superadmin->syncRoles(['Superadmin']);
+        $this->command->info('   Role Superadmin berhasil di-assign.');
     }
 }

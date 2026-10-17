@@ -145,6 +145,9 @@
                                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                             @php
                                                 $availableRoles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru Piket', 'Kepala Sekolah', 'TU', 'Admin'];
+                                                if (Auth::user()->hasRole('Superadmin')) {
+                                                    $availableRoles[] = 'Superadmin';
+                                                }
                                             @endphp
 
                                             @foreach($availableRoles as $option)
