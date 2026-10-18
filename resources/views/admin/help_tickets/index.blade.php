@@ -1,31 +1,47 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/20 text-sky-400 text-xs font-bold uppercase tracking-wider mb-2">
-                    <i class="ph-bold ph-lifebuoy text-sm"></i>
-                    <span>Pusat Layanan IT & Helpdesk</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
-                    Tiket Kendala Aplikasi
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-400 mt-1">
-                    Kelola dan pantau seluruh kendala yang dihadapi Siswa & Guru saat mengakses SIMADU
-                </p>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="button" 
-                        @click="$dispatch('open-create-ticket-modal')"
-                        class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-sky-500/20 transition-all active:scale-95 cursor-pointer">
-                    <i class="ph-bold ph-plus-circle text-base"></i>
-                    <span>Catat Kendala Manual</span>
-                </button>
-            </div>
-        </div>
+        <h2 class="text-xl font-black text-white tracking-tight flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 flex items-center justify-center text-lg shrink-0 shadow-inner">
+                <i class="ph-bold ph-lifebuoy"></i>
+            </span>
+            <span>Tiket Kendala Aplikasi</span>
+        </h2>
     </x-slot>
 
     <div x-data="helpTicketsManager()" class="py-6 space-y-6">
+
+        {{-- HERO SECTION --}}
+        <div class="relative rounded-[2.5rem] bg-gradient-to-br from-[#0d52a1]/85 via-[#031d3d]/90 to-[#021124]/95 p-6 sm:p-8 text-white shadow-2xl shadow-[#0d52a1]/20 border border-white/15 backdrop-blur-2xl overflow-hidden">
+            {{-- Specular Top Rim Light --}}
+            <div class="absolute inset-0 rounded-[2.5rem] pointer-events-none border-t border-l border-white/20"></div>
+            {{-- Ambient Radiant Glow Orbs --}}
+            <div class="absolute -top-16 -right-16 w-72 h-72 bg-[#56bbf1]/15 rounded-full blur-[100px] pointer-events-none"></div>
+            <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-[#0d52a1]/25 rounded-full blur-[90px] pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                <div class="space-y-2 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-sky-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm">
+                        <i class="ph-fill ph-lifebuoy text-sky-400"></i>
+                        <span>Pusat Layanan IT & Helpdesk</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                        Tiket Kendala Aplikasi
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                        Kelola dan pantau seluruh kendala yang dihadapi Siswa & Guru saat mengakses SIMADU secara terpusat.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3 shrink-0">
+                    <button type="button" 
+                            @click="$dispatch('open-create-ticket-modal')"
+                            class="px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all active:scale-95 cursor-pointer">
+                        <i class="ph-bold ph-plus-circle text-lg"></i>
+                        <span>Catat Kendala Manual</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         {{-- FLASH ALERTS --}}
         @if(session('success'))

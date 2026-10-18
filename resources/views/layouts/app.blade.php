@@ -103,10 +103,10 @@
                     </div>
 
                     <!-- User Info & Quick Tools -->
-                    <div class="flex items-center gap-4 sm:gap-6">
-                       <div class="hidden md:block text-right border-r border-white/15 pr-6">
-                            <p class="text-[10px] font-bold text-elevate-accent uppercase tracking-widest">Hari Ini</p>
-                            <p class="text-sm font-bold text-slate-200">{{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}</p>
+                    <div class="flex items-center gap-3 sm:gap-5 lg:gap-6 shrink-0">
+                       <div class="hidden md:block text-right border-r border-white/15 pr-4 sm:pr-6 shrink-0 whitespace-nowrap">
+                            <p class="text-[10px] font-bold text-elevate-accent uppercase tracking-widest leading-none">Hari Ini</p>
+                            <p class="text-xs sm:text-sm font-bold text-slate-200 mt-1 leading-none whitespace-nowrap">{{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}</p>
                         </div>
                         
                         <!-- Link Cepat ke Portal Siswa -->
