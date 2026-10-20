@@ -77,7 +77,8 @@ trait TeacherScopeTrait
             return Subject::whereIn('id', $subjectIds)->orderBy('name')->get();
         }
 
-        return collect();
+        // Fallback: Jika belum ada beban mengajar, tampilkan seluruh mapel agar tidak kosong
+        return Subject::orderBy('name')->get();
     }
 
     /**
@@ -111,6 +112,7 @@ trait TeacherScopeTrait
             return SchoolClass::whereIn('id', $classIds)->orderBy('name')->get();
         }
 
-        return collect();
+        // Fallback: Jika belum ada beban mengajar/jadwal, tampilkan seluruh kelas agar tidak kosong
+        return SchoolClass::orderBy('name')->get();
     }
 }

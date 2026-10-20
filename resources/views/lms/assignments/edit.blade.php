@@ -303,6 +303,79 @@
                                     <p class="text-xs font-semibold text-slate-400 mt-2 ml-1">Untuk mengubah soal kuis, fitur edit soal belum tersedia di form ini.</p>
                                 </div>
                             @endif
+
+                            <!-- LAMPIRAN BERKAS / SOAL / APLIKASI WEB (OPSIONAL) -->
+                            <div class="mt-8 pt-6 border-t border-white/10" x-data="{ attachedName: '', attachedSize: '' }">
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-1.5">
+                                    <i class="ph-bold ph-paperclip text-sm"></i> Lampirkan File Soal / Bahan / Aplikasi Web <span class="text-slate-500 text-[9px] lowercase font-normal">(opsional)</span>
+                                </label>
+
+                                @if($assignment->file_path)
+                                    @php
+                                        $isHtml = preg_match('/\.(html|htm)$/i', $assignment->file_path);
+                                        $isPdf = preg_match('/\.pdf$/i', $assignment->file_path);
+                                    @endphp
+                                    <div class="mb-4 p-4 rounded-2xl bg-slate-800/80 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl {{ $isHtml ? 'bg-emerald-500/20 text-emerald-400' : ($isPdf ? 'bg-rose-500/20 text-rose-400' : 'bg-sky-500/20 text-sky-400') }} flex items-center justify-center text-xl shrink-0">
+                                                <i class="ph-bold {{ $isHtml ? 'ph-code' : ($isPdf ? 'ph-file-pdf' : 'ph-file-text') }}"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white">{{ $assignment->file_name ?? basename($assignment->file_path) }}</p>
+                                                <span class="text-[10px] font-semibold text-slate-400">Berkas saat ini terpasang</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <a href="{{ asset('storage/' . $assignment->file_path) }}" target="_blank" class="px-3.5 py-1.5 bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors">
+                                                <i class="ph-bold ph-arrow-square-out"></i> Buka / Cek File
+                                            </a>
+                                            <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 cursor-pointer ml-2">
+                                                <input type="checkbox" name="delete_attachment" value="1" class="rounded border-white/20 bg-slate-900 text-rose-500 focus:ring-rose-400">
+                                                <span>Hapus File Ini</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="p-5 rounded-2xl border border-dashed border-white/20 bg-slate-900/40 hover:border-sky-400/50 transition-all group">
+                                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                                            <i class="ph-duotone ph-file-arrow-up"></i>
+                                        </div>
+                                        <div class="flex-1 w-full text-center sm:text-left">
+                                            <input type="file" name="attachment_file" id="assignment_attachment_file"
+                                                   accept=".pdf,.html,.htm,.zip,.rar,.7z,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+                                                   @change="if($event.target.files[0]) {
+                                                       if ($event.target.files[0].size > 30 * 1024 * 1024) {
+                                                           Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 30MB.', confirmButtonColor: '#0284c7' });
+                                                           $event.target.value = '';
+                                                           attachedName = '';
+                                                           attachedSize = '';
+                                                       } else {
+                                                           attachedName = $event.target.files[0].name;
+                                                           attachedSize = ($event.target.files[0].size / 1024 / 1024).toFixed(2) + ' MB';
+                                                       }
+                                                   } else {
+                                                       attachedName = '';
+                                                       attachedSize = '';
+                                                   }"
+                                                   class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
+                                            
+                                            <template x-if="attachedName">
+                                                <div class="mt-2.5 flex items-center justify-center sm:justify-start gap-2 text-xs font-bold text-emerald-400">
+                                                    <i class="ph-bold ph-check-circle text-base"></i>
+                                                    <span x-text="attachedName"></span> (<span x-text="attachedSize"></span>)
+                                                    <button type="button" @click="document.getElementById('assignment_attachment_file').value = ''; attachedName = ''; attachedSize = '';" class="text-rose-400 hover:text-rose-300 ml-2 text-[11px] underline">Batal</button>
+                                                </div>
+                                            </template>
+                                            
+                                            <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                                                {{ $assignment->file_path ? 'Pilih file baru jika ingin mengganti lampiran di atas.' : 'Dapat berupa berkas PDF, Word, Excel, maupun Aplikasi Web (HTML / index.html / ZIP) hingga 30MB.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 4. TARGET PENERIMA (READ-ONLY) -->

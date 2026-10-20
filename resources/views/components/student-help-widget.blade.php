@@ -27,11 +27,28 @@
 
 <div x-data="studentHelpWidget()" x-cloak class="relative z-[9999]" id="student-help-widget-root">
 
-    {{-- 1. FLOATING BUTTON & SPEECH BUBBLE (PERSIS REFERENSI USER) --}}
-    <div class="fixed bottom-6 right-4 sm:bottom-8 sm:right-6 z-[9999] flex items-center select-none group"
-         :class="{ 'opacity-90 hover:opacity-100': !isOpen }">
+    {{-- 1. FLOATING BUTTON & SPEECH BUBBLE (OPTIMASI KHUSUS HP/MOBILE) --}}
+    
+    {{-- A. SLIM MINIMIZED EDGE TAB (JIKA DIKECILKAN DI HP AGAR TIDAK MENGGANGGU TOMBOL LAIN) --}}
+    <div x-show="isMinimized && !isOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-x-4"
+         x-transition:enter-end="opacity-100 translate-x-0"
+         @click="isMinimized = false; try { localStorage.setItem('simadu_help_minimized', 'false'); } catch(e) {}"
+         class="fixed right-0 z-[9999] bg-[#032b5b]/95 hover:bg-[#0d52a1] border-y border-l border-sky-400/50 text-white rounded-l-2xl py-2.5 px-3 shadow-2xl backdrop-blur-md flex items-center gap-1.5 cursor-pointer transition-all duration-200 group active:scale-95 select-none"
+         :style="'bottom: ' + currentBottomPx + 'px'"
+         title="Buka Pusat Bantuan (Ketuk untuk memperbesar)">
+        <i class="ph-bold ph-headset text-sky-400 text-xl group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-black tracking-wider uppercase text-sky-200 hidden sm:inline">Bantuan</span>
+    </div>
 
-        {{-- BALON KATA "Butuh bantuan?" --}}
+    {{-- B. FLOATING DOCK UTAMA (BISA DIGESER ATAS-BAWAH DI HP) --}}
+    <div x-show="!isMinimized"
+         class="fixed right-3 sm:right-6 z-[9999] flex items-center select-none"
+         :style="'bottom: ' + currentBottomPx + 'px'"
+         :class="{ 'opacity-90 hover:opacity-100': !isOpen && !isDragging, 'transition-all duration-150': !isDragging }">
+
+        {{-- BALON KATA 'Butuh bantuan?' (DISEMBUNYIKAN DI LAYAR HP AGAR TIDAK MEMBLOKIR TOMBOL HALAMAN) --}}
         <div x-show="bubbleVisible && !isOpen"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-x-4 scale-95"
@@ -40,7 +57,7 @@
              x-transition:leave-start="opacity-100 translate-x-0 scale-100"
              x-transition:leave-end="opacity-0 translate-x-4 scale-95"
              @click="openHelpModal('lapor')"
-             class="mr-2 sm:mr-3 relative cursor-pointer filter drop-shadow-xl animate-float-gentle">
+             class="hidden sm:flex mr-3 relative cursor-pointer filter drop-shadow-xl animate-float-gentle">
             
             <div class="bg-white text-slate-900 rounded-2xl px-4 py-2.5 sm:px-5 sm:py-3 border-2 border-sky-400/30 flex items-center gap-2.5 shadow-2xl relative">
                 
@@ -66,45 +83,57 @@
             </div>
         </div>
 
-        {{-- AVATAR OPERATOR DOCK (TOMBOL BULAT MELAYANG) --}}
-        <div class="relative cursor-pointer" @click="toggleHelpModal()">
+        {{-- AVATAR OPERATOR DOCK (BISA DISENTUH & DIGESER SECARA VERTIKAL DI HP) --}}
+        <div class="relative cursor-pointer touch-none"
+             @touchstart="handleTouchStart($event)"
+             @touchmove="handleTouchMove($event)"
+             @touchend="handleTouchEnd($event)"
+             @click="handleButtonClick()">
             
             {{-- Glowing Pulse Ring --}}
-            <div class="absolute inset-0 rounded-full bg-sky-400/30 blur-md animate-ping pointer-events-none"></div>
+            <div class="absolute inset-0 rounded-full bg-sky-400/30 blur-md animate-ping pointer-events-none" x-show="!isDragging"></div>
             
             {{-- Tombol Avatar Utama --}}
             <button type="button"
-                    class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#032b5b] via-[#0d52a1] to-[#38bdf8] p-0.5 shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-white/60 flex items-center justify-center overflow-hidden focus:outline-none">
+                    class="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#032b5b] via-[#0d52a1] to-[#38bdf8] p-0.5 shadow-2xl transition-transform duration-200 hover:scale-105 active:scale-95 border-2 border-white/60 flex items-center justify-center overflow-hidden focus:outline-none">
                 
                 {{-- Foto Avatar Helpdesk --}}
                 <img src="{{ asset('img/helpdesk-operator.png') }}" 
                      alt="Bantuan & Layanan Kendala" 
-                     class="w-full h-full object-cover rounded-full"
+                     class="w-full h-full object-cover rounded-full pointer-events-none"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                 
                 {{-- Fallback Icon jika gambar belum terload --}}
-                <div class="w-full h-full rounded-full bg-[#032b5b] hidden items-center justify-center text-white">
-                    <i class="ph-bold ph-headset text-2xl text-sky-300"></i>
+                <div class="w-full h-full rounded-full bg-[#032b5b] hidden items-center justify-center text-white pointer-events-none">
+                    <i class="ph-bold ph-headset text-xl sm:text-2xl text-sky-300"></i>
                 </div>
             </button>
 
             {{-- Tombol Kecil Biru di Sudut Kanan Bawah --}}
-            <div class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-blue-600 border-2 border-white text-white flex items-center justify-center shadow-md">
+            <div class="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-600 border-2 border-white text-white flex items-center justify-center shadow-md text-xs sm:text-sm pointer-events-none">
                 <i class="ph-bold" :class="isOpen ? 'ph-x' : 'ph-chats'"></i>
             </div>
 
             {{-- Status Online Indicator (Green Dot) --}}
-            <span class="absolute top-0 right-0 flex h-3.5 w-3.5">
+            <span class="absolute top-0 right-0 flex h-3 w-3 sm:h-3.5 sm:w-3.5 pointer-events-none">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 sm:h-3.5 sm:w-3.5 bg-emerald-500 border-2 border-white"></span>
             </span>
+
+            {{-- Tombol Kecilkan di HP (Tombol Minus Kecil) --}}
+            <button type="button"
+                    @click.stop="isMinimized = true; try { localStorage.setItem('simadu_help_minimized', 'true'); } catch(e) {}"
+                    class="sm:hidden absolute -top-1 -left-1 w-5 h-5 rounded-full bg-slate-900/90 text-slate-300 hover:text-white border border-white/20 flex items-center justify-center text-[10px] shadow-sm cursor-pointer"
+                    title="Kecilkan / Sembunyikan ke tepi">
+                <i class="ph-bold ph-minus"></i>
+            </button>
         </div>
 
-        {{-- Tombol Mini untuk Munculkan kembali Balon jika ditutup --}}
+        {{-- Tombol Mini untuk Munculkan kembali Balon di Desktop jika ditutup --}}
         <button type="button" 
                 x-show="!bubbleVisible && !isOpen" 
                 @click="bubbleVisible = true"
-                class="ml-1 w-5 h-5 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-[10px] transition cursor-pointer"
+                class="hidden sm:flex ml-1 w-5 h-5 rounded-full bg-white/20 hover:bg-white/40 text-white items-center justify-center text-[10px] transition cursor-pointer"
                 title="Buka pesan bantuan">
             <i class="ph-bold ph-caret-left"></i>
         </button>
@@ -733,6 +762,67 @@
                     const tab = (e.detail && e.detail.tab) ? e.detail.tab : 'lapor';
                     this.openHelpModal(tab);
                 });
+            },
+
+            // State Posisi & Gesture Drag di HP
+            isDragging: false,
+            hasMoved: false,
+            touchStartY: 0,
+            startBottomPx: 24,
+            currentBottomPx: (function() {
+                try {
+                    const saved = localStorage.getItem('simadu_help_pos_y');
+                    if (saved) return Math.max(16, Math.min(parseInt(saved), window.innerHeight - 90));
+                } catch(e) {}
+                return window.innerWidth < 640 ? 75 : 32; // Default 75px di HP agar melayang di atas bottom actions
+            })(),
+            isMinimized: (function() {
+                try {
+                    return localStorage.getItem('simadu_help_minimized') === 'true';
+                } catch(e) {
+                    return false;
+                }
+            })(),
+
+            handleTouchStart(e) {
+                if (window.innerWidth >= 640) return;
+                const touch = e.touches[0];
+                this.touchStartY = touch.clientY;
+                this.startBottomPx = this.currentBottomPx;
+                this.hasMoved = false;
+                this.isDragging = true;
+            },
+
+            handleTouchMove(e) {
+                if (!this.isDragging || window.innerWidth >= 640) return;
+                const touch = e.touches[0];
+                const deltaY = this.touchStartY - touch.clientY;
+                if (Math.abs(deltaY) > 6) {
+                    this.hasMoved = true;
+                    if (e.cancelable) e.preventDefault();
+                    let newBottom = this.startBottomPx + deltaY;
+                    const maxBottom = window.innerHeight - 90;
+                    newBottom = Math.max(16, Math.min(newBottom, maxBottom));
+                    this.currentBottomPx = newBottom;
+                }
+            },
+
+            handleTouchEnd() {
+                if (window.innerWidth >= 640) return;
+                this.isDragging = false;
+                if (this.hasMoved) {
+                    try {
+                        localStorage.setItem('simadu_help_pos_y', this.currentBottomPx);
+                    } catch(e) {}
+                }
+            },
+
+            handleButtonClick() {
+                if (this.hasMoved) {
+                    this.hasMoved = false;
+                    return;
+                }
+                this.toggleHelpModal();
             },
 
             toggleHelpModal() {

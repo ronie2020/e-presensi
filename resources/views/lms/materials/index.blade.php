@@ -197,13 +197,9 @@
                                     {{-- Class badge & Target --}}
                                     <div class="flex items-center gap-2 mb-2 relative z-10">
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-300" 
-                                              title="{{ $material->is_bulk ? 'Materi ini dibagikan ke beberapa kelas sekaligus' : 'Materi khusus satu kelas' }}">
+                                              title="{{ $material->classes_list ?? ($material->is_bulk ? 'Materi ini dibagikan ke beberapa kelas sekaligus' : 'Materi khusus satu kelas') }}">
                                             <i class="ph-fill ph-users text-sky-400"></i>
-                                            @if($material->is_bulk)
-                                                Semua Kelas {{ $material->target_grade ?? '' }} ({{ $material->total_classes }})
-                                            @else
-                                                {{ $material->schoolClass->name ?? 'Semua Kelas' }}
-                                            @endif
+                                            {{ $material->target_badge_label ?? ($material->schoolClass->name ?? 'Semua Kelas') }}
                                         </span>
                                     </div>
 

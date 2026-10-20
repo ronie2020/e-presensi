@@ -123,14 +123,10 @@
 
                                 {{-- Bottom Badges Overlay --}}
                                 <div class="absolute bottom-2.5 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-slate-300 text-[10px] font-semibold border border-white/10 truncate max-w-[180px]">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-slate-300 text-[10px] font-semibold border border-white/10 truncate max-w-[180px]" title="{{ $task->classes_list ?? '' }}">
                                         <i class="ph-fill ph-users text-sky-400 shrink-0"></i>
                                         <span class="truncate">
-                                            @if($task->is_bulk)
-                                                Semua Kelas {{ $task->target_grade ?? '' }} ({{ $task->total_classes }})
-                                            @else
-                                                {{ $task->schoolClass->name ?? 'Semua' }}
-                                            @endif
+                                            {{ $task->target_badge_label ?? ($task->schoolClass->name ?? 'Semua') }}
                                         </span>
                                     </span>
 
@@ -163,16 +159,12 @@
                                 {{-- Info Detail Grid --}}
                                 <div class="grid grid-cols-2 gap-2.5 mb-3.5 relative z-10">
                                     {{-- Target Kelas --}}
-                                    <div class="bg-slate-900/60 px-3 py-2 rounded-xl border border-white/10">
+                                    <div class="bg-slate-900/60 px-3 py-2 rounded-xl border border-white/10" title="{{ $task->classes_list ?? '' }}">
                                         <p class="text-[9px] font-bold text-sky-400 uppercase tracking-widest mb-0.5">Target</p>
                                         <div class="text-xs font-bold text-slate-200 flex items-center gap-1.5 truncate">
                                             <i class="ph-fill ph-users text-sky-400 shrink-0"></i>
                                             <span class="truncate">
-                                                @if($task->is_bulk)
-                                                    Semua Kelas {{ $task->target_grade ?? '' }} ({{ $task->total_classes }})
-                                                @else
-                                                    {{ $task->schoolClass->name ?? 'Semua' }}
-                                                @endif
+                                                {{ $task->target_badge_label ?? ($task->schoolClass->name ?? 'Semua') }}
                                             </span>
                                         </div>
                                     </div>

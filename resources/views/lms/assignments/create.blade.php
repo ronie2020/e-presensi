@@ -95,13 +95,57 @@
             <div class="bg-gradient-to-b from-[#031d3d]/90 via-[#021124]/95 to-[#020b18] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden text-slate-100 backdrop-blur-xl">
                 <form action="{{ route('lms.assignments.store') }}" method="POST" enctype="multipart/form-data" id="createAssignmentForm" 
                       x-data="{ 
-                          targetType: '{{ old('target_type', 'class') }}', 
+                          targetType: '{{ old('target_type', 'multiple') }}', 
+                          selectedClasses: {{ json_encode(array_map('strval', (array)old('class_ids', old('class_id') ? [old('class_id')] : []))) }},
+                          availableClasses: {{ $classes->map(fn($c) => ['id' => (string)$c->id, 'name' => $c->name])->toJson() }},
+                          allSchoolClasses: {{ ($allClasses ?? $classes)->map(fn($c) => ['id' => (string)$c->id, 'name' => $c->name])->toJson() }},
+                          showAllSchoolClasses: false,
+                          targetGrade: '{{ old('target_grade', '7') }}',
                           assignmentType: '{{ old('assignment_type', 'file_upload') }}', 
                           questions: [],
                           interactiveQuestions: [],
                           selectedSubject: '{{ old('subject_id') }}',
                           topics: [],
                           selectedTopic: '{{ old('topic_id') }}',
+
+                          get displayClasses() {
+                              return this.showAllSchoolClasses ? this.allSchoolClasses : this.availableClasses;
+                          },
+
+                          toggleClass(id) {
+                              id = String(id);
+                              if (this.selectedClasses.includes(id)) {
+                                  this.selectedClasses = this.selectedClasses.filter(x => x !== id);
+                              } else {
+                                  this.selectedClasses.push(id);
+                              }
+                          },
+
+                          isClassSelected(id) {
+                              return this.selectedClasses.includes(String(id));
+                          },
+
+                          selectAll() {
+                              this.selectedClasses = this.displayClasses.map(c => String(c.id));
+                          },
+
+                          selectGrade(grade) {
+                              const gradeIds = this.displayClasses
+                                  .filter(c => c.name.startsWith(grade))
+                                  .map(c => String(c.id));
+                              this.selectedClasses = [...new Set([...this.selectedClasses, ...gradeIds])];
+                          },
+
+                          clearAll() {
+                              this.selectedClasses = [];
+                          },
+
+                          getSelectedNames() {
+                              return this.allSchoolClasses
+                                  .filter(c => this.selectedClasses.includes(String(c.id)))
+                                  .map(c => c.name)
+                                  .join(', ');
+                          },
                           
                           fetchTopics() {
                               if(!this.selectedSubject) {
@@ -437,46 +481,230 @@
                                 </div>
                             </div>
 
+                            <!-- LAMPIRAN BERKAS / SOAL / APLIKASI WEB (OPSIONAL) -->
+                            <div class="mt-8 pt-6 border-t border-white/10" x-data="{ attachedName: '', attachedSize: '' }">
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-1.5">
+                                    <i class="ph-bold ph-paperclip text-sm"></i> Lampirkan File Soal / Bahan / Aplikasi Web <span class="text-slate-500 text-[9px] lowercase font-normal">(opsional)</span>
+                                </label>
+                                <div class="p-5 rounded-2xl border border-dashed border-white/20 bg-slate-900/40 hover:border-sky-400/50 transition-all group">
+                                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                                        <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+                                            <i class="ph-duotone ph-file-arrow-up"></i>
+                                        </div>
+                                        <div class="flex-1 w-full text-center sm:text-left">
+                                            <input type="file" name="attachment_file" id="assignment_attachment_file"
+                                                   accept=".pdf,.html,.htm,.zip,.rar,.7z,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+                                                   @change="if($event.target.files[0]) {
+                                                       if ($event.target.files[0].size > 30 * 1024 * 1024) {
+                                                           Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 30MB.', confirmButtonColor: '#0284c7' });
+                                                           $event.target.value = '';
+                                                           attachedName = '';
+                                                           attachedSize = '';
+                                                       } else {
+                                                           attachedName = $event.target.files[0].name;
+                                                           attachedSize = ($event.target.files[0].size / 1024 / 1024).toFixed(2) + ' MB';
+                                                       }
+                                                   } else {
+                                                       attachedName = '';
+                                                       attachedSize = '';
+                                                   }"
+                                                   class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 cursor-pointer">
+                                            
+                                            <template x-if="attachedName">
+                                                <div class="mt-2.5 flex items-center justify-center sm:justify-start gap-2 text-xs font-bold text-emerald-400">
+                                                    <i class="ph-bold ph-check-circle text-base"></i>
+                                                    <span x-text="attachedName"></span> (<span x-text="attachedSize"></span>)
+                                                    <button type="button" @click="document.getElementById('assignment_attachment_file').value = ''; attachedName = ''; attachedSize = '';" class="text-rose-400 hover:text-rose-300 ml-2 text-[11px] underline">Hapus</button>
+                                                </div>
+                                            </template>
+                                            
+                                            <p class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                                                Guru dapat melampirkan berkas soal <b>PDF</b>, lembar kerja Word/Excel, atau <b>Aplikasi Web Sederhana (HTML / index.html / ZIP)</b> untuk dibuka dan dipelajari siswa (maks 30MB).
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         <!-- 4. TARGET PENERIMA -->
-                        <div class="bg-slate-900/60 p-6 md:p-8 rounded-[2rem] border border-white/10">
-                            <label class="block text-xs font-black text-sky-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <i class="ph-fill ph-users-three text-lg"></i> Target Penerima <span class="text-rose-400">*</span>
-                            </label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="flex flex-col sm:flex-row gap-4">
-                                    <label class="flex-1 inline-flex items-center cursor-pointer group bg-slate-900/80 px-4 py-3.5 border border-white/10 rounded-xl hover:border-sky-400/50 shadow-sm transition-all">
-                                        <div class="relative flex items-center">
-                                            <input type="radio" name="target_type" value="class" x-model="targetType" class="peer sr-only">
-                                            <div class="w-5 h-5 border-2 border-slate-600 rounded-full peer-checked:border-sky-400 peer-checked:bg-sky-400 transition-colors"></div>
+                        <div class="bg-slate-900/60 p-6 md:p-8 rounded-[2rem] border border-white/10 space-y-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <label class="block text-xs font-black text-sky-400 uppercase tracking-widest flex items-center gap-2">
+                                    <i class="ph-fill ph-users-three text-lg"></i> Target Penerima Tugas / Latihan <span class="text-rose-400">*</span>
+                                </label>
+                                <span class="text-xs text-slate-400 font-medium">Tentukan kelas mana saja yang harus mengerjakan tugas ini</span>
+                            </div>
+
+                            {{-- PILIHAN MODE: MULTI KELAS, SATU KELAS, PER JENJANG --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                                {{-- OPSI 1: MULTI KELAS --}}
+                                <label class="relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all duration-200 select-none group"
+                                       :class="targetType === 'multiple' ? 'bg-sky-500/15 border-sky-400 shadow-lg shadow-sky-500/10' : 'bg-slate-900/80 border-white/10 hover:border-white/20'">
+                                    <input type="radio" name="target_type" value="multiple" x-model="targetType" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+                                             :class="targetType === 'multiple' ? 'bg-sky-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400 group-hover:text-white'">
+                                            <i class="ph-bold ph-squares-four text-lg"></i>
                                         </div>
-                                        <span class="ml-3 text-sm font-black text-slate-200 group-hover:text-sky-300 transition-colors">Satu Kelas</span>
-                                    </label>
-                                    <label class="flex-1 inline-flex items-center cursor-pointer group bg-slate-900/80 px-4 py-3.5 border border-white/10 rounded-xl hover:border-sky-400/50 shadow-sm transition-all">
-                                        <div class="relative flex items-center">
-                                            <input type="radio" name="target_type" value="grade" x-model="targetType" class="peer sr-only">
-                                            <div class="w-5 h-5 border-2 border-slate-600 rounded-full peer-checked:border-sky-400 peer-checked:bg-sky-400 transition-colors"></div>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                              :class="targetType === 'multiple' ? 'bg-sky-400/20 text-sky-300 border border-sky-400/30' : 'bg-slate-800 text-slate-400'">
+                                            Fleksibel
+                                        </span>
+                                    </div>
+                                    <span class="text-sm font-black text-white">Pilih Multi Kelas</span>
+                                    <span class="text-[11px] text-slate-400 mt-0.5 leading-snug">Pilih beberapa kelas sekaligus (misal: 7A, 7B, 7C)</span>
+                                </label>
+
+                                {{-- OPSI 2: SATU KELAS --}}
+                                <label class="relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all duration-200 select-none group"
+                                       :class="targetType === 'class' ? 'bg-sky-500/15 border-sky-400 shadow-lg shadow-sky-500/10' : 'bg-slate-900/80 border-white/10 hover:border-white/20'">
+                                    <input type="radio" name="target_type" value="class" x-model="targetType" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+                                             :class="targetType === 'class' ? 'bg-sky-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400 group-hover:text-white'">
+                                            <i class="ph-bold ph-chalkboard-teacher text-lg"></i>
                                         </div>
-                                        <span class="ml-3 text-sm font-black text-slate-200 group-hover:text-sky-300 transition-colors">Satu Jenjang</span>
-                                    </label>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                              :class="targetType === 'class' ? 'bg-sky-400/20 text-sky-300 border border-sky-400/30' : 'bg-slate-800 text-slate-400'">
+                                            Tunggal
+                                        </span>
+                                    </div>
+                                    <span class="text-sm font-black text-white">Satu Kelas</span>
+                                    <span class="text-[11px] text-slate-400 mt-0.5 leading-snug">Khusus hanya untuk 1 kelas tertentu</span>
+                                </label>
+
+                                {{-- OPSI 3: PER JENJANG --}}
+                                <label class="relative flex flex-col p-4 rounded-2xl border cursor-pointer transition-all duration-200 select-none group"
+                                       :class="targetType === 'grade' ? 'bg-sky-500/15 border-sky-400 shadow-lg shadow-sky-500/10' : 'bg-slate-900/80 border-white/10 hover:border-white/20'">
+                                    <input type="radio" name="target_type" value="grade" x-model="targetType" class="sr-only">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+                                             :class="targetType === 'grade' ? 'bg-sky-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400 group-hover:text-white'">
+                                            <i class="ph-bold ph-graduation-cap text-lg"></i>
+                                        </div>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                              :class="targetType === 'grade' ? 'bg-sky-400/20 text-sky-300 border border-sky-400/30' : 'bg-slate-800 text-slate-400'">
+                                            1 Angkatan
+                                        </span>
+                                    </div>
+                                    <span class="text-sm font-black text-white">Pilih Per Jenjang</span>
+                                    <span class="text-[11px] text-slate-400 mt-0.5 leading-snug">Otomatis seluruh kelas di jenjang terpilih</span>
+                                </label>
+                            </div>
+
+                            {{-- KONTEN BERDASARKAN MODE YANG DIPILIH --}}
+
+                            {{-- 1. KONTEN MULTI KELAS --}}
+                            <div x-show="targetType === 'multiple'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4 pt-2">
+                                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 p-4 rounded-2xl border border-white/10">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-xs font-bold text-slate-400 mr-1 flex items-center gap-1">
+                                            <i class="ph-bold ph-lightning text-amber-400"></i> Pilih Cepat:
+                                        </span>
+                                        <button type="button" @click="selectAll()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all border border-white/10 active:scale-95">
+                                            Pilih Semua
+                                        </button>
+                                        <button type="button" @click="selectGrade('7')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-sky-500/20 text-slate-200 hover:text-sky-300 text-xs font-bold transition-all border border-white/10 active:scale-95">
+                                            + Kelas 7
+                                        </button>
+                                        <button type="button" @click="selectGrade('8')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-sky-500/20 text-slate-200 hover:text-sky-300 text-xs font-bold transition-all border border-white/10 active:scale-95">
+                                            + Kelas 8
+                                        </button>
+                                        <button type="button" @click="selectGrade('9')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-sky-500/20 text-slate-200 hover:text-sky-300 text-xs font-bold transition-all border border-white/10 active:scale-95">
+                                            + Kelas 9
+                                        </button>
+                                        <button type="button" @click="clearAll()" x-show="selectedClasses.length > 0" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold transition-all border border-rose-500/20 active:scale-95">
+                                            Reset
+                                        </button>
+                                    </div>
+
+                                    @if(isset($allClasses) && $classes->count() < $allClasses->count())
+                                        <button type="button" @click="showAllSchoolClasses = !showAllSchoolClasses" class="text-xs font-bold text-sky-400 hover:text-sky-300 underline flex items-center gap-1">
+                                            <span x-text="showAllSchoolClasses ? 'Tampilkan Hanya Kelas Saya' : 'Tampilkan Seluruh Kelas Sekolah'"></span>
+                                        </button>
+                                    @endif
                                 </div>
 
-                                <div>
-                                    <div x-show="targetType === 'class'">
-                                        <select name="class_id" :required="targetType === 'class'" :disabled="targetType !== 'class'" class="w-full text-sm font-bold rounded-xl border-white/10 bg-slate-900/80 focus:ring-sky-400/20 focus:border-sky-400 h-14 px-5 shadow-sm text-white transition-colors [color-scheme:dark]">
-                                            <option value="" class="bg-slate-900 text-white">-- Pilih Kelas --</option>
-                                            @foreach($classes as $class)
-                                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $class->name }}</option>
-                                            @endforeach
-                                        </select>
+                                {{-- GRID CHECKBOX KELAS --}}
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                    <template x-for="c in displayClasses" :key="c.id">
+                                        <div @click="toggleClass(c.id)"
+                                             class="flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 select-none group"
+                                             :class="isClassSelected(c.id)
+                                                ? 'bg-sky-500/20 border-sky-400 text-white shadow-md shadow-sky-500/10 font-black'
+                                                : 'bg-slate-900/80 border-white/10 text-slate-300 hover:border-white/20 font-bold'">
+                                            <input type="checkbox" name="class_ids[]" :value="c.id" :checked="isClassSelected(c.id)" class="sr-only">
+                                            <div class="flex items-center gap-2.5 truncate">
+                                                <i class="ph-fill text-lg transition-colors"
+                                                   :class="isClassSelected(c.id) ? 'ph-chalkboard text-sky-400' : 'ph-chalkboard-simple text-slate-500 group-hover:text-slate-300'"></i>
+                                                <span class="text-sm truncate" x-text="c.name"></span>
+                                            </div>
+                                            <div class="w-5 h-5 rounded-lg flex items-center justify-center text-xs transition-colors"
+                                                 :class="isClassSelected(c.id) ? 'bg-sky-400 text-slate-950 font-black' : 'border border-slate-600 group-hover:border-slate-400'">
+                                                <i class="ph-bold ph-check" x-show="isClassSelected(c.id)"></i>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                {{-- SUMMARY STATUS BAR --}}
+                                <div class="p-4 rounded-2xl border transition-all"
+                                     :class="selectedClasses.length > 0 ? 'bg-sky-500/10 border-sky-400/30 text-sky-200' : 'bg-rose-500/10 border-rose-500/20 text-rose-300'">
+                                    <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <i class="ph-bold text-base" :class="selectedClasses.length > 0 ? 'ph-check-circle text-sky-400' : 'ph-warning-circle text-rose-400'"></i>
+                                            <span class="font-bold" x-show="selectedClasses.length > 0">
+                                                <b class="text-white" x-text="selectedClasses.length"></b> Kelas Dipilih:
+                                                <span class="text-sky-300 font-mono" x-text="getSelectedNames()"></span>
+                                            </span>
+                                            <span class="font-bold" x-show="selectedClasses.length === 0">
+                                                Belum ada kelas yang dipilih. Silakan centang minimal 1 kelas di atas.
+                                            </span>
+                                        </div>
+                                        <span class="text-[11px] text-slate-400 font-medium" x-show="selectedClasses.length > 0">
+                                            Tugas/Latihan otomatis terbit di semua kelas ini tanpa perlu buat ulang.
+                                        </span>
                                     </div>
-                                    <div x-show="targetType === 'grade'" style="display: none;">
-                                        <select name="target_grade" :required="targetType === 'grade'" :disabled="targetType !== 'grade'" class="w-full text-sm font-bold rounded-xl border-white/10 bg-slate-900/80 focus:ring-sky-400/20 focus:border-sky-400 h-14 px-5 shadow-sm text-white transition-colors [color-scheme:dark]">
-                                            <option value="7" class="bg-slate-900 text-white">Kelas 7</option>
-                                            <option value="8" class="bg-slate-900 text-white">Kelas 8</option>
-                                            <option value="9" class="bg-slate-900 text-white">Kelas 9</option>
+                                </div>
+                            </div>
+
+                            {{-- 2. KONTEN SATU KELAS --}}
+                            <div x-show="targetType === 'class'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="pt-2">
+                                <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Pilih Kelas Tujuan <span class="text-rose-400">*</span></label>
+                                <div class="relative group">
+                                    <select name="class_id" :required="targetType === 'class'" :disabled="targetType !== 'class'" class="w-full text-sm font-bold rounded-2xl border-white/10 bg-slate-900/80 focus:ring-sky-400/20 focus:border-sky-400 h-14 px-5 shadow-sm text-white transition-colors [color-scheme:dark] appearance-none cursor-pointer">
+                                        <option value="" class="bg-slate-900 text-white">-- Pilih Satu Kelas --</option>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $class->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-sky-400"><i class="ph-bold ph-caret-down text-lg"></i></div>
+                                </div>
+                            </div>
+
+                            {{-- 3. KONTEN PER JENJANG --}}
+                            <div x-show="targetType === 'grade'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4 pt-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-sky-400 uppercase tracking-widest mb-2 ml-1">Pilih Tingkat / Jenjang <span class="text-rose-400">*</span></label>
+                                    <div class="relative group">
+                                        <select name="target_grade" x-model="targetGrade" :required="targetType === 'grade'" :disabled="targetType !== 'grade'" class="w-full text-sm font-bold rounded-2xl border-white/10 bg-slate-900/80 focus:ring-sky-400/20 focus:border-sky-400 h-14 px-5 shadow-sm text-white transition-colors [color-scheme:dark] appearance-none cursor-pointer">
+                                            <option value="7" class="bg-slate-900 text-white">Kelas 7 (Semua Kelas)</option>
+                                            <option value="8" class="bg-slate-900 text-white">Kelas 8 (Semua Kelas)</option>
+                                            <option value="9" class="bg-slate-900 text-white">Kelas 9 (Semua Kelas)</option>
                                         </select>
+                                        <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-sky-400"><i class="ph-bold ph-caret-down text-lg"></i></div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200 flex items-start gap-3">
+                                    <i class="ph-bold ph-info text-xl text-amber-400 shrink-0 mt-0.5"></i>
+                                    <div class="text-xs space-y-1">
+                                        <p class="font-bold text-white">Catatan Pilihan Per Jenjang:</p>
+                                        <p class="text-slate-300 leading-relaxed">
+                                            Tugas/Latihan ini otomatis akan diterbitkan ke <b class="text-amber-300">SELURUH KELAS</b> pada jenjang yang Anda pilih (misal jika memilih Kelas 7, seluruh kelas 7A, 7B, 7C, 7D, dst. akan menerima tugas ini).
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -561,10 +789,29 @@
             }
 
             if(formCreate) {
-                formCreate.addEventListener('submit', function() {
+                formCreate.addEventListener('submit', function(e) {
                     var type = document.querySelector('input[name="assignment_type"]:checked').value;
                     if(type === 'file_upload') syncQuillData(quillFile, 'desc-file-input');
                     if(type === 'link') syncQuillData(quillLink, 'desc-link-input');
+
+                    // Validasi Multi Kelas
+                    const alpineData = window.Alpine ? Alpine.$data(this) : null;
+                    if (alpineData && alpineData.targetType === 'multiple' && alpineData.selectedClasses.length === 0) {
+                        e.preventDefault();
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pilih Minimal 1 Kelas',
+                                text: 'Silakan pilih atau centang minimal satu kelas penerima tugas.',
+                                background: '#021124',
+                                color: '#fff',
+                                customClass: { popup: 'rounded-[2rem] font-sans border border-white/10 bg-[#021124] text-white shadow-2xl' }
+                            });
+                        } else {
+                            alert('Silakan pilih atau centang minimal satu kelas penerima tugas.');
+                        }
+                        return false;
+                    }
                 });
             }
 

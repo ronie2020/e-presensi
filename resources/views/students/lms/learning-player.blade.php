@@ -160,15 +160,19 @@
                                             </h4>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <template x-for="att in activeItem.attachments" :key="att.id">
-                                                    <a :href="att.file_url || (att.file_type === 'file' ? '/storage/' + att.file_path : att.file_path)" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl border border-elevate-soft bg-white hover:border-elevate-accent hover:shadow-lg hover:shadow-elevate-primary/5 transition-all group/file relative overflow-hidden">
+                                                    @php
+                                                        $calcUrl = "att.file_url || (att.file_type === 'file' ? '/storage/' + att.file_path : att.file_path)";
+                                                    @endphp
+                                                    <a :href="{{ $calcUrl }}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl border border-elevate-soft bg-white hover:border-elevate-accent hover:shadow-lg hover:shadow-elevate-primary/5 transition-all group/file relative overflow-hidden">
                                                         <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-300"
-                                                             :class="att.file_type === 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : (att.file_type === 'video' ? 'bg-elevate-peach/20 text-elevate-peach' : 'bg-elevate-soft text-elevate-primary')">
-                                                            <i class="ph-duotone text-2xl" :class="att.file_type === 'file' ? 'ph-file-pdf' : (att.file_type === 'video' ? 'ph-youtube-logo' : 'ph-link')"></i>
+                                                             :class="isHtmlApp(att.file_path || att.file_name) ? 'bg-emerald-50 text-emerald-600' : (isZipFile(att.file_path || att.file_name) ? 'bg-amber-50 text-amber-600' : (att.file_type === 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : (att.file_type === 'video' ? 'bg-elevate-peach/20 text-elevate-peach' : 'bg-elevate-soft text-elevate-primary')))">
+                                                            <i class="ph-duotone text-2xl" 
+                                                               :class="isHtmlApp(att.file_path || att.file_name) ? 'ph-code' : (isZipFile(att.file_path || att.file_name) ? 'ph-file-zip' : (att.file_type === 'file' ? (isPdfFile(att.file_path || att.file_name) ? 'ph-file-pdf' : 'ph-file-text') : (att.file_type === 'video' ? 'ph-youtube-logo' : 'ph-link')))"></i>
                                                         </div>
                                                         <div class="flex-1 min-w-0 z-10">
                                                             <p class="text-sm font-bold text-elevate-dark truncate group-hover/file:text-elevate-primary transition-colors" x-text="att.file_name || 'Lampiran'"></p>
                                                             <p class="text-[10px] text-elevate-dark/40 uppercase font-black tracking-wider mt-1 flex items-center gap-1">
-                                                                <span x-text="att.file_type === 'file' ? 'Dokumen File' : (att.file_type === 'video' ? 'Video Youtube' : 'Tautan Web')"></span> 
+                                                                <span x-text="isHtmlApp(att.file_path || att.file_name) ? 'Aplikasi Web HTML' : (isZipFile(att.file_path || att.file_name) ? 'Arsip ZIP Web' : (att.file_type === 'file' ? (isPdfFile(att.file_path || att.file_name) ? 'Dokumen PDF' : 'Berkas File') : (att.file_type === 'video' ? 'Video Youtube' : 'Tautan Web')))"></span> 
                                                                 <i class="ph-bold ph-arrow-up-right text-xs"></i>
                                                             </p>
                                                         </div>
@@ -200,19 +204,77 @@
                                 </div>
                             </template>
 
-                            {{-- 3. RENDER PDF / DOKUMEN --}}
+                            {{-- 3. RENDER PDF / DOKUMEN / APLIKASI WEB HTML --}}
                             <template x-if="activeItem.type === 'file' && (!activeItem.attachments || activeItem.attachments.length === 0)">
                                 <div class="bg-white rounded-[2rem] shadow-sm border border-elevate-soft overflow-hidden flex flex-col p-4 md:p-8">
                                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 ml-1 md:ml-2">
-                                        <h2 class="text-lg md:text-xl font-black text-elevate-dark leading-tight" x-text="activeItem.title"></h2>
-                                        <a :href="activeItem.file_url" target="_blank" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-elevate-soft text-elevate-primary rounded-xl text-sm font-bold hover:bg-elevate-primary hover:text-white transition-colors text-center flex items-center justify-center gap-2 active:scale-95">
-                                            <i class="ph-bold ph-download-simple"></i> Download / Buka
-                                        </a>
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                                                      :class="isHtmlApp(activeItem.file_url) ? 'bg-emerald-100 text-emerald-700' : (isPdfFile(activeItem.file_url) ? 'bg-rose-100 text-rose-700' : 'bg-sky-100 text-sky-700')"
+                                                      x-text="isHtmlApp(activeItem.file_url) ? 'Aplikasi Web Interaktif (HTML)' : (isPdfFile(activeItem.file_url) ? 'Dokumen PDF' : 'Berkas Pembelajaran')">
+                                                </span>
+                                            </div>
+                                            <h2 class="text-lg md:text-xl font-black text-elevate-dark leading-tight" x-text="activeItem.title"></h2>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <a :href="activeItem.file_url" target="_blank" class="w-full sm:w-auto px-4 py-2.5 bg-elevate-primary text-white rounded-xl text-xs font-bold hover:bg-elevate-dark shadow-md shadow-elevate-primary/20 transition-all text-center flex items-center justify-center gap-2 active:scale-95 shrink-0">
+                                                <i class="ph-bold ph-arrow-square-out text-sm"></i>
+                                                <span x-text="isHtmlApp(activeItem.file_url) ? 'Jalankan Layar Penuh' : 'Buka Layar Penuh'"></span>
+                                            </a>
+                                            <a :href="activeItem.file_url" download class="w-full sm:w-auto px-4 py-2.5 bg-elevate-soft text-elevate-primary rounded-xl text-xs font-bold hover:bg-elevate-primary hover:text-white transition-colors text-center flex items-center justify-center gap-2 active:scale-95 shrink-0">
+                                                <i class="ph-bold ph-download-simple text-sm"></i> Unduh File
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div class="w-full h-[50vh] md:h-[65vh] rounded-xl overflow-hidden bg-elevate-soft/50 shadow-inner border border-elevate-soft embed-container">
-                                        <div class="embed-loading bg-elevate-soft/50"><div class="animate-pulse flex flex-col items-center gap-3"><i class="ph-duotone ph-spinner-gap animate-spin text-4xl text-elevate-primary"></i><span class="text-xs font-bold text-elevate-primary">Memuat Dokumen...</span></div></div>
-                                        <iframe :src="getDocumentViewerUrl(activeItem.file_url)" class="w-full h-full embed-iframe border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" allowfullscreen></iframe>
-                                    </div>
+
+                                    {{-- A. JIKA FILE ADALAH APLIKASI WEB INTERAKTIF (HTML / HTM) --}}
+                                    <template x-if="isHtmlApp(activeItem.file_url)">
+                                        <div class="space-y-3">
+                                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center gap-2">
+                                                <i class="ph-fill ph-code text-base text-emerald-600 shrink-0"></i>
+                                                <span>Aplikasi web interaktif ini berjalan langsung di browser siswa. Jika ingin tampilan lebih luas, klik tombol <b>Jalankan Layar Penuh</b> di atas.</span>
+                                            </div>
+                                            <div class="w-full h-[65vh] md:h-[75vh] rounded-2xl overflow-hidden bg-white shadow-inner border border-elevate-soft relative">
+                                                <iframe :src="activeItem.file_url" class="w-full h-full border-0 bg-white" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" allowfullscreen></iframe>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- B. JIKA FILE ADALAH DOKUMEN PDF --}}
+                                    <template x-if="isPdfFile(activeItem.file_url)">
+                                        <div class="space-y-3">
+                                            <div class="w-full h-[65vh] md:h-[75vh] rounded-2xl overflow-hidden bg-slate-900 shadow-inner border border-elevate-soft relative">
+                                                {{-- Embed Object + Iframe fallback TANPA sandbox agar PDFium browser tidak terblokir --}}
+                                                <object :data="getDocumentViewerUrl(activeItem.file_url)" type="application/pdf" class="w-full h-full border-0">
+                                                    <iframe :src="getDocumentViewerUrl(activeItem.file_url)" class="w-full h-full border-0 bg-white" allowfullscreen>
+                                                        <div class="p-8 text-center bg-white flex flex-col items-center justify-center h-full">
+                                                            <i class="ph-duotone ph-file-pdf text-5xl text-rose-500 mb-3"></i>
+                                                            <p class="text-sm font-bold text-slate-800 mb-2">Browser Anda tidak dapat memuat pratinjau PDF langsung.</p>
+                                                            <a :href="activeItem.file_url" target="_blank" class="px-5 py-2.5 bg-elevate-primary text-white rounded-xl text-xs font-bold shadow-md">
+                                                                Buka Dokumen PDF di Tab Baru
+                                                            </a>
+                                                        </div>
+                                                    </iframe>
+                                                </object>
+                                            </div>
+                                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-center justify-between gap-2">
+                                                <span class="flex items-center gap-1.5"><i class="ph-fill ph-info text-sky-500"></i> Jika dokumen PDF tampak kosong di smartphone, silakan klik tombol <b>Buka Layar Penuh</b> di atas.</span>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- C. JIKA FILE OFFICE / LAINNYA --}}
+                                    <template x-if="!isHtmlApp(activeItem.file_url) && !isPdfFile(activeItem.file_url)">
+                                        <div class="space-y-3">
+                                            <div class="w-full h-[55vh] md:h-[65vh] rounded-2xl overflow-hidden bg-elevate-soft/50 shadow-inner border border-elevate-soft relative">
+                                                <iframe :src="getDocumentViewerUrl(activeItem.file_url)" class="w-full h-full embed-iframe border-0 bg-white" allowfullscreen></iframe>
+                                            </div>
+                                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-center justify-between gap-2">
+                                                <span class="flex items-center gap-1.5"><i class="ph-fill ph-info text-sky-500"></i> Berkas dokumen dapat dibuka atau diunduh untuk diedit langsung.</span>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
                             </template>
 
@@ -256,6 +318,47 @@
                                     <div class="p-6 md:p-8">
                                         <div class="prose max-w-none text-elevate-dark/80 mb-8 bg-elevate-soft/30 p-5 md:p-6 rounded-2xl border border-elevate-soft text-sm md:text-base whitespace-pre-wrap" x-html="activeItem.content"></div>
                                         
+                                        {{-- LAMPIRAN FILE / SOAL / APLIKASI WEB DARI GURU (JIKA ADA) --}}
+                                        <template x-if="activeItem.attachment_file">
+                                            <div class="mb-8 p-5 md:p-6 rounded-2xl border border-sky-400/30 bg-sky-500/5 shadow-sm">
+                                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                                                             :class="isHtmlApp(activeItem.attachment_file) ? 'bg-emerald-500/10 text-emerald-600' : (isPdfFile(activeItem.attachment_file) ? 'bg-rose-500/10 text-rose-600' : 'bg-sky-500/10 text-sky-600')">
+                                                            <i :class="isHtmlApp(activeItem.attachment_file) ? 'ph-bold ph-code' : (isPdfFile(activeItem.attachment_file) ? 'ph-bold ph-file-pdf' : 'ph-bold ph-paperclip')"></i>
+                                                        </div>
+                                                        <div>
+                                                            <span class="text-[10px] font-black uppercase tracking-widest text-sky-600 block">Lampiran Soal / Berkas Tugas Dari Guru</span>
+                                                            <h4 class="text-sm font-bold text-elevate-dark" x-text="activeItem.attachment_name || 'Berkas Tugas'"></h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                        <a :href="activeItem.attachment_file" target="_blank" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                                            <i class="ph-bold ph-arrow-square-out text-sm"></i>
+                                                            <span x-text="isHtmlApp(activeItem.attachment_file) ? 'Jalankan Web App' : 'Buka Layar Penuh'"></span>
+                                                        </a>
+                                                        <a :href="activeItem.attachment_file" download class="px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                                            <i class="ph-bold ph-download-simple text-sm"></i> Unduh
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Preview langsung untuk HTML atau PDF di dalam tugas --}}
+                                                <template x-if="isHtmlApp(activeItem.attachment_file)">
+                                                    <div class="w-full h-80 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-inner">
+                                                        <iframe :src="activeItem.attachment_file" class="w-full h-full border-0 bg-white" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+                                                    </div>
+                                                </template>
+                                                <template x-if="isPdfFile(activeItem.attachment_file)">
+                                                    <div class="w-full h-96 rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shadow-inner">
+                                                        <object :data="getDocumentViewerUrl(activeItem.attachment_file)" type="application/pdf" class="w-full h-full border-0">
+                                                            <iframe :src="getDocumentViewerUrl(activeItem.attachment_file)" class="w-full h-full border-0 bg-white" allowfullscreen></iframe>
+                                                        </object>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
                                         <template x-if="activeItem.completed">
                                             <div class="bg-[#DFF6DD] text-[#107C10] p-5 md:p-6 rounded-2xl border border-[#B7DFB9] flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
                                                 <i class="ph-fill ph-check-circle text-4xl hidden sm:block"></i>
@@ -320,7 +423,10 @@
                                                             </div>
                                                         </template>
                                                         <template x-if="activeItem.assignment_type === 'file_upload'">
-                                                            <input type="file" name="file" required @change="if($event.target.files[0] && $event.target.files[0].size > 10 * 1024 * 1024) { Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 10MB. Silakan pilih file yang lebih kecil.', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem] font-sans' } }); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                            <div class="space-y-1.5">
+                                                                <label class="block text-xs font-bold text-elevate-dark">Pilih Berkas Tugas (PDF, Word, Excel, Gambar, HTML/Web App, ZIP/RAR maks 20MB)</label>
+                                                                <input type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.html,.htm,.zip,.rar,.7z" @change="if($event.target.files[0] && $event.target.files[0].size > 20 * 1024 * 1024) { Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 20MB. Silakan pilih file yang lebih kecil.', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem] font-sans' } }); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                            </div>
                                                         </template>
                                                         <textarea name="student_note" rows="3" placeholder="Tambahkan catatan opsional..." class="w-full rounded-xl border-elevate-soft p-4 focus:ring-2 focus:ring-elevate-accent/20 focus:border-elevate-accent text-elevate-dark bg-white outline-none transition-all text-sm resize-none shadow-sm"></textarea>
                                                         
@@ -675,21 +781,42 @@
                     return url;
                 },
 
+                isPdfFile(url) {
+                    if (!url) return false;
+                    return /\.pdf(\?|#|$)/i.test(url);
+                },
+
+                isHtmlApp(url) {
+                    if (!url) return false;
+                    return /\.(html|htm)(\?|#|$)/i.test(url);
+                },
+
+                isZipFile(url) {
+                    if (!url) return false;
+                    return /\.(zip|rar|7z)(\?|#|$)/i.test(url);
+                },
+
                 getDocumentViewerUrl(url) {
                     if (!url) return '';
                     
+                    // Jika PDF, gunakan url langsung dengan toolbar aktif
+                    if (this.isPdfFile(url)) {
+                        return url.includes('#') ? url : (url + '#toolbar=1');
+                    }
+                    
                     const lowerUrl = url.toLowerCase();
-                    // Jika itu PDF, browser bisa menampilkannya secara native
-                    if (lowerUrl.endsWith('.pdf')) {
-                        return url + '#toolbar=0';
-                    }
-                    
-                    // Jika itu file Office (Word, Excel, PowerPoint), gunakan Google Docs Viewer
+                    // Jika file Office (Word, Excel, PowerPoint)
                     if (lowerUrl.match(/\.(doc|docx|xls|xlsx|ppt|pptx)$/)) {
-                        return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+                        const isLocalhost = window.location.hostname === 'localhost' || 
+                                           window.location.hostname === '127.0.0.1' || 
+                                           window.location.hostname.startsWith('192.168.') ||
+                                           window.location.hostname.endsWith('.test') ||
+                                           window.location.hostname.endsWith('.local');
+                        if (!isLocalhost) {
+                            return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+                        }
                     }
                     
-                    // Fallback
                     return url;
                 },
 

@@ -45,18 +45,34 @@ class LmsMaterialController extends Controller
             ->withQueryString(); 
 
         foreach ($materials as $material) {
-            $siblingsQuery = LmsMaterial::where('teacher_id', $user->id)
+            $siblings = LmsMaterial::with('schoolClass')
+                ->where('teacher_id', $user->id)
                 ->where('title', $material->title)
-                ->where('created_at', $material->created_at);
+                ->where('created_at', $material->created_at)
+                ->get();
 
-            $siblingsCount = $siblingsQuery->count();
+            $siblingsCount = $siblings->count();
             
             $material->is_bulk = $siblingsCount > 1;
             $material->total_classes = $siblingsCount;
 
-            if ($material->is_bulk && $material->schoolClass) {
-                preg_match('/\d+/', $material->schoolClass->name, $matches);
-                $material->target_grade = $matches[0] ?? ''; 
+            $classNames = $siblings->pluck('schoolClass.name')->filter()->values();
+            $material->classes_list = $classNames->implode(', ');
+
+            if ($material->is_bulk) {
+                preg_match('/\d+/', $material->schoolClass->name ?? '', $matches);
+                $grade = $matches[0] ?? '';
+                $allGradeCount = $grade ? SchoolClass::where('name', 'like', $grade . '%')->count() : 0;
+
+                if ($allGradeCount > 0 && $siblingsCount >= $allGradeCount) {
+                    $material->target_badge_label = 'Semua Kelas ' . $grade . ' (' . $siblingsCount . ')';
+                } elseif ($classNames->count() <= 3) {
+                    $material->target_badge_label = $classNames->implode(', ') . ' (' . $siblingsCount . ' Kelas)';
+                } else {
+                    $material->target_badge_label = $classNames->take(2)->implode(', ') . ' +' . ($siblingsCount - 2) . ' Kelas';
+                }
+            } else {
+                $material->target_badge_label = $material->schoolClass->name ?? 'Semua Kelas';
             }
         }
 
@@ -70,7 +86,8 @@ class LmsMaterialController extends Controller
     {
         $subjects = $this->getScopedSubjects();
         $classes = $this->getScopedClasses();
-        return view('lms.materials.create', compact('subjects', 'classes'));
+        $allClasses = SchoolClass::orderBy('name')->get();
+        return view('lms.materials.create', compact('subjects', 'classes', 'allClasses'));
     }
 
     public function store(Request $request)
@@ -81,11 +98,13 @@ class LmsMaterialController extends Controller
             'topic_id' => 'required|exists:topics,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'resume' => 'nullable|string', 
-            'target_type' => 'required|in:class,grade',
-            'class_id' => 'nullable|exists:classes,id', 
-            'target_grade' => 'required_if:target_type,grade',
+            'target_type' => 'required|in:class,multiple,grade',
+            'class_id' => 'nullable|required_if:target_type,class|exists:classes,id', 
+            'class_ids' => 'nullable|required_if:target_type,multiple|array',
+            'class_ids.*' => 'exists:classes,id',
+            'target_grade' => 'nullable|required_if:target_type,grade',
             'new_attachments' => 'nullable|array',
-            'new_attachments.*.file' => 'nullable|file|max:20480', 
+            'new_attachments.*.file' => 'nullable|file|max:30720', 
             'new_attachments.*.link' => 'nullable|url',
             'new_attachments.*.type' => 'required_with:new_attachments|in:file,video,link',
         ]);
@@ -103,10 +122,14 @@ class LmsMaterialController extends Controller
             
             if ($request->target_type == 'class') {
                 if ($request->class_id) $targetClassIds[] = $request->class_id;
+            } elseif ($request->target_type == 'multiple') {
+                $targetClassIds = $request->class_ids ?? [];
             } elseif ($request->target_type == 'grade') {
                 $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                 foreach ($classes as $c) $targetClassIds[] = $c->id;
             }
+
+            $targetClassIds = array_values(array_unique(array_filter($targetClassIds)));
 
             if (empty($targetClassIds)) return; 
 
@@ -213,6 +236,7 @@ class LmsMaterialController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'resume' => 'nullable|string',
             'new_attachments' => 'nullable|array',
+            'new_attachments.*.file' => 'nullable|file|max:30720',
             'topic_id' => 'required|exists:topics,id',
         ]);
 
@@ -449,6 +473,8 @@ class LmsMaterialController extends Controller
                     'content' => $item->description,
                     'duration' => $item->duration_minutes,
                     'link_url' => $item->link_url,
+                    'attachment_file' => $item->file_path ? asset('storage/' . str_replace(['public/', 'public\\'], '', $item->file_path)) : null,
+                    'attachment_name' => $item->file_name ?? 'Berkas Lampiran Tugas',
                     'grade' => null,
                     'completed' => true,
                     'locked' => false,

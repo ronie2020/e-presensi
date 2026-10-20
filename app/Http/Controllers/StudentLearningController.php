@@ -142,6 +142,8 @@ class StudentLearningController extends Controller
                     'content' => $item->description,
                     'duration' => $item->duration_minutes ?? 0,
                     'link_url' => $item->link_url,
+                    'attachment_file' => $item->file_path ? asset('storage/' . str_replace(['public/', 'public\\'], '', $item->file_path)) : null,
+                    'attachment_name' => $item->file_name ?? 'Berkas Lampiran Tugas',
                     'grade' => $submission->grade ?? null,
                     'completed' => $isCompleted,
                     'locked' => false,

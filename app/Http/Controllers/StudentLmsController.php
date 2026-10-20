@@ -249,7 +249,7 @@ class StudentLmsController extends Controller
         // 1. Validasi Input Fleksibel (File atau Link)
         $request->validate([
             'submission_type' => 'required|in:file,link',
-            'file' => 'nullable|required_if:submission_type,file|file|mimes:pdf,doc,docx,jpg,jpeg,png,ppt,pptx,xls,xlsx|max:10240', // Max 10MB
+            'file' => 'nullable|required_if:submission_type,file|file|mimes:pdf,doc,docx,jpg,jpeg,png,ppt,pptx,xls,xlsx,html,htm,zip,rar,7z|max:20480', // Max 20MB
             'link_url' => 'nullable|required_if:submission_type,link|active_url', // Validasi URL aktif
             'student_note' => 'nullable|string|max:500',
         ], [

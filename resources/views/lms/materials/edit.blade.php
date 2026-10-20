@@ -243,7 +243,7 @@
                                             <div class="md:col-span-3">
                                                 <div class="relative group/sel">
                                                     <select :name="'new_attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-xl border-white/10 bg-slate-800 focus:ring-sky-400/20 focus:border-sky-400 cursor-pointer h-12 px-4 appearance-none shadow-sm text-white focus:bg-slate-900 transition-colors [color-scheme:dark]">
-                                                        <option value="file" class="bg-slate-900 text-white">Dokumen / File</option>
+                                                        <option value="file" class="bg-slate-900 text-white">Dokumen / File / Web App (HTML, PDF, ZIP)</option>
                                                         <option value="video" class="bg-slate-900 text-white">Video YouTube</option>
                                                         <option value="link" class="bg-slate-900 text-white">Link Web Eksternal</option>
                                                     </select>
@@ -252,7 +252,7 @@
                                             </div>
                                             
                                             <div class="md:col-span-5">
-                                                <input x-show="att.type === 'file'" type="file" :name="'new_attachments['+index+'][file]'" class="block w-full text-sm text-slate-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-sky-300 h-12 border border-white/10 rounded-xl bg-slate-900 cursor-pointer hover:file:bg-slate-700 shadow-sm transition-colors" :required="att.type === 'file'" :disabled="att.type !== 'file'">
+                                                <input x-show="att.type === 'file'" type="file" :name="'new_attachments['+index+'][file]'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4,.html,.htm,.zip,.rar,.7z" class="block w-full text-sm text-slate-400 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-sky-300 h-12 border border-white/10 rounded-xl bg-slate-900 cursor-pointer hover:file:bg-slate-700 shadow-sm transition-colors" :required="att.type === 'file'" :disabled="att.type !== 'file'">
                                                 <input x-show="att.type !== 'file'" type="url" :name="'new_attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-xl border-white/10 h-12 placeholder:text-slate-500 focus:ring-sky-400/20 focus:border-sky-400 text-white px-4 shadow-sm bg-slate-800 focus:bg-slate-900 transition-colors" placeholder="https://..." :required="att.type !== 'file'">
                                             </div>
                                             
@@ -266,6 +266,9 @@
                                         </button>
                                     </div>
                                 </template>
+                                <p class="text-xs text-slate-400 mt-3 ml-1 flex items-center gap-1.5">
+                                    <i class="ph-fill ph-info text-sky-400"></i> Mendukung berkas <b>PDF</b>, Word, Excel, PPT, Gambar, serta <b>Aplikasi Web Interaktif (HTML / index.html / ZIP)</b> hingga 30MB.
+                                </p>
                             </div>
                         </div>
 

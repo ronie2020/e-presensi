@@ -37,9 +37,10 @@ class LmsAssignmentController extends Controller
             ->latest()
             ->paginate(10);
 
-        // 3. Tambahkan info bulk
+        // 3. Tambahkan info bulk & label akurat
         foreach ($assignments as $assignment) {
-            $siblingsQuery = LmsAssignment::where('title', $assignment->title)
+            $siblingsQuery = LmsAssignment::with('schoolClass')
+                ->where('title', $assignment->title)
                 ->where('created_at', $assignment->created_at)
                 ->where('deadline', $assignment->deadline);
                 
@@ -47,19 +48,34 @@ class LmsAssignmentController extends Controller
                 $siblingsQuery->where('teacher_id', $user->id);
             }
 
-            $siblingsCount = $siblingsQuery->count();
+            $siblings = $siblingsQuery->get();
+            $siblingsCount = $siblings->count();
             
             // Hitung total pengumpulan global
-            $allIds = $siblingsQuery->pluck('id');
+            $allIds = $siblings->pluck('id');
             $globalSubmissions = LmsSubmission::whereIn('assignment_id', $allIds)->count();
 
             $assignment->is_bulk = $siblingsCount > 1;
             $assignment->total_classes = $siblingsCount;
             $assignment->global_submissions_count = $globalSubmissions;
             
-            if ($assignment->is_bulk && $assignment->schoolClass) {
-                 preg_match('/\d+/', $assignment->schoolClass->name, $matches);
-                 $assignment->target_grade = $matches[0] ?? ''; 
+            $classNames = $siblings->pluck('schoolClass.name')->filter()->values();
+            $assignment->classes_list = $classNames->implode(', ');
+
+            if ($assignment->is_bulk) {
+                preg_match('/\d+/', $assignment->schoolClass->name ?? '', $matches);
+                $grade = $matches[0] ?? ''; 
+                $allGradeCount = $grade ? \App\Models\SchoolClass::where('name', 'like', $grade . '%')->count() : 0;
+
+                if ($allGradeCount > 0 && $siblingsCount >= $allGradeCount) {
+                    $assignment->target_badge_label = 'Semua Kelas ' . $grade . ' (' . $siblingsCount . ')';
+                } elseif ($classNames->count() <= 3) {
+                    $assignment->target_badge_label = $classNames->implode(', ') . ' (' . $siblingsCount . ' Kelas)';
+                } else {
+                    $assignment->target_badge_label = $classNames->take(2)->implode(', ') . ' +' . ($siblingsCount - 2) . ' Kelas';
+                }
+            } else {
+                $assignment->target_badge_label = $assignment->schoolClass->name ?? 'Semua';
             }
         }
 
@@ -73,7 +89,8 @@ class LmsAssignmentController extends Controller
     {
         $subjects = $this->getScopedSubjects();
         $classes = $this->getScopedClasses();
-        return view('lms.assignments.create', compact('subjects', 'classes'));
+        $allClasses = \App\Models\SchoolClass::orderBy('name')->get();
+        return view('lms.assignments.create', compact('subjects', 'classes', 'allClasses'));
     }
 
     public function store(Request $request)
@@ -102,17 +119,21 @@ class LmsAssignmentController extends Controller
 
         $request->merge(['description' => $description]);
 
-        // Validasi diperbarui untuk mendukung 'interactive_video' dan 'offline'
+        // Validasi diperbarui untuk mendukung 'interactive_video', 'offline', dan 'multiple'
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'topic_id' => 'nullable|exists:topics,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'attachment_file' => 'nullable|file|max:30720',
             'deadline' => 'required',
             'description' => 'required|string',
             'assignment_type' => 'required|in:file_upload,quiz,link,interactive_video,offline',
-            'target_type' => 'required|in:grade,class',
+            'target_type' => 'required|in:grade,class,multiple',
             'class_id' => 'required_if:target_type,class|nullable|exists:classes,id',
+            'class_ids' => 'required_if:target_type,multiple|nullable|array',
+            'class_ids.*' => 'exists:classes,id',
+            'target_grade' => 'required_if:target_type,grade|nullable',
             'link_url' => 'nullable|required_if:assignment_type,link|url',
             'youtube_url' => 'nullable|required_if:assignment_type,interactive_video|url',
             'duration_minutes' => 'nullable|required_if:assignment_type,quiz|integer|min:1',
@@ -128,15 +149,25 @@ class LmsAssignmentController extends Controller
             $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
         }
 
+        $attachmentPath = null;
+        $attachmentName = null;
+        if ($request->hasFile('attachment_file')) {
+            $attFile = $request->file('attachment_file');
+            $attachmentPath = $attFile->store('lms-assignments', 'public');
+            $attachmentName = $attFile->getClientOriginalName();
+        }
+
         try {
             $deadline = \Carbon\Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
             $firstAssignment = null;
 
-            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now, $coverPath, &$firstAssignment) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now, $coverPath, $attachmentPath, $attachmentName, &$firstAssignment) {
                 
                 $targetClassIds = [];
                 if ($request->target_type == 'class') {
-                    $targetClassIds[] = $request->class_id;
+                    if ($request->filled('class_id')) $targetClassIds[] = $request->class_id;
+                } elseif ($request->target_type == 'multiple') {
+                    $targetClassIds = $request->class_ids ?? [];
                 } elseif ($request->target_type == 'grade') {
                     $classes = \App\Models\SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                     foreach ($classes as $c) {
@@ -144,8 +175,10 @@ class LmsAssignmentController extends Controller
                     }
                 }
 
+                $targetClassIds = array_values(array_unique(array_filter($targetClassIds)));
+
                 if (empty($targetClassIds)) {
-                    throw new \Exception("Tidak ditemukan kelas untuk jenjang " . $request->target_grade);
+                    throw new \Exception("Silakan pilih minimal satu kelas tujuan.");
                 }
 
                 foreach ($targetClassIds as $classId) {
@@ -164,6 +197,8 @@ class LmsAssignmentController extends Controller
                         'class_id' => $classId,
                         'title' => $request->title,
                         'cover_image' => $coverPath,
+                        'file_path' => $attachmentPath,
+                        'file_name' => $attachmentName,
                         'description' => $description,
                         'deadline' => $deadline,
                         'assignment_type' => $request->assignment_type,
@@ -267,6 +302,7 @@ class LmsAssignmentController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'topic_id' => 'required|exists:topics,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'attachment_file' => 'nullable|file|max:30720',
             'deadline' => 'required',
             'description' => 'required|string',
             'link_url' => 'nullable|url',
@@ -280,10 +316,30 @@ class LmsAssignmentController extends Controller
             $coverPath = $request->file('cover_image')->store('lms-covers', 'public');
         }
 
+        $filePath = $assignment->file_path;
+        $fileName = $assignment->file_name;
+
+        if ($request->boolean('delete_attachment') && $filePath) {
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $filePath = null;
+            $fileName = null;
+        }
+
+        if ($request->hasFile('attachment_file')) {
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $attFile = $request->file('attachment_file');
+            $filePath = $attFile->store('lms-assignments', 'public');
+            $fileName = $attFile->getClientOriginalName();
+        }
+
         try {
             $deadline = Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
 
-            DB::transaction(function () use ($request, $assignment, $deadline, $coverPath) {
+            DB::transaction(function () use ($request, $assignment, $deadline, $coverPath, $filePath, $fileName) {
                 $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
                     ->where('title', $assignment->title)
                     ->where('created_at', $assignment->created_at)
@@ -297,6 +353,8 @@ class LmsAssignmentController extends Controller
                         'subject_id' => $request->subject_id,
                         'topic_id' => $request->topic_id,
                         'cover_image' => $coverPath,
+                        'file_path' => $filePath,
+                        'file_name' => $fileName,
                         'deadline' => $deadline,
                         'description' => $request->description,
                         'link_url' => $request->link_url, 
@@ -324,6 +382,10 @@ class LmsAssignmentController extends Controller
             ->where('title', $assignment->title)
             ->where('created_at', $assignment->created_at)
             ->get();
+
+        if ($assignment->file_path && Storage::disk('public')->exists($assignment->file_path)) {
+            Storage::disk('public')->delete($assignment->file_path);
+        }
 
         foreach ($siblings as $target) {
             $target->delete();
@@ -362,6 +424,8 @@ class LmsAssignmentController extends Controller
 
         // 5. Inject properti tambahan untuk View
         $assignment->is_bulk = $siblings->count() > 1;
+        $classNames = \App\Models\SchoolClass::whereIn('id', $classIds)->pluck('name');
+        $assignment->classes_label = $classNames->implode(', ');
         
         if ($assignment->is_bulk && $assignment->schoolClass) {
              preg_match('/\d+/', $assignment->schoolClass->name, $matches);

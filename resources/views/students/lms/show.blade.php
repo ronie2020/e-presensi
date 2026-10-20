@@ -171,11 +171,20 @@
                                     </h4>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         @foreach($item->attachments as $att)
+                                            @php
+                                                $attExt = strtolower(pathinfo($att->file_name ?? $att->file_path, PATHINFO_EXTENSION));
+                                                $isHtml = in_array($attExt, ['html', 'htm']);
+                                                $isZip = in_array($attExt, ['zip', 'rar', '7z']);
+                                                $isPdf = $attExt === 'pdf';
+                                                $targetUrl = $att->file_type == 'file' ? asset('storage/' . str_replace(['public/', 'public\\'], '', $att->file_path)) : $att->file_path;
+                                            @endphp
                                             <div class="flex items-center gap-4 p-4 rounded-2xl border border-elevate-soft bg-white hover:border-elevate-accent hover:shadow-lg hover:shadow-elevate-primary/5 transition-all group/file cursor-pointer relative overflow-hidden"
-                                                 onclick="window.open('{{ $att->file_type == 'file' ? asset('storage/'.$att->file_path) : $att->file_path }}', '_blank')">
+                                                 onclick="window.open('{{ $targetUrl }}', '_blank')">
                                                 <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-300
-                                                    {{ $att->file_type == 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark group-hover/file:bg-elevate-peach-dark group-hover/file:text-white' : ($att->file_type == 'video' ? 'bg-elevate-peach/20 text-elevate-peach group-hover/file:bg-elevate-peach group-hover/file:text-white' : 'bg-elevate-soft text-elevate-primary group-hover/file:bg-elevate-primary group-hover/file:text-white') }}">
-                                                    @if($att->file_type == 'file') <i class="ph-duotone ph-file-pdf text-3xl"></i>
+                                                    {{ $isHtml ? 'bg-emerald-50 text-emerald-600 group-hover/file:bg-emerald-600 group-hover/file:text-white' : ($isZip ? 'bg-amber-50 text-amber-600 group-hover/file:bg-amber-600 group-hover/file:text-white' : ($att->file_type == 'file' ? 'bg-elevate-peach-light/30 text-elevate-peach-dark group-hover/file:bg-elevate-peach-dark group-hover/file:text-white' : ($att->file_type == 'video' ? 'bg-elevate-peach/20 text-elevate-peach group-hover/file:bg-elevate-peach group-hover/file:text-white' : 'bg-elevate-soft text-elevate-primary group-hover/file:bg-elevate-primary group-hover/file:text-white'))) }}">
+                                                    @if($isHtml) <i class="ph-duotone ph-code text-3xl"></i>
+                                                    @elseif($isZip) <i class="ph-duotone ph-file-zip text-3xl"></i>
+                                                    @elseif($att->file_type == 'file') <i class="ph-duotone ph-file-pdf text-3xl"></i>
                                                     @elseif($att->file_type == 'video') <i class="ph-duotone ph-youtube-logo text-3xl"></i>
                                                     @else <i class="ph-duotone ph-link text-3xl"></i> @endif
                                                 </div>
@@ -184,7 +193,8 @@
                                                         {{ $att->file_name ?? 'Lampiran Materi' }}
                                                     </p>
                                                     <p class="text-[10px] text-elevate-dark/40 uppercase font-black tracking-wider mt-1 flex items-center gap-1">
-                                                        {{ $att->file_type }} <i class="ph-bold ph-arrow-up-right text-xs opacity-0 group-hover/file:opacity-100 transition-opacity"></i>
+                                                        <span>{{ $isHtml ? 'Aplikasi Web HTML' : ($isZip ? 'Berkas ZIP' : ($isPdf ? 'Dokumen PDF' : $att->file_type)) }}</span>
+                                                        <i class="ph-bold ph-arrow-up-right text-xs opacity-0 group-hover/file:opacity-100 transition-opacity"></i>
                                                     </p>
                                                 </div>
                                             </div>
@@ -305,6 +315,37 @@
                                     {{ $task->description }}
                                 </div>
 
+                                {{-- BERKAS / SOAL / APLIKASI WEB DARI GURU (JIKA ADA) --}}
+                                @if($task->file_path)
+                                    @php
+                                        $taskExt = strtolower(pathinfo($task->file_name ?? $task->file_path, PATHINFO_EXTENSION));
+                                        $isTaskHtml = in_array($taskExt, ['html', 'htm']);
+                                        $isTaskZip = in_array($taskExt, ['zip', 'rar', '7z']);
+                                        $isTaskPdf = $taskExt === 'pdf';
+                                        $taskUrl = asset('storage/' . str_replace(['public/', 'public\\'], '', $task->file_path));
+                                    @endphp
+                                    <div class="mb-6 p-4 rounded-2xl border border-sky-400/30 bg-sky-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl {{ $isTaskHtml ? 'bg-emerald-100 text-emerald-700' : ($isTaskZip ? 'bg-amber-100 text-amber-700' : ($isTaskPdf ? 'bg-rose-100 text-rose-700' : 'bg-sky-100 text-sky-700')) }} flex items-center justify-center text-xl shrink-0">
+                                                <i class="ph-bold {{ $isTaskHtml ? 'ph-code' : ($isTaskZip ? 'ph-file-zip' : ($isTaskPdf ? 'ph-file-pdf' : 'ph-paperclip')) }}"></i>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 block">Lampiran Tugas Dari Guru</span>
+                                                <p class="text-xs font-bold text-elevate-dark">{{ $task->file_name ?? 'Lampiran Soal' }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <a href="{{ $taskUrl }}" target="_blank" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                                <i class="ph-bold ph-arrow-square-out text-sm"></i>
+                                                <span>{{ $isTaskHtml ? 'Jalankan Web App' : ($isTaskPdf ? 'Buka PDF' : 'Buka / Lihat') }}</span>
+                                            </a>
+                                            <a href="{{ $taskUrl }}" download class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                                                <i class="ph-bold ph-download-simple text-sm"></i> Unduh
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- ACTION BUTTONS --}}
                                 @if(!$mySubmission)
                                     @if($isLate && !$task->allow_late_submission)
@@ -374,8 +415,8 @@
                                                     <div class="space-y-5">
                                                         {{-- INPUT FILE --}}
                                                         <div x-show="submissionType === 'file'">
-                                                            <label class="block text-xs font-bold text-elevate-dark/60 uppercase mb-2 ml-1">File Jawaban (PDF/JPG)</label>
-                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" @change="if($event.target.files[0] && $event.target.files[0].size > 10 * 1024 * 1024) { alert('Ukuran file terlalu besar! Maksimum 10MB.'); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
+                                                            <label class="block text-xs font-bold text-elevate-dark/60 uppercase mb-2 ml-1">File Jawaban (PDF, Word, Excel, Gambar, HTML Web App, ZIP/RAR maks 20MB)</label>
+                                                            <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.html,.htm,.zip,.rar,.7z" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" @change="if($event.target.files[0] && $event.target.files[0].size > 20 * 1024 * 1024) { alert('Ukuran file terlalu besar! Maksimum 20MB.'); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark border border-elevate-soft rounded-2xl bg-white shadow-sm transition cursor-pointer">
                                                         </div>
 
                                                         {{-- INPUT LINK --}}
@@ -451,7 +492,7 @@
 
                                                     <div class="space-y-4">
                                                         <div x-show="submissionType === 'file'">
-                                                            <input type="file" name="file" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-primary hover:file:text-white border border-elevate-soft bg-white">
+                                                            <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.html,.htm,.zip,.rar,.7z" :required="submissionType === 'file'" :disabled="submissionType !== 'file'" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-primary hover:file:text-white border border-elevate-soft bg-white">
                                                         </div>
                                                         <div x-show="submissionType === 'link'" style="display: none;">
                                                             <input type="url" name="link_url" :required="submissionType === 'link'" :disabled="submissionType !== 'link'" placeholder="Update Link Tugas..." class="block w-full p-3 text-sm border border-elevate-soft bg-elevate-soft/30 focus:bg-white rounded-xl text-elevate-dark">

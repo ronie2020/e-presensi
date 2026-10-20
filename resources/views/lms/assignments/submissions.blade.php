@@ -31,7 +31,7 @@
                 titleHighlight="{{ $assignment->subject->name }}"
                 description="{{ $assignment->assignment_type == 'offline' ? 'Lembar input nilai tugas tatap muka di kelas. Anda dapat memasukkan nilai dan umpan balik langsung untuk seluruh siswa.' : 'Monitoring pengumpulan tugas, tinjau berkas jawaban siswa, dan berikan evaluasi nilai serta umpan balik secara terstruktur.' }}"
                 :chips="[
-                    ['icon' => 'ph-users-three', 'label' => ($assignment->is_bulk ? 'Semua Kelas ' . $assignment->target_grade : ($assignment->schoolClass->name ?? 'Semua Kelas'))],
+                    ['icon' => 'ph-users-three', 'label' => ($assignment->is_bulk ? 'Kelas: ' . ($assignment->classes_label ?? 'Multi Kelas') : ($assignment->schoolClass->name ?? 'Semua Kelas'))],
                     ['icon' => 'ph-clock', 'label' => ($assignment->assignment_type == 'offline' ? 'Waktu: ' : 'Deadline: ') . $assignment->deadline->format('d M Y, H:i')],
                     ['icon' => 'ph-check-circle', 'label' => 'Penilaian Terintegrasi']
                 ]"
@@ -227,10 +227,20 @@
                                                     </a>
 
                                                 @elseif($submission->file_path)
-                                                    <a href="{{ asset('storage/'.$submission->file_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900/80 border border-white/10 hover:border-sky-400/50 hover:bg-slate-800 text-sky-300 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/file active:scale-95">
-                                                        <i class="ph-bold ph-file-text text-lg text-slate-400 group-hover/file:text-sky-300"></i>
-                                                        Lihat File
-                                                    </a>
+                                                    @php
+                                                        $subExt = strtolower(pathinfo($submission->file_path, PATHINFO_EXTENSION));
+                                                        $isHtmlSub = in_array($subExt, ['html', 'htm']);
+                                                        $subUrl = asset('storage/' . str_replace(['public/', 'public\\'], '', $submission->file_path));
+                                                    @endphp
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <a href="{{ $subUrl }}" target="_blank" class="inline-flex items-center gap-2 px-3.5 py-2 bg-slate-900/80 border border-white/10 hover:border-sky-400/50 hover:bg-slate-800 text-sky-300 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/file active:scale-95">
+                                                            <i class="ph-bold {{ $isHtmlSub ? 'ph-browsers text-emerald-400' : 'ph-file-text text-slate-400 group-hover/file:text-sky-300' }} text-base"></i>
+                                                            {{ $isHtmlSub ? 'Jalankan Web App' : 'Lihat File' }}
+                                                        </a>
+                                                        <a href="{{ $subUrl }}" download class="w-8 h-8 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition-all shadow-sm" title="Unduh Berkas">
+                                                            <i class="ph-bold ph-download-simple text-sm"></i>
+                                                        </a>
+                                                    </div>
                                                 @endif
 
                                                 @if($submission->student_note)
