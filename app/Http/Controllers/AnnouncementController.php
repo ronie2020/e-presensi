@@ -83,6 +83,7 @@ class AnnouncementController extends Controller
 
         // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
         Cache::forget('landing_general_data');
+        Cache::forget('landing_popup_announcement');
 
         return back()->with('success', 'Pengumuman berhasil dipublikasikan.');
     }
@@ -117,6 +118,7 @@ class AnnouncementController extends Controller
         $announcement->update($data);
 
         Cache::forget('landing_general_data');
+        Cache::forget('landing_popup_announcement');
 
         return back()->with('success', 'Pengumuman berhasil diperbarui.');
     }
@@ -135,6 +137,7 @@ class AnnouncementController extends Controller
         
         // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
         Cache::forget('landing_general_data');
+        Cache::forget('landing_popup_announcement');
 
         return back()->with('success', 'Pengumuman dihapus.');
     }

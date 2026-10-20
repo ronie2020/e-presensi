@@ -27,11 +27,11 @@
                 <div class="flex gap-4 shrink-0">
                     <div class="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/10 text-center min-w-[140px] shadow-sm">
                         <p class="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Menunggu</p>
-                        <p class="text-4xl font-black text-white tracking-tight">{{ $complaints->where('status', 'pending')->count() }}</p>
+                        <p class="text-4xl font-black text-white tracking-tight">{{ $totalPending ?? $complaints->where('status', 'pending')->count() }}</p>
                     </div>
                     <div class="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/10 text-center min-w-[140px] shadow-sm">
                         <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Selesai</p>
-                        <p class="text-4xl font-black text-white tracking-tight">{{ $complaints->where('status', 'resolved')->count() }}</p>
+                        <p class="text-4xl font-black text-white tracking-tight">{{ $totalResolved ?? $complaints->where('status', 'resolved')->count() }}</p>
                     </div>
                 </div>
             </div>

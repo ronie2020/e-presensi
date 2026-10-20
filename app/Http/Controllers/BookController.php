@@ -13,6 +13,7 @@ use App\Models\EbookRead;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BookCopy; // Tambahkan Model BookCopy
 use Illuminate\Support\Facades\DB; // Tambahkan Facade DB
+use Illuminate\Support\Facades\Cache;
 
 class BookController extends Controller
 {
@@ -91,6 +92,7 @@ class BookController extends Controller
             BookCopy::insert($copiesData);
 
             DB::commit();
+            Cache::forget('landing_literacy_data');
             return redirect()->route('library.books.index')->with('success', 'Buku dan ' . $request->jumlah_buku . ' eksemplar fisik berhasil ditambahkan.');
 
         } catch (\Exception $e) {
@@ -99,7 +101,12 @@ class BookController extends Controller
         }
     }
 
-   public function edit(Book $book)
+    public function show(Book $book)
+    {
+        return redirect()->route('library.books.edit', $book->id);
+    }
+
+    public function edit(Book $book)
     {
         $categories = BookCategory::orderBy('name')->get();
         return view('books.edit', compact('book', 'categories'));
@@ -174,6 +181,7 @@ class BookController extends Controller
             }
 
             DB::commit();
+            Cache::forget('landing_literacy_data');
             return redirect()->route('library.books.index')->with('success', 'Data buku diperbarui' . $pesanTambahan);
 
         } catch (\Exception $e) {
@@ -193,6 +201,7 @@ class BookController extends Controller
         }
         
         $book->delete();
+        Cache::forget('landing_literacy_data');
         return redirect()->route('library.books.index')->with('success', 'Buku berhasil dihapus.');
     }   
 

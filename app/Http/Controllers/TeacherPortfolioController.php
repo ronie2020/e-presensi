@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use App\Models\User;
 
 class TeacherPortfolioController extends Controller
@@ -335,6 +336,7 @@ class TeacherPortfolioController extends Controller
 
         $targetUser = $this->getTargetUser($request);
         $targetUser->articles()->create($data);
+        Cache::forget('landing_literacy_data');
         
         return back()->with('success', 'Artikel berhasil ditambahkan.');
     }
@@ -346,6 +348,7 @@ class TeacherPortfolioController extends Controller
         
         if ($art->image_path) Storage::disk('public')->delete($art->image_path);
         $art->delete();
+        Cache::forget('landing_literacy_data');
         
         return back()->with('success', 'Artikel berhasil dihapus.');
     }
@@ -372,6 +375,7 @@ class TeacherPortfolioController extends Controller
         }
 
         $art->update($data);
+        Cache::forget('landing_literacy_data');
         
         return back()->with('success', 'Artikel berhasil diperbarui.');
     }

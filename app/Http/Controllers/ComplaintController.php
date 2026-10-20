@@ -48,8 +48,12 @@ class ComplaintController extends Controller
         // 6. Eksekusi Pagination
         $complaints = $query->paginate(10)->withQueryString();
 
-        // 7. Kirim data ke view (Termasuk variabel $date agar tidak error)
-        return view('admin.complaints.index', compact('complaints', 'date', 'search', 'category'));
+        // 7. Hitung total status secara global
+        $totalPending = Complaint::where('status', 'pending')->count();
+        $totalResolved = Complaint::where('status', 'resolved')->count();
+
+        // 8. Kirim data ke view (Termasuk variabel $date agar tidak error)
+        return view('admin.complaints.index', compact('complaints', 'date', 'search', 'category', 'totalPending', 'totalResolved'));
     }
 
     /**

@@ -227,7 +227,7 @@
                         </button>
                         
                         {{-- Tombol Cetak / Export PDF --}}
-                        <a href="{{ route('reports.printDaily', ['date' => request('date')]) }}" target="_blank" class="ml-1 bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 border border-white/15 focus:outline-none active:scale-95 transition-all shadow-md flex items-center justify-center gap-2" title="Cetak Laporan Harian" aria-label="Cetak Laporan">
+                        <a href="{{ route('reports.printDaily', ['date' => $date]) }}" target="_blank" class="ml-1 bg-white/10 text-white p-3 rounded-xl hover:bg-white/20 border border-white/15 focus:outline-none active:scale-95 transition-all shadow-md flex items-center justify-center gap-2" title="Cetak Laporan Harian" aria-label="Cetak Laporan">
                             <i class="ph-bold ph-printer text-lg text-elevate-accent"></i>
                         </a>
                     </div>
@@ -487,6 +487,7 @@
             </div>
         </div>
         
+        @if($isGuru)
         {{-- WIDGET JADWAL MENGAJAR GURU --}}
         <div class="mb-6 flex items-center justify-between">
             <h3 class="text-xl font-black text-white flex items-center gap-2">
@@ -603,6 +604,7 @@
                     Bagus! Hari ini Anda tidak memiliki jadwal kelas. Waktunya fokus pada tugas administratif atau bersantai sejenak.
                 </p>
             </div>
+        @endif
         @endif
 
         {{-- TABLES SECTION --}}
