@@ -150,7 +150,7 @@
                                 </div>
                             </div>
                             @if($isStudentLoggedIn)
-                                <a href="{{ route('material.download', $material->id) }}" class="px-4 py-2 rounded-xl bg-sky-500 text-white hover:bg-sky-400 text-xs font-bold shrink-0 shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition-transform active:scale-95">
+                                <a href="{{ route('students.learning.material.download', $material->id) }}" class="px-4 py-2 rounded-xl bg-sky-500 text-white hover:bg-sky-400 text-xs font-bold shrink-0 shadow-lg shadow-sky-500/20 flex items-center gap-1.5 transition-transform active:scale-95">
                                     <i class="ph-bold ph-download-simple"></i> Unduh
                                 </a>
                             @else

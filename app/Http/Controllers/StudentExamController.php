@@ -246,11 +246,7 @@ class StudentExamController extends Controller
 
         $sessionId = $session->id;
         
-        if (view()->exists('cbt.student.exam_runner')) {
-             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
-        } else {
-             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
-        }
+        return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
     }
 
     public function saveAnswer(Request $request)

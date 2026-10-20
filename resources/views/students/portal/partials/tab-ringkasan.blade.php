@@ -645,7 +645,7 @@
                     <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                         <i class="ph-bold ph-book-open text-elevate-primary"></i> Literasi
                     </h3>
-                    <a href="{{ Route::has('student.library.index') ? route('student.library.index') : '#' }}" class="text-[10px] font-bold text-elevate-primary dark:text-elevate-accent hover:underline">
+                    <a href="{{ route('library.catalogue') }}" class="text-[10px] font-bold text-elevate-primary dark:text-elevate-accent hover:underline">
                         Lihat Katalog
                     </a>
                 </div>

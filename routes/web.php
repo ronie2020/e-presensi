@@ -383,7 +383,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/preview-player/{subject}/{class}', [\App\Http\Controllers\LmsMaterialController::class, 'previewPlayer'])->name('preview.player');
 
-        Route::resource('materials', LmsMaterialController::class);
+        Route::resource('materials', LmsMaterialController::class)->except(['show']);
         // Route untuk melihat log pembaca materi
         Route::get('/materials/{material}/readers', [\App\Http\Controllers\LmsMaterialController::class, 'readers'])->name('materials.readers');
         
@@ -393,9 +393,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/discussions/{discussionId}/verify', [\App\Http\Controllers\StudentLearningController::class, 'verifyDiscussion'])->name('discussions.verify');
         Route::delete('/discussions/{discussionId}', [\App\Http\Controllers\StudentLearningController::class, 'destroyDiscussion'])->name('discussions.destroy');
 
-        Route::resource('assignments', LmsAssignmentController::class);
-         // --- ROUTE BARU: PREVIEW MODE GURU ---
-        Route::get('/preview/{subject_id}', [\App\Http\Controllers\StudentLearningController::class, 'teacherPreview'])->name('preview');  
+        Route::resource('assignments', LmsAssignmentController::class)->except(['show']);  
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
          // ---> submission detail <---
         Route::get('/submissions/{submission}/detail', [LmsAssignmentController::class, 'showSubmissionDetail'])->name('submissions.detail');
@@ -461,7 +459,7 @@ Route::middleware('auth')->group(function () {
     // --- MANAJEMEN USER (GURU & STAFF) ---
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
-    Route::resource('users', UserController::class);
+    Route::resource('users', UserController::class)->except(['show']);
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     
     // =========================================================================
@@ -469,13 +467,11 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
     Route::patch('/achievements/{id}/verify', [AchievementController::class, 'verify'])->name('achievements.verify'); // TAMBAHAN: Route Verifikasi Laporan Siswa
-    Route::resource('achievements', AchievementController::class);
-    Route::resource('school-activities', SchoolActivityController::class);
+    Route::resource('achievements', AchievementController::class)->except(['create', 'show']);
+    Route::resource('school-activities', SchoolActivityController::class)->except(['create', 'show', 'edit']);
 
     // Jadwal
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
-    Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
-    Route::delete('/schedules/{id}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
     Route::post('/schedules/regular', [ScheduleController::class, 'storeRegular'])->name('schedules.regular.store');
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
@@ -592,7 +588,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/exam/{exam}/export-questions', [CbtQuestionController::class, 'exportQuestions'])->name('questions.export_excel');
         Route::post('/exam/{exam}/import', [CbtQuestionController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtQuestionController::class, 'downloadTemplate'])->name('questions.template');
-        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
+        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refreshToken'])->name('refresh_token');
         Route::delete('/exam/{exam}/questions/bulk-delete', [CbtQuestionController::class, 'bulkDelete'])->name('questions.bulk_delete');
         Route::put('/exam/{exam}/questions/bulk-weight', [CbtQuestionController::class, 'bulkWeight'])->name('questions.bulk_weight');
 
@@ -700,7 +696,7 @@ Route::middleware('auth')->group(function () {
 
     // Catatan Disiplin Utama
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
-    Route::resource('discipline-types', DisciplineTypeController::class);
+    Route::resource('discipline-types', DisciplineTypeController::class)->only(['index', 'store', 'destroy']);
     Route::get('/discipline/analytics', [DisciplineController::class, 'analytics'])->name('discipline.analytics');
     Route::get('/discipline/sp-print/{id}', [DisciplineController::class, 'spPrint'])->name('discipline.sp_print');
     
@@ -870,13 +866,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/daily/print', [ReportController::class, 'printDaily'])->name('reports.printDaily');
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
-    Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
-    Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
     
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
-    Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
-    Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');
     Route::get('/reports/religious/print', [ReportController::class, 'printReligious'])->name('reports.printReligious');
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
@@ -920,20 +912,20 @@ Route::middleware('auth')->group(function () {
 
     // Persuratan
      Route::prefix('letters')->name('letters.')->group(function () {
-        Route::resource('incoming', LetterIncomingController::class);
+        Route::resource('incoming', LetterIncomingController::class)->except(['show']);
         Route::get('outgoing/generate-number', [LetterOutgoingController::class, 'generateNumberAjax'])->name('outgoing.generate-number');
         Route::patch('outgoing/{id}/quick-update-nomor', [LetterOutgoingController::class, 'quickUpdateNomor'])->name('outgoing.quick-update-nomor');
         Route::get('outgoing/export-excel', [LetterOutgoingController::class, 'exportExcel'])->name('outgoing.export-excel');
         Route::get('outgoing/print-agenda', [LetterOutgoingController::class, 'printAgenda'])->name('outgoing.print-agenda');
-        Route::resource('outgoing', LetterOutgoingController::class); 
+        Route::resource('outgoing', LetterOutgoingController::class)->except(['show']); 
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
-        Route::resource('spt', SptController::class);
+        Route::resource('spt', SptController::class)->except(['show']);
     });
     Route::get('sppd/dashboard', [SppdController::class, 'dashboard'])->name('sppd.dashboard');
     Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
     Route::get('sppd/{id}/print-spj', [SppdController::class, 'printSpj'])->name('sppd.print-spj');
     Route::patch('sppd/{id}/status', [SppdController::class, 'updateStatus'])->name('sppd.update-status');
-    Route::resource('sppd', SppdController::class);
+    Route::resource('sppd', SppdController::class)->except(['show']);
 
     // =========================================================================
     //  MANAJEMEN BUKU PENGHUBUNG & PENGADUAN (GURU/ADMIN)
@@ -941,14 +933,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('communication')->group(function() {
         
         // 1. Buku Penghubung
-        Route::resource('liaison', LiaisonBookController::class);
+        Route::resource('liaison', LiaisonBookController::class)->only(['index', 'store', 'destroy']);
         
         // API untuk mengambil siswa per kelas (Dipakai di Form Create Liaison)
         Route::get('/api/students-by-class/{classId}', [LiaisonBookController::class, 'getStudentsByClass'])
             ->name('liaison.get_students');
             
         // 2. Pengaduan Siswa
-        Route::resource('complaints', ComplaintController::class);
+        Route::resource('complaints', ComplaintController::class)->only(['index']);
         Route::post('/complaints/{id}/resolve', [ComplaintController::class, 'markAsResolved'])
             ->name('complaints.resolve');
 

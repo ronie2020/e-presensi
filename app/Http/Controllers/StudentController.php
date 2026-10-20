@@ -92,10 +92,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-        $classes = SchoolClass::orderBy('name', 'asc')->get();
-        return view('students.create', [
-            'classes' => $classes
-        ]);
+        return redirect()->route('students.index');
     }
 
     /**

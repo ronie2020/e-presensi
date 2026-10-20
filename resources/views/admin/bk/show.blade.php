@@ -198,8 +198,8 @@
                                     </div>
                                 @endif
 
-                                @if(Route::has('admin.discipline.student_history'))
-                                    <a href="{{ route('admin.discipline.student_history', $session->student->id) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3.5 bg-white/10 text-slate-200 font-bold text-sm rounded-xl border border-white/15 hover:bg-white/20 hover:text-white transition-all shadow-sm">
+                                @if(Route::has('discipline.index'))
+                                    <a href="{{ route('discipline.index', ['search' => $session->student->student_id ?? $session->student->name]) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3.5 bg-white/10 text-slate-200 font-bold text-sm rounded-xl border border-white/15 hover:bg-white/20 hover:text-white transition-all shadow-sm">
                                         <i class="ph-bold ph-shield-warning text-xl text-amber-400"></i> 
                                         Rekam Kedisiplinan
                                     </a>

@@ -45,10 +45,7 @@ class StudentPortalController extends Controller
 {
     public function index()
     {
-        if (view()->exists('students.portal.index')) {
-            return view('students.portal.index');
-        }
-        return view('portal.index');
+        return view('students.portal.index');
     }
 
     // FUNGSI SEARCH UNTUK GUEST (CARI NISN)
@@ -541,11 +538,7 @@ class StudentPortalController extends Controller
             'cbt_exam_results' => $cbt_exam_results
         ];
 
-        if (view()->exists('students.portal.show')) {
-            return view('students.portal.show', $data);
-        }
-        
-        return view('portal.show', $data);
+        return view('students.portal.show', $data);
     }
 
     public function storeBkFeedback(Request $request, $id)

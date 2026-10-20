@@ -26,7 +26,9 @@
 <body class="font-sans antialiased bg-slate-50 text-slate-800" x-data="{ sidebarOpen: false }">
 
     <!-- 1. INCLUDE SIDEBAR SISWA -->
-    @include('layouts.student-sidebar')
+    @if(view()->exists('layouts.student-sidebar'))
+        @include('layouts.student-sidebar')
+    @endif
 
     <!-- 2. OVERLAY MOBILE -->
     <div x-show="sidebarOpen" 

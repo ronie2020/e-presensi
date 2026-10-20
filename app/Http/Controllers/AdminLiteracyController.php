@@ -87,6 +87,13 @@ class AdminLiteracyController extends Controller
         return back()->with('success', 'Jurnal berhasil diverifikasi.');
     }
 
+    public function reject($id)
+    {
+        $journal = LiteracyJournal::findOrFail($id);
+        $journal->update(['verified_at' => null]);
+        return back()->with('success', 'Status verifikasi jurnal berhasil dibatalkan.');
+    }
+
     public function destroy($id)
     {
         $journal = LiteracyJournal::findOrFail($id);
