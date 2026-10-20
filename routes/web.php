@@ -298,6 +298,7 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         Route::post('/assignment/{id}/submit', [StudentLmsController::class, 'submitAssignment'])->name('assignment.submit');
         Route::get('/assignment/{id}/quiz', [StudentLmsController::class, 'startQuiz'])->name('assignment.quiz');
         Route::post('/assignment/{id}/quiz', [StudentQuizController::class, 'submit'])->name('assignment.quiz.submit');
+        Route::post('/assignment/{id}/quiz/autosave', [StudentQuizController::class, 'autosave'])->name('assignment.quiz.autosave');
         
         // Route untuk memanggil halaman Learning Player Moodle-style
         Route::get('/{subjectId}/play', [\App\Http\Controllers\StudentLearningController::class, 'play'])->name('play');
@@ -312,6 +313,8 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         Route::post('/discussions/{discussionId}/verify', [\App\Http\Controllers\StudentLearningController::class, 'verifyDiscussion'])->name('discussions.verify');
         Route::delete('/discussions/{discussionId}', [\App\Http\Controllers\StudentLearningController::class, 'destroyDiscussion'])->name('discussions.destroy');
     });
+    // Alias singular URL untuk kompatibilitas frontend autosave
+    Route::post('/student/learning/assignment/{id}/quiz/autosave', [StudentQuizController::class, 'autosave']);
 
     // B. UJIAN SISWA (CBT)    
     Route::prefix('student/exam')->name('student.exam.')->group(function () {

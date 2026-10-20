@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Titik Hilang — Menjelajahi Proyeksi &amp; Perspektif</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep: #0a1c30;
+    --navy-panel: #0f2438;
+    --blueprint-line: rgba(120,160,200,0.16);
+    --blueprint-line-strong: rgba(140,180,220,0.28);
+    --teal: #2dd4bf;
+    --teal-dim: #1c8f82;
+    --gold: #e8b33d;
+    --gold-dim: #b6862a;
+    --paper: #eee7d8;
+    --ink: #d8e3ee;
+    --ink-dim: #93a7bc;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--navy-deep);
+    color: var(--ink);
+    font-family: var(--sans);
+    padding: 28px 20px 48px;
+  }
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  header{
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--blueprint-line-strong);
+    padding-bottom: 18px;
+  }
+  header .kop{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  h1{
+    font-size: clamp(24px, 3.4vw, 34px);
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: var(--paper);
+    line-height: 1.15;
+  }
+  header p{
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-dim);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .layout{
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 300px;
+    gap: 22px;
+  }
+  @media (max-width: 860px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  .board{
+    position: relative;
+    background: var(--navy-panel);
+    border: 1px solid var(--blueprint-line-strong);
+  }
+  .board::before, .board::after,
+  .board .corner-br, .board .corner-bl{
+    content:"";
+    position:absolute;
+    width:16px; height:16px;
+    border-color: var(--gold-dim);
+    z-index: 2;
+  }
+  .board::before{ top:-1px; left:-1px; border-top:2px solid var(--gold-dim); border-left:2px solid var(--gold-dim); }
+  .board::after{ top:-1px; right:-1px; border-top:2px solid var(--gold-dim); border-right:2px solid var(--gold-dim); }
+  .board .corner-bl{ bottom:-1px; left:-1px; border-bottom:2px solid var(--gold-dim); border-left:2px solid var(--gold-dim); }
+  .board .corner-br{ bottom:-1px; right:-1px; border-bottom:2px solid var(--gold-dim); border-right:2px solid var(--gold-dim); }
+
+  .board-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--blueprint-line);
+    flex-wrap: wrap;
+  }
+  .mode-toggle{
+    display:flex;
+    border: 1px solid var(--blueprint-line-strong);
+    overflow:hidden;
+  }
+  .mode-toggle button{
+    background: transparent;
+    border: none;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding: 8px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+  .mode-toggle button.active{
+    background: var(--teal-dim);
+    color: var(--paper);
+  }
+  .board-toolbar .hint{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-dim);
+  }
+  canvas{
+    display:block;
+    width: 100%;
+    height: auto;
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .board-footer{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--blueprint-line);
+    flex-wrap: wrap;
+  }
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .toggle-row input{ accent-color: var(--gold); width:16px; height:16px; }
+  .btn{
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+  .btn:hover{ background: rgba(232,179,61,0.1); }
+
+  .panel{
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card{
+    background: var(--navy-panel);
+    border: 1px solid var(--blueprint-line-strong);
+    padding: 16px 16px 18px;
+  }
+  .card h2{
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    margin: 0 0 12px;
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+  .field{ margin-bottom: 14px; }
+  .field:last-child{ margin-bottom: 0; }
+  .field label{
+    display:flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+  .field label span.val{ color: var(--gold); font-family: var(--mono); }
+  input[type="range"]{
+    width: 100%;
+    accent-color: var(--gold);
+  }
+  .steps{
+    list-style: none;
+    margin:0; padding:0;
+    counter-reset: step;
+  }
+  .steps li{
+    counter-increment: step;
+    display:flex;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .steps li:last-child{ margin-bottom:0; }
+  .steps li::before{
+    content: counter(step);
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: var(--mono);
+    font-size: 11px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  dl.glossary{ margin:0; }
+  dl.glossary dt{
+    font-size: 13.5px;
+    color: var(--paper);
+    font-weight: 600;
+    margin-top: 12px;
+  }
+  dl.glossary dt:first-child{ margin-top:0; }
+  dl.glossary dd{
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kop">LEMBAR GAMBAR — SENI RUPA FASE D</div>
+    <h1>Titik Hilang: Menjelajahi Proyeksi &amp; Perspektif</h1>
+    <p>Klik kanvas untuk menggambar kotak, lalu geser titik oranye di garis horizon dan lihat bagaimana bentuknya berubah. Alat ini membantumu memahami bagaimana garis proyeksi membentuk kesan ruang tiga dimensi di atas bidang datar.</p>
+  </header>
+
+  <div class="layout">
+    <div class="board">
+      <div class="corner-bl"></div><div class="corner-br"></div>
+      <div class="board-toolbar">
+        <div class="mode-toggle">
+          <button id="mode1" class="active">1 TITIK HILANG</button>
+          <button id="mode2">2 TITIK HILANG</button>
+        </div>
+        <div class="hint">Klik kanvas = tambah kotak &nbsp;·&nbsp; Seret titik oranye = ubah sudut pandang</div>
+      </div>
+      <canvas id="canvas" width="900" height="520"></canvas>
+      <div class="board-footer">
+        <label class="toggle-row">
+          <input type="checkbox" id="guideToggle" checked>
+          Tampilkan garis proyeksi
+        </label>
+        <button class="btn" id="resetBtn">ATUR ULANG</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card">
+        <h2>Pengaturan Kotak</h2>
+        <div class="field">
+          <label>Kedalaman <span class="val" id="depthVal">0.45</span></label>
+          <input type="range" id="depthSlider" min="0.15" max="0.8" step="0.01" value="0.45">
+        </div>
+        <div class="field">
+          <label>Ukuran <span class="val" id="sizeVal">90</span></label>
+          <input type="range" id="sizeSlider" min="40" max="160" step="5" value="90">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cara Pakai</h2>
+        <ol class="steps">
+          <li>Pilih mode 1 atau 2 titik hilang di atas kanvas.</li>
+          <li>Klik area kanvas untuk menambahkan kotak baru.</li>
+          <li>Seret titik oranye di garis horizon untuk mengubah sudut pandang semua kotak sekaligus.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>Istilah Penting</h2>
+        <dl class="glossary">
+          <dt>Garis horizon</dt>
+          <dd>Garis khayal setinggi mata pengamat, tempat langit terlihat bertemu daratan.</dd>
+          <dt>Titik hilang</dt>
+          <dd>Titik di garis horizon tempat semua garis proyeksi objek berkumpul.</dd>
+          <dt>Garis proyeksi</dt>
+          <dd>Garis bantu dari sudut objek menuju titik hilang, penentu bentuk ruang objek.</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const horizonY = H * 0.42;
+
+  let mode = 1;
+  let vp1 = { x: W * 0.30, y: horizonY };
+  let vp2 = { x: W * 0.78, y: horizonY };
+  let boxes = [];
+  let showGuides = true;
+  let depth = 0.45;
+  let boxSize = 90;
+  let dragTarget = null;
+
+  const depthSlider = document.getElementById('depthSlider');
+  const sizeSlider = document.getElementById('sizeSlider');
+  const depthVal = document.getElementById('depthVal');
+  const sizeVal = document.getElementById('sizeVal');
+  const guideToggle = document.getElementById('guideToggle');
+  const mode1Btn = document.getElementById('mode1');
+  const mode2Btn = document.getElementById('mode2');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function lerp(p, q, t){ return { x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t }; }
+
+  function lineIntersect(p1, p2, p3, p4){
+    const d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+    if (Math.abs(d) < 1e-6) return { x: (p1.x+p4.x)/2, y: (p1.y+p4.y)/2 };
+    const a = p1.x*p2.y - p1.y*p2.x, b = p3.x*p4.y - p3.y*p4.x;
+    return {
+      x: (a*(p3.x-p4.x) - (p1.x-p2.x)*b) / d,
+      y: (a*(p3.y-p4.y) - (p1.y-p2.y)*b) / d
+    };
+  }
+
+  function drawGrid(){
+    ctx.strokeStyle = 'rgba(120,160,200,0.10)';
+    ctx.lineWidth = 1;
+    for(let x=0; x<=W; x+=30){
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    }
+    for(let y=0; y<=H; y+=30){
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+  }
+
+  function drawHorizon(){
+    ctx.save();
+    ctx.strokeStyle = 'rgba(232,179,61,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6,5]);
+    ctx.beginPath(); ctx.moveTo(0, horizonY); ctx.lineTo(W, horizonY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(232,179,61,0.75)';
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillText('GARIS HORIZON', 10, horizonY - 8);
+    ctx.restore();
+  }
+
+  function drawVP(p, label){
+    ctx.save();
+    ctx.fillStyle = '#e8b33d';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(232,179,61,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 12, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.fillStyle = '#eee7d8';
+    ctx.font = '11px JetBrains Mono, monospace';
+    ctx.fillText(label, p.x - 8, p.y - 16);
+    ctx.restore();
+  }
+
+  function guideLine(a, b){
+    ctx.save();
+    ctx.strokeStyle = 'rgba(232,179,61,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function fillFace(points, color){
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for(let i=1;i<points.length;i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(238,231,216,0.85)';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+  }
+
+  function drawBox1pt(box){
+    const TL = {x:box.x, y:box.y}, TR = {x:box.x+box.w, y:box.y};
+    const BR = {x:box.x+box.w, y:box.y+box.h}, BL = {x:box.x, y:box.y+box.h};
+    const front = [TL,TR,BR,BL];
+
+    if(showGuides){
+      front.forEach(c => guideLine(c, vp1));
+      const back = front.map(c => lerp(c, vp1, box.t));
+      fillFace([TL, TR, back[1], back[0]], 'rgba(238,231,216,0.14)');
+      fillFace([TR, BR, back[2], back[1]], 'rgba(28,143,130,0.5)');
+      fillFace(back, 'rgba(45,212,191,0.18)');
+    }
+    fillFace(front, 'rgba(45,212,191,0.28)');
+  }
+
+  function drawBox2pt(box){
+    const top = {x:box.x, y:box.yTop}, bot = {x:box.x, y:box.yBot};
+    const Ltop = lerp(top, vp1, box.t1), Lbot = lerp(bot, vp1, box.t1);
+    const Rtop = lerp(top, vp2, box.t2), Rbot = lerp(bot, vp2, box.t2);
+    const farTop = lineIntersect(Ltop, vp2, Rtop, vp1);
+
+    if(showGuides){
+      guideLine(top, vp1); guideLine(bot, vp1);
+      guideLine(top, vp2); guideLine(bot, vp2);
+    }
+    fillFace([top, Rtop, Rbot, bot], 'rgba(20,90,90,0.55)');
+    fillFace([top, Ltop, Lbot, bot], 'rgba(45,212,191,0.30)');
+    fillFace([top, Ltop, farTop, Rtop], 'rgba(238,231,216,0.20)');
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    drawGrid();
+    boxes.forEach(b => mode === 1 ? drawBox1pt(b) : drawBox2pt(b));
+    drawHorizon();
+    if(mode === 1){
+      drawVP(vp1, 'TH');
+    } else {
+      drawVP(vp1, 'TH1');
+      drawVP(vp2, 'TH2');
+    }
+  }
+
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+    const cy = (e.touches ? e.touches[0].clientY : e.clientY);
+    return {
+      x: (cx - rect.left) * (W / rect.width),
+      y: (cy - rect.top) * (H / rect.height)
+    };
+  }
+
+  function nearVP(pos, vp){
+    return Math.hypot(pos.x - vp.x, pos.y - vp.y) < 16;
+  }
+
+  function addBox(pos){
+    if(mode === 1){
+      boxes.push({ x: pos.x - boxSize/2, y: pos.y - boxSize/2, w: boxSize, h: boxSize, t: depth });
+    } else {
+      boxes.push({ x: pos.x, yTop: pos.y - boxSize/2, yBot: pos.y + boxSize/2, t1: depth, t2: depth });
+    }
+    render();
+  }
+
+  let moved = false;
+  function onDown(e){
+    e.preventDefault();
+    const pos = getPos(e);
+    moved = false;
+    if(nearVP(pos, vp1)) dragTarget = vp1;
+    else if(mode === 2 && nearVP(pos, vp2)) dragTarget = vp2;
+    else dragTarget = null;
+  }
+  function onMove(e){
+    if(!dragTarget) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    dragTarget.x = Math.max(10, Math.min(W-10, pos.x));
+    moved = true;
+    render();
+  }
+  function onUp(e){
+    if(!dragTarget && !moved){
+      const pos = getPos(e.changedTouches ? {touches:e.changedTouches} : e);
+      if(!nearVP(pos, vp1) && !(mode===2 && nearVP(pos, vp2))) addBox(pos);
+    }
+    dragTarget = null;
+  }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, {passive:false});
+  canvas.addEventListener('touchmove', onMove, {passive:false});
+  canvas.addEventListener('touchend', onUp, {passive:false});
+
+  depthSlider.addEventListener('input', () => {
+    depth = parseFloat(depthSlider.value);
+    depthVal.textContent = depth.toFixed(2);
+  });
+  sizeSlider.addEventListener('input', () => {
+    boxSize = parseFloat(sizeSlider.value);
+    sizeVal.textContent = boxSize;
+  });
+  guideToggle.addEventListener('change', () => {
+    showGuides = guideToggle.checked;
+    render();
+  });
+  mode1Btn.addEventListener('click', () => {
+    mode = 1; boxes = [];
+    mode1Btn.classList.add('active'); mode2Btn.classList.remove('active');
+    render();
+  });
+  mode2Btn.addEventListener('click', () => {
+    mode = 2; boxes = [];
+    mode2Btn.classList.add('active'); mode1Btn.classList.remove('active');
+    render();
+  });
+  resetBtn.addEventListener('click', () => {
+    boxes = [];
+    vp1 = { x: W * 0.30, y: horizonY };
+    vp2 = { x: W * 0.78, y: horizonY };
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

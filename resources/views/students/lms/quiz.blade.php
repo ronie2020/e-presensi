@@ -106,7 +106,7 @@
                                                        value="{{ $opt }}" 
                                                        class="peer sr-only"
                                                        @change="saveAnswer('{{ $q->id }}', $event.target.value)"
-                                                       {{ old("answers.{$q->id}") == $opt ? 'checked' : '' }}>
+                                                       {{ (old("answers.{$q->id}", $draftAnswers[$q->id] ?? null) == $opt) ? 'checked' : '' }}>
                                                 
                                                     {{-- Indikator Huruf --}}
                                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all border-2
@@ -136,7 +136,7 @@
                                             <textarea name="answers[{{ $q->id }}]" rows="5" 
                                                 class="w-full rounded-2xl border-elevate-soft bg-elevate-soft/50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary/30 text-elevate-dark placeholder:text-elevate-dark/40 p-4 font-medium transition-all resize-none shadow-inner" 
                                                 placeholder="Ketik jawaban uraian Anda di sini..."
-                                                @input.debounce.1000ms="saveAnswer('{{ $q->id }}', $event.target.value)">{{ old("answers.{$q->id}") }}</textarea>
+                                                @input.debounce.1000ms="saveAnswer('{{ $q->id }}', $event.target.value)">{{ old("answers.{$q->id}", $draftAnswers[$q->id] ?? '') }}</textarea>
                                             <div class="absolute bottom-3 right-3 text-elevate-dark/30 pointer-events-none"><i class="ph-bold ph-pencil-simple text-xl"></i></div>
                                         </div>
                                     @endif
@@ -231,7 +231,7 @@
 
                 saveAnswer(questionId, answer) {
                     this.saveStatus = 'saving';
-                    const url = `/student/learning/assignment/${this.assignmentId}/quiz/autosave`;
+                    const url = "{{ route('students.learning.assignment.quiz.autosave', $assignment->id) }}";
                     
                     fetch(url, {
                         method: 'POST',
@@ -277,14 +277,14 @@
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#0d52a1',
-                cancelButtonColor: '#2c3f61',
+                cancelButtonColor: '#f1f5f9',
                 confirmButtonText: 'Ya, Kumpulkan!',
                 cancelButtonText: 'Periksa Lagi',
                 reverseButtons: true,
                 customClass: {
                     popup: 'rounded-[2rem] font-sans',
-                    confirmButton: 'px-6 py-3 rounded-xl font-bold shadow-lg shadow-elevate-primary/20',
-                    cancelButton: 'px-6 py-3 rounded-xl font-bold hover:bg-elevate-soft text-elevate-dark/80'
+                    confirmButton: 'px-6 py-3 rounded-xl font-bold text-white shadow-lg shadow-elevate-primary/20',
+                    cancelButton: 'px-6 py-3 rounded-xl font-bold !bg-slate-100 hover:!bg-white !text-slate-800 border border-slate-300 shadow-sm'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {

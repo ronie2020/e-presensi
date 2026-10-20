@@ -308,7 +308,7 @@ class StudentLmsController extends Controller
      */
     public function startQuiz($id)
     {
-        $student = Auth::guard('student')->user();
+        $student = Auth::guard('student')->user() ?? Auth::user();
         $assignment = LmsAssignment::with('questions')->findOrFail($id);
 
         if ($assignment->isSubmittedBy($student->id)) {
@@ -320,7 +320,12 @@ class StudentLmsController extends Controller
             return back()->with('error', 'Waktu pengerjaan kuis sudah habis.');
         }
 
-        return view('students.lms.quiz', compact('assignment'));
+        $draftAnswers = \App\Models\LmsQuizDraft::where('student_id', $student->id)
+            ->where('assignment_id', $id)
+            ->pluck('answer_text', 'question_id')
+            ->toArray();
+
+        return view('students.lms.quiz', compact('assignment', 'draftAnswers'));
     }
 
     /**
