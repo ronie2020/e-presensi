@@ -64,6 +64,13 @@ return [
                 'roles' => ['Superadmin', 'Admin', 'Guru Piket', 'Guru Mata Pelajaran', 'Wali Kelas'] 
             ],
             [
+                'name' => 'Jadwal Guru Piket', 
+                'route' => 'permit.schedules',
+                'active_check' => 'permit.schedules',
+                'icon' => 'ph-calendar-check',
+                'roles' => ['Superadmin', 'Admin', 'TU', 'Kepala Sekolah', 'Guru Piket']
+            ],
+            [
                 'name' => 'Riwayat Izin', 
                 'route' => 'permit.history',
                 'active_check' => 'permit.history',
