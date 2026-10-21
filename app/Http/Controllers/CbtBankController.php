@@ -180,15 +180,21 @@ class CbtBankController extends Controller
     public function storeQuestion(Request $request, $bank_id)
     {
         $request->validate([
-            'question_type' => 'required|in:choice,essay,true_false,matching',
+            'question_type' => 'required|in:choice,complex,essay,true_false,matching',
             'question_text' => 'required',
             'score_weight' => 'required|integer|min:1',
-            'question_image' => 'nullable|image|max:2048'
+            'question_image' => 'nullable|image|max:2048',
+            'question_audio' => 'nullable|file|mimes:mp3,wav,m4a,ogg|max:15360'
         ]);
 
         $imagePath = null;
         if ($request->hasFile('question_image')) {
             $imagePath = $request->file('question_image')->store('soal', 'public');
+        }
+
+        $audioPath = null;
+        if ($request->hasFile('question_audio')) {
+            $audioPath = $request->file('question_audio')->store('audio_soal', 'public');
         }
 
         $type = $request->question_type;
@@ -211,6 +217,23 @@ class CbtBankController extends Controller
             
             $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
+
+        } elseif ($type === 'complex') {
+            $request->validate(['complex_answers' => 'required|array|min:1']);
+            
+            $options = [
+                'A' => $request->option_A, 'B' => $request->option_B, 
+                'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
+            ];
+            
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if ($request->hasFile("image_$opt")) {
+                    $options["image_$opt"] = $request->file("image_$opt")->store('soal', 'public');
+                }
+            }
+            
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
+            $correctAnswer = json_encode(array_values((array)$request->complex_answers));
 
         } elseif ($type === 'true_false') {
             $request->validate(['correct_answer' => 'required']);
@@ -261,6 +284,8 @@ class CbtBankController extends Controller
             'question_type' => $type,
             'question_text' => $request->question_text,
             'question_image' => $imagePath,
+            'audio_path' => $audioPath,
+            'audio_play_limit' => $request->input('audio_play_limit', 2),
             'options' => $options, 
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
@@ -292,6 +317,22 @@ class CbtBankController extends Controller
                 Storage::delete('public/' . $question->question_image);
             }
             $question->question_image = $request->file('question_image')->store('soal', 'public');
+        }
+
+        if ($request->has('delete_audio') && $request->delete_audio == 'true') {
+            if ($question->audio_path && Storage::exists('public/' . $question->audio_path)) {
+                Storage::delete('public/' . $question->audio_path);
+            }
+            $question->audio_path = null;
+        }
+        if ($request->hasFile('question_audio')) {
+            if ($question->audio_path && Storage::exists('public/' . $question->audio_path)) {
+                Storage::delete('public/' . $question->audio_path);
+            }
+            $question->audio_path = $request->file('question_audio')->store('audio_soal', 'public');
+        }
+        if ($request->filled('audio_play_limit')) {
+            $question->audio_play_limit = (int) $request->audio_play_limit;
         }
 
         $type = $request->question_type ?? $question->question_type;
@@ -328,6 +369,37 @@ class CbtBankController extends Controller
 
             $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
+
+        } elseif ($type === 'complex') {
+            $options = [
+                'A' => $request->option_A, 'B' => $request->option_B, 
+                'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
+            ];
+
+            $oldOptions = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                $imgKey = "image_$opt";
+                $deleteKey = "delete_image_$opt";
+
+                if (isset($oldOptions[$imgKey])) {
+                    $options[$imgKey] = $oldOptions[$imgKey];
+                }
+
+                if (($request->has($deleteKey) && $request->$deleteKey == 'true') || $request->hasFile($imgKey)) {
+                    if (isset($oldOptions[$imgKey]) && Storage::exists('public/' . $oldOptions[$imgKey])) {
+                        Storage::delete('public/' . $oldOptions[$imgKey]);
+                    }
+                    unset($options[$imgKey]); 
+                }
+
+                if ($request->hasFile($imgKey)) {
+                    $options[$imgKey] = $request->file($imgKey)->store('soal', 'public');
+                }
+            }
+
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
+            $correctAnswer = json_encode(array_values((array)$request->complex_answers));
 
         } elseif ($type === 'true_false') {
             $options = ['A' => 'Benar', 'B' => 'Salah'];
@@ -394,6 +466,8 @@ class CbtBankController extends Controller
             'question_type' => $type,
             'question_text' => $request->question_text,
             'question_image' => $question->question_image, 
+            'audio_path' => $question->audio_path,
+            'audio_play_limit' => $question->audio_play_limit ?? 2,
             'options' => $options,
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight,
@@ -412,6 +486,9 @@ class CbtBankController extends Controller
             
             if ($q->question_image && Storage::exists('public/' . $q->question_image)) {
                 Storage::delete('public/' . $q->question_image);
+            }
+            if ($q->audio_path && Storage::exists('public/' . $q->audio_path)) {
+                Storage::delete('public/' . $q->audio_path);
             }
             
             $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);

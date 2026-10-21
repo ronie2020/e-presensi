@@ -56,6 +56,34 @@
                 {{-- Isi Soal --}}
                 <div class="flex-1 overflow-hidden">
                     
+                    {{-- Audio Soal Jika Ada (Listening) --}}
+                    @if($q->audio_path)
+                        <div class="mb-5 p-4 rounded-2xl bg-gradient-to-r from-[#56bbf1]/15 via-[#0d52a1]/5 to-transparent border border-[#56bbf1]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#56bbf1] to-[#0d52a1] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#56bbf1]/20">
+                                    <i class="ph-fill ph-headphones text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-xs font-black uppercase tracking-wider text-[#0d52a1]">Audio Listening Soal</p>
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#56bbf1]/20 text-[#0d52a1] border border-[#56bbf1]/30">
+                                            Preview Bank Soal
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-[#2c3f61]/70 font-medium mt-0.5">
+                                        Batas putar untuk siswa: <span class="font-bold text-[#0d52a1]">{{ $q->audio_play_limit ?? 2 }}x putaran</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="w-full sm:w-auto">
+                                <audio controls class="h-10 w-full sm:w-72 rounded-lg">
+                                    <source src="{{ asset('storage/' . $q->audio_path) }}">
+                                    Browser tidak mendukung pemutar audio.
+                                </audio>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Gambar Soal Jika Ada --}}
                     @if($q->question_image)
                         <div class="mb-5">
@@ -81,6 +109,33 @@
                                         <input type="radio" name="preview_ans_{{ $q->id }}" class="mt-1 w-5 h-5 border-slate-300 text-[#0d52a1] focus:ring-[#56bbf1]">
                                         <div class="flex-1">
                                             <span class="font-black text-slate-400 group-hover:text-[#0d52a1] transition-colors mr-2">{{ $opt }}.</span>
+                                            <span class="font-medium text-[#2c3f61]">{!! $val !!}</span>
+                                            @if($imgVal)
+                                                <img src="{{ asset('storage/' . $imgVal) }}" class="mt-3 max-h-32 rounded-xl border border-slate-200 object-contain bg-white shadow-sm">
+                                            @endif
+                                        </div>
+                                    </label>
+                                @endif
+                            @endforeach
+                        </div>
+
+                    @elseif($qType == 'complex')
+                        <div class="space-y-3">
+                            <div class="mb-2 flex items-center gap-2">
+                                <span class="text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 flex items-center gap-1.5 shadow-sm">
+                                    <i class="ph-bold ph-check-square-offset text-sm text-amber-600"></i> Pilihan Ganda Kompleks (Siswa dapat mencentang lebih dari 1 jawaban)
+                                </span>
+                            </div>
+                            @foreach(['A','B','C','D', 'E'] as $opt)
+                                @php 
+                                    $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? ''); 
+                                    $imgVal = isset($q->{'image_'.$opt}) ? $q->{'image_'.$opt} : ($q->options['image_'.$opt] ?? null);
+                                @endphp
+                                @if($val !== '' || $imgVal)
+                                    <label class="flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-amber-300 hover:bg-amber-50/40 cursor-pointer transition-all group">
+                                        <input type="checkbox" name="preview_ans_{{ $q->id }}[]" class="mt-1 w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500">
+                                        <div class="flex-1">
+                                            <span class="font-black text-slate-400 group-hover:text-amber-700 transition-colors mr-2">{{ $opt }}.</span>
                                             <span class="font-medium text-[#2c3f61]">{!! $val !!}</span>
                                             @if($imgVal)
                                                 <img src="{{ asset('storage/' . $imgVal) }}" class="mt-3 max-h-32 rounded-xl border border-slate-200 object-contain bg-white shadow-sm">

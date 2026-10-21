@@ -328,6 +328,9 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
             Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
             Route::get('/{exam}/run', [StudentExamController::class, 'run'])->name('run');
             Route::post('/answer', [StudentExamController::class, 'saveAnswer'])->name('saveAnswer');
+            Route::post('/violation', [StudentExamController::class, 'logViolation'])->name('violation');
+            Route::post('/ping', [StudentExamController::class, 'ping'])->name('ping');
+            Route::post('/message-read', [StudentExamController::class, 'markMessageRead'])->name('message_read');
             Route::post('/{exam}/finish', [StudentExamController::class, 'finish'])->name('finish');
         });
     });
@@ -602,6 +605,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/monitoring/{id}/data', [CbtMonitoringController::class, 'getMonitoringData'])->name('monitoring_data');
         Route::post('/monitoring/{id}/auto-token', [CbtMonitoringController::class, 'autoRotateToken'])->name('auto_token');
         Route::get('/monitoring/{exam}/{student}/photos', [CbtMonitoringController::class, 'getStudentPhotos'])->name('monitoring.photos');
+        Route::post('/monitoring/{exam_id}/send-message', [CbtMonitoringController::class, 'sendMessage'])->name('monitoring.send_message');
 
         // --- 8. BANK SOAL INTEGRASI ---        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');

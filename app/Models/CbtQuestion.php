@@ -21,7 +21,9 @@ class CbtQuestion extends Model
         'score_weight',
         'tags',
         'difficulty',
-        'bloom_taxonomy'
+        'bloom_taxonomy',
+        'audio_path',
+        'audio_play_limit'
     ];
 
     protected $casts = [

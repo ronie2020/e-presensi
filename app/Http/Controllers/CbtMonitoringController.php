@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Models\CbtExam;
 use App\Models\Student;
+use App\Models\CbtMessage;
 use Illuminate\Support\Str;
 
 class CbtMonitoringController extends Controller
@@ -188,6 +190,9 @@ class CbtMonitoringController extends Controller
                 'is_active' => $isActive,
                 'is_seb' => $isSeb,
                 'device' => $deviceType,
+                'violations' => $session ? (int)($session->violation_count ?? 0) : 0,
+                'latency_ms' => $session ? $session->latency_ms : null,
+                'last_seen' => $session && $session->last_seen_at ? \Carbon\Carbon::parse($session->last_seen_at)->diffForHumans() : '-',
             ];
         })->values();
 
@@ -199,5 +204,31 @@ class CbtMonitoringController extends Controller
         ];
 
         return ['monitoringData' => $monitoringData, 'stats' => $stats];
+    }
+
+    /**
+     * Kirim Pesan Siaran / Teguran Proktor ke Layar Siswa
+     */
+    public function sendMessage(Request $request, $exam_id)
+    {
+        $request->validate([
+            'message' => 'required|string|max:500',
+            'type' => 'required|in:info,warning,urgent',
+            'student_id' => 'nullable|integer'
+        ]);
+
+        CbtMessage::create([
+            'cbt_exam_id' => $exam_id,
+            'student_id' => $request->student_id ?: null,
+            'sender_id' => Auth::id(),
+            'message' => $request->message,
+            'type' => $request->type,
+            'is_read' => false
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pesan berhasil disiarkan ke layar siswa!'
+        ]);
     }
 }

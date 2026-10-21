@@ -12,7 +12,8 @@ class CbtStudentExam extends Model
     protected $fillable = [
         'cbt_exam_id', 'student_id', 'started_at',
         'finished_at', 'total_score', 'status',
-        'ip_address', 'user_agent'
+        'ip_address', 'user_agent', 'violation_count',
+        'latency_ms', 'last_seen_at'
     ];
 
     protected $casts = [

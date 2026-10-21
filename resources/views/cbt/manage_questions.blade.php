@@ -137,6 +137,9 @@
             question_type: 'choice', 
             question_text: '', 
             question_image: '', 
+            audio_path: '',
+            audio_play_limit: 2,
+            complex_answers: [],
             option_A: '', option_B: '', option_C: '', option_D: '',
             image_A: '', image_B: '', image_C: '', image_D: '',
             correct_answer: 'A', 
@@ -147,6 +150,8 @@
         editNewTag: '',
         newImagePreview: null,
         deleteImage: false,
+        newAudioPreview: null,
+        deleteAudio: false,
         exportMode: 'new',
         
         // Helper Matching (Create)
@@ -174,10 +179,28 @@
         openEdit(data, url) {
             this.newImagePreview = null;
             this.deleteImage = false;
+            this.newAudioPreview = null;
+            this.deleteAudio = false;
+
+            let parsedComplex = [];
+            if (data.question_type === 'complex') {
+                if (Array.isArray(data.correct_answer)) {
+                    parsedComplex = data.correct_answer;
+                } else if (typeof data.correct_answer === 'string') {
+                    try { 
+                        parsedComplex = JSON.parse(data.correct_answer); 
+                    } catch(e) { 
+                        parsedComplex = data.correct_answer ? [data.correct_answer] : []; 
+                    }
+                }
+            }
             
             this.editState = { 
                 ...this.editState, 
                 ...data, 
+                audio_path: data.audio_path || '',
+                audio_play_limit: data.audio_play_limit || 2,
+                complex_answers: Array.isArray(parsedComplex) ? parsedComplex : [],
                 url: url,
                 question_type: data.question_type || 'choice'
             };
@@ -214,7 +237,16 @@
         },
 
         removeCurrentImage() {
-            this.deleteImage = true; this.newImagePreview = null; this.$refs.editFileInput.value = '';
+            this.deleteImage = true; this.newImagePreview = null; if (this.$refs.editFileInput) this.$refs.editFileInput.value = '';
+        },
+
+        handleEditAudio(event) {
+            const file = event.target.files[0];
+            if (file) { this.newAudioPreview = URL.createObjectURL(file); this.deleteAudio = false; }
+        },
+
+        removeCurrentAudio() {
+            this.deleteAudio = true; this.newAudioPreview = null; if (this.$refs.editAudioInput) this.$refs.editAudioInput.value = '';
         }
     }">
         
@@ -326,6 +358,7 @@
                                         <div class="relative">
                                             <select name="question_type" x-model="createType" class="w-full rounded-2xl border-white/15 bg-slate-900/80 text-sm font-bold text-white py-3 px-4 focus:bg-slate-900 focus:ring-sky-400 focus:border-sky-400 cursor-pointer appearance-none transition-colors">
                                                 <option value="choice">Pilihan Ganda</option>
+                                                <option value="complex">Pilihan Ganda Kompleks (Multi-Jawaban)</option>
                                                 <option value="true_false">Benar / Salah</option>
                                                 <option value="matching">Menjodohkan</option>
                                                 <option value="essay">Isian Singkat / Essai</option>
@@ -387,6 +420,44 @@
                                         </label>
                                     </div>
 
+                                    {{-- Upload Audio (Listening) & Limit --}}
+                                    <div class="bg-slate-900/50 p-4 rounded-2xl border border-white/10" x-data="{ createPreviewAudio: null }">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="block text-xs font-bold text-amber-400 uppercase ml-1">
+                                                <i class="ph-fill ph-speaker-high"></i> Audio Listening (Opsional)
+                                            </label>
+                                            <span class="text-[10px] text-slate-400 font-medium">MP3, WAV, M4A, OGG</span>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <template x-if="createPreviewAudio">
+                                                <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 flex items-center justify-between gap-3">
+                                                    <audio :src="createPreviewAudio" controls class="h-8 max-w-full flex-1"></audio>
+                                                    <button type="button" @click="createPreviewAudio = null; $refs.audioInput.value = ''" class="bg-rose-500 text-white p-1.5 rounded-lg shadow hover:bg-rose-600 transition" title="Hapus Audio">
+                                                        <i class="ph-bold ph-trash text-sm"></i>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div class="sm:col-span-2">
+                                                    <label class="flex items-center justify-center gap-2 w-full h-11 border-2 border-dashed border-white/15 rounded-xl cursor-pointer hover:bg-amber-500/10 hover:border-amber-400/50 transition-all bg-slate-900/60 px-3">
+                                                        <i class="ph-duotone ph-music-note text-lg text-amber-400"></i>
+                                                        <span class="text-xs font-bold text-slate-300">Pilih File Audio</span>
+                                                        <input type="file" x-ref="audioInput" name="question_audio" @change="createPreviewAudio = URL.createObjectURL($event.target.files[0])" accept="audio/*" class="hidden">
+                                                    </label>
+                                                </div>
+                                                <div>
+                                                    <div class="relative">
+                                                        <input type="number" name="audio_play_limit" min="1" max="10" value="2" class="w-full rounded-xl border-white/15 bg-slate-900/80 text-white text-xs font-bold py-2.5 px-3 pl-8 focus:ring-amber-400 focus:border-amber-400" title="Batas pemutaran oleh siswa">
+                                                        <span class="absolute inset-y-0 left-2.5 flex items-center text-amber-400 font-bold text-xs pointer-events-none">
+                                                            <i class="ph-bold ph-repeat"></i>
+                                                        </span>
+                                                        <span class="absolute inset-y-0 right-2.5 flex items-center text-[10px] text-slate-400 font-medium pointer-events-none">x Putar</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {{-- Input Jawaban Dinamis (Create) --}}
                                     <div class="bg-slate-900/50 rounded-2xl p-4 border border-white/10">
                                         
@@ -421,6 +492,41 @@
                                                         <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
                                                     </select>
                                                 </div>
+                                            </div>
+                                        </template>
+
+                                        {{-- Tipe: Pilihan Ganda Kompleks --}}
+                                        <template x-if="createType === 'complex'">
+                                            <div class="space-y-4">
+                                                <div class="flex items-center justify-between">
+                                                    <label class="block text-xs font-bold text-amber-400 uppercase ml-1">Opsi Jawaban & Centang Kunci Benar</label>
+                                                    <span class="text-[10px] text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-md">Multi-Jawaban</span>
+                                                </div>
+                                                @foreach(['A','B','C','D'] as $opt)
+                                                <div class="flex gap-3 items-start group">
+                                                    <label class="cursor-pointer shrink-0 mt-1 flex flex-col items-center gap-1" title="Centang jika merupakan jawaban benar">
+                                                        <input type="checkbox" name="complex_answers[]" value="{{ $opt }}" class="rounded bg-slate-800 border-white/20 text-amber-500 focus:ring-amber-400 h-5 w-5">
+                                                        <span class="text-[10px] font-bold text-slate-300">{{ $opt }}</span>
+                                                    </label>
+                                                    <div class="flex-1 space-y-2 min-w-0" x-data="{ optPreview: null }">
+                                                        <div class="flex gap-2 min-w-0">
+                                                            <input type="text" name="option_{{ $opt }}" class="flex-1 min-w-0 rounded-xl border-white/15 bg-slate-900/90 text-white placeholder-slate-500 text-sm py-2 px-3 focus:ring-sky-400 focus:border-sky-400 transition-colors" placeholder="Teks Jawaban {{ $opt }}">
+                                                            <label class="w-10 h-10 shrink-0 bg-slate-800 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-sky-300 hover:bg-slate-700 cursor-pointer transition" title="Upload Gambar Opsi {{ $opt }}">
+                                                                <i class="ph-bold ph-image text-lg"></i>
+                                                                <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreview = URL.createObjectURL($event.target.files[0])">
+                                                            </label>
+                                                        </div>
+                                                        <template x-if="optPreview">
+                                                            <div class="relative w-24 mt-2">
+                                                                <img :src="optPreview" class="h-24 w-24 object-cover rounded-xl border border-white/20 shadow-sm">
+                                                                <button type="button" @click="optPreview = null; $event.target.closest('.flex-1').querySelector('input[type=file]').value = ''" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-lg p-1 shadow-md hover:bg-rose-600">
+                                                                    <i class="ph-bold ph-x text-xs"></i>
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                                @endforeach
                                             </div>
                                         </template>
 
@@ -618,15 +724,23 @@
 
                                     <div class="pl-20 sm:pl-24">
                                         {{-- Badge Tipe Soal --}}
-                                        <div class="mb-2">
+                                        <div class="mb-2 flex flex-wrap items-center gap-1.5">
                                             @if($qType == 'choice') 
                                                 <span class="text-[10px] font-bold bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded border border-sky-400/30">PILIHAN GANDA</span>
+                                            @elseif($qType == 'complex') 
+                                                <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded border border-amber-500/30">PILIHAN GANDA KOMPLEKS</span>
                                             @elseif($qType == 'true_false') 
                                                 <span class="text-[10px] font-bold bg-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded border border-purple-500/30">BENAR / SALAH</span>
                                             @elseif($qType == 'matching') 
-                                                <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded border border-amber-500/30">MENJODOHKAN</span>
+                                                <span class="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded border border-indigo-500/30">MENJODOHKAN</span>
                                             @elseif($qType == 'essay') 
                                                 <span class="text-[10px] font-bold bg-pink-500/20 text-pink-300 px-2.5 py-0.5 rounded border border-pink-500/30">ESSAI</span>
+                                            @endif
+
+                                            @if($q->audio_path)
+                                                <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30 flex items-center gap-1">
+                                                    <i class="ph-fill ph-speaker-high"></i> AUDIO ({{ $q->audio_play_limit ?? 2 }}x)
+                                                </span>
                                             @endif
                                         </div>
                                         
@@ -638,6 +752,25 @@
                                                         <i class="ph-fill ph-tag"></i> {{ trim($tag) }}
                                                     </span>
                                                 @endforeach
+                                            </div>
+                                        @endif
+
+                                        {{-- Audio Player Preview --}}
+                                        @if($q->audio_path)
+                                            <div class="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+                                                <div class="flex items-center gap-2.5">
+                                                    <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-500/30">
+                                                        <i class="ph-duotone ph-speaker-high text-xl"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-xs font-bold text-amber-200">Audio Listening Soal</p>
+                                                        <p class="text-[10px] text-amber-400/80">Batas putar siswa: {{ $q->audio_play_limit ?? 2 }}x</p>
+                                                    </div>
+                                                </div>
+                                                <audio controls class="h-8 max-w-full sm:max-w-[280px]">
+                                                    <source src="{{ asset('storage/' . $q->audio_path) }}">
+                                                    Browser tidak mendukung audio.
+                                                </audio>
                                             </div>
                                         @endif
 
@@ -661,6 +794,36 @@
                                                         <div class="flex-1 overflow-hidden mt-1">
                                                             @if($val && $val !== '-')
                                                                 <span class="leading-relaxed block {{ $opt == $q->correct_answer ? 'text-emerald-200 font-bold' : 'text-slate-200 font-medium' }}">{{ $val }}</span>
+                                                            @endif
+                                                            @if($imgVal)
+                                                                <img src="{{ asset('storage/' . $imgVal) }}" class="mt-2 max-h-24 rounded-lg border border-white/15 object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('{{ asset('storage/' . $imgVal) }}')">
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @elseif($qType == 'complex')
+                                            @php
+                                                $correctKeys = is_string($q->correct_answer) ? (json_decode($q->correct_answer, true) ?: [$q->correct_answer]) : (is_array($q->correct_answer) ? $q->correct_answer : []);
+                                            @endphp
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                                @foreach(['A','B','C','D'] as $opt)
+                                                    @php 
+                                                        $isCorrect = in_array($opt, $correctKeys);
+                                                        $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? '-'); 
+                                                        $imgVal = isset($q->{'image_'.$opt}) ? $q->{'image_'.$opt} : ($q->options['image_'.$opt] ?? null);
+                                                    @endphp
+                                                    <div class="flex items-start gap-3 p-3 rounded-[1.5rem] border transition-colors {{ $isCorrect ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-sm' : 'bg-slate-900/60 border-white/10 text-slate-300' }}">
+                                                        <span class="w-8 h-8 flex items-center justify-center rounded-xl border {{ $isCorrect ? 'border-amber-500 bg-amber-500 text-slate-900 shadow-md font-black' : 'border-white/10 text-slate-400 bg-slate-800' }} text-[10px] font-black shrink-0">
+                                                            @if($isCorrect)
+                                                                <i class="ph-bold ph-check"></i> {{ $opt }}
+                                                            @else
+                                                                {{ $opt }}
+                                                            @endif
+                                                        </span>
+                                                        <div class="flex-1 overflow-hidden mt-1">
+                                                            @if($val && $val !== '-')
+                                                                <span class="leading-relaxed block {{ $isCorrect ? 'text-amber-200 font-bold' : 'text-slate-200 font-medium' }}">{{ $val }}</span>
                                                             @endif
                                                             @if($imgVal)
                                                                 <img src="{{ asset('storage/' . $imgVal) }}" class="mt-2 max-h-24 rounded-lg border border-white/15 object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('{{ asset('storage/' . $imgVal) }}')">
@@ -724,6 +887,8 @@
                                                 question_type: '{{ $qType }}',
                                                 question_text: {{ json_encode($q->question_text) }},
                                                 question_image: {{ json_encode($q->question_image) }}, 
+                                                audio_path: {{ json_encode($q->audio_path) }},
+                                                audio_play_limit: {{ $q->audio_play_limit ?? 2 }},
                                                 option_A: {{ json_encode($q->option_A ?? ($q->options['A']??'')) }},
                                                 option_B: {{ json_encode($q->option_B ?? ($q->options['B']??'')) }},
                                                 option_C: {{ json_encode($q->option_C ?? ($q->options['C']??'')) }},
@@ -775,6 +940,7 @@
                         <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
                             @csrf @method('PUT')
                             <input type="hidden" name="delete_image" x-model="deleteImage">
+                            <input type="hidden" name="delete_audio" x-model="deleteAudio">
 
                             <div class="bg-slate-900/80 px-8 py-6 border-b border-white/10 flex justify-between items-center">
                                 <h3 class="text-xl font-black text-white flex items-center gap-3">
@@ -796,6 +962,7 @@
                                     <div class="relative">
                                         <select name="question_type" x-model="editState.question_type" class="w-full rounded-2xl border-white/15 bg-slate-900 text-sm font-bold text-white py-3 px-4 focus:ring-sky-400 focus:border-sky-400 cursor-pointer appearance-none">
                                             <option value="choice">Pilihan Ganda</option>
+                                            <option value="complex">Pilihan Ganda Kompleks (Multi-Jawaban)</option>
                                             <option value="true_false">Benar / Salah</option>
                                             <option value="matching">Menjodohkan</option>
                                             <option value="essay">Essai / Isian</option>
@@ -867,6 +1034,56 @@
                                     </div>
                                 </div>
 
+                                {{-- Audio Listening Soal (Edit) --}}
+                                <div class="bg-slate-900/50 p-5 rounded-2xl border border-white/10">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="block text-xs font-bold text-amber-400 uppercase ml-1">
+                                            <i class="ph-fill ph-speaker-high"></i> Audio Listening Soal
+                                        </label>
+                                        <span class="text-[10px] text-slate-400">MP3, WAV, M4A, OGG</span>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <template x-if="newAudioPreview">
+                                            <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 flex items-center justify-between gap-3">
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-emerald-400 mb-1 flex items-center gap-1">
+                                                        <i class="ph-bold ph-check"></i> Audio Baru Terpilih:
+                                                    </p>
+                                                    <audio :src="newAudioPreview" controls class="h-8 max-w-full"></audio>
+                                                </div>
+                                                <button type="button" @click="newAudioPreview = null; if($refs.editAudioInput) $refs.editAudioInput.value = ''" class="bg-rose-500 text-white p-2 rounded-xl shadow hover:bg-rose-600 transition">
+                                                    <i class="ph-bold ph-x text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <template x-if="!newAudioPreview && editState.audio_path && !deleteAudio">
+                                            <div class="p-3 bg-slate-800/80 rounded-xl border border-white/10 flex items-center justify-between gap-3">
+                                                <div>
+                                                    <p class="text-[10px] font-bold text-slate-400 mb-1">Audio Saat Ini:</p>
+                                                    <audio :src="'/storage/' + editState.audio_path" controls class="h-8 max-w-full"></audio>
+                                                </div>
+                                                <button type="button" @click="removeCurrentAudio()" class="px-3 py-1.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1 border border-rose-500/30">
+                                                    <i class="ph-bold ph-trash"></i> Hapus
+                                                </button>
+                                            </div>
+                                        </template>
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            <div class="sm:col-span-2">
+                                                <input type="file" x-ref="editAudioInput" name="question_audio" @change="handleEditAudio" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 cursor-pointer border border-white/15 rounded-xl bg-slate-900/80">
+                                            </div>
+                                            <div>
+                                                <div class="relative">
+                                                    <input type="number" name="audio_play_limit" min="1" max="10" x-model="editState.audio_play_limit" class="w-full rounded-xl border-white/15 bg-slate-900/80 text-white text-xs font-bold py-2.5 px-3 pl-8 focus:ring-amber-400 focus:border-amber-400" title="Batas putar untuk siswa">
+                                                    <span class="absolute inset-y-0 left-2.5 flex items-center text-amber-400 font-bold text-xs pointer-events-none">
+                                                        <i class="ph-bold ph-repeat"></i>
+                                                    </span>
+                                                    <span class="absolute inset-y-0 right-2.5 flex items-center text-[10px] text-slate-400 font-medium pointer-events-none">x Putar</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- JAWABAN DINAMIS (EDIT) --}}
                                 <div class="bg-slate-900/50 rounded-2xl p-4 border border-white/10">
                                     <template x-if="editState.question_type === 'choice'">
@@ -914,6 +1131,55 @@
                                                     <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
                                                 </select>
                                             </div>
+                                        </div>
+                                    </template>
+
+                                    {{-- Tipe: Pilihan Ganda Kompleks (Edit) --}}
+                                    <template x-if="editState.question_type === 'complex'">
+                                        <div class="space-y-4">
+                                            <div class="flex items-center justify-between">
+                                                <label class="block text-xs font-bold text-amber-400 uppercase ml-1">Edit Opsi & Centang Kunci Benar</label>
+                                                <span class="text-[10px] text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-md">Multi-Jawaban</span>
+                                            </div>
+                                            @foreach(['A','B','C','D'] as $opt)
+                                            <div class="flex gap-3 items-start">
+                                                <label class="cursor-pointer shrink-0 mt-2 flex flex-col items-center gap-1" title="Centang jika benar">
+                                                    <input type="checkbox" name="complex_answers[]" value="{{ $opt }}" :checked="editState.complex_answers && editState.complex_answers.includes('{{ $opt }}')" class="rounded bg-slate-800 border-white/20 text-amber-500 focus:ring-amber-400 h-5 w-5">
+                                                    <span class="text-[10px] font-bold text-slate-300">{{ $opt }}</span>
+                                                </label>
+                                                <div class="flex-1 space-y-2 min-w-0" x-data="{ optPreviewEdit: null, deleteOptImage: false }">
+                                                    <div class="flex gap-2 min-w-0">
+                                                        <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" class="flex-1 min-w-0 rounded-xl border-white/15 bg-slate-900 text-sm py-2.5 px-4 focus:ring-sky-400 focus:border-sky-400 font-medium text-white placeholder-slate-500" placeholder="Teks opsi {{ $opt }}">
+                                                        <label class="w-11 h-11 shrink-0 bg-slate-800 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-sky-300 hover:bg-slate-700 cursor-pointer transition" title="Ganti Gambar Opsi {{ $opt }}">
+                                                            <i class="ph-bold ph-image text-lg"></i>
+                                                            <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreviewEdit = URL.createObjectURL($event.target.files[0]); deleteOptImage = false">
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="delete_image_{{ $opt }}" x-model="deleteOptImage">
+                    
+                                                    <template x-if="optPreviewEdit">
+                                                        <div class="relative w-24 mt-2">
+                                                            <p class="text-[10px] font-bold text-emerald-400 mb-1">Baru:</p>
+                                                            <img :src="optPreviewEdit" class="h-24 w-24 object-cover rounded-xl border-2 border-emerald-500 shadow-sm">
+                                                            <button type="button" @click="optPreviewEdit = null; $event.target.closest('.flex-1').querySelector('input[type=file]').value = ''" class="absolute top-4 -right-2 bg-rose-500 text-white rounded-lg p-1 shadow-md hover:bg-rose-600">
+                                                                <i class="ph-bold ph-x text-xs"></i>
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                    
+                                                    <template x-if="!optPreviewEdit && editState.image_{{ $opt }} && !deleteOptImage">
+                                                        <div class="relative w-24 group/optimg mt-2">
+                                                            <p class="text-[10px] font-bold text-slate-400 mb-1">Saat ini:</p>
+                                                            <img :src="'/storage/' + editState.image_{{ $opt }}" class="h-24 w-24 object-cover rounded-xl border border-white/15 shadow-sm">
+                                                            <button type="button" @click="deleteOptImage = true" class="absolute inset-y-0 bottom-0 mt-5 inset-x-0 bg-rose-950/80 text-white flex items-center justify-center opacity-0 group-hover/optimg:opacity-100 transition rounded-xl font-bold text-xs gap-1">
+                                                                <i class="ph-bold ph-trash"></i> Hapus
+                                                            </button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            @endforeach
                                         </div>
                                     </template>
 
@@ -1198,9 +1464,11 @@
                                                         <div class="flex items-center gap-2 mb-1">
                                                             <span class="text-[10px] font-bold bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-white/10" x-text="'No. ' + (index+1)"></span>
                                                             <span class="text-[10px] font-bold bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded" x-show="q.question_type == 'choice'">PILGANDA</span>
+                                                            <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded" x-show="q.question_type == 'complex'">KOMPLEKS</span>
                                                             <span class="text-[10px] font-bold bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded" x-show="q.question_type == 'essay'">ESSAI</span>
                                                             <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded" x-show="q.question_type == 'matching'">MENJODOHKAN</span>
                                                             <span class="text-[10px] font-bold bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded" x-show="q.question_type == 'true_false'">B/S</span>
+                                                            <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded flex items-center gap-0.5" x-show="q.audio_path"><i class="ph-bold ph-speaker-high"></i> AUDIO</span>
                                                         </div>
                                                         <p class="text-xs text-slate-200 font-medium line-clamp-2" x-text="stripHtml(q.question_text)"></p>
                                                     </div>

@@ -132,6 +132,7 @@
             effectiveDuration: {{ $effectiveDuration ?? (($exam->duration_minutes ?? 0) * 60) }},
             sessionId: {{ $sessionId }}, 
             examId: {{ $exam->id }},
+            violationCount: {{ $violationCount ?? 0 }},
             examType: '{{ $exam->exam_type ?? 'cbt' }}', 
             randomizeQuestions: {{ $exam->randomize_questions ? 'true' : 'false' }},
             randomizeOptions: {{ $exam->randomize_options ? 'true' : 'false' }}
@@ -160,6 +161,28 @@
                 showMobileMap: false,
                 zoomedImage: null,
                 
+                // Network Latency & Heartbeat
+                pingMs: 35,
+                pingStatus: 'good', // 'good' (<200ms), 'fair' (<600ms), 'poor' (>=600ms), 'offline'
+                heartbeatInterval: null,
+
+                // Audio / Listening State
+                audioPlays: {},
+                activeAudio: null,
+                activeAudioQuestionId: null,
+                audioPlaying: false,
+                audioProgress: 0,
+                audioCurrentTime: '00:00',
+                audioDuration: '00:00',
+
+                // Scratchpad (Papan Coretan Digital)
+                showScratchpad: false,
+                isDrawing: false,
+                scratchColor: '#38bdf8',
+                scratchLineWidth: 3,
+                scratchMode: 'draw',
+                _scratchpadInited: false,
+
                 // Security & Settings
                 violationCount: 0,
                 maxViolations: 3,
@@ -186,13 +209,13 @@
                         }
 
                         rawQuestions.forEach(q => {
-                            if (!q.question_type || q.question_type === 'choice') {
+                            if (!q.question_type || q.question_type === 'choice' || q.question_type === 'complex' || q.question_type === 'multiple_choice') {
                                 try {
                                     let parsedOpts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || {});
                                     let keys = Object.keys(parsedOpts).filter(k => k.length === 1 && parsedOpts[k] != null && String(parsedOpts[k]).trim() !== '');
                                     let hasImages = ['A', 'B', 'C', 'D', 'E'].some(k => parsedOpts['image_'+k] != null && parsedOpts['image_'+k] !== '');
 
-                                    if (keys.length === 0 && !hasImages) {
+                                    if (keys.length === 0 && !hasImages && (!q.question_type || q.question_type === 'choice')) {
                                         // Tidak ada opsi teks maupun gambar -> Soal ini adalah Esai/Uraian!
                                         q.question_type = 'essay';
                                     } else {
@@ -207,6 +230,15 @@
                                 } catch (e) {
                                     q.displayKeys = ['A', 'B', 'C', 'D', 'E']; 
                                 }
+                            } else if (q.question_type === 'matching') {
+                                try {
+                                    let mOpts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || {});
+                                    let pairs = mOpts.pairs || [];
+                                    let rightChoices = pairs.map(p => p.right).filter(Boolean);
+                                    q.shuffledRights = shuffleArray([...rightChoices], rand);
+                                } catch(e) {
+                                    q.shuffledRights = [];
+                                }
                             }
                         });
 
@@ -217,6 +249,7 @@
                         this.endTimeTarget = now + (this.timeLeft * 1000);
                         
                         try { this.loadLocalProgress(); } catch (e) {}
+                        try { this.loadAudioPlays(); } catch (e) {}
                         
                         if (this.violationCount >= this.maxViolations) {
                             this.showSecurityOverlay = true;
@@ -231,7 +264,11 @@
                         if (this.examType !== 'google_form') {
                             this.questions.forEach(q => { 
                                 if(q.saved_answer && !this.answers[q.id]) {
-                                    this.answers[q.id] = q.saved_answer; 
+                                    let ans = q.saved_answer;
+                                    if ((q.question_type === 'complex' || q.question_type === 'multiple_choice') && typeof ans === 'string') {
+                                        try { ans = JSON.parse(ans); } catch(e) {}
+                                    }
+                                    this.answers[q.id] = ans; 
                                 }
                             });
                         }
@@ -245,8 +282,16 @@
                             }
                         }, 5000);
 
+                        // Heartbeat & Proctor Message Polling (tiap 10 detik)
+                        this.startHeartbeat();
+
                         setTimeout(() => { if(window.renderMath) window.renderMath(); }, 500);
                         this.$watch('currentQuestion', () => {
+                            // Hentikan audio jika berpindah soal
+                            if (this.activeAudio) {
+                                this.activeAudio.pause();
+                                this.audioPlaying = false;
+                            }
                             setTimeout(() => { if(window.renderMath) window.renderMath(); }, 100);
                         });
 
@@ -269,7 +314,12 @@
                 },
 
                 updateProgress() {
-                    this.answeredCount = Object.keys(this.answers).length;
+                    this.answeredCount = Object.values(this.answers).filter(v => {
+                        if (v === null || v === undefined) return false;
+                        if (Array.isArray(v)) return v.length > 0;
+                        if (typeof v === 'object') return Object.keys(v).length > 0;
+                        return String(v).trim() !== '';
+                    }).length;
                 },
 
                 // --- LOGIKA JAWABAN ---
@@ -293,6 +343,285 @@
                     if (typeof currentAns !== 'object') currentAns = {};
                     currentAns[leftKey] = rightValue;
                     this.selectAnswer(questionId, currentAns);
+                },
+
+                // --- PILIHAN GANDA KOMPLEKS (Multi-Centang ala ANBK) ---
+                toggleComplexAnswer(questionId, optionKey) {
+                    let current = this.answers[questionId];
+                    if (!Array.isArray(current)) {
+                        current = current ? [current] : [];
+                    } else {
+                        current = [...current];
+                    }
+                    let idx = current.indexOf(optionKey);
+                    if (idx > -1) {
+                        current.splice(idx, 1);
+                    } else {
+                        current.push(optionKey);
+                    }
+                    current.sort();
+                    this.selectAnswer(questionId, current);
+                },
+
+                isComplexSelected(questionId, optionKey) {
+                    let ans = this.answers[questionId];
+                    if (Array.isArray(ans)) return ans.includes(optionKey);
+                    if (typeof ans === 'string') {
+                        try {
+                            let arr = JSON.parse(ans);
+                            return Array.isArray(arr) && arr.includes(optionKey);
+                        } catch(e) {
+                            return ans === optionKey;
+                        }
+                    }
+                    return false;
+                },
+
+                // --- SOAL AUDIO / LISTENING (Play Limit) ---
+                playAudio(questionId, audioUrl, limit = 2) {
+                    if (!audioUrl) return;
+                    let currentPlays = this.audioPlays[questionId] || 0;
+                    
+                    // Jika audio aktif adalah soal ini, toggle play / pause
+                    if (this.activeAudio && this.activeAudioQuestionId === questionId) {
+                        if (this.audioPlaying) {
+                            this.activeAudio.pause();
+                            this.audioPlaying = false;
+                        } else {
+                            this.activeAudio.play();
+                            this.audioPlaying = true;
+                        }
+                        return;
+                    }
+
+                    // Cek batas limit pemutaran
+                    if (currentPlays >= limit) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Batas Pemutaran Habis',
+                            text: `Audio untuk soal ini hanya dapat diputar maksimal ${limit} kali.`,
+                            confirmButtonColor: '#0284c7',
+                            customClass: { popup: 'rounded-2xl bg-[#031d3d] text-white border border-white/10' }
+                        });
+                        return;
+                    }
+
+                    // Hentikan audio sebelumnya jika ada
+                    if (this.activeAudio) {
+                        this.activeAudio.pause();
+                        this.activeAudio = null;
+                    }
+
+                    let fullUrl = this.getImageUrl(audioUrl);
+                    let audio = new Audio(fullUrl);
+                    this.activeAudio = audio;
+                    this.activeAudioQuestionId = questionId;
+                    this.audioPlays[questionId] = currentPlays + 1;
+                    this.saveAudioPlays();
+
+                    audio.addEventListener('loadedmetadata', () => {
+                        this.audioDuration = this.formatDuration(audio.duration);
+                    });
+
+                    audio.addEventListener('timeupdate', () => {
+                        if (audio.duration) {
+                            this.audioProgress = (audio.currentTime / audio.duration) * 100;
+                            this.audioCurrentTime = this.formatDuration(audio.currentTime);
+                        }
+                    });
+
+                    audio.addEventListener('ended', () => {
+                        this.audioPlaying = false;
+                        this.audioProgress = 100;
+                    });
+
+                    audio.addEventListener('error', () => {
+                        this.audioPlaying = false;
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'File audio gagal dimuat.' });
+                    });
+
+                    audio.play().then(() => {
+                        this.audioPlaying = true;
+                    }).catch(err => {
+                        console.error('Audio play error:', err);
+                        this.audioPlaying = false;
+                    });
+                },
+
+                getAudioRemainingPlays(questionId, limit = 2) {
+                    let used = this.audioPlays[questionId] || 0;
+                    return Math.max(0, limit - used);
+                },
+
+                saveAudioPlays() {
+                    try {
+                        localStorage.setItem(`exam_${this.sessionId}_audio`, JSON.stringify(this.audioPlays));
+                    } catch(e) {}
+                },
+
+                loadAudioPlays() {
+                    try {
+                        let saved = localStorage.getItem(`exam_${this.sessionId}_audio`);
+                        if (saved) this.audioPlays = JSON.parse(saved);
+                    } catch(e) {}
+                },
+
+                formatDuration(sec) {
+                    if (isNaN(sec)) return '00:00';
+                    let m = Math.floor(sec / 60);
+                    let s = Math.floor(sec % 60);
+                    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+                },
+
+                // --- HEARTBEAT & LATENSI JARINGAN ---
+                startHeartbeat() {
+                    this.sendHeartbeat();
+                    this.heartbeatInterval = setInterval(() => {
+                        if (this.isOnline && this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') {
+                            this.sendHeartbeat();
+                        }
+                    }, 10000);
+                },
+
+                async sendHeartbeat() {
+                    if (!this.isOnline) {
+                        this.pingStatus = 'offline';
+                        return;
+                    }
+                    const t0 = performance.now();
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        const res = await fetch("{{ route('student.exam.ping') }}", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                            body: JSON.stringify({ session_id: this.sessionId, latency_ms: this.pingMs })
+                        });
+                        const t1 = performance.now();
+                        const rtt = Math.round(t1 - t0);
+                        this.pingMs = rtt;
+                        if (rtt < 200) this.pingStatus = 'good';
+                        else if (rtt < 600) this.pingStatus = 'fair';
+                        else this.pingStatus = 'poor';
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            if (data.messages && data.messages.length > 0) {
+                                this.handleIncomingMessages(data.messages);
+                            }
+                        }
+                    } catch (e) {
+                        this.pingStatus = 'poor';
+                    }
+                },
+
+                handleIncomingMessages(messages) {
+                    messages.forEach(msg => {
+                        if (msg.type === 'warning' || msg.type === 'urgent') {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '<span class="text-rose-400 font-black">TEGURAN DARI PENGAWAS</span>',
+                                html: `<div class="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-left my-2">
+                                         <p class="text-white text-base font-semibold leading-relaxed">${msg.message}</p>
+                                         <div class="mt-3 text-[11px] text-rose-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                             <i class="ph-fill ph-warning-octagon text-sm"></i> Harap patuhi tata tertib ujian demi kelancaran sesi Anda!
+                                         </div>
+                                       </div>`,
+                                confirmButtonText: 'Saya Mengerti & Akan Tertib',
+                                confirmButtonColor: '#e11d48',
+                                allowOutsideClick: false,
+                                customClass: { popup: 'rounded-[2rem] bg-[#031d3d] text-white border border-rose-500/30 shadow-2xl' }
+                            }).then(() => {
+                                // Tandai pesan sudah dibaca
+                                try {
+                                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                                    fetch("{{ route('student.exam.message_read') }}", {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                                        body: JSON.stringify({ message_id: msg.id })
+                                    }).catch(() => {});
+                                } catch(e) {}
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'info',
+                                title: '<span class="text-sky-400 font-black">PENGUMUMAN PROKTOR</span>',
+                                html: `<div class="p-4 bg-sky-500/10 border border-sky-400/30 rounded-2xl text-left my-2">
+                                         <p class="text-white text-base font-semibold leading-relaxed">${msg.message}</p>
+                                       </div>`,
+                                confirmButtonText: 'Baik, Terimakasih',
+                                confirmButtonColor: '#0284c7',
+                                customClass: { popup: 'rounded-[2rem] bg-[#031d3d] text-white border border-sky-500/30 shadow-2xl' }
+                            });
+                        }
+                    });
+                },
+
+                // --- PAPAN CORETAN DIGITAL (SCRATCHPAD) ---
+                initScratchpad() {
+                    this.showScratchpad = true;
+                    this.$nextTick(() => {
+                        const canvas = document.getElementById('scratchpad-canvas');
+                        if (!canvas) return;
+                        if (!this._scratchpadInited) {
+                            canvas.width = canvas.parentElement.clientWidth;
+                            canvas.height = canvas.parentElement.clientHeight;
+                            const ctx = canvas.getContext('2d');
+                            ctx.lineCap = 'round';
+                            ctx.lineJoin = 'round';
+                            this._scratchpadInited = true;
+                        }
+                    });
+                },
+
+                startDraw(e) {
+                    this.isDrawing = true;
+                    const canvas = document.getElementById('scratchpad-canvas');
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const ctx = canvas.getContext('2d');
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    ctx.beginPath();
+                    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+                },
+
+                draw(e) {
+                    if (!this.isDrawing) return;
+                    const canvas = document.getElementById('scratchpad-canvas');
+                    if (!canvas) return;
+                    const rect = canvas.getBoundingClientRect();
+                    const ctx = canvas.getContext('2d');
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    if (this.scratchMode === 'erase') {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.lineWidth = 24;
+                    } else {
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.strokeStyle = this.scratchColor;
+                        ctx.lineWidth = this.scratchLineWidth;
+                    }
+                    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+                    ctx.stroke();
+                },
+
+                stopDraw() {
+                    if (this.isDrawing) {
+                        this.isDrawing = false;
+                        const canvas = document.getElementById('scratchpad-canvas');
+                        if (canvas) {
+                            const ctx = canvas.getContext('2d');
+                            ctx.closePath();
+                        }
+                    }
+                },
+
+                clearScratchpad() {
+                    const canvas = document.getElementById('scratchpad-canvas');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
                 },
 
                 async pushAnswerToServer(questionId, answer) {
@@ -377,8 +706,11 @@
                         this.answers = { ...data.answers, ...this.answers }; 
                         this.markedQuestions = data.marked || {}; 
                         if(data.unsaved) data.unsaved.forEach(id => this.unsavedQuestions.add(id)); 
-                        if(data.violationCount !== undefined) this.violationCount = data.violationCount;
+                        if(data.violationCount !== undefined) this.violationCount = Math.max(this.violationCount, data.violationCount);
                         this.updateProgress();
+                    }
+                    if (window.examData.violationCount) {
+                        this.violationCount = Math.max(this.violationCount, window.examData.violationCount);
                     }
                 },
 
@@ -460,6 +792,16 @@
                     
                     this.showSecurityOverlay = true;
 
+                    // Kirim log pelanggaran langsung ke server untuk proktor
+                    try {
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        fetch("{{ route('student.exam.violation') }}", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+                            body: JSON.stringify({ session_id: this.sessionId })
+                        }).catch(e => console.warn('Violation log failed:', e));
+                    } catch(e) {}
+
                     if(this.violationCount >= this.maxViolations) {
                         setTimeout(() => {
                             if(this.saveStatus !== 'finished' && this.saveStatus !== 'submitting') {
@@ -495,6 +837,7 @@
                 },
 
                 finishExam() {
+                    this.flushCurrentInput();
                     const waitThreshold = this.effectiveDuration * 0.25; 
 
                     if (this.timeLeft > waitThreshold) {
@@ -578,6 +921,8 @@
                     
                     clearInterval(this.timerInterval);
                     if(this.backgroundSyncInterval) clearInterval(this.backgroundSyncInterval);
+                    if(this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+                    if(this.activeAudio) { this.activeAudio.pause(); this.activeAudio = null; }
 
                     localStorage.removeItem(`exam_${this.sessionId}`);
 
@@ -691,9 +1036,25 @@
                 },
 
                 // --- NAVIGASI UI ---
-                nextQuestion() { if (this.currentQuestion < this.totalQuestions - 1) this.currentQuestion++; },
-                prevQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },
-                jumpTo(index) { this.currentQuestion = index; this.showMobileMap = false; },
+                flushCurrentInput() {
+                    const activeEl = document.activeElement;
+                    if (activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) {
+                        activeEl.blur();
+                    }
+                },
+                nextQuestion() { 
+                    this.flushCurrentInput();
+                    if (this.currentQuestion < this.totalQuestions - 1) this.currentQuestion++; 
+                },
+                prevQuestion() { 
+                    this.flushCurrentInput();
+                    if (this.currentQuestion > 0) this.currentQuestion--; 
+                },
+                jumpTo(index) { 
+                    this.flushCurrentInput();
+                    this.currentQuestion = index; 
+                    this.showMobileMap = false; 
+                },
             }
         }
         
@@ -801,8 +1162,32 @@
                 <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1.5 py-0.5 rounded" :class="fontSize === 3 ? 'text-white bg-sky-500/20 border border-sky-400/30 font-black' : 'text-slate-400'">A</button>
             </div>
 
-            {{-- Indikator Offline --}}
-            <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-xl border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
+            {{-- Tombol Papan Coretan Digital --}}
+            <button x-show="examType !== 'google_form'" type="button" @click="initScratchpad()" 
+                    class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-sky-500/20 hover:border-sky-400/40 text-sky-300 text-xs font-bold transition shadow-sm active:scale-95" 
+                    title="Buka Papan Coretan / Buram Matematika">
+                <i class="ph-bold ph-pencil-simple text-sm"></i>
+                <span class="hidden md:inline">Coretan</span>
+            </button>
+
+            {{-- Indikator Ping & Latensi Real-Time --}}
+            <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all shadow-sm"
+                 :class="{
+                     'bg-emerald-500/10 border-emerald-500/30 text-emerald-300': isOnline && pingStatus === 'good',
+                     'bg-amber-500/10 border-amber-500/30 text-amber-300': isOnline && pingStatus === 'fair',
+                     'bg-rose-500/10 border-rose-500/30 text-rose-300': isOnline && pingStatus === 'poor',
+                     'bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse': !isOnline
+                 }"
+                 :title="isOnline ? ('Latensi ke server: ' + pingMs + ' ms') : 'Koneksi Terputus'">
+                <span class="w-2 h-2 rounded-full"
+                      :class="{
+                          'bg-emerald-400 animate-pulse': isOnline && pingStatus === 'good',
+                          'bg-amber-400': isOnline && pingStatus === 'fair',
+                          'bg-rose-400': isOnline && pingStatus === 'poor',
+                          'bg-rose-500': !isOnline
+                      }"></span>
+                <span x-text="isOnline ? (pingMs + ' ms') : 'Offline'" class="text-[11px]"></span>
+            </div>
             
             {{-- Indikator No Camera --}}
             <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 text-sky-300 px-3 py-1.5 rounded-xl text-xs font-bold" title="Kamera Tidak Aktif">
@@ -886,6 +1271,46 @@
                 <div class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto overscroll-contain custom-scroll relative">
                     <template x-if="questions.length > 0 && questions[currentQuestion]">
                         <div>
+                            {{-- AUDIO LISTENING WIDGET --}}
+                            <template x-if="questions[currentQuestion].audio_path">
+                                <div class="mb-6 p-4 rounded-2xl bg-gradient-to-r from-sky-500/15 via-blue-500/10 to-transparent border border-sky-400/30 backdrop-blur-md shadow-lg">
+                                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3.5 w-full sm:w-auto">
+                                            <button type="button" 
+                                                    @click="playAudio(questions[currentQuestion].id, questions[currentQuestion].audio_path, questions[currentQuestion].audio_play_limit || 2)"
+                                                    :disabled="getAudioRemainingPlays(questions[currentQuestion].id, questions[currentQuestion].audio_play_limit || 2) === 0 && !(activeAudio && activeAudioQuestionId === questions[currentQuestion].id)"
+                                                    class="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg transition transform active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                                                    :class="activeAudio && activeAudioQuestionId === questions[currentQuestion].id && audioPlaying ? 'bg-amber-500 shadow-amber-500/30 ring-2 ring-amber-300' : 'bg-gradient-to-tr from-sky-500 to-blue-600 shadow-sky-500/30 hover:brightness-110'">
+                                                <i class="ph-fill text-2xl" :class="activeAudio && activeAudioQuestionId === questions[currentQuestion].id && audioPlaying ? 'ph-pause' : 'ph-play'"></i>
+                                            </button>
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-black uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+                                                        <i class="ph-fill ph-headphones text-sm"></i> Soal Audio (Listening)
+                                                    </span>
+                                                    <span x-show="activeAudio && activeAudioQuestionId === questions[currentQuestion].id && audioPlaying" 
+                                                          class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse">
+                                                        Memutar
+                                                    </span>
+                                                </div>
+                                                <p class="text-[11px] text-slate-300 font-medium mt-0.5">
+                                                    Sisa putar: <b class="text-sky-400 font-black" x-text="getAudioRemainingPlays(questions[currentQuestion].id, questions[currentQuestion].audio_play_limit || 2)"></b> dari <span x-text="questions[currentQuestion].audio_play_limit || 2"></span>x kesempatan
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="w-full sm:w-56 flex items-center gap-3">
+                                            <div class="flex-1 bg-white/10 rounded-full h-2 overflow-hidden border border-white/5">
+                                                <div class="bg-gradient-to-r from-sky-400 to-blue-500 h-full rounded-full transition-all duration-200" 
+                                                     :style="'width: ' + (activeAudio && activeAudioQuestionId === questions[currentQuestion].id ? audioProgress : 0) + '%'"></div>
+                                            </div>
+                                            <span class="text-[10px] font-mono text-slate-400 shrink-0" 
+                                                  x-text="activeAudio && activeAudioQuestionId === questions[currentQuestion].id ? (audioCurrentTime + '/' + audioDuration) : '00:00'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
                             {{-- Gambar Soal --}}
                             <template x-if="questions[currentQuestion].question_image">
                                 <div class="mb-6 relative group w-fit">
@@ -951,6 +1376,56 @@
                                 </div>
                             </template>
 
+                            {{-- TIPE 1.5: PILIHAN GANDA KOMPLEKS (Multi-Centang ala ANBK) --}}
+                            <template x-if="questions[currentQuestion].question_type === 'complex' || questions[currentQuestion].question_type === 'multiple_choice'">
+                                <div class="space-y-3">
+                                    <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs font-bold flex items-center gap-2">
+                                        <i class="ph-fill ph-check-square-offset text-indigo-400 text-base"></i>
+                                        <span>Pilihan Ganda Kompleks: Anda dapat memilih lebih dari satu jawaban yang benar.</span>
+                                    </div>
+
+                                    <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
+                                        <label class="relative flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-200 group active:scale-[0.99] touch-manipulation" 
+                                               :class="isComplexSelected(questions[currentQuestion].id, optionKey) ? 'border-indigo-400 bg-indigo-500/20 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-400/50' : 'border-white/10 bg-white/[0.03] hover:border-indigo-400/40 hover:bg-white/[0.07]'">
+                                            
+                                            <input type="checkbox" :value="optionKey" 
+                                                   @change="toggleComplexAnswer(questions[currentQuestion].id, optionKey)"
+                                                   :checked="isComplexSelected(questions[currentQuestion].id, optionKey)"
+                                                   class="peer sr-only">
+                                            
+                                            <div class="w-10 h-10 rounded-xl border flex items-center justify-center font-black text-sm shrink-0 transition-all shadow-sm relative" 
+                                                 :class="isComplexSelected(questions[currentQuestion].id, optionKey) ? 'bg-gradient-to-tr from-indigo-500 to-sky-500 border-indigo-300 text-white shadow-indigo-500/30 ring-2 ring-indigo-400/40' : 'bg-white/10 border-white/20 text-slate-300 group-hover:border-indigo-400 group-hover:text-white'">
+                                                
+                                                <template x-if="isComplexSelected(questions[currentQuestion].id, optionKey)">
+                                                    <i class="ph-bold ph-check text-base"></i>
+                                                </template>
+                                                <template x-if="!isComplexSelected(questions[currentQuestion].id, optionKey)">
+                                                    <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]"></span>
+                                                </template>
+                                            </div>
+                                            
+                                            <div class="flex-1 select-text" x-data="{ 
+                                                get parsedOptions() { 
+                                                    try { return typeof questions[currentQuestion].options === 'string' ? JSON.parse(questions[currentQuestion].options) : (questions[currentQuestion].options || {}); } 
+                                                    catch(e) { return {}; } 
+                                                } 
+                                            }">
+                                                <span class="font-medium transition-colors block leading-relaxed" 
+                                                      :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-white font-semibold': isComplexSelected(questions[currentQuestion].id, optionKey), 'text-slate-200': !isComplexSelected(questions[currentQuestion].id, optionKey)}">
+                                                    <span x-text="parsedOptions[optionKey]"></span>
+                                                </span>
+                                                
+                                                <template x-if="parsedOptions['image_' + optionKey]">
+                                                    <img :src="getImageUrl(parsedOptions['image_' + optionKey])" 
+                                                         @click.stop="zoomedImage = getImageUrl(parsedOptions['image_' + optionKey])"
+                                                         class="mt-3 max-h-36 rounded-xl border border-white/10 shadow-md object-contain bg-black/20 p-1 cursor-zoom-in hover:brightness-110 transition">
+                                                </template>
+                                            </div>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+
                             {{-- TIPE 2: BENAR / SALAH --}}
                             <template x-if="questions[currentQuestion].question_type === 'true_false'">
                                 <div class="grid grid-cols-2 gap-4">
@@ -979,6 +1454,8 @@
                                 <div class="relative">
                                     <textarea x-model="answers[questions[currentQuestion].id]" 
                                         @input.debounce.1000ms="selectAnswer(questions[currentQuestion].id, $event.target.value)" 
+                                        @blur="selectAnswer(questions[currentQuestion].id, $event.target.value)"
+                                        @change="selectAnswer(questions[currentQuestion].id, $event.target.value)"
                                         class="w-full h-44 p-4 rounded-2xl border border-white/15 bg-white/5 focus:border-sky-400 focus:ring-4 focus:ring-sky-500/20 transition-all font-medium text-white placeholder-slate-400 leading-relaxed text-lg" 
                                         placeholder="Ketik jawaban Anda di sini..."></textarea>
                                     
@@ -988,7 +1465,7 @@
 
                                     <div class="flex items-center gap-2 mt-3 text-slate-400">
                                         <i class="ph-fill ph-info text-sky-400"></i>
-                                        <p class="text-xs font-bold text-slate-400">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
+                                        <p class="text-xs font-bold text-slate-400">Jawaban tersimpan otomatis saat Anda berhenti mengetik atau berpindah nomor.</p>
                                     </div>
                                 </div>
                             </template>
@@ -1005,9 +1482,9 @@
                                                 <select class="w-full rounded-xl border-white/20 bg-[#021124] text-sm font-bold text-white focus:ring-sky-500 py-3 px-4 shadow-sm touch-manipulation"
                                                         @change="updateMatching(questions[currentQuestion].id, pair.left, $event.target.value)">
                                                     <option value="" selected disabled>-- Pilih Pasangan --</option>
-                                                    <template x-for="pOption in questions[currentQuestion].options.pairs" :key="pOption.right">
-                                                        <option :value="pOption.right" x-text="pOption.right" 
-                                                                :selected="answers[questions[currentQuestion].id] && answers[questions[currentQuestion].id][pair.left] === pOption.right">
+                                                    <template x-for="pOption in (questions[currentQuestion].shuffledRights && questions[currentQuestion].shuffledRights.length > 0 ? questions[currentQuestion].shuffledRights : (questions[currentQuestion].options?.pairs?.map(p => p.right) || []))" :key="pOption">
+                                                        <option :value="pOption" x-text="pOption" 
+                                                                :selected="answers[questions[currentQuestion].id] && answers[questions[currentQuestion].id][pair.left] === pOption">
                                                         </option>
                                                     </template>
                                                 </select>
@@ -1110,6 +1587,85 @@
         <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-[#020b18]/70 z-30 lg:hidden backdrop-blur-sm"></div>
         
         @endif
+    </div>
+
+    {{-- MODAL PAPAN CORETAN DIGITAL (SCRATCHPAD) --}}
+    <div x-show="showScratchpad" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-2 sm:inset-8 z-[10000] bg-[#020b18]/95 backdrop-blur-2xl rounded-[2.5rem] border border-sky-400/30 shadow-2xl flex flex-col overflow-hidden" 
+         style="display: none;" x-cloak>
+        
+        {{-- Toolbar Coretan --}}
+        <div class="shrink-0 p-4 border-b border-white/10 bg-white/5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400">
+                    <i class="ph-bold ph-pencil-simple text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-white text-base">Papan Coretan Digital</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Gunakan untuk coret-coret hitungan / buram soal.</p>
+                </div>
+            </div>
+
+            {{-- Tool controls --}}
+            <div class="flex items-center gap-2 flex-wrap">
+                {{-- Warna Pen --}}
+                <div class="flex items-center gap-1.5 bg-white/5 p-1 rounded-xl border border-white/10">
+                    <button type="button" @click="scratchColor = '#38bdf8'; scratchMode = 'draw'" 
+                            class="w-6 h-6 rounded-lg bg-sky-400 transition" :class="scratchColor === '#38bdf8' && scratchMode === 'draw' ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'"></button>
+                    <button type="button" @click="scratchColor = '#fbbf24'; scratchMode = 'draw'" 
+                            class="w-6 h-6 rounded-lg bg-amber-400 transition" :class="scratchColor === '#fbbf24' && scratchMode === 'draw' ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'"></button>
+                    <button type="button" @click="scratchColor = '#34d399'; scratchMode = 'draw'" 
+                            class="w-6 h-6 rounded-lg bg-emerald-400 transition" :class="scratchColor === '#34d399' && scratchMode === 'draw' ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'"></button>
+                    <button type="button" @click="scratchColor = '#f87171'; scratchMode = 'draw'" 
+                            class="w-6 h-6 rounded-lg bg-rose-400 transition" :class="scratchColor === '#f87171' && scratchMode === 'draw' ? 'ring-2 ring-white scale-110' : 'opacity-70 hover:opacity-100'"></button>
+                    <button type="button" @click="scratchColor = '#ffffff'; scratchMode = 'draw'" 
+                            class="w-6 h-6 rounded-lg bg-white transition" :class="scratchColor === '#ffffff' && scratchMode === 'draw' ? 'ring-2 ring-sky-400 scale-110' : 'opacity-70 hover:opacity-100'"></button>
+                </div>
+
+                {{-- Mode: Pen vs Eraser --}}
+                <div class="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10 text-xs font-bold">
+                    <button type="button" @click="scratchMode = 'draw'" 
+                            class="px-2.5 py-1.5 rounded-lg transition" 
+                            :class="scratchMode === 'draw' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'">
+                        <i class="ph-bold ph-pencil"></i> Pen
+                    </button>
+                    <button type="button" @click="scratchMode = 'erase'" 
+                            class="px-2.5 py-1.5 rounded-lg transition" 
+                            :class="scratchMode === 'erase' ? 'bg-rose-500 text-white shadow-sm' : 'text-slate-400 hover:text-white'">
+                        <i class="ph-bold ph-eraser"></i> Hapus
+                    </button>
+                </div>
+
+                {{-- Tombol Bersihkan --}}
+                <button type="button" @click="clearScratchpad()" class="px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-bold transition flex items-center gap-1">
+                    <i class="ph-bold ph-trash"></i> Bersihkan Semua
+                </button>
+
+                {{-- Tombol Tutup --}}
+                <button type="button" @click="showScratchpad = false" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition border border-white/10" title="Tutup / Simpan Coretan">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- Area Canvas --}}
+        <div class="flex-1 w-full h-full relative bg-[#020b18]/60 cursor-crosshair touch-none select-none overflow-hidden">
+            <canvas id="scratchpad-canvas" 
+                    class="absolute inset-0 w-full h-full"
+                    @mousedown="startDraw($event)"
+                    @mousemove="draw($event)"
+                    @mouseup="stopDraw()"
+                    @mouseleave="stopDraw()"
+                    @touchstart.prevent="startDraw($event)"
+                    @touchmove.prevent="draw($event)"
+                    @touchend.prevent="stopDraw()"></canvas>
+        </div>
     </div>
 </body>
 </html>

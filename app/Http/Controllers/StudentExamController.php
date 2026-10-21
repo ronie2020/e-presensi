@@ -11,6 +11,7 @@ use App\Models\CbtExam;
 use App\Models\CbtStudentExam;
 use App\Models\CbtStudentAnswer;
 use App\Models\CbtQuestion;
+use App\Models\CbtMessage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // PERBAIKAN: Tambahkan Log untuk merekam error
 
@@ -191,11 +192,16 @@ class StudentExamController extends Controller
             return $this->finishProcess($session, $exam);
         }
 
-        // Ambil soal dan acak
+        // Ambil soal
         // PENTING: Jangan select 'correct_answer' ke view untuk menghindari siswa curang (Inspect Element)
         $query = CbtQuestion::where('cbt_exam_id', $exam_id)
-            ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
-            ->inRandomOrder($session->id);
+            ->select('id', 'question_text', 'question_image', 'audio_path', 'audio_play_limit', 'options', 'question_type');
+
+        if ($exam->randomize_questions) {
+            $query->inRandomOrder($session->id);
+        } else {
+            $query->orderBy('id', 'asc');
+        }
 
         // Jika guru menyetel limit soal (misal 40), potong soalnya!
         if (isset($exam->question_limit) && $exam->question_limit > 0) {
@@ -213,7 +219,7 @@ class StudentExamController extends Controller
                         
             $saved = $savedAnswers[$q->id] ?? null;
                       
-            if ($q->question_type === 'matching' && $saved && is_string($saved)) {
+            if (($q->question_type === 'matching' || $q->question_type === 'complex' || $q->question_type === 'multiple_choice') && $saved && is_string($saved)) {
                 $decoded = json_decode($saved, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $saved = $decoded;
@@ -245,8 +251,9 @@ class StudentExamController extends Controller
         });       
 
         $sessionId = $session->id;
+        $violationCount = $session->violation_count ?? 0;
         
-        return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student'));
+        return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'effectiveDuration', 'sessionId', 'student', 'violationCount'));
     }
 
     public function saveAnswer(Request $request)
@@ -315,17 +322,20 @@ class StudentExamController extends Controller
                     $finalEndTime = $endTimeByDuration;
                 }
 
-                // Hitung durasi EFEKTIF (menit) yang dimiliki siswa, lalu ambil 75%-nya
-                $effectiveDurationMinutes = $startTime->diffInMinutes($finalEndTime);
-                $minutesElapsed = $startTime->diffInMinutes($now);
+                // Hitung durasi EFEKTIF (detik) yang dimiliki siswa, lalu ambil 75%-nya
+                $effectiveDurationSeconds = $startTime->diffInSeconds($finalEndTime);
+                $secondsElapsed = $startTime->diffInSeconds($now);
                 
-                // Syarat: Siswa WAJIB mengerjakan 75% dari waktu yang TERSEDIA BAGI MEREKA
-                $minimumMinutesRequired = $effectiveDurationMinutes * 0.75;
+                // Syarat: Siswa WAJIB mengerjakan 75% dari waktu yang tersedia bagi mereka
+                // Diberikan toleransi 30 detik untuk toleransi sinkronisasi clock client-server
+                $minimumSecondsRequired = ($effectiveDurationSeconds * 0.75) - 30;
 
-                // Mencegah error jika minutes_required 0 (ujian tanpa durasi)
-                if ($minimumMinutesRequired > 0 && $minutesElapsed < $minimumMinutesRequired) {
+                // Mencegah error jika minimumSecondsRequired <= 0 (ujian tanpa batas waktu)
+                if ($minimumSecondsRequired > 0 && $secondsElapsed < $minimumSecondsRequired) {
+                    $remainingSec = ceil($minimumSecondsRequired - $secondsElapsed);
+                    $remainingMin = ceil($remainingSec / 60);
                     return redirect()->route('student.exam.run', $exam_id)
-                        ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu pengerjaan (' . ceil($minimumMinutesRequired) . ' menit). Sisa waktu tunggu: ' . ceil($minimumMinutesRequired - $minutesElapsed) . ' menit lagi.');
+                        ->with('error', 'Anda baru bisa menyelesaikan ujian setelah melewati 75% waktu pengerjaan. Sisa waktu tunggu: ' . ($remainingMin > 0 ? $remainingMin . ' menit' : $remainingSec . ' detik') . ' lagi.');
                 }
             }
             // --- AKHIR LOGIKA 75% ---
@@ -334,6 +344,75 @@ class StudentExamController extends Controller
         }
 
         return redirect()->route('student.exam.index');
+    }
+
+    public function logViolation(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required',
+        ]);
+
+        $session = CbtStudentExam::where('id', $request->session_id)
+            ->where('student_id', $this->getStudentId())
+            ->where('status', 'ongoing')
+            ->first();
+
+        if ($session) {
+            $session->increment('violation_count');
+            return response()->json([
+                'status' => 'success',
+                'violation_count' => (int) $session->violation_count
+            ]);
+        }
+
+        return response()->json(['status' => 'error'], 404);
+    }
+
+    public function ping(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required',
+            'latency_ms' => 'nullable|integer'
+        ]);
+
+        $session = CbtStudentExam::where('id', $request->session_id)
+            ->where('student_id', $this->getStudentId())
+            ->where('status', 'ongoing')
+            ->first();
+
+        if ($session) {
+            $session->update([
+                'latency_ms' => $request->latency_ms ?? 50,
+                'last_seen_at' => now(),
+            ]);
+
+            // Ambil pesan siaran proktor (broadcast maupun direct) yang belum dibaca
+            $messages = CbtMessage::where('cbt_exam_id', $session->cbt_exam_id)
+                ->where(function($q) use ($session) {
+                    $q->whereNull('student_id')
+                      ->orWhere('student_id', $session->student_id);
+                })
+                ->where('is_read', false)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'messages' => $messages
+            ]);
+        }
+
+        return response()->json(['status' => 'error'], 404);
+    }
+
+    public function markMessageRead(Request $request)
+    {
+        $request->validate(['message_id' => 'required']);
+        $msg = CbtMessage::find($request->message_id);
+        if ($msg && $msg->student_id) {
+            $msg->update(['is_read' => true]);
+        }
+        return response()->json(['status' => 'success']);
     }
 
     public function uploadPhoto(Request $request)
@@ -345,6 +424,7 @@ class StudentExamController extends Controller
 
         $session = CbtStudentExam::where('id', $request->session_id)
             ->where('student_id', $this->getStudentId())
+            ->where('status', 'ongoing')
             ->first();
 
         if (!$session || $session->status == 'finished') {
@@ -390,23 +470,47 @@ class StudentExamController extends Controller
                 $type = $q->question_type ?? 'choice'; 
                 $isCorrect = false;
 
-                $studentAns = trim($ans->answer);
-                $correctAns = trim($q->correct_answer);
+                $studentAns = trim((string)$ans->answer);
+                $correctAns = trim((string)$q->correct_answer);
 
-                if ($type === 'choice' || $type === 'true_false' || $type === 'multiple_choice' || $type === 'multiple_select') {        // pilihan ganda / PG Kompleks
-                    $studentDec = json_decode($studentAns, true);
-                    $correctDec = json_decode($correctAns, true);
-
-                    if (is_array($studentDec) && is_array($correctDec)) {
-                        sort($studentDec);
-                        sort($correctDec);
-                        if ($studentDec == $correctDec) {
-                            $isCorrect = true;
-                        }
-                    } elseif (strcasecmp($studentAns, $correctAns) == 0) {
+                if ($type === 'choice' || $type === 'true_false') {
+                    if (strcasecmp($studentAns, $correctAns) == 0) {
                         $isCorrect = true;
                     }
                 } 
+                elseif ($type === 'complex' || $type === 'multiple_choice' || $type === 'multiple_select') {
+                    // Pilihan Ganda Kompleks (Multi-Centang ala ANBK / AKM Kemendikbud)
+                    $studentDec = is_array($ans->answer) ? $ans->answer : json_decode($ans->answer, true);
+                    $correctDec = is_array($q->correct_answer) ? $q->correct_answer : json_decode($q->correct_answer, true);
+
+                    if (!is_array($studentDec)) {
+                        $studentDec = !empty($ans->answer) ? [trim((string)$ans->answer)] : [];
+                    }
+                    if (!is_array($correctDec)) {
+                        $correctDec = !empty($q->correct_answer) ? [trim((string)$q->correct_answer)] : [];
+                    }
+
+                    $totalKeys = count($correctDec);
+                    if ($totalKeys > 0) {
+                        $correctSelected = count(array_intersect($studentDec, $correctDec));
+                        $wrongSelected = count(array_diff($studentDec, $correctDec));
+                        
+                        // Rumus ANBK: proporsi skor parsial (benar - salah) / total_kunci
+                        $fraction = max(0, ($correctSelected - $wrongSelected) / $totalKeys);
+                        $earnedScore = round($q->score_weight * $fraction, 2);
+
+                        if ($earnedScore > 0) {
+                            $totalScore += $earnedScore;
+                            $ans->score = $earnedScore;
+                            $ans->is_correct = ($fraction == 1.0);
+                        } else {
+                            $ans->score = 0;
+                            $ans->is_correct = false;
+                        }
+                        $ans->save();
+                        continue; // Lewati block bawah karena sudah dinilai secara proporsional
+                    }
+                }
                 elseif ($type === 'matching') {                         // matching
                     $keyMap = json_decode($correctAns, true) ?? [];
                     $studentMap = json_decode($studentAns, true) ?? [];
@@ -426,10 +530,11 @@ class StudentExamController extends Controller
 
                 if ($isCorrect) {
                     $totalScore += $q->score_weight;
-                    // status benar/salah per butir soal (opsional, untuk analisis)
+                    $ans->score = $q->score_weight;
                     $ans->is_correct = true;
                     $ans->save();
                 } else {
+                    $ans->score = 0;
                     $ans->is_correct = false;
                     $ans->save();
                 }

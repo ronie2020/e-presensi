@@ -31,12 +31,21 @@
                 activeStudentName: '',
                 studentPhotos: [],
                 loadingPhotos: false,
+
+                // Proctor Message State
+                showMessageModal: false,
+                targetStudentId: null,
+                targetStudentName: '',
+                messageText: '',
+                messageType: 'warning', // 'info', 'warning', 'urgent'
+                isSendingMessage: false,
                 
                 urls: {
                     monitoring: '{{ route('cbt.monitoring_data', $exam->id) }}',
                     autoToken: '{{ route('cbt.auto_token', $exam->id) }}',
                     resetBase: '{{ route('cbt.reset', ['exam' => $exam->id, 'student' => 'ID_PLACEHOLDER']) }}',
-                    photosBase: '{{ route("cbt.monitoring.photos", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}'
+                    photosBase: '{{ route("cbt.monitoring.photos", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}',
+                    sendMessage: '{{ route("cbt.monitoring.send_message", $exam->id) }}'
                 },
 
                 init() {
@@ -176,6 +185,68 @@
                         .then(data => { this.studentPhotos = data; })
                         .catch(err => { console.error(err); this.studentPhotos = []; })
                         .finally(() => { this.loadingPhotos = false; });
+                },
+
+                openMessageModal(studentId = null, studentName = '') {
+                    this.targetStudentId = studentId;
+                    this.targetStudentName = studentName;
+                    this.messageType = studentId ? 'warning' : 'info';
+                    this.messageText = '';
+                    this.showMessageModal = true;
+                },
+
+                sendMessageToServer() {
+                    if (!this.messageText || !this.messageText.trim()) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'warning',
+                            title: 'Pesan belum diisi!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            customClass: { popup: 'rounded-2xl shadow-xl border border-white/10 bg-slate-900 text-white' }
+                        });
+                        return;
+                    }
+                    this.isSendingMessage = true;
+                    fetch(this.urls.sendMessage, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            student_id: this.targetStudentId,
+                            message: this.messageText,
+                            type: this.messageType
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            this.showMessageModal = false;
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: this.targetStudentId ? 'Teguran Berhasil Dikirim!' : 'Pesan Siaran Terkirim!',
+                                text: 'Pesan akan tampil di layar siswa secara langsung.',
+                                showConfirmButton: false,
+                                timer: 3500,
+                                customClass: { popup: 'rounded-2xl shadow-xl border border-white/10 bg-slate-900 text-white' }
+                            });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal Mengirim', text: data.message || 'Terjadi kesalahan sistem' });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error sending message:', err);
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Koneksi gagal atau server bermasalah.' });
+                    })
+                    .finally(() => {
+                        this.isSendingMessage = false;
+                    });
                 }
             }));
         });
@@ -296,10 +367,20 @@
             </div>
 
             {{-- TOOLBAR BAWAH --}}
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <a href="{{ route('cbt.index') }}" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition">
-                    <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke List
-                </a>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <a href="{{ route('cbt.index') }}" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition">
+                        <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke List
+                    </a>
+
+                    <div class="w-px h-5 bg-white/10 hidden sm:block"></div>
+
+                    <button type="button" @click="openMessageModal()" 
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-500/25 transition active:scale-95">
+                        <i class="ph-bold ph-megaphone text-sm"></i>
+                        <span>Kirim Pesan Siaran</span>
+                    </button>
+                </div>
 
                 <div class="text-[10px] font-bold px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-2 transition-colors duration-300"
                      :class="isUpdating ? 'bg-sky-500/10 text-sky-400 border-sky-500/30' : 'bg-white/5 text-slate-400 border-white/10'">
@@ -341,7 +422,7 @@
                                     <td class="px-6 py-4 text-center font-bold text-slate-500" x-text="index + 1"></td>
                                     <td class="px-6 py-4 font-black text-white" x-text="student.name"></td>
                                     
-                                    {{-- Kolom Keamanan (SEB) --}}
+                                    {{-- Kolom Keamanan (SEB & Pelanggaran) --}}
                                     <td class="px-6 py-4 text-center">
                                         <template x-if="student.status !== 'Belum Mengerjakan'">
                                             <div class="flex items-center justify-center gap-2">
@@ -363,6 +444,24 @@
                                                 <template x-if="student.device === 'Desktop'">
                                                     <span title="Menggunakan Laptop/PC" class="flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 text-slate-400 border border-white/10">
                                                         <i class="ph-bold ph-laptop text-lg"></i>
+                                                    </span>
+                                                </template>
+                                                <template x-if="student.violations > 0">
+                                                    <span :title="student.violations + ' Kali Pelanggaran (Pindah Tab / Minimize)'" class="flex items-center justify-center px-2 h-8 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold gap-1 animate-pulse">
+                                                        <i class="ph-fill ph-warning-octagon text-sm text-rose-400"></i>
+                                                        <span x-text="student.violations"></span>x
+                                                    </span>
+                                                </template>
+                                                <template x-if="student.latency_ms">
+                                                    <span :title="'Ping: ' + student.latency_ms + ' ms (Aktif: ' + student.last_seen + ')'" 
+                                                          class="flex items-center justify-center px-2 h-8 rounded-lg text-xs font-mono font-bold gap-1 border transition-all"
+                                                          :class="{
+                                                              'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': student.latency_ms < 200,
+                                                              'bg-amber-500/15 text-amber-300 border-amber-500/30': student.latency_ms >= 200 && student.latency_ms < 600,
+                                                              'bg-rose-500/15 text-rose-300 border-rose-500/30 animate-pulse': student.latency_ms >= 600
+                                                          }">
+                                                        <i class="ph-bold ph-wifi-high text-xs"></i>
+                                                        <span x-text="student.latency_ms + 'ms'"></span>
                                                     </span>
                                                 </template>
                                             </div>
@@ -413,6 +512,11 @@
                                             </button>
                                         </template>
                                         <template x-if="student.is_active">
+                                            <button @click="openMessageModal(student.id, student.name)" class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 flex items-center justify-center transition shadow-sm" title="Tegur Siswa Ini">
+                                                <i class="ph-bold ph-chat-centered-dots"></i>
+                                            </button>
+                                        </template>
+                                        <template x-if="student.is_active">
                                             <button @click="confirmResetLogin(getResetUrl(student.id), student.name)" class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 flex items-center justify-center transition shadow-sm" title="Keluarkan Siswa (Reset)">
                                                 <i class="ph-bold ph-power"></i>
                                             </button>
@@ -445,9 +549,10 @@
                                         </span>
                                     </div>
                                     <template x-if="student.status !== 'Belum Mengerjakan'">
-                                        <div class="flex gap-2">
+                                        <div class="flex flex-wrap items-center gap-1.5">
                                             <span x-show="student.is_seb" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1"><i class="ph-fill ph-shield-check"></i> SEB</span>
                                             <span x-show="!student.is_seb" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Browser</span>
+                                            <span x-show="student.latency_ms" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300" x-text="student.latency_ms + 'ms'"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -465,10 +570,13 @@
                             
                             <template x-if="student.is_active">
                                 <div class="mt-3 pt-3 border-t border-white/10 flex justify-end gap-2">
-                                    <button @click="openPhotoModal(student.id, student.name)" class="text-xs font-bold text-sky-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                                    <button @click="openMessageModal(student.id, student.name)" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 flex items-center gap-1">
+                                        <i class="ph-bold ph-chat-centered-dots"></i> Tegur
+                                    </button>
+                                    <button @click="openPhotoModal(student.id, student.name)" class="text-xs font-bold text-sky-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-1">
                                         <i class="ph-bold ph-camera"></i> Foto
                                     </button>
-                                    <button @click="confirmResetLogin(getResetUrl(student.id), student.name)" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20">
+                                    <button @click="confirmResetLogin(getResetUrl(student.id), student.name)" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20 flex items-center gap-1">
                                         <i class="ph-bold ph-power"></i> Reset
                                     </button>
                                 </div>
@@ -525,6 +633,113 @@
                                 </template>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        {{-- MODAL KIRIM PESAN SIARAN / TEGURAN --}}
+        <template x-teleport="body">
+            <div x-show="showMessageModal" style="display: none;" class="fixed inset-0 z-[999] overflow-y-auto" @keydown.escape.window="showMessageModal = false" x-cloak>
+                <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity" @click="showMessageModal = false"></div>
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="relative bg-[#031d3d] rounded-[2.5rem] shadow-2xl max-w-lg w-full p-8 overflow-hidden transform transition-all border border-white/10 text-white">
+                        
+                        {{-- Header Modal --}}
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner"
+                                     :class="targetStudentId ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'">
+                                    <i class="ph-bold" :class="targetStudentId ? 'ph-chat-centered-dots' : 'ph-megaphone'"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-black text-white" x-text="targetStudentId ? 'Teguran Pengawas' : 'Kirim Pesan Siaran'"></h3>
+                                    <p class="text-xs text-slate-400 font-bold" x-text="targetStudentId ? 'Kirim peringatan ke layar siswa tertentu' : 'Siarkan pengumuman ke seluruh peserta'"></p>
+                                </div>
+                            </div>
+                            <button @click="showMessageModal = false" class="w-10 h-10 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white flex items-center justify-center transition border border-white/10">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+
+                        {{-- Target Banner --}}
+                        <template x-if="targetStudentId">
+                            <div class="p-3 bg-amber-500/15 border border-amber-400/30 rounded-2xl flex items-center justify-between gap-2.5 mb-5 text-xs font-bold text-amber-300">
+                                <span class="flex items-center gap-2">
+                                    <i class="ph-fill ph-user text-base"></i> Target: <span class="text-white font-black" x-text="targetStudentName"></span>
+                                </span>
+                                <button type="button" @click="targetStudentId = null; targetStudentName = ''; messageType = 'info'" class="text-[10px] text-slate-300 hover:text-white underline">Ubah ke Siaran Umum</button>
+                            </div>
+                        </template>
+                        <template x-if="!targetStudentId">
+                            <div class="p-3 bg-sky-500/15 border border-sky-400/30 rounded-2xl flex items-center gap-2.5 mb-5 text-xs font-bold text-sky-300">
+                                <i class="ph-fill ph-broadcast text-base"></i> Target: <span class="text-white font-black">Semua Siswa Sedang Ujian (Broadcast)</span>
+                            </div>
+                        </template>
+
+                        {{-- Tipe Pesan --}}
+                        <div class="mb-5">
+                            <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Tingkat Pesan</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" @click="messageType = 'info'" 
+                                        class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                                        :class="messageType === 'info' ? 'bg-sky-500/20 border-sky-400 text-sky-300 shadow-sm' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'">
+                                    <i class="ph-bold ph-info"></i> Info
+                                </button>
+                                <button type="button" @click="messageType = 'warning'" 
+                                        class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                                        :class="messageType === 'warning' ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'">
+                                    <i class="ph-bold ph-warning"></i> Peringatan
+                                </button>
+                                <button type="button" @click="messageType = 'urgent'" 
+                                        class="py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                                        :class="messageType === 'urgent' ? 'bg-rose-500/20 border-rose-400 text-rose-300 shadow-sm' : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'">
+                                    <i class="ph-bold ph-warning-octagon"></i> Teguran Keras
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Quick Phrases --}}
+                        <div class="mb-4">
+                            <span class="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">Template Cepat:</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" @click="messageText = 'Waktu ujian tersisa 15 menit lagi, harap periksa kembali jawaban Anda!'" 
+                                        class="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition">
+                                    ⏱️ Sisa 15 Menit
+                                </button>
+                                <button type="button" @click="messageText = 'Dilarang membuka tab browser lain, aplikasi lain, atau berpindah layar!'" 
+                                        class="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition">
+                                    🚫 Dilarang Pindah Tab
+                                </button>
+                                <button type="button" @click="messageText = 'Harap tenang, fokus ke layar masing-masing dan jangan berbisik!'" 
+                                        class="text-[11px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition">
+                                    🤫 Jangan Berbisik
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Input Textarea --}}
+                        <div class="mb-6">
+                            <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Isi Pesan</label>
+                            <textarea x-model="messageText" rows="3" 
+                                      placeholder="Ketik pesan yang akan muncul langsung di layar siswa..." 
+                                      class="w-full bg-slate-900/90 border-white/10 rounded-2xl p-4 text-white text-sm focus:border-sky-400 focus:ring-sky-500 placeholder:text-slate-500 shadow-inner"></textarea>
+                        </div>
+
+                        {{-- Tombol Kirim --}}
+                        <div class="flex items-center justify-end gap-3">
+                            <button type="button" @click="showMessageModal = false" 
+                                    class="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white bg-white/5 border border-white/10 transition">
+                                Batal
+                            </button>
+                            <button type="button" @click="sendMessageToServer()" :disabled="isSendingMessage"
+                                    class="px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition flex items-center gap-2 active:scale-95 disabled:opacity-50"
+                                    :class="targetStudentId ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/25' : 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 shadow-sky-500/25'">
+                                <i class="ph-bold" :class="isSendingMessage ? 'ph-spinner animate-spin' : 'ph-paper-plane-right'"></i>
+                                <span x-text="isSendingMessage ? 'Mengirim...' : (targetStudentId ? 'Kirim Teguran' : 'Siarkan Pesan')"></span>
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             </div>
