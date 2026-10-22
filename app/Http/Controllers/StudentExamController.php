@@ -172,10 +172,11 @@ class StudentExamController extends Controller
         
         // Fallback aman jika admin lupa isi durasi atau isinya 0
         $duration = $exam->duration_minutes > 0 ? $exam->duration_minutes : 120;
-        $endTimeByDuration = $startTime->copy()->addMinutes($duration);
+        $extraTime = (int) ($session->extra_time_minutes ?? 0);
+        $endTimeByDuration = $startTime->copy()->addMinutes($duration + $extraTime);
         
         if (!empty($exam->end_time)) {
-            $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'));
+            $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'))->addMinutes($extraTime);
             // Ambil waktu mana yang lebih dulu habis (Durasi vs Jadwal)
             $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
         } else {
@@ -313,10 +314,11 @@ class StudentExamController extends Controller
                 
                 // Kalkulasi ulang batas waktu sesungguhnya
                 $duration = $exam->duration_minutes > 0 ? $exam->duration_minutes : 120;
-                $endTimeByDuration = $startTime->copy()->addMinutes($duration);
+                $extraTime = (int) ($session->extra_time_minutes ?? 0);
+                $endTimeByDuration = $startTime->copy()->addMinutes($duration + $extraTime);
                 
                 if (!empty($exam->end_time)) {
-                    $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'));
+                    $endTimeBySchedule = Carbon::parse($exam->end_time)->timezone(config('app.timezone'))->addMinutes($extraTime);
                     $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
                 } else {
                     $finalEndTime = $endTimeByDuration;

@@ -182,6 +182,7 @@
                                 <th class="px-8 py-5">Tanggal Pinjam</th>
                                 <th class="px-8 py-5">Tenggat Kembali</th>
                                 <th class="px-8 py-5 text-center">Status</th>
+                                <th class="px-6 py-5 text-center">Struk</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
@@ -226,10 +227,17 @@
                                         </span>
                                     @endif
                                 </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('library.circulation.slip', $loan->id) }}" target="_blank" 
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition shadow-sm active:scale-95" title="Cetak Struk Mini">
+                                        <i class="ph-bold ph-printer text-sm"></i>
+                                        <span>Struk</span>
+                                    </a>
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-8 py-10 text-center text-slate-400">
+                                <td colspan="6" class="px-8 py-10 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
                                         <i class="ph-duotone ph-books text-4xl mb-1 opacity-50"></i>
                                         <p class="text-sm font-medium">Belum ada peminjaman aktif saat ini.</p>

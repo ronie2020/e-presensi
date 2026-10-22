@@ -117,7 +117,8 @@
 
         <!-- Tengah: Navigasi Prev/Next & Zoom -->
         <div class="flex items-center gap-2 bg-[#e5eff5]/50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-center shadow-inner">
-            <!-- Navigasi Siswa -->
+            <!-- Navigasi Siswa (Hanya untuk Guru/Admin, bukan dari Portal Siswa) -->
+            @if(empty($isPortal))
             <div class="flex items-center mr-2 border-r border-slate-300 pr-2 gap-1">
                 @if(isset($prevStudentId) && $prevStudentId)
                     <a href="{{ route('grades.report', ['student_id' => $prevStudentId, 'year' => $year, 'semester' => $semester]) }}" 
@@ -143,6 +144,7 @@
                     </button>
                 @endif
             </div>
+            @endif
 
             <!-- Kontrol Zoom -->
             <button @click="zoomOut()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition shadow-sm border border-transparent hover:border-slate-200">
@@ -156,9 +158,15 @@
 
         <!-- Kanan: Tombol Aksi -->
         <div class="flex gap-3 w-full md:w-auto justify-end">
-            <a href="{{ route('grades.list', ['class_id' => $student->class_id, 'academic_year' => $year, 'semester' => $semester]) }}" class="px-5 py-2.5 text-xs font-bold text-[#2c3f61] bg-white border border-[#2c3f61] rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
-                <i class="ph-bold ph-arrow-left"></i> Kembali
-            </a>
+            @if(!empty($isPortal))
+                <a href="{{ route('portal.show', ['student_id' => $student->student_id, 'tab' => 'akademik']) }}" class="px-5 py-2.5 text-xs font-bold text-[#2c3f61] bg-white border border-[#2c3f61] rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
+                    <i class="ph-bold ph-arrow-left"></i> Kembali ke Portal
+                </a>
+            @else
+                <a href="{{ route('grades.list', ['class_id' => $student->class_id, 'academic_year' => $year, 'semester' => $semester]) }}" class="px-5 py-2.5 text-xs font-bold text-[#2c3f61] bg-white border border-[#2c3f61] rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
+                    <i class="ph-bold ph-arrow-left"></i> Kembali
+                </a>
+            @endif
             <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-[#2c3f61] rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 font-sans flex items-center gap-2">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak / PDF
             </button>

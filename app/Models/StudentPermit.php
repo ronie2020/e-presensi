@@ -86,6 +86,9 @@ class StudentPermit extends Model
             'Barang Tertinggal' => 15,
             'UKS' => 45,
             'Panggilan Guru' => 60,
+            'Keluar Gerbang' => 60,
+            'Pulang Cepat' => 999999,
+            'Dispensasi' => 120,
             default => 60
         };
 

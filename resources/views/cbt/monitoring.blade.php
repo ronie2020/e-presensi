@@ -45,7 +45,10 @@
                     autoToken: '{{ route('cbt.auto_token', $exam->id) }}',
                     resetBase: '{{ route('cbt.reset', ['exam' => $exam->id, 'student' => 'ID_PLACEHOLDER']) }}',
                     photosBase: '{{ route("cbt.monitoring.photos", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}',
-                    sendMessage: '{{ route("cbt.monitoring.send_message", $exam->id) }}'
+                    sendMessage: '{{ route("cbt.monitoring.send_message", $exam->id) }}',
+                    extraTimeBase: '{{ route("cbt.monitoring.extra_time", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}',
+                    forceSubmitBase: '{{ route("cbt.monitoring.force_submit", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}',
+                    forceSubmitAll: '{{ route("cbt.monitoring.force_submit_all", $exam->id) }}'
                 },
 
                 init() {
@@ -247,6 +250,179 @@
                     .finally(() => {
                         this.isSendingMessage = false;
                     });
+                },
+
+                giveExtraTime(studentId, studentName) {
+                    Swal.fire({
+                        title: 'Tambah Waktu Ujian',
+                        html: `Pilih durasi tambahan waktu untuk siswa <b class="text-sky-400">${studentName}</b>:`,
+                        icon: 'question',
+                        input: 'select',
+                        inputOptions: {
+                            '5': '+5 Menit',
+                            '10': '+10 Menit',
+                            '15': '+15 Menit',
+                            '30': '+30 Menit',
+                            '45': '+45 Menit',
+                            '60': '+60 Menit (1 Jam)'
+                        },
+                        inputValue: '10',
+                        showCancelButton: true,
+                        confirmButtonText: 'Berikan Tambahan Waktu',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#0284c7',
+                        cancelButtonColor: '#475569',
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        customClass: { popup: 'rounded-[2rem] border border-white/10 shadow-2xl' }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const minutes = result.value;
+                            const url = this.urls.extraTimeBase.replace('ID_PLACEHOLDER', studentId);
+                            
+                            Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a', color: '#f8fafc' });
+
+                            fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ minutes: parseInt(minutes) })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Waktu Ditambahkan!',
+                                        text: data.message,
+                                        showConfirmButton: false,
+                                        timer: 3500,
+                                        customClass: { popup: 'rounded-2xl border border-white/10 bg-slate-900 text-white' }
+                                    });
+                                    this.fetchStudentData();
+                                } else {
+                                    Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan sistem' });
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire({ icon: 'error', title: 'Error', text: 'Koneksi gagal atau server bermasalah.' });
+                            });
+                        }
+                    });
+                },
+
+                confirmForceSubmitStudent(studentId, studentName) {
+                    Swal.fire({
+                        title: 'Selesaikan Ujian Siswa?',
+                        html: `Jawaban siswa <b class="text-amber-400">${studentName}</b> akan langsung dikumpulkan dan dinilai sekarang juga. Siswa tidak dapat melanjutkan ujian lagi.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d97706',
+                        cancelButtonColor: '#475569',
+                        confirmButtonText: 'Ya, Selesaikan & Nilai!',
+                        cancelButtonText: 'Batal',
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        customClass: { popup: 'rounded-[2rem] border border-white/10 shadow-2xl' }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const url = this.urls.forceSubmitBase.replace('ID_PLACEHOLDER', studentId);
+                            Swal.fire({ title: 'Menyelesaikan ujian...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a', color: '#f8fafc' });
+
+                            fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: 'Ujian Diselesaikan!',
+                                        text: 'Lembar ujian telah dikumpulkan dan nilai berhasil dihitung.',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        customClass: { popup: 'rounded-2xl border border-white/10 bg-slate-900 text-white' }
+                                    });
+                                    this.fetchStudentData();
+                                } else {
+                                    Swal.fire({ icon: 'error', title: 'Gagal', text: data.message });
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire({ icon: 'error', title: 'Error', text: 'Koneksi gagal atau server bermasalah.' });
+                            });
+                        }
+                    });
+                },
+
+                confirmForceSubmitAll() {
+                    if (this.stats.working === 0) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: 'Tidak Ada Siswa Aktif',
+                            text: 'Semua siswa telah selesai atau belum login.',
+                            showConfirmButton: false,
+                            timer: 2500,
+                            customClass: { popup: 'rounded-2xl border border-white/10 bg-slate-900 text-white' }
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Selesaikan Semua Siswa?',
+                        html: `Apakah Anda yakin ingin mengumpulkan ujian untuk <b>${this.stats.working} siswa</b> yang masih berstatus proses? Tindakan ini tidak dapat dibatalkan.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#475569',
+                        confirmButtonText: 'Ya, Kumpulkan Semua!',
+                        cancelButtonText: 'Batal',
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        customClass: { popup: 'rounded-[2rem] border border-white/10 shadow-2xl' }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({ title: 'Mengumpulkan semua lembar jawaban...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#0f172a', color: '#f8fafc' });
+
+                            fetch(this.urls.forceSubmitAll, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Selesai Massal!',
+                                    text: data.message,
+                                    background: '#0f172a',
+                                    color: '#f8fafc',
+                                    customClass: { popup: 'rounded-2xl border border-white/10' }
+                                });
+                                this.fetchStudentData();
+                            })
+                            .catch(err => {
+                                Swal.fire({ icon: 'error', title: 'Error', text: 'Koneksi gagal atau server bermasalah.' });
+                            });
+                        }
+                    });
                 }
             }));
         });
@@ -319,7 +495,7 @@
                         </div>
                         <h1 class="text-3xl font-black tracking-tight leading-none mb-4 text-white">{{ $exam->title }}</h1>
                         
-                        <div class="flex gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <div class="bg-white/5 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center min-w-[90px] shadow-sm">
                                 <h4 class="text-2xl font-black text-sky-400 leading-none" x-text="stats.working">{{ $stats['working'] }}</h4>
                                 <p class="text-[9px] uppercase font-black text-slate-400 mt-1">Proses</p>
@@ -328,6 +504,13 @@
                                 <h4 class="text-2xl font-black text-emerald-400 leading-none" x-text="stats.finished">{{ $stats['finished'] }}</h4>
                                 <p class="text-[9px] uppercase font-black text-emerald-300/70 mt-1">Selesai</p>
                             </div>
+                            <button type="button" @click="confirmForceSubmitAll()"
+                                    :disabled="stats.working === 0"
+                                    class="px-4 py-3 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-bold text-xs flex items-center gap-2 transition disabled:opacity-30 disabled:cursor-not-allowed shadow-sm backdrop-blur-md active:scale-95"
+                                    title="Paksa Kumpulkan Jawaban Semua Siswa yang Masih Mengerjakan">
+                                <i class="ph-bold ph-stop-circle text-lg text-rose-400"></i>
+                                <span>Kumpulkan Semua (<span x-text="stats.working"></span>)</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -474,9 +657,17 @@
                                     {{-- Status --}}
                                     <td class="px-6 py-4 text-center">
                                         <template x-if="student.status === 'Sedang Mengerjakan'">
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase tracking-wide">
-                                                <span class="block w-1.5 h-1.5 rounded-full bg-[#56bbf1] animate-pulse"></span> Proses
-                                            </span>
+                                            <div class="flex flex-col items-center justify-center gap-1">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase tracking-wide">
+                                                    <span class="block w-1.5 h-1.5 rounded-full bg-[#56bbf1] animate-pulse"></span> Proses
+                                                </span>
+                                                <template x-if="student.extra_time > 0">
+                                                    <span :title="'Mendapatkan tambahan waktu ' + student.extra_time + ' menit'" 
+                                                          class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                                        <i class="ph-bold ph-clock-plus"></i> +<span x-text="student.extra_time"></span>m
+                                                    </span>
+                                                </template>
+                                            </div>
                                         </template>
                                         <template x-if="student.status === 'Selesai'">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
@@ -505,15 +696,25 @@
                                     </td>
                                     
                                     {{-- Aksi --}}
-                                    <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                    <td class="px-6 py-4 text-right flex items-center justify-end gap-1.5">
                                         <template x-if="student.is_active || student.status === 'Selesai'">
                                             <button @click="openPhotoModal(student.id, student.name)" class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-sky-400 hover:bg-white/10 flex items-center justify-center transition shadow-sm" title="Lihat Foto Pengawasan">
                                                 <i class="ph-bold ph-camera"></i>
                                             </button>
                                         </template>
                                         <template x-if="student.is_active">
+                                            <button @click="giveExtraTime(student.id, student.name)" class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 flex items-center justify-center transition shadow-sm" title="Beri Tambahan Waktu (+Menit)">
+                                                <i class="ph-bold ph-clock-plus"></i>
+                                            </button>
+                                        </template>
+                                        <template x-if="student.is_active">
                                             <button @click="openMessageModal(student.id, student.name)" class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 flex items-center justify-center transition shadow-sm" title="Tegur Siswa Ini">
                                                 <i class="ph-bold ph-chat-centered-dots"></i>
+                                            </button>
+                                        </template>
+                                        <template x-if="student.is_active">
+                                            <button @click="confirmForceSubmitStudent(student.id, student.name)" class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 flex items-center justify-center transition shadow-sm" title="Paksa Selesai & Hitung Nilai">
+                                                <i class="ph-bold ph-check-circle"></i>
                                             </button>
                                         </template>
                                         <template x-if="student.is_active">
@@ -553,6 +754,11 @@
                                             <span x-show="student.is_seb" class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1"><i class="ph-fill ph-shield-check"></i> SEB</span>
                                             <span x-show="!student.is_seb" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Browser</span>
                                             <span x-show="student.latency_ms" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded border border-white/10 bg-white/5 text-slate-300" x-text="student.latency_ms + 'ms'"></span>
+                                            <template x-if="student.extra_time > 0">
+                                                <span class="text-[10px] font-bold text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-2 py-0.5 rounded flex items-center gap-1">
+                                                    <i class="ph-bold ph-clock-plus"></i> +<span x-text="student.extra_time"></span>m
+                                                </span>
+                                            </template>
                                         </div>
                                     </template>
                                 </div>
@@ -569,14 +775,20 @@
                             </div>
                             
                             <template x-if="student.is_active">
-                                <div class="mt-3 pt-3 border-t border-white/10 flex justify-end gap-2">
-                                    <button @click="openMessageModal(student.id, student.name)" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 flex items-center gap-1">
+                                <div class="mt-3 pt-3 border-t border-white/10 flex flex-wrap justify-end gap-1.5">
+                                    <button @click="giveExtraTime(student.id, student.name)" class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-500/20 flex items-center gap-1">
+                                        <i class="ph-bold ph-clock-plus"></i> +Waktu
+                                    </button>
+                                    <button @click="confirmForceSubmitStudent(student.id, student.name)" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-500/20 flex items-center gap-1">
+                                        <i class="ph-bold ph-check-circle"></i> Selesai
+                                    </button>
+                                    <button @click="openMessageModal(student.id, student.name)" class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1.5 rounded-lg border border-amber-500/20 flex items-center gap-1">
                                         <i class="ph-bold ph-chat-centered-dots"></i> Tegur
                                     </button>
-                                    <button @click="openPhotoModal(student.id, student.name)" class="text-xs font-bold text-sky-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-1">
+                                    <button @click="openPhotoModal(student.id, student.name)" class="text-xs font-bold text-sky-400 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 flex items-center gap-1">
                                         <i class="ph-bold ph-camera"></i> Foto
                                     </button>
-                                    <button @click="confirmResetLogin(getResetUrl(student.id), student.name)" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20 flex items-center gap-1">
+                                    <button @click="confirmResetLogin(getResetUrl(student.id), student.name)" class="text-xs font-bold text-rose-400 bg-rose-500/10 px-2.5 py-1.5 rounded-lg border border-rose-500/20 flex items-center gap-1">
                                         <i class="ph-bold ph-power"></i> Reset
                                     </button>
                                 </div>

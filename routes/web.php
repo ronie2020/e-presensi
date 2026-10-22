@@ -163,6 +163,7 @@ Route::post('/portal/search', [StudentPortalController::class, 'search'])->name(
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
 Route::get('/portal/{id}/biodata', [StudentPortalController::class, 'biodata'])->name('portal.biodata');
+Route::get('/portal/{id}/report-card', [StudentPortalController::class, 'printReportCard'])->name('portal.report_card');
 Route::get('/kelulusan', [GraduationController::class, 'index'])->name('graduation.index');
 Route::post('/kelulusan/cek', [GraduationController::class, 'check'])->name('graduation.check');
 Route::get('/kelulusan/cetak/{id}', [GraduationController::class, 'printSkl'])->name('graduation.print');
@@ -421,6 +422,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/history', [TeachingController::class, 'history'])->name('history');
         Route::post('/start/{schedule_id}', [TeachingController::class, 'start'])->name('start');
         Route::post('/attendance/manual', [TeachingController::class, 'storeManual'])->name('manual');
+        Route::post('/bulk-present', [TeachingController::class, 'bulkPresent'])->name('bulk_present');
+        Route::post('/bulk-alpha', [TeachingController::class, 'bulkAlpha'])->name('bulk_alpha');
         Route::get('/session/{id}', [TeachingController::class, 'show'])->name('show');            
         Route::get('/session/{id}/edit', [TeachingController::class, 'edit'])->name('edit');        
         Route::put('/session/{id}', [TeachingController::class, 'update'])->name('update');
@@ -606,6 +609,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/monitoring/{id}/auto-token', [CbtMonitoringController::class, 'autoRotateToken'])->name('auto_token');
         Route::get('/monitoring/{exam}/{student}/photos', [CbtMonitoringController::class, 'getStudentPhotos'])->name('monitoring.photos');
         Route::post('/monitoring/{exam_id}/send-message', [CbtMonitoringController::class, 'sendMessage'])->name('monitoring.send_message');
+        Route::post('/monitoring/{exam}/{student}/extra-time', [CbtMonitoringController::class, 'addExtraTime'])->name('monitoring.extra_time');
+        Route::post('/monitoring/{exam}/{student}/force-submit', [CbtMonitoringController::class, 'forceSubmitStudent'])->name('monitoring.force_submit');
+        Route::post('/monitoring/{exam_id}/force-submit-all', [CbtMonitoringController::class, 'forceSubmitAll'])->name('monitoring.force_submit_all');
 
         // --- 8. BANK SOAL INTEGRASI ---        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
@@ -669,7 +675,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/print', [StudentPermitController::class, 'print'])->name('print');
         Route::get('/export', [StudentPermitController::class, 'export'])->name('export');        
         Route::post('/scan', [StudentPermitController::class, 'scan'])->name('scan');
-        Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
+        Route::post('/store', [StudentPermitController::class, 'store'])->name('store');
+        Route::post('/{id}/return', [StudentPermitController::class, 'manualReturn'])->name('manual_return');
+        Route::get('/{id}/slip', [StudentPermitController::class, 'printSlip'])->name('slip');    
 
         //--- E-Jurnal Piket, Inval, Buku Tamu, & Jadwal Piket
         Route::get('/schedules', [PiketController::class, 'schedulesIndex'])->name('schedules');
@@ -736,6 +744,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/search-book', [LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
+        Route::get('/circulation/{id}/slip', [LibraryCirculationController::class, 'printSlip'])->name('circulation.slip');
      
           // ROUTE PEMINJAMAN MASSAL BUKU PAKET
         Route::get('/circulation/bulk', [LibraryCirculationController::class, 'bulkBorrow'])->name('circulation.bulk_borrow');
@@ -938,6 +947,7 @@ Route::middleware('auth')->group(function () {
         
         // 1. Buku Penghubung
         Route::resource('liaison', LiaisonBookController::class)->only(['index', 'store', 'destroy']);
+        Route::get('/liaison/{id}/call-letter', [LiaisonBookController::class, 'printCallLetter'])->name('liaison.call_letter');
         
         // API untuk mengambil siswa per kelas (Dipakai di Form Create Liaison)
         Route::get('/api/students-by-class/{classId}', [LiaisonBookController::class, 'getStudentsByClass'])

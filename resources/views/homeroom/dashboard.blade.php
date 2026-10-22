@@ -317,9 +317,31 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <a href="{{ route('admin.bk.index',) }}" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all shrink-0" title="Buku Induk & Detail">
-                                                <i class="ph-bold ph-arrow-right"></i>
-                                            </a>
+                                            @php
+                                                $rawPhone = $ws->parent_wa_number ?? $ws->parent_phone ?? $ws->guardian_phone ?? $ws->phone ?? null;
+                                                $waPhone = null;
+                                                if ($rawPhone) {
+                                                    $waPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+                                                    if (str_starts_with($waPhone, '0')) {
+                                                        $waPhone = '62' . substr($waPhone, 1);
+                                                    }
+                                                }
+                                                $waAlertText = urlencode("Yth. Bapak/Ibu Orang Tua dari {$ws->name},\n\nKami dari pihak sekolah (Wali Kelas " . ($class->name ?? '') . ") ingin menginformasikan perkembangan ananda:\n- Catatan Pelanggaran: {$ws->violation_points} Poin\n- Alpa/Ketidakhadiran: {$ws->alfa_count}x\n\nMohon bimbingan bersama di rumah demi kelancaran belajar ananda. Terima kasih.\n\nSMP Negeri 3 Lakbok");
+                                            @endphp
+
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                @if($waPhone)
+                                                    <a href="https://wa.me/{{ $waPhone }}?text={{ $waAlertText }}" target="_blank" 
+                                                       class="px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-300 text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95" 
+                                                       title="Kirim Peringatan WA ke Orang Tua">
+                                                        <i class="ph-bold ph-whatsapp-logo text-base"></i>
+                                                        <span class="hidden sm:inline">Hubungi Ortu</span>
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route('admin.bk.index') }}" class="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 shadow-sm transition-all shrink-0" title="Buku Induk & Detail">
+                                                    <i class="ph-bold ph-arrow-right"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>

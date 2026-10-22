@@ -1,3 +1,7 @@
+@php
+    $targetStudent = isset($student) ? $student : (auth()->check() ? auth()->user()->student : null);
+@endphp
+
 {{-- BAGIAN 1: NILAI SEMESTER BERJALAN (Bawaan Sistem) --}}
 <div class="mb-8">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
@@ -5,8 +9,18 @@
             <i class="ph-fill ph-book-open text-elevate-primary"></i> Laporan Nilai Siswa
         </h3>
 
-        {{-- TAMBAHAN: FORM FILTER TAHUN & SEMESTER --}}
-        <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2.5">
+            @if($targetStudent)
+            <a href="{{ route('portal.report_card', ['id' => $targetStudent->id, 'year' => $selectedYear ?? ($academic_record->academic_year ?? '2024/2025'), 'semester' => $selectedSemester ?? ($academic_record->semester ?? '1')]) }}" 
+               target="_blank"
+               class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white font-bold text-xs shadow-md shadow-sky-600/20 flex items-center gap-2 transition active:scale-95 border border-sky-400/30">
+                <i class="ph-bold ph-printer text-base"></i>
+                <span>Cetak Rapor Digital</span>
+            </a>
+            @endif
+
+            {{-- TAMBAHAN: FORM FILTER TAHUN & SEMESTER --}}
+            <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
             
             {{-- FIX: Pertahankan parameter query (seperti active tab) agar tidak ter-reset saat reload --}}
             @foreach(request()->except(['academic_year', 'semester']) as $key => $value)

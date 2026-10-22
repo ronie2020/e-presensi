@@ -585,4 +585,13 @@ class LibraryCirculationController extends Controller
             return response()->json(['success' => false, 'message' => 'Gagal perpanjang: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Cetak Struk Peminjaman Mini Thermal 80mm
+     */
+    public function printSlip($id)
+    {
+        $borrowing = Borrowing::with(['student.schoolClass', 'book'])->findOrFail($id);
+        return view('library.slip', compact('borrowing'));
+    }
 }

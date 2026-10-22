@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsExport;
@@ -573,6 +574,9 @@ class StudentController extends Controller
 
         $student->update($updateData);
 
+        // Invalidate face descriptors cache
+        Cache::forget('kiosk_face_descriptors');
+
         $message = $photoUpdated
             ? 'Pola wajah dan foto profil ' . $student->name . ' berhasil diperbarui!'
             : 'Pola wajah ' . $student->name . ' berhasil disimpan! (Foto resmi tetap terlindungi)';
@@ -594,6 +598,9 @@ class StudentController extends Controller
             'face_registered_at' => null,
         ]);
 
+        // Invalidate face descriptors cache
+        Cache::forget('kiosk_face_descriptors');
+
         return response()->json([
             'success' => true,
             'message' => 'Data wajah ' . $student->name . ' berhasil dihapus.',
@@ -605,29 +612,50 @@ class StudentController extends Controller
      */
     public function getFaceDescriptors(Request $request)
     {
-        $query = Student::where('status', 'active')
-            ->whereNotNull('face_descriptor')
-            ->select('id', 'name', 'student_id', 'nisn', 'class_id', 'face_descriptor', 'photo_path')
-            ->with('schoolClass:id,name');
+        $classId = $request->get('class_id');
+        $cacheKey = $classId ? 'face_descriptors_class_' . $classId : 'kiosk_face_descriptors';
 
-        if ($request->filled('class_id')) {
-            $query->where('class_id', $request->class_id);
+        // Jika request global tanpa filter kelas, gunakan cache kiosk_face_descriptors
+        if (!$classId) {
+            $students = Cache::remember('kiosk_face_descriptors', 3600, function () {
+                return Student::where('status', 'active')
+                    ->whereNotNull('face_descriptor')
+                    ->select('id', 'name', 'student_id', 'nisn', 'class_id', 'face_descriptor', 'photo_path')
+                    ->with('schoolClass:id,name')
+                    ->get()
+                    ->map(function($s) {
+                        return [
+                            'id' => $s->id,
+                            'name' => $s->name,
+                            'student_id' => $s->student_id ?? $s->nisn,
+                            'class_name' => $s->schoolClass->name ?? '-',
+                            'photo_url' => $s->photo_path ? asset('storage/' . $s->photo_path) : null,
+                            'descriptor' => $s->face_descriptor,
+                        ];
+                    })->values()->all();
+            });
+        } else {
+            $query = Student::where('status', 'active')
+                ->where('class_id', $classId)
+                ->whereNotNull('face_descriptor')
+                ->select('id', 'name', 'student_id', 'nisn', 'class_id', 'face_descriptor', 'photo_path')
+                ->with('schoolClass:id,name');
+
+            $students = $query->get()->map(function($s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'student_id' => $s->student_id ?? $s->nisn,
+                    'class_name' => $s->schoolClass->name ?? '-',
+                    'photo_url' => $s->photo_path ? asset('storage/' . $s->photo_path) : null,
+                    'descriptor' => $s->face_descriptor,
+                ];
+            })->values()->all();
         }
-
-        $students = $query->get()->map(function($s) {
-            return [
-                'id' => $s->id,
-                'name' => $s->name,
-                'student_id' => $s->student_id ?? $s->nisn,
-                'class_name' => $s->schoolClass->name ?? '-',
-                'photo_url' => $s->photo_path ? asset('storage/' . $s->photo_path) : null,
-                'descriptor' => $s->face_descriptor,
-            ];
-        });
 
         return response()->json([
             'success' => true,
-            'count' => $students->count(),
+            'count' => count($students),
             'students' => $students,
         ]);
     }

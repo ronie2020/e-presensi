@@ -499,6 +499,23 @@
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            {{-- TOMBOL AKSI 1-KLIK (KEMBALI & CETAK SLIP) --}}
+                                            <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
+                                                <button type="button" 
+                                                        onclick="PiketApp.returnPermit({{ $permit->id }}, '{{ addslashes($permit->student->name) }}')" 
+                                                        class="flex-1 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95" 
+                                                        title="Tandai Siswa Sudah Kembali ke Kelas">
+                                                    <i class="ph-bold ph-arrow-u-down-left text-sm"></i>
+                                                    <span>Kembali</span>
+                                                </button>
+                                                <button type="button" 
+                                                        onclick="PiketApp.openSlip({{ $permit->id }})" 
+                                                        class="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold transition flex items-center justify-center shadow-sm active:scale-95" 
+                                                        title="Cetak Slip Izin Mini (Untuk Satpam Gerbang)">
+                                                    <i class="ph-bold ph-printer text-base text-sky-600"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     @endforeach
@@ -1174,7 +1191,7 @@
                     <input type="hidden" id="modalStudentId" name="student_id">
                     
                     <div class="grid grid-cols-2 gap-4 mb-6">
-                        @foreach(['Toilet', 'UKS', 'Barang Tertinggal', 'Panggilan Guru', 'Dispensasi', 'Lainnya'] as $reason)
+                        @foreach(['Toilet', 'UKS', 'Keluar Gerbang', 'Pulang Cepat', 'Dispensasi', 'Panggilan Guru', 'Barang Tertinggal', 'Lainnya'] as $reason)
                         <label class="cursor-pointer relative group">
                             <input type="radio" name="reason_category" value="{{ $reason }}" class="peer sr-only">
                             <div class="p-4 rounded-2xl border border-slate-200 text-center text-xs font-bold text-elevate-dark/70 
@@ -1533,13 +1550,85 @@
                     this.playAudio('success'); 
                     this.elements.scannerInput.value = '';
                     await this.refreshDashboardData();
-                    Swal.fire({ icon: 'success', title: 'Izin Tercatat', text: `${data.data.student.name} - ${data.data.reason}`, timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-[2.5rem]' } });
+
+                    if (data.data.reason_category === 'Keluar Gerbang' && data.data.id) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Izin Keluar Gerbang Tercatat',
+                            text: `${data.data.student.name} - Berikan slip ini ke satpam gerbang.`,
+                            showCancelButton: true,
+                            confirmButtonText: '<i class="ph-bold ph-printer"></i> Cetak Slip Sekarang',
+                            cancelButtonText: 'Selesai',
+                            confirmButtonColor: '#0284c7',
+                            cancelButtonColor: '#94a3b8',
+                            customClass: { popup: 'rounded-[2.5rem]' }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                this.openSlip(data.data.id);
+                            }
+                        });
+                    } else {
+                        Swal.fire({ icon: 'success', title: 'Izin Tercatat', text: `${data.data.student.name} - ${data.data.reason}`, timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-[2.5rem]' } });
+                    }
                 } catch (err) {
                     this.playAudio('error'); Swal.fire({ icon: 'error', title: 'Gagal', text: err.message, customClass: { popup: 'rounded-[2.5rem]' } });
                 } finally {
                     btn.disabled = false; btn.innerHTML = '<span>Berikan Izin</span> <i class="ph-bold ph-arrow-right"></i>';
                     setTimeout(() => this.elements.scannerInput.focus(), 100);
                 }
+            },
+
+            async returnPermit(permitId, studentName) {
+                const confirmed = await Swal.fire({
+                    title: 'Konfirmasi Siswa Kembali',
+                    html: `Tandai siswa <b>${studentName}</b> telah kembali ke kelas?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Sudah Kembali',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#94a3b8',
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
+
+                if (!confirmed.isConfirmed) return;
+
+                try {
+                    const res = await fetch(`/permit/${permitId}/return`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': this.csrfToken,
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Gagal memproses pengembalian');
+
+                    this.playAudio('success');
+                    await this.refreshDashboardData();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Siswa Kembali!',
+                        text: `${studentName} telah kembali (Durasi: ${data.data?.duration_minutes ?? '-'} mnt)`,
+                        timer: 2500,
+                        showConfirmButton: false,
+                        customClass: { popup: 'rounded-[2rem]' }
+                    });
+                } catch (err) {
+                    this.playAudio('error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: err.message,
+                        customClass: { popup: 'rounded-[2rem]' }
+                    });
+                }
+            },
+
+            openSlip(permitId) {
+                const url = `/permit/${permitId}/slip`;
+                window.open(url, '_blank', 'width=460,height=650,resizable=yes,scrollbars=yes');
             },
 
             async refreshDashboardData() {

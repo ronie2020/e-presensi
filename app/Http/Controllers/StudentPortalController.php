@@ -715,4 +715,44 @@ class StudentPortalController extends Controller
 
         return view('students.portal.biodata', compact('student', 'settings', 'attendanceStats'));
     }
+
+    /**
+     * Cetak / Pratinjau Rapor Digital Siswa dari Portal
+     */
+    public function printReportCard($id)
+    {
+        $year = request('year') ?? '2024/2025';
+        $semester = request('semester') ?? '1';
+
+        $student = Student::with('schoolClass')->findOrFail($id);
+        
+        $record = GradeRecord::with('extracurriculars')
+                    ->where('student_id', $id)
+                    ->where('academic_year', $year)
+                    ->where('semester', $semester)
+                    ->first();
+
+        // Ambil semua mapel, lalu hubungkan dengan nilai siswa jika ada
+        $subjects = \App\Models\Subject::orderBy('order')->get()->map(function($subject) use ($record) {
+            $grade = null;
+            if ($record) {
+                $grade = \App\Models\GradeItem::where('grade_record_id', $record->id)
+                            ->where('subject_id', $subject->id)
+                            ->first();
+            }
+            $subject->grade = $grade;
+            return $subject;
+        });
+
+        return view('grades.report', [
+            'student' => $student,
+            'record' => $record,
+            'subjects' => $subjects,
+            'year' => $year,
+            'semester' => $semester,
+            'prevStudentId' => null,
+            'nextStudentId' => null,
+            'isPortal' => true
+        ]);
+    }
 }

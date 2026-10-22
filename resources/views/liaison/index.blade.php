@@ -170,6 +170,47 @@
                                     </div>
                                     <h4 class="font-black text-white text-sm mb-2 group-hover:text-[#56bbf1] transition-colors uppercase tracking-tight">{{ $msg->title }}</h4>
                                     <p class="text-[11px] text-slate-300 line-clamp-2 italic leading-relaxed">"{{ $msg->message }}"</p>
+
+                                    @php
+                                        $typeBadge = match($msg->type) {
+                                            'call' => ['bg' => 'bg-rose-500/20', 'border' => 'border-rose-500/40', 'text' => 'text-rose-400', 'label' => '📞 Panggilan'],
+                                            'warning' => ['bg' => 'bg-amber-500/20', 'border' => 'border-amber-500/40', 'text' => 'text-amber-400', 'label' => '⚠️ Peringatan'],
+                                            'achievement' => ['bg' => 'bg-emerald-500/20', 'border' => 'border-emerald-500/40', 'text' => 'text-emerald-400', 'label' => '🏆 Prestasi'],
+                                            default => ['bg' => 'bg-sky-500/20', 'border' => 'border-sky-500/40', 'text' => 'text-sky-400', 'label' => '📢 Info']
+                                        };
+
+                                        $rawPhone = $msg->student->parent_wa_number ?? $msg->student->parent_phone ?? $msg->student->guardian_phone ?? $msg->student->phone ?? null;
+                                        $waPhone = null;
+                                        if ($rawPhone) {
+                                            $waPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+                                            if (str_starts_with($waPhone, '0')) {
+                                                $waPhone = '62' . substr($waPhone, 1);
+                                            }
+                                        }
+                                        $waText = urlencode("Yth. Bapak/Ibu Orang Tua dari {$msg->student->name},\n\nKami menginformasikan catatan sekolah: *{$msg->title}*.\n\n\"{$msg->message}\"\n\nSalam hangat, SMP Negeri 3 Lakbok.");
+                                    @endphp
+
+                                    <div class="flex items-center justify-between pt-3 mt-3 border-t border-white/10">
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-bold border {{ $typeBadge['bg'] }} {{ $typeBadge['border'] }} {{ $typeBadge['text'] }}">
+                                            {{ $typeBadge['label'] }}
+                                        </span>
+                                        <div class="flex items-center gap-1.5">
+                                            @if($waPhone)
+                                                <a href="https://wa.me/{{ $waPhone }}?text={{ $waText }}" target="_blank" 
+                                                   class="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 transition text-xs flex items-center gap-1" title="Kirim via WhatsApp">
+                                                    <i class="ph-bold ph-whatsapp-logo text-base"></i>
+                                                    <span class="text-[9px] font-bold">WA</span>
+                                                </a>
+                                            @endif
+                                            @if($msg->type === 'call')
+                                                <a href="{{ route('liaison.call_letter', $msg->id) }}" target="_blank" 
+                                                   class="px-2.5 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/30 text-[10px] font-bold transition flex items-center gap-1" title="Cetak Surat Panggilan Resmi">
+                                                    <i class="ph-bold ph-printer text-xs"></i>
+                                                    <span>Surat Panggilan</span>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             @empty
                                 <div class="text-center py-20 opacity-40">

@@ -292,7 +292,20 @@ public function analytics()
         }
         
         $type = DisciplineType::find($request->discipline_type_id);
-        $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat.' : 'Prestasi berhasil ditambahkan!';
+
+        // TEMBUSAN OTOMATIS KE BUKU PENGHUBUNG (PORTAL WALI MURID)
+        if ($request->boolean('sync_to_liaison') && $student && $type) {
+            \App\Models\LiaisonBook::create([
+                'student_id'        => $student->id,
+                'teacher_id'        => Auth::id(),
+                'title'             => ($type->type == 'Pelanggaran') ? 'Catatan Disiplin: ' . $type->name : 'Apresiasi Siswa: ' . $type->name,
+                'type'              => ($type->type == 'Pelanggaran') ? 'warning' : 'achievement',
+                'message'           => 'Tercatat pada tanggal ' . Carbon::parse($data['date'])->translatedFormat('d F Y') . ($request->notes ? ". Rincian: {$request->notes}" : ". Bobot: {$type->point_value} Poin."),
+                'is_read_by_parent' => false,
+            ]);
+        }
+
+        $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat & terhubung ke Buku Penghubung.' : 'Prestasi berhasil dicatat & dibagikan!';
 
         return redirect()->route('discipline.index')->with('success', $msg);
     }    

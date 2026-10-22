@@ -144,6 +144,12 @@
                                 <textarea name="notes" rows="2" class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4 text-white placeholder:text-slate-500 transition-all [color-scheme:dark]" placeholder="Jelaskan singkat kejadiannya..."></textarea>
                             </div>
 
+                            {{-- TEMBUSAN KE BUKU PENGHUBUNG --}}
+                            <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-300 cursor-pointer pt-1">
+                                <input type="checkbox" name="sync_to_liaison" value="1" checked class="rounded border-slate-700 bg-slate-900 text-rose-500 focus:ring-0">
+                                <span>Kirim tembusan ke Buku Penghubung (Portal Wali Murid)</span>
+                            </label>
+
                             <button type="submit" class="w-full py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-rose-600/25 flex items-center justify-center gap-2 mt-2 active:scale-95 border border-rose-500/30">
                                 <i class="ph-bold ph-warning-circle text-lg"></i>
                                 Simpan Pelanggaran
@@ -214,6 +220,12 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Detail Tambahan</label>
                                 <textarea name="notes" rows="2" class="w-full rounded-xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4 text-white placeholder:text-slate-500 transition-all [color-scheme:dark]" placeholder="Keterangan prestasi..."></textarea>
                             </div>
+
+                            {{-- TEMBUSAN KE BUKU PENGHUBUNG --}}
+                            <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-300 cursor-pointer pt-1">
+                                <input type="checkbox" name="sync_to_liaison" value="1" checked class="rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-0">
+                                <span>Kirim tembusan ke Buku Penghubung (Portal Wali Murid)</span>
+                            </label>
 
                             <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 mt-2 active:scale-95 border border-emerald-500/30">
                                 <i class="ph-bold ph-star text-lg"></i>

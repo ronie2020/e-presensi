@@ -261,13 +261,17 @@ class StudentPermitController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Siswa sudah tercatat di luar!'], 422);
         }
 
+        $isPulang = $request->reason_category === 'Pulang Cepat';
+
         $permit = StudentPermit::create([
             'student_id' => $request->student_id,
             'pic_teacher_id' => Auth::id(),
             'reason_category' => $request->reason_category,
             'notes' => $request->notes,
             'time_out' => Carbon::now(),
-            'status' => 'OUT'
+            'time_in' => $isPulang ? Carbon::now() : null,
+            'duration_minutes' => $isPulang ? 0 : null,
+            'status' => $isPulang ? 'RETURNED' : 'OUT'
         ]);
 
         // Load relasi siswa untuk dikirim balik ke frontend
@@ -275,12 +279,52 @@ class StudentPermitController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Izin berhasil dicatat.',
+            'message' => $isPulang ? "Izin pulang cepat untuk {$permit->student->name} berhasil dicatat." : 'Izin keluar berhasil dicatat.',
             'data' => [
+                'id' => $permit->id,
                 'student' => $permit->student,
-                'reason' => $permit->reason_category
+                'reason' => $permit->reason_category,
+                'is_pulang' => $isPulang
             ]
         ]);
+    }
+
+    /**
+     * Fitur 1-Klik: Tandai Siswa Sudah Kembali (Manual Check-In oleh Guru/Satpam)
+     */
+    public function manualReturn(Request $request, $id)
+    {
+        $permit = StudentPermit::with(['student.schoolClass'])->where('status', 'OUT')->findOrFail($id);
+        $checkInTime = Carbon::now();
+        $duration = (int) $permit->time_out->diffInMinutes($checkInTime);
+
+        $permit->update([
+            'time_in' => $checkInTime,
+            'status' => 'RETURNED',
+            'duration_minutes' => $duration
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => "Siswa {$permit->student->name} berhasil ditandai sudah kembali.",
+                'data' => [
+                    'student' => $permit->student,
+                    'duration' => $duration
+                ]
+            ]);
+        }
+
+        return back()->with('success', "Siswa {$permit->student->name} berhasil ditandai sudah kembali ({$duration} menit).");
+    }
+
+    /**
+     * Cetak Slip Izin Keluar Mini (Thermal / Pocket Slip untuk Satpam Gerbang)
+     */
+    public function printSlip($id)
+    {
+        $permit = StudentPermit::with(['student.schoolClass', 'teacher'])->findOrFail($id);
+        return view('permit.slip', compact('permit'));
     }
 
  /**

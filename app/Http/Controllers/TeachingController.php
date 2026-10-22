@@ -398,6 +398,60 @@ class TeachingController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Status siswa berhasil diperbarui.', 'data' => $data, 'new_status' => $status]);
     }
 
+    /**
+     * Tandai Siswa Hadir Sekaligus (Set Semua Hadir atau Sisanya)
+     */
+    public function bulkPresent(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:teaching_sessions,id',
+            'mode'       => 'nullable|in:all,unmarked'
+        ]);
+
+        $session = TeachingSession::with('timetable.studentClass')->find($request->session_id);
+        if (!$session || $session->status !== 'open') {
+            return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid atau sudah ditutup.']);
+        }
+
+        $classId = $session->timetable->class_id;
+        $allStudents = Student::where('class_id', $classId)->pluck('id')->toArray();
+        $mode = $request->input('mode', 'all');
+
+        $now = now('Asia/Jakarta');
+        $updatedIds = [];
+
+        if ($mode === 'unmarked') {
+            $existingIds = ClassAttendance::where('teaching_session_id', $session->id)->pluck('student_id')->toArray();
+            $targetIds = array_diff($allStudents, $existingIds);
+        } else {
+            $targetIds = $allStudents;
+        }
+
+        foreach ($targetIds as $studentId) {
+            ClassAttendance::updateOrCreate(
+                ['teaching_session_id' => $session->id, 'student_id' => $studentId],
+                ['status' => 'present', 'scanned_at' => $now]
+            );
+            $updatedIds[] = $studentId;
+        }
+
+        // Hitung ulang statistik kehadiran
+        $attendances = ClassAttendance::where('teaching_session_id', $session->id)->get();
+        $stats = [
+            'present'    => $attendances->where('status', 'present')->count(),
+            'sick'       => $attendances->where('status', 'sick')->count(),
+            'permission' => $attendances->where('status', 'permission')->count(),
+            'alpha'      => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'message' => count($updatedIds) . ' siswa berhasil ditandai Hadir.',
+            'updated_ids' => array_values($updatedIds),
+            'stats' => $stats
+        ]);
+    }
+
     // --- TANDAI SISANYA ALPHA (BULK ACTION) ---
     public function bulkAlpha(Request $request)
     {
@@ -420,7 +474,21 @@ class TeachingController extends Controller
             $updatedIds[] = $studentId;
         }
 
-        return response()->json(['status' => 'success', 'message' => count($updatedIds) . ' siswa berhasil ditandai Alpha.', 'updated_ids' => array_values($updatedIds)]);
+        // Hitung ulang statistik kehadiran
+        $attendances = ClassAttendance::where('teaching_session_id', $session->id)->get();
+        $stats = [
+            'present'    => $attendances->where('status', 'present')->count(),
+            'sick'       => $attendances->where('status', 'sick')->count(),
+            'permission' => $attendances->where('status', 'permission')->count(),
+            'alpha'      => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'message' => count($updatedIds) . ' siswa berhasil ditandai Alpha.',
+            'updated_ids' => array_values($updatedIds),
+            'stats' => $stats
+        ]);
     }
 
     // --- TUTUP KELAS & DISIPLIN  ---

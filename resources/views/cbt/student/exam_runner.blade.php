@@ -34,6 +34,19 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+    {{-- REGISTRASI ZERO-PANIC SERVICE WORKER CBT --}}
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/cbt-sw.js').then(reg => {
+                    console.log('[CBT] Zero-Panic Service Worker active', reg.scope);
+                }).catch(err => {
+                    console.warn('[CBT] SW Registration Failed:', err);
+                });
+            });
+        }
+    </script>
+
     <style>
         /* Base Reset Anti-Potong: Menjamin tinggi absolut di semua browser HP */
         body, html { 
@@ -1069,8 +1082,8 @@
 <body class="bg-[#020b18] text-slate-100 antialiased overflow-hidden flex flex-col relative select-none" style="height: 100vh; height: 100dvh;"
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
-    @online.window="isOnline = true; syncPendingAnswers()"
-    @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'error', title: 'Koneksi Terputus!', text: 'Jawaban disimpan di browser.', showConfirmButton: false, timer: 4000, customClass: {popup: 'rounded-2xl mb-4 bg-[#031d3d] text-white border border-white/10'} })"
+    @online.window="isOnline = true; syncPendingAnswers(); Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Koneksi Pulih!', text: 'Jawaban tersinkronisasi otomatis ke server.', showConfirmButton: false, timer: 2500, customClass: {popup: 'rounded-2xl mb-4 bg-[#031d3d] text-white border border-white/10'} });"
+    @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'warning', title: 'Mode Offline Aktif (Aman)', text: 'Koneksi terputus sejenak. Tetap fokus mengerjakan, seluruh jawaban tersimpan aman di perangkat.', showConfirmButton: false, timer: 4500, customClass: {popup: 'rounded-2xl mb-4 bg-[#031d3d] text-white border border-white/10'} })"
     @focus.window="syncPendingAnswers()">
 
     {{-- AMBIENT GLOW EFFECTS --}}
@@ -1154,6 +1167,14 @@
         </div>
 
         <div class="flex items-center gap-3 md:gap-4 shrink-0">
+            {{-- STATUS KONEKSI OFFLINE / ONLINE JITU --}}
+            <div x-show="!isOnline" x-cloak 
+                 class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold animate-pulse"
+                 title="Koneksi terputus sejenak. Jawaban Anda tetap tersimpan aman di browser!">
+                <i class="ph-bold ph-wifi-slash text-base text-amber-400"></i>
+                <span class="hidden sm:inline">Offline (Tersimpan)</span>
+            </div>
+
             {{-- Tombol Ukuran Font --}}
             <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl mr-1">
                 <span class="text-[10px] text-sky-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
@@ -1206,6 +1227,31 @@
             </button>
         </div>
     </nav>
+
+    {{-- FLOATING ZERO-PANIC BANNER KETIKA KONEKSI TERPUTUS --}}
+    <div x-show="!isOnline" x-cloak 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="-translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="-translate-y-full opacity-0"
+         class="shrink-0 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-slate-950 px-4 py-2.5 shadow-xl border-b border-amber-300/40 relative z-50 flex items-center justify-between gap-3 text-xs font-bold">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-black/15 flex items-center justify-center shrink-0 text-slate-950 text-base animate-pulse">
+                <i class="ph-fill ph-shield-check"></i>
+            </div>
+            <div class="truncate">
+                <span class="uppercase tracking-wider font-extrabold text-[10px] bg-black/20 px-1.5 py-0.5 rounded text-white mr-1.5">Zero-Panic</span>
+                <span class="text-slate-950 font-semibold">Koneksi internet terputus. Jawaban Anda <b>TETAP TERSIMPAN AMAN</b> di perangkat ini. Teruslah mengerjakan ujian.</span>
+            </div>
+        </div>
+        <button type="button" @click="syncPendingAnswers()" 
+                class="shrink-0 px-3 py-1 rounded-lg bg-slate-950 hover:bg-slate-900 text-amber-300 hover:text-white transition shadow-sm flex items-center gap-1 active:scale-95 text-[11px] font-bold">
+            <i class="ph-bold ph-arrows-clockwise" :class="saveStatus === 'saving' ? 'animate-spin' : ''"></i>
+            <span>Cek Koneksi</span>
+        </button>
+    </div>
 
     {{-- PROGRESS BAR HORIZONTAL --}}
     <div x-show="examType !== 'google_form'" class="shrink-0 h-1.5 w-full bg-[#020b18] border-b border-white/5 relative z-40 overflow-hidden">

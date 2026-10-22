@@ -13,7 +13,7 @@ class CbtStudentExam extends Model
         'cbt_exam_id', 'student_id', 'started_at',
         'finished_at', 'total_score', 'status',
         'ip_address', 'user_agent', 'violation_count',
-        'latency_ms', 'last_seen_at'
+        'latency_ms', 'last_seen_at', 'extra_time_minutes'
     ];
 
     protected $casts = [

@@ -684,11 +684,21 @@
                                     </div>
                                     
                                     @if($isOpen)
-                                        {{-- Tombol Bulk Alpha diletakkan di samping/bawah filter --}}
-                                        <button @click="markRestAsAlpha()" type="button" 
-                                                class="shrink-0 w-full xl:w-auto px-4 py-2 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-rose-500/30 transition-colors shadow-sm active:scale-95 whitespace-nowrap">
-                                            <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
-                                        </button>
+                                        <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                                            {{-- Tombol 1-Klik Set Semua Hadir --}}
+                                            <button @click="markAllAsPresent('all')" type="button" 
+                                                    class="shrink-0 flex-1 xl:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-emerald-400/40 transition-all shadow-md active:scale-95 whitespace-nowrap"
+                                                    title="Tandai seluruh siswa di kelas ini Hadir">
+                                                <i class="ph-bold ph-check-circle text-base"></i> Set Semua Hadir
+                                            </button>
+
+                                            {{-- Tombol Bulk Alpha --}}
+                                            <button @click="markRestAsAlpha()" type="button" 
+                                                    class="shrink-0 flex-1 xl:flex-none px-4 py-2 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-rose-500/30 transition-colors shadow-sm active:scale-95 whitespace-nowrap"
+                                                    title="Tandai sisa siswa yang belum diabsen menjadi Alpha">
+                                                <i class="ph-bold ph-users-three"></i> Tandai Sisanya Alpha
+                                            </button>
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -866,7 +876,66 @@
                     localStorage.removeItem('journal_' + this.sessionId + '_activities');
                 },
 
-                // TAMBAHAN: Fungsi Bulk Action
+                // TAMBAHAN: One-Click Set Semua Hadir
+                async markAllAsPresent(mode = 'all') {
+                    const totalStudents = {{ $allStudents->count() }};
+                    const titleText = mode === 'unmarked' 
+                        ? 'Tandai Siswa Belum Absen Sebagai Hadir?' 
+                        : `Set Seluruh Kelas Hadir? (${totalStudents} Siswa)`;
+
+                    Swal.fire({
+                        title: titleText,
+                        text: "Seluruh siswa akan langsung ditandai Hadir. Anda tetap dapat mengganti status jika ada 1-2 siswa yang sakit/izin.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Tandai Hadir Semua',
+                        cancelButtonText: 'Batal',
+                        customClass: { popup: 'rounded-[2rem] shadow-2xl border-slate-100', confirmButton: 'rounded-xl px-6 py-3 font-bold', cancelButton: 'rounded-xl px-6 py-3 font-bold' }
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                const response = await fetch('/teaching/bulk-present', { 
+                                    method: 'POST',
+                                    headers: { 
+                                        'Content-Type': 'application/json', 
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
+                                    },
+                                    body: JSON.stringify({ session_id: this.sessionId, mode: mode })
+                                });
+                                
+                                const data = await response.json();
+                                if (data.status === 'success') {
+                                    playBeep('success');
+                                    this.showToast('success', data.message);
+                                    
+                                    // Update UI baris setiap siswa secara reaktif
+                                    data.updated_ids.forEach(id => {
+                                        window.dispatchEvent(new CustomEvent('update-status-' + id, { detail: { status: 'present' } }));
+                                    });
+                                    
+                                    // Sinkronisasi counter statistik atas
+                                    if (data.stats) {
+                                        this.stats = data.stats;
+                                    } else {
+                                        this.stats.present = totalStudents;
+                                        this.stats.sick = 0;
+                                        this.stats.permission = 0;
+                                        this.stats.alpha = 0;
+                                    }
+                                } else {
+                                    throw new Error(data.message || 'Gagal memproses.');
+                                }
+                            } catch (e) {
+                                this.showToast('error', e.message || 'Terjadi kesalahan sistem.');
+                            }
+                        }
+                    });
+                },
+
+                // TAMBAHAN: Fungsi Bulk Action Alpha
                 async markRestAsAlpha() {
                     const totalStudents = {{ $allStudents->count() }};
                     const totalMarked = this.stats.present + this.stats.sick + this.stats.permission + this.stats.alpha;
@@ -902,7 +971,7 @@
                                 
                                 const data = await response.json();
                                 if (data.status === 'success') {
-                                    playBeep('error'); // Gunakan nada error/peringatan karena berstatus Alpha
+                                    playBeep('error');
                                     this.showToast('success', data.message);
                                     
                                     // Update UI list siswa secara reaktif (tanpa reload halaman)
@@ -910,8 +979,12 @@
                                         window.dispatchEvent(new CustomEvent('update-status-' + id, { detail: { status: 'alpha' } }));
                                     });
                                     
-                                    // Update statistik counter Alpha di UI atas
-                                    this.stats.alpha += data.updated_ids.length;
+                                    // Update statistik counter di UI atas
+                                    if (data.stats) {
+                                        this.stats = data.stats;
+                                    } else {
+                                        this.stats.alpha += data.updated_ids.length;
+                                    }
                                 } else {
                                     throw new Error(data.message || 'Gagal memproses.');
                                 }

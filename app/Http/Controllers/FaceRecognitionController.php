@@ -7,6 +7,7 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class FaceRecognitionController extends Controller
@@ -109,36 +110,42 @@ class FaceRecognitionController extends Controller
     /**
      * Endpoint API: Ambil semua descriptor wajah siswa aktif untuk Kiosk & Mobile Scanner
      */
+    /**
+     * Endpoint API: Ambil semua descriptor wajah siswa aktif untuk Kiosk & Mobile Scanner
+     * Dioptimalkan dengan Cache::remember (1 jam) untuk mencegah lonjakan query database di jam 07:00 pagi
+     */
     public function getDescriptors()
     {
         try {
-            $students = Student::with('schoolClass:id,name')
-                ->where('status', 'active')
-                ->whereNotNull('face_descriptor')
-                ->select('id', 'student_id', 'nisn', 'name', 'class_id', 'photo_path', 'face_descriptor')
-                ->get()
-                ->map(function ($s) {
-                    $photoUrl = null;
-                    if ($s->photo_path) {
-                        $photoUrl = str_starts_with($s->photo_path, 'http')
-                            ? $s->photo_path
-                            : asset('storage/' . $s->photo_path);
-                    }
+            $students = Cache::remember('kiosk_face_descriptors', 3600, function () {
+                return Student::with('schoolClass:id,name')
+                    ->where('status', 'active')
+                    ->whereNotNull('face_descriptor')
+                    ->select('id', 'student_id', 'nisn', 'name', 'class_id', 'photo_path', 'face_descriptor')
+                    ->get()
+                    ->map(function ($s) {
+                        $photoUrl = null;
+                        if ($s->photo_path) {
+                            $photoUrl = str_starts_with($s->photo_path, 'http')
+                                ? $s->photo_path
+                                : asset('storage/' . $s->photo_path);
+                        }
 
-                    return [
-                        'id' => $s->id,
-                        'student_id' => $s->student_id,
-                        'nisn' => $s->nisn,
-                        'name' => $s->name,
-                        'class_name' => $s->schoolClass->name ?? '-',
-                        'photo_url' => $photoUrl,
-                        'descriptor' => $s->face_descriptor,
-                    ];
-                });
+                        return [
+                            'id' => $s->id,
+                            'student_id' => $s->student_id,
+                            'nisn' => $s->nisn,
+                            'name' => $s->name,
+                            'class_name' => $s->schoolClass->name ?? '-',
+                            'photo_url' => $photoUrl,
+                            'descriptor' => $s->face_descriptor,
+                        ];
+                    })->values()->all();
+            });
 
             return response()->json([
                 'status' => 'success',
-                'count' => $students->count(),
+                'count' => count($students),
                 'data' => $students
             ], 200);
 
@@ -194,6 +201,9 @@ class FaceRecognitionController extends Controller
             $student->face_registered_at = Carbon::now();
             $student->save();
 
+            // Invalidate cache descriptor agar Kiosk & Scanner segera mendapatkan data teranyar
+            Cache::forget('kiosk_face_descriptors');
+
             $message = $photoUpdated 
                 ? "Wajah dan foto profil {$student->name} berhasil diperbarui!"
                 : "Wajah biometrik {$student->name} berhasil didaftarkan! (Foto resmi tetap terlindungi)";
@@ -230,6 +240,9 @@ class FaceRecognitionController extends Controller
             $student->face_descriptor = null;
             $student->face_registered_at = null;
             $student->save();
+
+            // Invalidate cache descriptor
+            Cache::forget('kiosk_face_descriptors');
 
             return response()->json([
                 'status' => 'success',

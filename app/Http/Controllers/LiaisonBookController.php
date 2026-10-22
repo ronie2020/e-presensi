@@ -243,6 +243,19 @@ class LiaisonBookController extends Controller
     //  HELPER
     // =========================================================================
 
+    /**
+     * Cetak Surat Panggilan Orang Tua Resmi
+     */
+    public function printCallLetter($id)
+    {
+        $liaison = LiaisonBook::with(['student.schoolClass', 'teacher'])->findOrFail($id);
+        $student = $liaison->student;
+        $class = $student->schoolClass;
+        $homeroomTeacher = $class && $class->homeroom_teacher_id ? \App\Models\User::find($class->homeroom_teacher_id) : $liaison->teacher;
+
+        return view('liaison.call_letter', compact('liaison', 'student', 'class', 'homeroomTeacher'));
+    }
+
     private function detectClassColumn()
     {
         $candidates = ['school_class_id', 'class_id', 'classroom_id', 'rombel_id', 'kelas_id'];
