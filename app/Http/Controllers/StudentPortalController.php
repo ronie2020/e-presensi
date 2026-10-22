@@ -185,7 +185,7 @@ class StudentPortalController extends Controller
                 ->pluck('status', 'cbt_exam_id'); 
             
             $priorityExams = $activeExams->filter(function($exam) use ($studentLevel, $examAttempts) {                
-                if(isset($exam->class_level) && $studentLevel && $exam->class_level != $studentLevel) {
+                if(!empty($exam->class_level) && !in_array(strtolower(trim($exam->class_level)), ['umum', 'all', 'semua', 'semua tingkat']) && $studentLevel && $exam->class_level != $studentLevel) {
                     return false; 
                 }
                 $status = $examAttempts[$exam->id] ?? null;

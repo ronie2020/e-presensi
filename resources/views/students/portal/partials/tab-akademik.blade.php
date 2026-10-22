@@ -11,7 +11,7 @@
 
         <div class="flex flex-wrap items-center gap-2.5">
             @if($targetStudent)
-            <a href="{{ route('portal.report_card', ['id' => $targetStudent->id, 'year' => $selectedYear ?? ($academic_record->academic_year ?? '2024/2025'), 'semester' => $selectedSemester ?? ($academic_record->semester ?? '1')]) }}" 
+            <a href="{{ route('portal.report_card', ['id' => $targetStudent->id, 'year' => $selectedYear ?? ($academic_record->academic_year ?? (\App\Models\AcademicYear::active()->name ?? '2026/2027')), 'semester' => $selectedSemester ?? ($academic_record->semester ?? '1')]) }}" 
                target="_blank"
                class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white font-bold text-xs shadow-md shadow-sky-600/20 flex items-center gap-2 transition active:scale-95 border border-sky-400/30">
                 <i class="ph-bold ph-printer text-base"></i>
@@ -44,8 +44,16 @@
                     @endforeach
                 @else
                     <!-- Fallback jika variabel $years tidak dikirim -->
-                    <option value="2023/2024">TA. 2023/2024</option>
-                    <option value="2024/2025" selected>TA. 2024/2025</option>
+                    @php
+                        $fallbackYears = \App\Models\AcademicYear::orderBy('name', 'desc')->get();
+                    @endphp
+                    @forelse($fallbackYears as $fy)
+                        <option value="{{ $fy->name }}" {{ (isset($selectedYear) ? $selectedYear == $fy->name : $fy->is_active) ? 'selected' : '' }}>
+                            TA. {{ $fy->name }}
+                        </option>
+                    @empty
+                        <option value="2026/2027" selected>TA. 2026/2027</option>
+                    @endforelse
                 @endif
             </select>
             

@@ -484,7 +484,7 @@
                             @else
                                 <span class="bg-white/5 border border-white/10 text-slate-400 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">Non-Aktif</span>
                             @endif
-                            <span class="text-sky-400 text-xs font-black uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded border border-white/10">Kelas {{ $exam->class_level }}</span>
+                            <span class="text-sky-400 text-xs font-black uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded border border-white/10">{{ in_array($exam->class_level, ['7', '8', '9']) ? 'Kelas ' . $exam->class_level : ($exam->class_level ?: 'Semua Kelas') }}</span>
                             
                             {{-- PERBAIKAN: BADGE GOOGLE FORM --}}
                             @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')

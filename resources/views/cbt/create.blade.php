@@ -191,9 +191,10 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tingkat Kelas <span class="text-rose-400">*</span></label>
                                 <div class="relative">
                                     <select name="class_level" class="w-full rounded-2xl border border-white/10 bg-slate-900 text-white focus:border-sky-400 focus:ring-sky-400 font-bold py-3.5 px-5 appearance-none cursor-pointer transition-all [color-scheme:dark]">
-                                        <option value="7" class="bg-slate-900 text-white" {{ old('class_level') == '7' ? 'selected' : '' }}>Kelas 7</option>
-                                        <option value="8" class="bg-slate-900 text-white" {{ old('class_level') == '8' ? 'selected' : '' }}>Kelas 8</option>
-                                        <option value="9" class="bg-slate-900 text-white" {{ old('class_level') == '9' ? 'selected' : '' }}>Kelas 9</option>
+                                        <option value="Umum" {{ old('class_level') == 'Umum' ? 'selected' : '' }}>Umum (Semua Tingkat Kelas)</option>
+                                        <option value="7" {{ old('class_level') == '7' ? 'selected' : '' }}>Kelas 7</option>
+                                        <option value="8" {{ old('class_level') == '8' ? 'selected' : '' }}>Kelas 8</option>
+                                        <option value="9" {{ old('class_level') == '9' ? 'selected' : '' }}>Kelas 9</option>
                                     </select>
                                     <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>

@@ -159,7 +159,7 @@
                                     <div class="w-8 h-8 bg-slate-950 rounded-lg flex items-center justify-center text-slate-400 shadow-sm border border-white/10 group-hover/token:text-sky-300 transition"><i class="ph-bold ph-copy"></i></div>
                                 </div>
                                 <div class="flex items-center gap-4 text-xs text-slate-300 font-bold">
-                                    <span class="flex items-center gap-1.5"><i class="ph-bold ph-users text-amber-400"></i> Kelas {{ $exam->class_level }}</span>
+                                    <span class="flex items-center gap-1.5"><i class="ph-bold ph-users text-amber-400"></i> {{ in_array($exam->class_level, ['7', '8', '9']) ? 'Kelas ' . $exam->class_level : ($exam->class_level ?: 'Semua Kelas') }}</span>
                                     <span class="flex items-center gap-1.5"><i class="ph-bold ph-clock text-sky-400"></i> {{ $exam->duration_minutes }} Menit</span>
                                 </div>
                             </div>

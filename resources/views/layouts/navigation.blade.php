@@ -15,6 +15,7 @@
     }
     $displayRoles = array_filter($displayRoles);
     $mainRole = $displayRoles[0] ?? (Auth::user()->roles->first()?->name ?? 'Pengguna');
+    $activeAcademicYear = \App\Models\AcademicYear::active();
 @endphp
 
 <nav 
@@ -72,9 +73,14 @@
                  x-transition:enter-end="opacity-100 scale-100 translate-x-0">
                 <span class="font-black text-white text-base tracking-tight leading-none group-hover:text-elevate-accent transition-colors drop-shadow-sm">SMPN 3 LAKBOK</span>
                 <div class="flex items-center gap-1.5 mt-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-[9px] font-bold text-slate-300 tracking-wider">TA 2024/2025</span>
-                    <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-elevate-accent/20 text-elevate-accent border border-elevate-accent/30 uppercase leading-none">Ganjil</span>
+                    @if($activeAcademicYear)
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" title="Tahun Ajaran Aktif"></span>
+                        <span class="text-[9px] font-bold text-slate-300 tracking-wider">TA {{ $activeAcademicYear->name }}</span>
+                        <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-elevate-accent/20 text-elevate-accent border border-elevate-accent/30 uppercase leading-none">{{ $activeAcademicYear->semester }}</span>
+                    @else
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400" title="Tahun Ajaran Belum Aktif"></span>
+                        <span class="text-[9px] font-bold text-slate-400 tracking-wider">TA Non-Aktif</span>
+                    @endif
                 </div>
             </div>
         </a>

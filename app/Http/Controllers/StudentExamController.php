@@ -21,9 +21,11 @@ class StudentExamController extends Controller
         return Auth::guard('student')->id();
     }
 
-    // FUNGSI HELPER BARU: Memastikan "7A" cocok ke "7", tapi "10A" BUKAN "1"
+    // FUNGSI HELPER: Memastikan kecocokan tingkat kelas, mendukung tingkat spesifik ("7", "8", "9") maupun "Umum" / "Semua Tingkat"
     private function checkClassMatch($className, $examLevel) {
-        if (empty($examLevel)) return true; // Jika level dikosongkan = Ujian Umum
+        if (empty($examLevel) || in_array(strtolower(trim($examLevel)), ['umum', 'all', 'semua', 'semua tingkat'])) {
+            return true; // Jika level dikosongkan atau diset Umum = Ujian Umum untuk semua siswa
+        }
         
         // Regex: Harus diawali (^) level ujian, dan karakter berikutnya BUKAN angka (?![0-9])
         $pattern = '/^' . preg_quote(trim($examLevel), '/') . '(?![0-9])/i';

@@ -188,6 +188,7 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tingkat Kelas <span class="text-rose-400">*</span></label>
                                 <div class="relative">
                                     <select name="class_level" class="w-full rounded-2xl border-white/10 bg-slate-900/90 focus:bg-slate-900 focus:border-[#56bbf1] focus:ring-[#56bbf1] font-bold text-white py-3.5 px-5 appearance-none cursor-pointer transition-all [color-scheme:dark]">
+                                        <option value="Umum" class="bg-slate-900 text-white" {{ old('class_level', $exam->class_level) == 'Umum' ? 'selected' : '' }}>Umum (Semua Tingkat Kelas)</option>
                                         <option value="7" class="bg-slate-900 text-white" {{ old('class_level', $exam->class_level) == '7' ? 'selected' : '' }}>Kelas 7</option>
                                         <option value="8" class="bg-slate-900 text-white" {{ old('class_level', $exam->class_level) == '8' ? 'selected' : '' }}>Kelas 8</option>
                                         <option value="9" class="bg-slate-900 text-white" {{ old('class_level', $exam->class_level) == '9' ? 'selected' : '' }}>Kelas 9</option>
