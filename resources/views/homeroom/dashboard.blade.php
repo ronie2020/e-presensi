@@ -273,6 +273,158 @@
 
             </div>
 
+            {{-- PANEL MONITORING & VERIFIKASI FACE RECOGNITION SISWA KELAS (WALI KELAS / ADMIN) --}}
+            <div x-data="{ faceTab: '{{ ($faceStats['pending'] ?? 0) > 0 ? 'pending' : 'all' }}', searchFace: '' }" class="mb-8 rounded-[2.5rem] bg-gradient-to-br from-[#031d3d] via-[#021124] to-[#020b18] border border-white/15 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-white/10">
+                    <div class="flex items-start sm:items-center gap-3.5">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400 shrink-0 shadow-inner">
+                            <i class="ph-duotone ph-scan-smiley text-2xl"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-base sm:text-lg font-black text-white">Monitoring & Verifikasi Face Recognition — Kelas {{ $class->name ?? '' }}</h3>
+                                @if(($faceStats['pending'] ?? 0) > 0)
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/30 animate-pulse">
+                                        {{ $faceStats['pending'] }} Menunggu Verifikasi
+                                    </span>
+                                @else
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                        Terpantau Wali Kelas
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-slate-300 mt-1">
+                                Periksa kesesuaian foto siswa, setujui hasil rekam mandiri, atau hapus foto siswa yang salah agar siswa bisa merekam ulang di Portal Siswa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+                        @if(($faceStats['pending'] ?? 0) > 0)
+                            <form action="{{ route('students.face.bulk_verify') }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="class_id" value="{{ $class->id }}">
+                                <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg shadow-emerald-950/50 active:scale-95">
+                                    <i class="ph-bold ph-checks text-base"></i> Setujui Semua ({{ $faceStats['pending'] }})
+                                </button>
+                            </form>
+                        @endif
+                        <a href="{{ route('face-recognition.index', ['class_id' => $class->id]) }}" class="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 text-sky-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-camera text-base"></i> Studio Kamera AI
+                        </a>
+                        <a href="{{ route('students.index', ['filter_class_id' => $class->id]) }}" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-200 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-users-three text-base"></i> Buku Induk Kelas
+                        </a>
+                    </div>
+                </div>
+
+                {{-- FILTER TABS & PENCARIAN SISWA --}}
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" @click="faceTab = 'all'"
+                                :class="faceTab === 'all' ? 'bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20' : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'"
+                                class="px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-users"></i> Semua Siswa ({{ isset($students) ? $students->count() : 0 }})
+                        </button>
+                        <button type="button" @click="faceTab = 'pending'"
+                                :class="faceTab === 'pending' ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-white/5 text-amber-300 border-amber-500/30 hover:bg-amber-500/10'"
+                                class="px-3.5 py-2 rounded-xl border text-xs font-black transition-all flex items-center gap-1.5">
+                            <i class="ph-fill ph-clock-countdown"></i> Menunggu Verifikasi ({{ $faceStats['pending'] ?? 0 }})
+                        </button>
+                        <button type="button" @click="faceTab = 'verified'"
+                                :class="faceTab === 'verified' ? 'bg-emerald-600 text-white border-emerald-400 shadow-lg shadow-emerald-600/20' : 'bg-white/5 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/10'"
+                                class="px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5">
+                            <i class="ph-fill ph-seal-check"></i> Sudah Terdaftar ({{ $faceStats['verified'] ?? 0 }})
+                        </button>
+                        <button type="button" @click="faceTab = 'unregistered'"
+                                :class="faceTab === 'unregistered' ? 'bg-rose-600 text-white border-rose-400 shadow-lg shadow-rose-600/20' : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'"
+                                class="px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5">
+                            <i class="ph-bold ph-warning-circle"></i> Belum Rekam ({{ $faceStats['unregistered'] ?? 0 }})
+                        </button>
+                    </div>
+
+                    <div class="relative w-full sm:w-64">
+                        <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" x-model="searchFace" placeholder="Cari nama / NISN siswa..."
+                               class="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900/90 border border-white/15 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400">
+                    </div>
+                </div>
+
+                {{-- DAFTAR KARTU FOTO & STATUS FACE ID SELURUH SISWA KELAS --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
+                    @if(isset($students) && $students->count() > 0)
+                        @foreach($students->sortBy('name') as $st)
+                            @php
+                                $stPhoto = $st->face_photo_path ?: $st->photo_path;
+                                $stHasFace = !empty($st->face_descriptor);
+                                $stStatus = $st->face_status ?? ($stHasFace ? 'verified' : 'unregistered');
+                                $filterKey = $stHasFace ? ($stStatus === 'pending' ? 'pending' : 'verified') : 'unregistered';
+                            @endphp
+                            <div x-show="(faceTab === 'all' || faceTab === '{{ $filterKey }}') && ('{{ strtolower(addslashes($st->name)) }} {{ $st->student_id }} {{ $st->nisn }}').includes(searchFace.toLowerCase())"
+                                 class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border {{ $filterKey === 'pending' ? 'border-amber-400/40 bg-amber-500/5' : ($filterKey === 'verified' ? 'border-emerald-500/25' : 'border-white/10') }} flex items-center justify-between gap-3 transition-all">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-12 h-14 rounded-xl bg-slate-900 border border-white/15 overflow-hidden shrink-0 flex items-center justify-center relative">
+                                        @if($stPhoto)
+                                            <img src="{{ str_starts_with($stPhoto, 'http') ? $stPhoto : asset('storage/' . $stPhoto) }}" alt="{{ $st->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-sm font-black text-slate-400">{{ substr($st->name, 0, 1) }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="text-xs font-black text-white truncate" title="{{ $st->name }}">{{ $st->name }}</h4>
+                                        <p class="text-[10px] text-slate-400 font-mono">NISN: {{ $st->student_id ?? $st->nisn }}</p>
+                                        @if($filterKey === 'pending')
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 mt-1">
+                                                <i class="ph-fill ph-clock-countdown"></i> Menunggu Verifikasi
+                                            </span>
+                                        @elseif($filterKey === 'verified')
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 mt-1">
+                                                <i class="ph-fill ph-seal-check"></i> Face ID Aktif & Terverifikasi
+                                            </span>
+                                        @elseif($stStatus === 'rejected')
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-400 mt-1">
+                                                <i class="ph-fill ph-warning-octagon"></i> Foto Direset (Buka Kunci)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 mt-1">
+                                                <i class="ph-bold ph-minus-circle"></i> Belum Rekam Wajah
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col gap-1.5 shrink-0">
+                                    @if($filterKey === 'pending')
+                                        <form action="{{ route('students.face.verify', $st->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="w-full px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1 transition-all shadow-sm" title="Setujui Rekaman Wajah Siswa">
+                                                <i class="ph-bold ph-check"></i> Setujui
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    @if($stPhoto || $stHasFace)
+                                        <form action="{{ route('students.face.reset', $st->id) }}" method="POST" onsubmit="return confirm('Hapus foto / reset Face ID {{ addslashes($st->name) }}? Kunci di Portal Siswa akan dibuka kembali agar siswa bisa merekam ulang.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="delete_mode" value="both">
+                                            <button type="submit" class="w-full px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[10px] font-bold flex items-center justify-center gap-1 transition-all" title="Hapus Foto Salah & Reset Face ID">
+                                                <i class="ph-bold ph-trash"></i> Hapus Foto
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="{{ route('face-recognition.index', ['class_id' => $class->id, 'search' => $st->student_id ?: $st->name]) }}"
+                                           class="w-full px-2.5 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500 text-sky-300 hover:text-white border border-sky-400/30 text-[10px] font-bold flex items-center justify-center gap-1 transition-all" title="Rekam Wajah via Kamera Guru/Wali Kelas">
+                                            <i class="ph-bold ph-camera"></i> Rekam
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 
                 {{-- KIRI: EARLY WARNING LIST --}}

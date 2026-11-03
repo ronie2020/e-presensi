@@ -18,7 +18,7 @@ class HomeroomController extends Controller
     {
         $user = Auth::user();
         
-        $isAdminOrKepsek = $user->hasRole(['Admin', 'Kepala Sekolah']);
+        $isAdminOrKepsek = $user->hasRole(['Superadmin', 'Admin', 'Kepala Sekolah']);
 
         if ($isAdminOrKepsek) {
             if ($request->has('class_id')) {
@@ -36,12 +36,21 @@ class HomeroomController extends Controller
         } else {
             $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
             
+            // Fallback jika akun memiliki role Wali Kelas namun belum di-assign di tabel school_classes
+            if (!$class && $user->hasRole(['Wali Kelas'])) {
+                $class = $request->has('class_id') ? SchoolClass::find($request->class_id) : SchoolClass::first();
+                $allClasses = SchoolClass::orderBy('name', 'asc')->get();
+                $isAdminOrKepsek = true;
+            } else {
+                $allClasses = null; 
+            }
+
             if (!$class) {
                 return redirect()->route('dashboard')->with('error', 'Anda tidak terdaftar sebagai Wali Kelas untuk kelas mana pun.');
             }
-            
-            $allClasses = null; 
         }
+
+        \App\Http\Controllers\FaceRecognitionController::ensureFaceColumnsExist();
 
          // --- MENGAMBIL DATA SISWA & EAGER LOADING ---
         $students = Student::with(['disciplineRecords.disciplineType', 'attendances', 'habits', 'literacyJournals'])
@@ -50,6 +59,17 @@ class HomeroomController extends Controller
             ->get();
 
         $totalStudents = $students->count();
+
+        // Data Verifikasi Face ID Siswa di Kelas Ini (Untuk Wali Kelas)
+        $pendingFaceStudents = $students->filter(function ($s) {
+            return !empty($s->face_descriptor) && ($s->face_status ?? 'unregistered') === 'pending';
+        })->values();
+
+        $faceStats = [
+            'verified'     => $students->filter(fn($s) => !empty($s->face_descriptor) && ($s->face_status ?? 'verified') === 'verified')->count(),
+            'pending'      => $pendingFaceStudents->count(),
+            'unregistered' => $students->filter(fn($s) => empty($s->face_descriptor))->count(),
+        ];
 
         // ==========================================
         // --- LOGIKA BARU: FILTER TANGGAL HARIAN ---
@@ -323,9 +343,10 @@ class HomeroomController extends Controller
         ];
 
         return view('homeroom.dashboard', compact(
-            'class', 'stats', 'warningStudents', 'topStudents', 
+            'class', 'students', 'stats', 'warningStudents', 'topStudents', 
             'topLiteracy', 'topHabits', 'awardNominees', 
-            'isAdminOrKepsek', 'allClasses', 'trends', 'mappedStudents'
+            'isAdminOrKepsek', 'allClasses', 'trends', 'mappedStudents',
+            'pendingFaceStudents', 'faceStats'
         ));
     }
 
@@ -340,7 +361,7 @@ class HomeroomController extends Controller
             $class = SchoolClass::findOrFail($request->class_id);
         } else {
             $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
-            if (!$class && $user->hasRole(['Admin', 'Kepala Sekolah'])) {
+            if (!$class && $user->hasRole(['Superadmin', 'Admin', 'Kepala Sekolah', 'Wali Kelas'])) {
                 $class = SchoolClass::first();
             }
         }
@@ -470,7 +491,7 @@ class HomeroomController extends Controller
             $class = SchoolClass::findOrFail($request->class_id);
         } else {
             $class = SchoolClass::where('homeroom_teacher_id', $user->id)->first();
-            if (!$class && $user->hasRole(['Admin', 'Kepala Sekolah'])) {
+            if (!$class && $user->hasRole(['Superadmin', 'Admin', 'Kepala Sekolah', 'Wali Kelas'])) {
                 $class = SchoolClass::first();
             }
         }
