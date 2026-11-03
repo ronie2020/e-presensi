@@ -158,6 +158,7 @@ Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
 Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->name('kiosk.process');
 Route::post('/kiosk/sync-batch', [KioskController::class, 'syncBatch'])->name('kiosk.sync-batch');
 Route::get('/kiosk/face-descriptors', [FaceRecognitionController::class, 'getDescriptors'])->name('kiosk.face-descriptors');
+Route::get('/api/face/descriptors', [FaceRecognitionController::class, 'getDescriptors'])->name('face.descriptors');
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
@@ -219,6 +220,10 @@ Route::middleware(['auth:student'])->group(function () {
     // --- 0. ROUTE VERIFIKASI DATA INDUK ---
     Route::get('/student/verify', [StudentValidationController::class, 'index'])->name('students.verify');
     Route::post('/student/verify', [StudentValidationController::class, 'process'])->name('students.verify.process');
+
+    // --- 0B. ROUTE REKAM MANDIRI FACE RECOGNITION (PORTAL SISWA) ---
+    Route::get('/student/face-enrollment', [FaceRecognitionController::class, 'studentIndex'])->name('student.face.index');
+    Route::post('/student/face-enrollment', [FaceRecognitionController::class, 'studentStore'])->name('student.face.store');
     
     // --- 1. ROUTE BUKU PENGHUBUNG (SISI SISWA) ---
     Route::get('/student/penghubung', [LiaisonBookController::class, 'indexStudent'])
@@ -445,6 +450,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/students/{student}/face-embedding', [StudentController::class, 'updateFaceEmbedding'])->name('students.updateFaceEmbedding');
     Route::delete('/students/{student}/face-embedding', [StudentController::class, 'deleteFaceEmbedding'])->name('students.deleteFaceEmbedding');
     Route::get('/api/face-descriptors', [StudentController::class, 'getFaceDescriptors'])->name('students.getFaceDescriptors');
+    Route::post('/students/face/bulk-verify', [FaceRecognitionController::class, 'bulkVerify'])->name('students.face.bulk_verify');
+    Route::post('/students/{student}/face/store', [FaceRecognitionController::class, 'adminStore'])->name('students.face.admin_store');
+    Route::post('/students/{student}/face/verify', [FaceRecognitionController::class, 'verify'])->name('students.face.verify');
+    Route::delete('/students/{student}/face/reset', [FaceRecognitionController::class, 'resetOrDeletePhoto'])->name('students.face.reset');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
 

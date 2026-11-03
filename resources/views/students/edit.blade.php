@@ -146,7 +146,11 @@
                                     <p class="text-[11px] text-slate-400 font-medium">Format: JPG/PNG, Max: 2MB</p>
                                 </div>
 
-                                {{-- BIOMETRIK WAJAH (FACE RECOGNITION) --}}
+                                {{-- BIOMETRIK WAJAH (FACE RECOGNITION) & KONTROL VERIFIKASI / HAPUS FOTO --}}
+                                @php
+                                    $editFaceStatus = $student->face_status ?? 'unregistered';
+                                    $editHasFace = !empty($student->face_descriptor);
+                                @endphp
                                 <div class="w-full bg-[#021124]/90 border border-white/10 rounded-2xl p-4 shadow-lg flex flex-col gap-3">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-sky-400">
@@ -154,9 +158,21 @@
                                             <span>Biometrik Wajah</span>
                                         </div>
                                         <div id="face-status-badge">
-                                            @if($student->face_embedding)
+                                            @if($editHasFace && $editFaceStatus === 'verified')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                    <i class="ph-bold ph-seal-check text-xs"></i> Terverifikasi
+                                                </span>
+                                            @elseif($editHasFace && $editFaceStatus === 'pending')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                                                    <i class="ph-bold ph-clock-countdown text-xs"></i> Menunggu Verifikasi
+                                                </span>
+                                            @elseif($editHasFace)
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                                                     <i class="ph-bold ph-check-circle text-xs"></i> Terdaftar
+                                                </span>
+                                            @elseif($editFaceStatus === 'rejected')
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                                                    <i class="ph-bold ph-warning-octagon text-xs"></i> Foto Direset
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
@@ -167,10 +183,17 @@
                                     </div>
 
                                     <p class="text-[11px] text-slate-400 leading-relaxed">
-                                        Daftarkan pola wajah siswa untuk absensi otomatis via kamera HP guru / kiosk gerbang.
+                                        Daftarkan atau verifikasi pola wajah siswa untuk absensi otomatis via kamera HP guru / kiosk gerbang.
                                     </p>
 
                                     <div class="flex flex-col gap-2 pt-1">
+                                        @if($editHasFace && $editFaceStatus === 'pending')
+                                            <button type="button" onclick="document.getElementById('form-edit-verify-face').submit()"
+                                                    class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all shadow-md active:scale-95">
+                                                <i class="ph-bold ph-seal-check text-sm"></i> Setujui Face ID Siswa
+                                            </button>
+                                        @endif
+
                                         {{-- Tombol Ambil via Kamera --}}
                                         <button type="button" id="btn-open-face-cam" class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold shadow-md shadow-sky-900/30 transition-all active:scale-95">
                                             <i class="ph-bold ph-camera text-sm"></i> Ambil via Kamera
@@ -181,9 +204,16 @@
                                             <i class="ph-bold ph-sparkle text-sm text-sky-400"></i> Scan dari Foto Ini
                                         </button>
 
-                                        {{-- Tombol Hapus Data Wajah --}}
+                                        {{-- Tombol Hapus Foto / Reset Face ID --}}
+                                        @if($student->photo_path || $student->face_photo_path || $editHasFace)
+                                            <button type="button" onclick="confirmResetStudentPhoto()" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-[11px] font-bold transition-all active:scale-95">
+                                                <i class="ph-bold ph-trash"></i> Hapus Foto / Reset Face ID
+                                            </button>
+                                        @endif
+
+                                        {{-- Tombol Hapus Data Wajah Saja (AJAX) --}}
                                         <button type="button" id="btn-delete-face" class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[11px] font-bold transition-all active:scale-95 {{ $student->face_embedding ? '' : 'hidden' }}">
-                                            <i class="ph-bold ph-trash"></i> Hapus Wajah
+                                            <i class="ph-bold ph-eraser"></i> Hapus Biometrik Saja
                                         </button>
                                     </div>
                                 </div>
@@ -673,6 +703,17 @@
                     </div>
 
                 </form>
+
+                {{-- Form Tersembunyi untuk Verifikasi & Reset Foto/Face ID --}}
+                <form id="form-edit-verify-face" action="{{ route('students.face.verify', $student->id) }}" method="POST" class="hidden">
+                    @csrf
+                </form>
+                <form id="form-edit-reset-face" action="{{ route('students.face.reset', $student->id) }}" method="POST" class="hidden">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="delete_mode" id="edit-reset-type" value="both">
+                    <input type="hidden" name="rejection_note" id="edit-rejection-note" value="">
+                </form>
             </div>
         </div>
     </div>
@@ -814,6 +855,41 @@
     <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     <script>
+        function confirmResetStudentPhoto() {
+            Swal.fire({
+                title: 'Hapus Foto / Reset Face ID?',
+                html: `
+                    <p class="text-xs text-slate-300 mb-3">Foto yang tidak sesuai akan dihapus dan kunci perekaman Face ID di Portal Siswa akan dibuka kembali.</p>
+                    <select id="swal-reset-type" class="w-full rounded-xl bg-slate-900 border border-white/15 text-white text-xs font-bold p-2.5 mb-2">
+                        <option value="both">Hapus Foto + Reset Face ID (Buka Kunci)</option>
+                        <option value="photo_only">Hapus Foto Profil Saja</option>
+                        <option value="face_only">Reset Face ID Saja</option>
+                    </select>
+                    <input id="swal-rejection-note" type="text" placeholder="Catatan alasan untuk siswa (opsional)..." class="w-full rounded-xl bg-slate-900 border border-white/15 text-white text-xs p-2.5">
+                `,
+                icon: 'warning',
+                background: '#021124',
+                color: '#fff',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#334155',
+                confirmButtonText: 'Ya, Hapus & Reset',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    return {
+                        type: document.getElementById('swal-reset-type').value,
+                        note: document.getElementById('swal-rejection-note').value
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    document.getElementById('edit-reset-type').value = result.value.type;
+                    document.getElementById('edit-rejection-note').value = result.value.note;
+                    document.getElementById('form-edit-reset-face').submit();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const MODEL_URL = "{{ asset('models') }}";
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

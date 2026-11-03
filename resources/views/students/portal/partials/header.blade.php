@@ -96,6 +96,31 @@
                         <i class="ph-fill ph-warning-circle mr-1.5 text-base text-rose-300"></i> Belum Validasi
                     </a>
                 @endif
+
+                {{-- BADGE STATUS FACE RECOGNITION MANDIRI --}}
+                @if(!$isAlumni)
+                    @php
+                        $fStatus = $student->face_status ?? 'unregistered';
+                        $hasFace = !empty($student->face_descriptor);
+                    @endphp
+                    @if($hasFace && $fStatus === 'verified')
+                        <a href="{{ route('student.face.index') }}" class="inline-flex items-center bg-emerald-500/20 hover:bg-emerald-500/30 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-emerald-100 border border-emerald-400/30 font-bold transition-all shadow-sm" title="Face Recognition Terverifikasi & Aktif">
+                            <i class="ph-fill ph-scan-smiley mr-1.5 text-base text-emerald-400"></i> Face ID Aktif
+                        </a>
+                    @elseif($hasFace && $fStatus === 'pending')
+                        <a href="{{ route('student.face.index') }}" class="inline-flex items-center bg-amber-500/25 hover:bg-amber-500/35 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-amber-100 border border-amber-400/40 font-bold transition-all shadow-sm" title="Sudah aktif di Kiosk/Scan, menunggu verifikasi Wali Kelas/Admin">
+                            <i class="ph-fill ph-scan-smiley mr-1.5 text-base text-amber-300"></i> Face ID Aktif (Menunggu Verifikasi)
+                        </a>
+                    @elseif($fStatus === 'rejected')
+                        <a href="{{ route('student.face.index') }}" class="inline-flex items-center bg-rose-500/40 hover:bg-rose-500/60 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-rose-400/50 font-bold transition-all shadow-sm animate-pulse" title="{{ $student->face_rejection_note ?: 'Foto wajah ditolak/dihapus Admin, klik untuk rekam ulang' }}">
+                            <i class="ph-fill ph-camera-rotate mr-1.5 text-base text-rose-200"></i> Rekam Ulang Face ID
+                        </a>
+                    @else
+                        <a href="{{ route('student.face.index') }}" class="inline-flex items-center bg-sky-500/30 hover:bg-sky-500/50 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full text-white border border-sky-400/50 font-bold transition-all shadow-sm" title="Daftarkan Wajah untuk Absensi Kiosk & Scan">
+                            <i class="ph-fill ph-user-focus mr-1.5 text-base text-sky-300"></i> Rekam Face ID
+                        </a>
+                    @endif
+                @endif
             </div>
 
             <!-- BARIS 3: XP Bar (Kiri) & Tombol Aksi (Kanan) -->

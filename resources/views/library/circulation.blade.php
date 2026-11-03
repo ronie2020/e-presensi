@@ -1,6 +1,7 @@
 <x-app-layout>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen relative overflow-hidden">
         {{-- Efek Latar Belakang Halus --}}
@@ -289,6 +290,67 @@
         let activeInputId = null;
         let currentMember = null;
         let currentBook = null;
+        let circFaceModelsReady = false;
+        let circFaceDescriptors = [];
+        let circFaceTimer = null;
+
+        async function startCirculationFaceLoop() {
+            if (activeInputId !== 'memberInput') return;
+            try {
+                if (!circFaceModelsReady) {
+                    const MODEL_URL = "{{ asset('models') }}";
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                    ]);
+                    circFaceModelsReady = true;
+                }
+                if (circFaceDescriptors.length === 0) {
+                    const res = await fetch('{{ route("kiosk.face-descriptors") }}', { cache: 'no-store' });
+                    const json = await res.json();
+                    if ((json.status === 'success' || json.success) && Array.isArray(json.data)) circFaceDescriptors = json.data;
+                }
+
+                if (circFaceTimer) clearInterval(circFaceTimer);
+                circFaceTimer = setInterval(async () => {
+                    if (activeInputId !== 'memberInput') return;
+                    const videoEl = document.querySelector('#reader video');
+                    if (!videoEl || videoEl.readyState < 2) return;
+                    try {
+                        const detection = await faceapi
+                            .detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+                            .withFaceLandmarks()
+                            .withFaceDescriptor();
+                        if (!detection) return;
+
+                        let bestMatch = null;
+                        let minDistance = 0.44;
+                        for (const item of circFaceDescriptors) {
+                            if (!item.descriptor || item.descriptor.length !== 128) continue;
+                            let sum = 0;
+                            for (let i = 0; i < 128; i++) {
+                                const d = detection.descriptor[i] - item.descriptor[i];
+                                sum += d * d;
+                            }
+                            const dist = Math.sqrt(sum);
+                            if (dist < minDistance) {
+                                minDistance = dist;
+                                bestMatch = item;
+                            }
+                        }
+
+                        if (bestMatch) {
+                            document.getElementById('memberInput').value = bestMatch.student_id;
+                            document.getElementById('memberInput').dispatchEvent(new Event('change'));
+                            stopScanner();
+                        }
+                    } catch (e) {}
+                }, 750);
+            } catch (err) {
+                console.warn('Face ID Sirkulasi gagal dimuat:', err);
+            }
+        }
 
         function openScanner(inputId) {
             activeInputId = inputId;
@@ -299,7 +361,7 @@
             }
             
             html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
+                { facingMode: inputId === 'memberInput' ? "user" : "environment" }, 
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 (decodedText) => {
                     document.getElementById(activeInputId).value = decodedText;
@@ -307,10 +369,16 @@
                     stopScanner();
                 },
                 (errorMessage) => {}
-            );
+            ).then(() => {
+                if (inputId === 'memberInput') startCirculationFaceLoop();
+            });
         }
 
         function stopScanner() {
+            if (circFaceTimer) {
+                clearInterval(circFaceTimer);
+                circFaceTimer = null;
+            }
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
                     html5QrcodeScanner.clear();

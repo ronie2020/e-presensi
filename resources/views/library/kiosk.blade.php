@@ -62,12 +62,15 @@
             </div>
 
             <!-- MODE SWITCHER -->
-            <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 mb-6 backdrop-blur-xl shadow-lg">
+            <div class="flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 mb-6 backdrop-blur-xl shadow-lg">
                 <button onclick="setMode('attendance')" id="btn-mode-attendance" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-[#0d52a1] text-white shadow-md shadow-sky-950/50 interactive-btn border border-sky-400/30">
                     <i class="ph-bold ph-user-check"></i> Absensi Masuk
                 </button>
                 <button onclick="setMode('check')" id="btn-mode-check" class="px-6 py-2.5 rounded-xl font-bold text-sm text-slate-300 hover:text-white transition-all flex items-center gap-2 interactive-btn bg-transparent">
                     <i class="ph-bold ph-info"></i> Cek Status
+                </button>
+                <button type="button" onclick="toggleLibraryFaceCam()" id="btn-lib-face-cam" class="px-5 py-2.5 rounded-xl font-bold text-sm text-sky-300 hover:text-white bg-sky-500/15 hover:bg-sky-500/30 border border-sky-400/30 transition-all flex items-center gap-2 interactive-btn">
+                    <i class="ph-fill ph-face-mask text-lg"></i> <span id="lib-face-btn-text">Kamera Face ID</span>
                 </button>
             </div>
 
@@ -85,8 +88,18 @@
                              <i class="ph-bold ph-scan text-5xl drop-shadow-md"></i>
                          </div>
                     </div>
-                    <p class="text-3xl font-black text-white tracking-wide">TEMPEL KARTU</p>
+                    <p class="text-3xl font-black text-white tracking-wide">TEMPEL KARTU / FACE ID</p>
                     <p class="text-sky-400 mt-1 font-bold text-sm tracking-widest uppercase" id="instruction-text">Untuk Absensi Perpustakaan</p>
+                </div>
+
+                <!-- State: Face Recognition Camera Overlay -->
+                <div id="lib-face-cam-overlay" class="hidden absolute inset-0 z-25 w-full h-full bg-slate-950 rounded-[2.5rem] flex-col items-center justify-center overflow-hidden border border-sky-400/40">
+                    <video id="lib-face-video" autoplay muted playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+                    <div class="absolute bottom-3 inset-x-4 flex justify-center z-30">
+                        <div id="lib-face-status" class="px-4 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-sky-400/40 text-sky-300 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg">
+                            <i class="ph-bold ph-spinner animate-spin"></i> Menyiapkan Face ID...
+                        </div>
+                    </div>
                 </div>
 
                 <!-- State: Result -->
@@ -208,6 +221,7 @@
     <input type="text" id="scan-input" class="absolute opacity-0 -top-full" autocomplete="off" inputmode="none">
 </div>
 
+<script src="{{ asset('js/face-api.min.js') }}"></script>
 <script>
     // GLOBAL VARS
     let currentMode = 'attendance'; // 'attendance' | 'check'
@@ -416,7 +430,115 @@
                 processScanData(code);
             }
         });
+
+        // Ekspos ke global untuk dipanggil oleh Face Recognition Perpustakaan
+        window.triggerLibraryScan = (studentId) => {
+            processScanData(studentId);
+        };
     });
+
+    // =========================================================================
+    // INTEGRASI FACE RECOGNITION KIOSK PERPUSTAKAAN (KUNJUNGAN & CEK STATUS)
+    // =========================================================================
+    let libFaceActive = false;
+    let libFaceModelsReady = false;
+    let libFaceDescriptors = [];
+    let libFaceStream = null;
+    let libFaceTimer = null;
+    let lastLibFaceId = '';
+    let lastLibFaceTime = 0;
+
+    function libEuclideanDist(a, b) {
+        let sum = 0;
+        for (let i = 0; i < a.length; i++) {
+            const d = a[i] - b[i];
+            sum += d * d;
+        }
+        return Math.sqrt(sum);
+    }
+
+    async function toggleLibraryFaceCam() {
+        const overlay = document.getElementById('lib-face-cam-overlay');
+        const btnText = document.getElementById('lib-face-btn-text');
+        const statusEl = document.getElementById('lib-face-status');
+        const videoEl = document.getElementById('lib-face-video');
+
+        libFaceActive = !libFaceActive;
+
+        if (!libFaceActive) {
+            if (libFaceTimer) { clearInterval(libFaceTimer); libFaceTimer = null; }
+            if (libFaceStream) { libFaceStream.getTracks().forEach(t => t.stop()); libFaceStream = null; }
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            btnText.textContent = 'Kamera Face ID';
+            document.getElementById('scan-input').focus();
+            return;
+        }
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        btnText.textContent = 'Mode Kartu RFID';
+
+        try {
+            if (!libFaceModelsReady) {
+                statusEl.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Memuat Model AI Wajah...`;
+                const MODEL_URL = "{{ asset('models') }}";
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                ]);
+                libFaceModelsReady = true;
+            }
+
+            const res = await fetch('{{ route("kiosk.face-descriptors") }}', { cache: 'no-store' });
+            const json = await res.json();
+            if ((json.status === 'success' || json.success) && Array.isArray(json.data)) {
+                libFaceDescriptors = json.data;
+            }
+
+            libFaceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+            videoEl.srcObject = libFaceStream;
+            statusEl.innerHTML = `<i class="ph-fill ph-face-mask text-emerald-400"></i> Face ID Perpustakaan Aktif (${libFaceDescriptors.length} Siswa)`;
+
+            if (libFaceTimer) clearInterval(libFaceTimer);
+            libFaceTimer = setInterval(async () => {
+                if (!libFaceActive || libFaceDescriptors.length === 0) return;
+                try {
+                    const detection = await faceapi
+                        .detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+
+                    if (!detection) return;
+
+                    let bestMatch = null;
+                    let minDistance = 0.44;
+                    for (const item of libFaceDescriptors) {
+                        if (!item.descriptor || item.descriptor.length !== 128) continue;
+                        const dist = libEuclideanDist(detection.descriptor, item.descriptor);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            bestMatch = item;
+                        }
+                    }
+
+                    if (bestMatch) {
+                        const nowMs = Date.now();
+                        if (bestMatch.student_id === lastLibFaceId && (nowMs - lastLibFaceTime) < 6000) return;
+                        lastLibFaceId = bestMatch.student_id;
+                        lastLibFaceTime = nowMs;
+                        if (typeof window.triggerLibraryScan === 'function') {
+                            window.triggerLibraryScan(bestMatch.student_id);
+                        }
+                    }
+                } catch (e) {}
+            }, 750);
+        } catch (err) {
+            console.error(err);
+            statusEl.innerHTML = `<i class="ph-bold ph-warning text-rose-400"></i> Kamera / Model Gagal Dimuat`;
+        }
+    }
     
     function playBeep(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();

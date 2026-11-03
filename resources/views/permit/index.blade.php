@@ -2,6 +2,7 @@
     {{-- LIBRARIES --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     @push('styles')
     <style>
@@ -1380,6 +1381,7 @@
                     }
                 ).then(() => { 
                     this.isCameraRunning = true; 
+                    this.startPermitFaceRecognition();
                 }).catch(err => { 
                     console.warn("Camera start error:", err);
                     Swal.fire({
@@ -1392,7 +1394,69 @@
                 });
             },
 
+            async startPermitFaceRecognition() {
+                try {
+                    if (!this.faceModelsReady) {
+                        const MODEL_URL = "{{ asset('models') }}";
+                        await Promise.all([
+                            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                        ]);
+                        this.faceModelsReady = true;
+                    }
+                    if (!this.faceDescriptors || this.faceDescriptors.length === 0) {
+                        const res = await fetch('{{ route("kiosk.face-descriptors") }}', { cache: 'no-store' });
+                        const json = await res.json();
+                        this.faceDescriptors = ((json.status === 'success' || json.success) && Array.isArray(json.data)) ? json.data : [];
+                    }
+
+                    if (this.faceTimer) clearInterval(this.faceTimer);
+                    this.faceTimer = setInterval(async () => {
+                        if (!this.isCameraRunning || this.isProcessing || this.scanCooldown || !this.faceDescriptors || this.faceDescriptors.length === 0) return;
+                        const videoEl = document.querySelector('#reader video');
+                        if (!videoEl || videoEl.readyState < 2) return;
+                        try {
+                            const detection = await faceapi
+                                .detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+                                .withFaceLandmarks()
+                                .withFaceDescriptor();
+                            if (!detection) return;
+
+                            let bestMatch = null;
+                            let minDistance = 0.44;
+                            for (const item of this.faceDescriptors) {
+                                if (!item.descriptor || item.descriptor.length !== 128) continue;
+                                let sum = 0;
+                                for (let i = 0; i < 128; i++) {
+                                    const d = detection.descriptor[i] - item.descriptor[i];
+                                    sum += d * d;
+                                }
+                                const dist = Math.sqrt(sum);
+                                if (dist < minDistance) {
+                                    minDistance = dist;
+                                    bestMatch = item;
+                                }
+                            }
+
+                            if (bestMatch) {
+                                this.scanCooldown = true;
+                                this.handleScan(bestMatch.student_id).finally(() => {
+                                    setTimeout(() => { this.scanCooldown = false; }, 3500);
+                                });
+                            }
+                        } catch (e) {}
+                    }, 750);
+                } catch (err) {
+                    console.warn('Face ID Pos Piket gagal dimuat:', err);
+                }
+            },
+
             stopCamera() {
+                if (this.faceTimer) {
+                    clearInterval(this.faceTimer);
+                    this.faceTimer = null;
+                }
                 const container = document.getElementById('cameraContainer');
                 const btnText = document.getElementById('cameraText');
                 const btnSwitch = document.getElementById('btnSwitchCamera');

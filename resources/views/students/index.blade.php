@@ -6,6 +6,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="{{ asset('js/face-api.min.js') }}"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-100 bg-[#020b18] min-h-screen relative overflow-hidden">
         {{-- Efek Latar Belakang Halus --}}
@@ -338,10 +339,13 @@
                                         @endforeach
                                     </select>
 
-                                    <select name="filter_status" id="filter_status" aria-label="Filter Status" onchange="this.form.submit()" class="rounded-xl border border-white/10 bg-slate-900/80 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs font-bold text-white py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36 [color-scheme:dark]">
+                                    <select name="filter_status" id="filter_status" aria-label="Filter Status" onchange="this.form.submit()" class="rounded-xl border border-white/10 bg-slate-900/80 focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 text-xs font-bold text-white py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-44 [color-scheme:dark]">
                                         <option value="" class="bg-slate-900 text-white">Semua Status</option>
-                                        <option value="lengkap" class="bg-slate-900 text-white" {{ request('filter_status') == 'lengkap' ? 'selected' : '' }}>Sudah Lengkap</option>
-                                        <option value="belum_lengkap" class="bg-slate-900 text-white" {{ request('filter_status') == 'belum_lengkap' ? 'selected' : '' }}>Belum Lengkap</option>
+                                        <option value="lengkap" class="bg-slate-900 text-white" {{ request('filter_status') == 'lengkap' ? 'selected' : '' }}>Biodata Lengkap</option>
+                                        <option value="belum_lengkap" class="bg-slate-900 text-white" {{ request('filter_status') == 'belum_lengkap' ? 'selected' : '' }}>Biodata Belum Lengkap</option>
+                                        <option value="face_pending" class="bg-slate-900 text-amber-300" {{ request('filter_status') == 'face_pending' ? 'selected' : '' }}>Face ID: Menunggu Verifikasi</option>
+                                        <option value="face_verified" class="bg-slate-900 text-emerald-300" {{ request('filter_status') == 'face_verified' ? 'selected' : '' }}>Face ID: Terverifikasi</option>
+                                        <option value="face_unregistered" class="bg-slate-900 text-slate-300" {{ request('filter_status') == 'face_unregistered' ? 'selected' : '' }}>Face ID: Belum Rekam</option>
                                     </select>
                                 </form>
 
@@ -372,6 +376,38 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Banner Antrean Verifikasi Face ID --}}
+                        @if(($pendingFaceCount ?? 0) > 0)
+                            <div class="mx-6 mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
+                                        <i class="ph-fill ph-face-mask text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-black text-amber-300 uppercase tracking-wider">
+                                            {{ $pendingFaceCount }} Rekam Face ID Siswa Menunggu Verifikasi
+                                        </h4>
+                                        <p class="text-[11px] text-slate-300 mt-0.5">
+                                            Face ID siswa tetap <strong class="text-white">aktif digunakan absen</strong> di Kiosk/Scan. Silakan periksa kesesuaian foto atau setujui sekaligus.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                                    <a href="{{ route('students.index', array_merge(request()->query(), ['filter_status' => 'face_pending'])) }}"
+                                       class="flex-1 sm:flex-none text-center px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-amber-200 border border-amber-400/30 text-xs font-bold transition-all">
+                                        Lihat Antrean
+                                    </a>
+                                    <form action="{{ route('students.face.bulk_verify') }}" method="POST" class="flex-1 sm:flex-none">
+                                        @csrf
+                                        <input type="hidden" name="class_id" value="{{ request('filter_class_id') }}">
+                                        <button type="submit" class="w-full px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all flex items-center justify-center gap-1.5 shadow-md">
+                                            <i class="ph-bold ph-checks"></i> Verifikasi Semua
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
                         
                         {{-- Table --}}
                         <div class="flex-1 overflow-x-auto custom-scrollbar relative pb-12">
@@ -430,16 +466,48 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                @php $isComplete = $student->pob && $student->dob && $student->address && $student->father_name; @endphp
-                                                @if($isComplete)
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
-                                                        <i class="ph-fill ph-check-circle"></i> Lengkap
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wide">
-                                                        <i class="ph-fill ph-warning-circle"></i> Incomplete
-                                                    </span>
-                                                @endif
+                                                <div class="flex flex-col items-center gap-1.5">
+                                                    @php
+                                                        $isComplete = $student->pob && $student->dob && $student->address && $student->father_name;
+                                                        $faceStatus = $student->face_status ?? 'unregistered';
+                                                        $hasFace = !empty($student->face_descriptor);
+                                                        $facePhotoUrl = $student->face_photo_path ? asset('storage/' . $student->face_photo_path) : ($student->photo_path ? asset('storage/' . $student->photo_path) : '');
+                                                    @endphp
+                                                    @if($isComplete)
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
+                                                            <i class="ph-fill ph-check-circle"></i> Lengkap
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wide">
+                                                            <i class="ph-fill ph-warning-circle"></i> Incomplete
+                                                        </span>
+                                                    @endif
+
+                                                    {{-- Badge Status Face ID (Klik untuk Verifikasi / Reset / Rekam) --}}
+                                                    <button type="button"
+                                                        class="open-face-modal inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black border transition-all cursor-pointer
+                                                        {{ ($hasFace && $faceStatus === 'verified') ? 'bg-sky-500/20 text-sky-300 border-sky-400/30 hover:bg-sky-500/30' : (($hasFace && $faceStatus === 'pending') ? 'bg-amber-500/20 text-amber-300 border-amber-400/40 hover:bg-amber-500/30 animate-pulse' : ($faceStatus === 'rejected' ? 'bg-rose-500/20 text-rose-300 border-rose-400/30 hover:bg-rose-500/30' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white')) }}"
+                                                        data-student-id="{{ $student->id }}"
+                                                        data-student-nisn="{{ $student->student_id }}"
+                                                        data-student-name="{{ $student->name }}"
+                                                        data-student-class="{{ $student->schoolClass->name ?? '-' }}"
+                                                        data-face-status="{{ $faceStatus }}"
+                                                        data-has-face="{{ $hasFace ? '1' : '0' }}"
+                                                        data-photo-url="{{ $facePhotoUrl }}"
+                                                        data-rejection-note="{{ $student->face_rejection_note ?? '' }}"
+                                                        title="Kelola Face ID & Foto Siswa">
+                                                        <i class="ph-fill ph-face-mask"></i>
+                                                        @if($hasFace && $faceStatus === 'verified')
+                                                            Face Terverifikasi
+                                                        @elseif($hasFace && $faceStatus === 'pending')
+                                                            Verifikasi Face ID
+                                                        @elseif($faceStatus === 'rejected')
+                                                            Foto Ditolak
+                                                        @else
+                                                            Belum Face ID
+                                                        @endif
+                                                    </button>
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                                 <div class="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -474,6 +542,18 @@
                                                             <button type="button" @click="open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-emerald-300 flex items-center gap-2 open-qr-modal transition-colors"
                                                                 data-student-id="{{ $student->student_id }}" data-student-name="{{ $student->name }}">
                                                                 <i class="ph-bold ph-qr-code text-base"></i> Lihat QR Code
+                                                            </button>
+
+                                                            <button type="button" @click="open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-300 hover:bg-white/5 hover:text-sky-300 flex items-center gap-2 open-face-modal transition-colors"
+                                                                data-student-id="{{ $student->id }}"
+                                                                data-student-nisn="{{ $student->student_id }}"
+                                                                data-student-name="{{ $student->name }}"
+                                                                data-student-class="{{ $student->schoolClass->name ?? '-' }}"
+                                                                data-face-status="{{ $student->face_status ?? 'unregistered' }}"
+                                                                data-has-face="{{ !empty($student->face_descriptor) ? '1' : '0' }}"
+                                                                data-photo-url="{{ $student->face_photo_path ? asset('storage/' . $student->face_photo_path) : ($student->photo_path ? asset('storage/' . $student->photo_path) : '') }}"
+                                                                data-rejection-note="{{ $student->face_rejection_note ?? '' }}">
+                                                                <i class="ph-bold ph-face-mask text-base"></i> Kelola Face ID & Foto
                                                             </button>
                                                             
                                                             <div class="border-t border-white/10 my-1"></div>
@@ -581,6 +661,140 @@
                 <a id="qr-modal-download" href="#" download="qrcode.png" class="px-6 py-2.5 bg-gradient-to-r from-[#0d52a1] to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-sky-600/25 text-sm transition-transform active:scale-95 flex items-center gap-2 border border-white/20">
                     <i class="ph-bold ph-download-simple"></i> Unduh
                 </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL VERIFIKASI, HAPUS FOTO & REKAM FACE ID SISWA --}}
+    <div id="face-recognition-modal" class="fixed inset-0 bg-[#020b18]/85 backdrop-blur-md overflow-y-auto h-full w-full hidden z-50 transition-opacity p-4">
+        <div class="relative top-6 sm:top-10 mx-auto border border-white/15 w-full max-w-2xl shadow-2xl rounded-[2.5rem] bg-[#021124] overflow-hidden text-white mb-12">
+            {{-- Header --}}
+            <div class="bg-gradient-to-r from-[#0d52a1] to-[#031d3d] px-6 sm:px-8 py-5 flex justify-between items-center border-b border-white/15">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300">
+                        <i class="ph-fill ph-face-mask text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-white text-base sm:text-lg leading-tight" id="face-modal-student-name">Kelola Face ID & Foto Siswa</h3>
+                        <p class="text-xs text-sky-300 font-mono font-bold mt-0.5" id="face-modal-student-meta">NISN: -</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeFaceModal()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-6 sm:p-8 space-y-6">
+                {{-- Bagian 1: Preview Foto Saat Ini & Status Verifikasi --}}
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center bg-slate-900/70 p-5 rounded-2xl border border-white/10">
+                    <div class="sm:col-span-4 flex flex-col items-center">
+                        <div class="w-32 h-36 rounded-2xl overflow-hidden border-2 border-white/15 bg-slate-950 flex items-center justify-center shadow-lg relative">
+                            <img id="face-modal-current-photo" src="" alt="Foto Siswa" class="w-full h-full object-cover hidden">
+                            <div id="face-modal-no-photo" class="flex flex-col items-center justify-center text-slate-500 p-4 text-center">
+                                <i class="ph-duotone ph-user-circle text-5xl mb-1"></i>
+                                <span class="text-[10px] font-bold uppercase">Belum Ada Foto</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-8 space-y-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status Face ID:</span>
+                            <span id="face-modal-status-badge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">-</span>
+                        </div>
+
+                        <p id="face-modal-status-desc" class="text-xs text-slate-300 leading-relaxed">
+                            Memuat informasi Face ID siswa...
+                        </p>
+
+                        {{-- Tombol Verifikasi Cepat (Muncul jika ada Face ID & status pending) --}}
+                        <div id="face-modal-verify-box" class="hidden pt-2">
+                            <form id="face-verify-form" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-seal-check text-base"></i> Verifikasi & Setujui Face ID Siswa Ini
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Bagian 2: Hapus Foto Tidak Sesuai / Reset Kunci Face ID --}}
+                <div class="bg-rose-500/10 border border-rose-500/25 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-300 shrink-0 mt-0.5">
+                            <i class="ph-fill ph-trash text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-rose-300 uppercase tracking-wider">Hapus Foto Tidak Sesuai / Buka Kunci Rekam Ulang</h4>
+                            <p class="text-[11px] text-slate-300 mt-0.5">
+                                Gunakan fitur ini jika siswa salah memasukkan foto, foto tidak sesuai ketentuan, atau agar siswa dapat merekam ulang wajahnya di Portal Siswa.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form id="face-reset-form" method="POST" class="space-y-3">
+                        @csrf
+                        @method('DELETE')
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">Tindakan Hapus / Reset</label>
+                                <select name="reset_type" class="w-full rounded-xl border border-white/15 bg-slate-900/90 text-xs font-bold text-white py-2.5 px-3 [color-scheme:dark]">
+                                    <option value="both">Hapus Foto + Reset Face ID (Buka Kunci)</option>
+                                    <option value="face_only">Reset Face ID Saja (Pertahankan Foto)</option>
+                                    <option value="photo_only">Hapus File Foto Saja</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">Catatan untuk Siswa (Opsional)</label>
+                                <input type="text" name="rejection_note" id="face-modal-rejection-note" placeholder="Cth: Foto gelap / bukan foto wajah asli"
+                                       class="w-full rounded-xl border border-white/15 bg-slate-900/90 text-xs font-bold text-white py-2.5 px-3 placeholder:text-slate-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md">
+                            <i class="ph-bold ph-trash"></i> Hapus Foto & Buka Kunci Rekam Ulang Siswa
+                        </button>
+                    </form>
+                </div>
+
+                {{-- Bagian 3: Rekam / Update Face ID Langsung oleh Admin / Guru --}}
+                <div class="bg-slate-900/60 border border-white/10 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <i class="ph-fill ph-camera text-sky-400 text-lg"></i>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wider">Rekam / Perbarui Face ID oleh Admin/Guru</h4>
+                        </div>
+                        <button type="button" id="btn-toggle-admin-enroll" onclick="toggleAdminFaceEnroll()" class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/30 text-xs font-bold transition-all">
+                            Buka Perekam Wajah
+                        </button>
+                    </div>
+
+                    <div id="admin-face-enroll-panel" class="hidden space-y-4 pt-2 border-t border-white/10">
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="startAdminFaceCamera()" class="py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-video-camera"></i> Gunakan Kamera
+                            </button>
+                            <button type="button" onclick="document.getElementById('admin-face-file').click()" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-upload-simple"></i> Pilih File Foto
+                            </button>
+                            <input type="file" id="admin-face-file" accept="image/*" class="hidden" onchange="handleAdminFaceFile(event)">
+                        </div>
+
+                        <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-white/10 aspect-[4/3] max-h-64 mx-auto flex items-center justify-center">
+                            <video id="admin-face-video" autoplay muted playsinline class="w-full h-full object-cover hidden transform -scale-x-100"></video>
+                            <img id="admin-face-img-preview" class="w-full h-full object-contain hidden" alt="Preview">
+                            <div id="admin-face-placeholder" class="text-center p-4 text-slate-500 text-xs font-bold">
+                                Pilih kamera atau unggah foto wajah siswa untuk mengekstrak Face ID.
+                            </div>
+                        </div>
+
+                        <div id="admin-face-status" class="text-center text-xs font-bold text-sky-300"></div>
+
+                        <button type="button" id="btn-admin-save-face" onclick="captureAndSaveAdminFace()" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#0d52a1] to-[#56bbf1] hover:from-sky-600 hover:to-sky-400 text-white font-black text-xs uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-floppy-disk text-base"></i> Deteksi Wajah & Simpan (Otomatis Terverifikasi)
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -878,6 +1092,246 @@
 
         window.addEventListener("beforeunload", function() {
             sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        // =========================================================================
+        // LOGIKA MODAL VERIFIKASI, HAPUS FOTO & REKAM FACE ID SISWA
+        // =========================================================================
+        let currentFaceStudentId = null;
+        let adminFaceModelsLoaded = false;
+        let adminFaceStream = null;
+        let adminFaceMode = null; // 'camera' | 'upload'
+
+        async function ensureAdminFaceModels() {
+            if (adminFaceModelsLoaded) return true;
+            const statusEl = document.getElementById('admin-face-status');
+            try {
+                statusEl.textContent = 'Memuat model AI pengenalan wajah...';
+                const MODEL_URL = "{{ asset('models') }}";
+                await Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                ]);
+                adminFaceModelsLoaded = true;
+                statusEl.textContent = 'Model AI siap digunakan.';
+                return true;
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = 'Gagal memuat model AI. Periksa koneksi internet.';
+                return false;
+            }
+        }
+
+        function stopAdminFaceStream() {
+            if (adminFaceStream) {
+                adminFaceStream.getTracks().forEach(t => t.stop());
+                adminFaceStream = null;
+            }
+        }
+
+        function closeFaceModal() {
+            stopAdminFaceStream();
+            document.getElementById('face-recognition-modal').classList.add('hidden');
+            document.getElementById('admin-face-enroll-panel').classList.add('hidden');
+        }
+
+        function toggleAdminFaceEnroll() {
+            const panel = document.getElementById('admin-face-enroll-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                ensureAdminFaceModels();
+            } else {
+                stopAdminFaceStream();
+            }
+        }
+
+        async function startAdminFaceCamera() {
+            await ensureAdminFaceModels();
+            stopAdminFaceStream();
+            const video = document.getElementById('admin-face-video');
+            const img = document.getElementById('admin-face-img-preview');
+            const placeholder = document.getElementById('admin-face-placeholder');
+            const statusEl = document.getElementById('admin-face-status');
+
+            try {
+                adminFaceStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } });
+                video.srcObject = adminFaceStream;
+                video.classList.remove('hidden');
+                img.classList.add('hidden');
+                placeholder.classList.add('hidden');
+                adminFaceMode = 'camera';
+                statusEl.textContent = 'Kamera aktif. Arahkan wajah siswa lalu klik Deteksi Wajah & Simpan.';
+            } catch (err) {
+                statusEl.textContent = 'Kamera tidak dapat diakses. Gunakan opsi Pilih File Foto.';
+            }
+        }
+
+        function handleAdminFaceFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            stopAdminFaceStream();
+            ensureAdminFaceModels();
+
+            const video = document.getElementById('admin-face-video');
+            const img = document.getElementById('admin-face-img-preview');
+            const placeholder = document.getElementById('admin-face-placeholder');
+            const statusEl = document.getElementById('admin-face-status');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                video.classList.add('hidden');
+                placeholder.classList.add('hidden');
+                adminFaceMode = 'upload';
+                statusEl.textContent = 'Foto dipilih. Klik Deteksi Wajah & Simpan untuk memproses.';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function captureAndSaveAdminFace() {
+            if (!currentFaceStudentId) return;
+            const ready = await ensureAdminFaceModels();
+            if (!ready) return;
+
+            const statusEl = document.getElementById('admin-face-status');
+            const btnSave = document.getElementById('btn-admin-save-face');
+            const video = document.getElementById('admin-face-video');
+            const img = document.getElementById('admin-face-img-preview');
+
+            let sourceEl = null;
+            if (adminFaceMode === 'camera' && !video.classList.contains('hidden')) {
+                sourceEl = video;
+            } else if (adminFaceMode === 'upload' && !img.classList.contains('hidden')) {
+                sourceEl = img;
+            } else {
+                statusEl.textContent = 'Aktifkan kamera atau pilih file foto terlebih dahulu!';
+                return;
+            }
+
+            btnSave.disabled = true;
+            statusEl.textContent = 'Mendeteksi titik biometrik wajah...';
+
+            try {
+                const detection = await faceapi
+                    .detectSingleFace(sourceEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 }))
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
+
+                if (!detection) {
+                    statusEl.textContent = 'Wajah tidak terdeteksi jelas! Pastikan hanya 1 wajah menghadap depan dengan terang.';
+                    btnSave.disabled = false;
+                    return;
+                }
+
+                // Ambil snapshot base64
+                const canvas = document.createElement('canvas');
+                canvas.width = 480;
+                canvas.height = 360;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(sourceEl, 0, 0, canvas.width, canvas.height);
+                const photoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                const descriptorArray = Array.from(detection.descriptor);
+
+                statusEl.textContent = 'Menyimpan Face ID ke server...';
+
+                const res = await fetch(`/students/${currentFaceStudentId}/face/store`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        face_descriptor: JSON.stringify(descriptorArray),
+                        face_photo_base64: photoBase64
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    closeFaceModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message,
+                        background: '#021124',
+                        color: '#fff'
+                    }).then(() => window.location.reload());
+                } else {
+                    statusEl.textContent = data.message || 'Gagal menyimpan Face ID.';
+                }
+            } catch (e) {
+                console.error(e);
+                statusEl.textContent = 'Terjadi kesalahan saat memproses wajah.';
+            } finally {
+                btnSave.disabled = false;
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.open-face-modal');
+            if (!btn) return;
+
+            currentFaceStudentId = btn.dataset.studentId;
+            const name = btn.dataset.studentName;
+            const nisn = btn.dataset.studentNisn;
+            const className = btn.dataset.studentClass;
+            const faceStatus = btn.dataset.faceStatus;
+            const hasFace = btn.dataset.hasFace === '1';
+            const photoUrl = btn.dataset.photoUrl;
+            const rejectionNote = btn.dataset.rejectionNote || '';
+
+            document.getElementById('face-modal-student-name').textContent = name;
+            document.getElementById('face-modal-student-meta').textContent = `NISN: ${nisn} • Kelas: ${className}`;
+            document.getElementById('face-modal-rejection-note').value = rejectionNote;
+
+            // Set form actions
+            document.getElementById('face-verify-form').action = `/students/${currentFaceStudentId}/face/verify`;
+            document.getElementById('face-reset-form').action = `/students/${currentFaceStudentId}/face/reset`;
+
+            // Photo preview
+            const imgEl = document.getElementById('face-modal-current-photo');
+            const noPhotoEl = document.getElementById('face-modal-no-photo');
+            if (photoUrl) {
+                imgEl.src = photoUrl;
+                imgEl.classList.remove('hidden');
+                noPhotoEl.classList.add('hidden');
+            } else {
+                imgEl.src = '';
+                imgEl.classList.add('hidden');
+                noPhotoEl.classList.remove('hidden');
+            }
+
+            // Status Badge & Verify Box
+            const badgeEl = document.getElementById('face-modal-status-badge');
+            const descEl = document.getElementById('face-modal-status-desc');
+            const verifyBox = document.getElementById('face-modal-verify-box');
+
+            if (hasFace && faceStatus === 'verified') {
+                badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badgeEl.textContent = 'Terverifikasi & Aktif';
+                descEl.textContent = 'Face ID siswa ini sudah terverifikasi oleh Wali Kelas/Admin dan aktif digunakan untuk absensi di Kiosk & Scan. Rekam mandiri di Portal Siswa terkunci.';
+                verifyBox.classList.add('hidden');
+            } else if (hasFace && faceStatus === 'pending') {
+                badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30';
+                badgeEl.textContent = 'Menunggu Verifikasi (Tetap Aktif)';
+                descEl.textContent = 'Siswa telah merekam Face ID mandiri di Portal Siswa. Saat ini Face ID SUDAH AKTIF digunakan untuk absen, namun menunggu verifikasi kesesuaian foto dari Wali Kelas/Admin.';
+                verifyBox.classList.remove('hidden');
+            } else if (faceStatus === 'rejected') {
+                badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                badgeEl.textContent = 'Ditolak / Direset (Kunci Terbuka)';
+                descEl.textContent = 'Foto/Face ID sebelumnya telah dihapus oleh Admin/Guru. Kunci perekaman di Portal Siswa saat ini TERBUKA agar siswa dapat merekam ulang wajah yang benar.';
+                verifyBox.classList.add('hidden');
+            } else {
+                badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-slate-300 border border-white/15';
+                badgeEl.textContent = 'Belum Rekam Face ID';
+                descEl.textContent = 'Siswa belum merekam data Face ID. Siswa dapat merekam mandiri melalui Portal Siswa atau direkam langsung oleh Admin/Guru di bawah ini.';
+                verifyBox.classList.add('hidden');
+            }
+
+            document.getElementById('face-recognition-modal').classList.remove('hidden');
         });
     </script>
 </x-app-layout>

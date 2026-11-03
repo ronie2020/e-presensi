@@ -28,6 +28,8 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
+        \App\Http\Controllers\FaceRecognitionController::ensureFaceColumnsExist();
+
         $user = Auth::user();
         $classes = SchoolClass::orderBy('name', 'asc')->get();
         
@@ -52,9 +54,17 @@ class StudentController extends Controller
             }
         }
 
+        // Hitung jumlah siswa yang baru merekam Face ID dan menunggu verifikasi Wali Kelas / Admin
+        $pendingFaceCount = (clone $query)
+            ->where('students.face_status', 'pending')
+            ->whereNotNull('students.face_descriptor')
+            ->count();
+
         $query->when($search, function ($q) use ($search) {
-            return $q->where('students.name', 'like', '%' . $search . '%')
-                     ->orWhere('students.student_id', 'like', '%' . $search . '%');
+            return $q->where(function ($sub) use ($search) {
+                $sub->where('students.name', 'like', '%' . $search . '%')
+                    ->orWhere('students.student_id', 'like', '%' . $search . '%');
+            });
         });
 
         $query->when($filter_class_id, function ($q) use ($filter_class_id) {
@@ -74,6 +84,17 @@ class StudentController extends Controller
                           ->orWhereNull('address')
                           ->orWhereNull('father_name');
                 });
+            } elseif ($filter_status == 'face_pending') {
+                return $q->where('students.face_status', 'pending')
+                         ->whereNotNull('students.face_descriptor');
+            } elseif ($filter_status == 'face_verified') {
+                return $q->where('students.face_status', 'verified')
+                         ->whereNotNull('students.face_descriptor');
+            } elseif ($filter_status == 'face_unregistered') {
+                return $q->where(function($query) {
+                    $query->whereNull('students.face_descriptor')
+                          ->orWhereIn('students.face_status', ['unregistered', 'rejected']);
+                });
             }
         });
 
@@ -84,7 +105,8 @@ class StudentController extends Controller
 
         return view('students.index', [
             'classes' => $classes,
-            'students' => $students
+            'students' => $students,
+            'pendingFaceCount' => $pendingFaceCount
         ]);
     }
 

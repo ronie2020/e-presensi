@@ -58,6 +58,45 @@
             </div>
         </div>
     @endif
+
+    {{-- TAMBAHAN ZONE 0.6: ALERT REKAM MANDIRI FACE RECOGNITION --}}
+    @if(!$isAlumni && isset($student))
+        @if(($student->face_status ?? '') === 'rejected')
+            <div class="flex flex-col sm:flex-row items-center gap-4 p-5 md:p-6 rounded-[2rem] bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 shadow-sm relative overflow-hidden group">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center text-3xl shrink-0 shadow-lg shadow-rose-500/30 z-10 animate-pulse">
+                    <i class="ph-fill ph-camera-rotate"></i>
+                </div>
+                <div class="flex-1 text-center sm:text-left z-10">
+                    <h4 class="font-black text-rose-900 dark:text-rose-100 text-base md:text-lg tracking-tight mb-0.5">Rekam Ulang Wajah (Face ID) Diperlukan!</h4>
+                    <p class="text-rose-700 dark:text-rose-300 text-xs md:text-sm font-medium leading-snug max-w-2xl">
+                        {{ $student->face_rejection_note ?: 'Foto atau rekaman wajah Anda sebelumnya dihapus oleh Wali Kelas / Admin karena tidak sesuai ketentuan. Silakan lakukan perekaman ulang.' }}
+                    </p>
+                </div>
+                <div class="shrink-0 w-full sm:w-auto z-10 mt-2 sm:mt-0">
+                    <a href="{{ route('student.face.index') }}" class="w-full sm:w-auto px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-black rounded-xl transition-all shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 transform active:scale-95">
+                        <i class="ph-bold ph-user-focus text-lg"></i> Rekam Ulang Sekarang
+                    </a>
+                </div>
+            </div>
+        @elseif(empty($student->face_descriptor))
+            <div class="flex flex-col sm:flex-row items-center gap-4 p-5 md:p-6 rounded-[2rem] bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 shadow-sm relative overflow-hidden group">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0d52a1] to-[#56bbf1] text-white flex items-center justify-center text-3xl shrink-0 shadow-lg shadow-sky-500/30 z-10">
+                    <i class="ph-fill ph-scan-smiley"></i>
+                </div>
+                <div class="flex-1 text-center sm:text-left z-10">
+                    <h4 class="font-black text-sky-900 dark:text-sky-100 text-base md:text-lg tracking-tight mb-0.5">Daftarkan Face Recognition Anda</h4>
+                    <p class="text-sky-700 dark:text-sky-300 text-xs md:text-sm font-medium leading-snug max-w-2xl">
+                        Anda belum merekam biometrik wajah. Rekam wajah Anda sekarang agar bisa melakukan absensi otomatis di Mesin Kiosk & Scanner Sekolah.
+                    </p>
+                </div>
+                <div class="shrink-0 w-full sm:w-auto z-10 mt-2 sm:mt-0">
+                    <a href="{{ route('student.face.index') }}" class="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-[#0d52a1] to-sky-600 hover:from-sky-600 hover:to-[#0d52a1] text-white text-sm font-black rounded-xl transition-all shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 transform active:scale-95">
+                        <i class="ph-bold ph-camera text-lg"></i> Rekam Wajah
+                    </a>
+                </div>
+            </div>
+        @endif
+    @endif
     
     {{-- ZONE 0: CRITICAL PRIORITY ALERTS --}}
     @if(isset($priorityAlerts) && $priorityAlerts->isNotEmpty())
