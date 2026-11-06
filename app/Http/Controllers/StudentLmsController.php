@@ -242,20 +242,34 @@ class StudentLmsController extends Controller
         }
         
         // Cek Deadline
-        if (!$assignment->allow_late_submission && now() > $assignment->deadline) {
-            return back()->with('error', 'Maaf, batas waktu pengumpulan sudah habis.');
+        if (!$assignment->allow_late_submission && $assignment->deadline && now()->greaterThan($assignment->deadline)) {
+            return back()->with('error', 'Maaf, batas waktu pengumpulan tugas ini sudah berakhir pada ' . \Carbon\Carbon::parse($assignment->deadline)->translatedFormat('d M Y, H:i') . '. Silakan hubungi Guru Mata Pelajaran untuk mengaktifkan izin pengumpulan terlambat.');
         }
 
         // 1. Validasi Input Fleksibel (File atau Link)
         $request->validate([
             'submission_type' => 'required|in:file,link',
-            'file' => 'nullable|required_if:submission_type,file|file|mimes:pdf,doc,docx,jpg,jpeg,png,ppt,pptx,xls,xlsx,html,htm,zip,rar,7z|max:20480', // Max 20MB
-            'link_url' => 'nullable|required_if:submission_type,link|active_url', // Validasi URL aktif
+            'file' => [
+                'nullable',
+                'required_if:submission_type,file',
+                'file',
+                'max:20480', // Max 20MB
+                function ($attribute, $value, $fail) {
+                    $allowedExtensions = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'ppt', 'pptx', 'xls', 'xlsx', 'csv', 'txt', 'html', 'htm', 'zip', 'rar', '7z'];
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($ext, $allowedExtensions)) {
+                        $fail('Format file (.' . $ext . ') tidak didukung. Gunakan PDF, Word, Excel, PowerPoint, Gambar, HTML, atau ZIP/RAR.');
+                    }
+                },
+            ],
+            'link_url' => 'nullable|required_if:submission_type,link|url', // Validasi format URL tanpa DNS lookup yang rawan gagal
             'student_note' => 'nullable|string|max:500',
         ], [
-            'file.required_if' => 'Anda memilih opsi File, harap upload file tugas.',
+            'file.required_if' => 'Anda memilih opsi File, harap pilih berkas tugas terlebih dahulu.',
+            'file.max' => 'Ukuran berkas terlalu besar (maksimal 20MB).',
+            'file.uploaded' => 'Berkas gagal diunggah ke server. Pastikan ukuran berkas tidak melebihi batas.',
             'link_url.required_if' => 'Anda memilih opsi Link, harap masukkan URL tugas.',
-            'link_url.active_url' => 'Link yang dimasukkan tidak valid atau tidak dapat diakses.',
+            'link_url.url' => 'Format link URL tidak valid (pastikan diawali http:// atau https://).',
         ]);
 
         // 2. Cek submission lama (untuk cleanup file jika ganti metode)
@@ -312,12 +326,13 @@ class StudentLmsController extends Controller
         $assignment = LmsAssignment::with('questions')->findOrFail($id);
 
         if ($assignment->isSubmittedBy($student->id)) {
-            return redirect()->route('students.learning.subject.show', $assignment->subject_id)
-                ->with('error', 'Anda sudah mengerjakan kuis ini.');
+            return redirect()->route('students.learning.play', $assignment->subject_id)
+                ->with('error', 'Anda sudah mengerjakan kuis ini sebelumnya.');
         }
 
-        if (now() > $assignment->deadline && !$assignment->allow_late_submission) {
-            return back()->with('error', 'Waktu pengerjaan kuis sudah habis.');
+        if ($assignment->deadline && now()->greaterThan($assignment->deadline) && !$assignment->allow_late_submission) {
+            return redirect()->route('students.learning.play', $assignment->subject_id)
+                ->with('error', 'Waktu pengerjaan kuis sudah berakhir.');
         }
 
         $draftAnswers = \App\Models\LmsQuizDraft::where('student_id', $student->id)
@@ -394,17 +409,21 @@ class StudentLmsController extends Controller
             'time_spent' => 'required|integer', // dalam hitungan detik
         ]);
 
+        $hasTimeColumn = \Illuminate\Support\Facades\Schema::hasColumn('lms_material_logs', 'time_spent_seconds');
+
         $log = \App\Models\LmsMaterialLog::firstOrCreate(
             [
                 'student_id' => Auth::guard('student')->id(), 
                 'material_id' => $request->material_id
             ],
-            ['time_spent_seconds' => 0]
+            $hasTimeColumn ? ['time_spent_seconds' => 0] : []
         );
 
-        // Akumulasikan detik belajar
-        $log->time_spent_seconds += $request->time_spent;
-        $log->save();
+        // Akumulasikan detik belajar jika kolom tersedia
+        if ($hasTimeColumn) {
+            $log->time_spent_seconds += $request->time_spent;
+            $log->save();
+        }
 
         return response()->json(['status' => 'success', 'logged_seconds' => $request->time_spent]);
     }

@@ -1244,13 +1244,15 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
+                        descriptor: JSON.stringify(descriptorArray),
                         face_descriptor: JSON.stringify(descriptorArray),
+                        photo: photoBase64,
                         face_photo_base64: photoBase64
                     })
                 });
 
                 const data = await res.json();
-                if (res.ok && data.success) {
+                if (res.ok && (data.success || data.status === 'success')) {
                     closeFaceModal();
                     Swal.fire({
                         icon: 'success',
@@ -1323,6 +1325,11 @@
                 badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30';
                 badgeEl.textContent = 'Ditolak / Direset (Kunci Terbuka)';
                 descEl.textContent = 'Foto/Face ID sebelumnya telah dihapus oleh Admin/Guru. Kunci perekaman di Portal Siswa saat ini TERBUKA agar siswa dapat merekam ulang wajah yang benar.';
+                verifyBox.classList.add('hidden');
+            } else if (hasFace) {
+                badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                badgeEl.textContent = 'Terdaftar & Aktif';
+                descEl.textContent = 'Data Face ID biometrik siswa sudah terdaftar dan aktif digunakan untuk absensi di Kiosk & Scan.';
                 verifyBox.classList.add('hidden');
             } else {
                 badgeEl.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-slate-300 border border-white/15';

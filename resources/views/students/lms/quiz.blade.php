@@ -19,7 +19,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
    {{-- TIMER & ANTI-CHEAT LOGIC WRAPPER --}}
-    <div x-data="examController({{ $assignment->duration_minutes * 60 }}, '{{ $assignment->id }}')" 
+    <div x-data="examController({{ max(60, ($assignment->duration_minutes ?? 30) * 60) }}, '{{ $assignment->id }}')" 
          x-init="startTimer()" 
          @visibilitychange.document="handleVisibilityChange" 
          @contextmenu.prevent="preventAction('Klik Kanan')" 
@@ -28,10 +28,10 @@
          class="relative select-none">
 
         {{-- FLOATING TIMER BADGE --}}
-        <div class="fixed top-4 right-4 z-[100] transition-all duration-300 transform flex flex-col items-end gap-2"
+        <div class="fixed top-24 right-4 md:right-8 z-[100] transition-all duration-300 transform flex flex-col items-end gap-2"
              :class="timeLeft < 300 ? 'scale-110' : 'scale-100'"> 
             <div class="flex items-center gap-2 px-5 py-2.5 rounded-full shadow-2xl border-2 backdrop-blur-md transition-colors duration-500"
-                 :class="timeLeft < 300 ? 'bg-elevate-peach-dark border-elevate-peach text-white timer-warning' : 'bg-elevate-dark/95 border-elevate-primary text-white'">
+                 :class="timeLeft < 300 ? 'bg-elevate-peach-dark border-elevate-peach text-white timer-warning' : 'bg-[#031d3d]/95 border-sky-400/40 text-white'">
                 
                 <i class="ph-bold ph-timer text-xl" :class="timeLeft < 300 ? 'text-white' : 'text-elevate-accent animate-pulse'"></i>
                 <div class="flex flex-col items-start leading-none">
@@ -42,7 +42,7 @@
 
             {{-- INDIKATOR AUTOSAVE --}}
             <div x-show="saveStatus !== ''" x-transition
-                 class="px-3 py-1.5 rounded-full bg-elevate-dark/90 border border-elevate-primary text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 backdrop-blur-md" style="display: none;">
+                 class="px-3 py-1.5 rounded-full bg-[#031d3d]/95 border border-sky-400/40 text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 backdrop-blur-md" style="display: none;">
                 <i class="ph-bold" :class="saveStatus === 'saving' ? 'ph-spinner animate-spin text-elevate-accent' : (saveStatus === 'saved' ? 'ph-check-circle text-emerald-400' : 'ph-warning-circle text-elevate-peach')"></i>
                 <span x-text="saveStatus === 'saving' ? 'Menyimpan...' : (saveStatus === 'saved' ? 'Jawaban Tersimpan' : 'Gagal Menyimpan')"></span>
             </div>
@@ -147,10 +147,13 @@
                 </div>
 
                 {{-- Floating Submit Button --}}
-                <div class="fixed bottom-[80px] md:bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t border-elevate-soft flex justify-center z-[60] animate-enter" style="animation-delay: 800ms">
-                    <div class="w-full max-w-4xl flex justify-end">
-                        <button type="button" onclick="confirmSubmit()"
-                            class="w-full md:w-auto px-8 py-4 bg-elevate-primary text-white font-bold rounded-2xl shadow-xl shadow-elevate-primary/30 hover:bg-elevate-dark hover:-translate-y-1 transition-all flex items-center justify-center gap-3 active:scale-95 group">
+                <div class="fixed bottom-[80px] md:bottom-0 left-0 right-0 p-4 bg-[#031d3d]/95 backdrop-blur-xl border-t border-white/15 flex justify-center z-[60] shadow-[0_-10px_40px_rgba(0,0,0,0.4)]">
+                    <div class="w-full max-w-4xl flex items-center justify-between gap-4">
+                        <a href="{{ route('students.learning.play', $assignment->subject_id) }}" class="px-5 py-3.5 rounded-2xl bg-[#021124] border border-white/15 text-slate-300 hover:text-white hover:bg-white/10 font-bold text-xs md:text-sm flex items-center gap-2 transition-all shrink-0">
+                            <i class="ph-bold ph-arrow-left"></i> <span>Kembali ke Materi</span>
+                        </a>
+                        <button type="button" @click="confirmSubmit()" onclick="window.confirmQuizSubmit && window.confirmQuizSubmit()"
+                            class="flex-1 md:flex-none px-8 py-4 bg-elevate-primary text-white font-bold rounded-2xl shadow-xl shadow-elevate-primary/30 hover:bg-sky-600 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 active:scale-95 group cursor-pointer">
                             <span>Kumpulkan Jawaban</span>
                             <div class="bg-white/20 rounded-full p-1 group-hover:translate-x-1 transition-transform">
                                 <i class="ph-bold ph-paper-plane-right text-lg"></i> 
@@ -254,37 +257,55 @@
                 },
 
                 forceSubmit() {
-                    Swal.fire({
-                        title: 'WAKTU HABIS!',
-                        html: 'Sistem akan mengumpulkan jawaban Anda secara otomatis.',
-                        icon: 'warning',
-                        timer: 3000,
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        didOpen: () => { Swal.showLoading(); }
-                    }).then(() => {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'WAKTU HABIS!',
+                            html: 'Sistem akan mengumpulkan jawaban Anda secara otomatis.',
+                            icon: 'warning',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => { Swal.showLoading(); }
+                        }).then(() => {
+                            document.getElementById('quizForm').submit();
+                        });
+                    } else {
                         document.getElementById('quizForm').submit();
-                    });
+                    }
+                },
+
+                confirmSubmit() {
+                    window.confirmQuizSubmit();
                 }
             }));
         });
 
-        function confirmSubmit() {
+        window.confirmQuizSubmit = function() {
+            const form = document.getElementById('quizForm');
+            if (!form) return;
+
+            if (typeof Swal === 'undefined') {
+                if (confirm('Pastikan semua soal sudah terjawab. Jawaban tidak bisa diubah setelah dikumpulkan. Kumpulkan sekarang?')) {
+                    form.submit();
+                }
+                return;
+            }
+
             Swal.fire({
                 title: 'Sudah Yakin?',
                 text: "Pastikan semua soal sudah terjawab. Jawaban tidak bisa diubah setelah dikumpulkan.",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#0d52a1',
-                cancelButtonColor: '#f1f5f9',
+                cancelButtonColor: '#1e293b',
                 confirmButtonText: 'Ya, Kumpulkan!',
                 cancelButtonText: 'Periksa Lagi',
                 reverseButtons: true,
                 customClass: {
                     popup: 'rounded-[2rem] font-sans',
                     confirmButton: 'px-6 py-3 rounded-xl font-bold text-white shadow-lg shadow-elevate-primary/20',
-                    cancelButton: 'px-6 py-3 rounded-xl font-bold !bg-slate-100 hover:!bg-white !text-slate-800 border border-slate-300 shadow-sm'
+                    cancelButton: 'px-6 py-3 rounded-xl font-bold text-slate-200 border border-white/15 shadow-sm'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -296,10 +317,10 @@
                         didOpen: () => { Swal.showLoading(); },
                         customClass: { popup: 'rounded-[2rem] font-sans' }
                     });
-                    document.getElementById('quizForm').submit();
+                    form.submit();
                 }
             });
-        }
+        };
 
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('error'))

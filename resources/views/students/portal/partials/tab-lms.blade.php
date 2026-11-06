@@ -1,4 +1,4 @@
-<div x-data="{ lmsTab: 'assignments' }" class="space-y-8 animate-in fade-in duration-500 font-sans">
+<div x-data="{ lmsTab: 'assignments', taskFilter: 'pending', materialFilter: 'latest' }" class="space-y-8 animate-in fade-in duration-500 font-sans">
 
     {{-- 1. HERO STATS --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -119,22 +119,51 @@
 
     {{-- 2. SUB-TAB SWITCHER --}}
     <div class="flex justify-center">
-        <div class="bg-slate-100 p-1.5 rounded-2xl inline-flex items-center gap-1 border border-slate-200 shadow-inner">
+        <div class="bg-[#031d3d]/90 p-1.5 rounded-2xl inline-flex items-center gap-1.5 border border-white/15 shadow-inner">
             <button @click="lmsTab = 'assignments'" 
-                :class="lmsTab === 'assignments' ? 'bg-white text-elevate-primary shadow-sm ring-1 ring-black/5 font-black' : 'text-slate-500 hover:text-slate-700 font-bold'"
+                :class="lmsTab === 'assignments' ? 'bg-elevate-primary text-white shadow-md border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent font-bold'"
                 class="px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-wider transition-all flex items-center gap-2">
-                <i class="ph-bold ph-clipboard-text text-lg"></i> Tugas & Kuis
+                <i class="ph-bold ph-clipboard-text text-lg" :class="lmsTab === 'assignments' ? 'text-sky-300' : 'text-slate-400'"></i> Tugas & Kuis
             </button>
             <button @click="lmsTab = 'materials'" 
-                :class="lmsTab === 'materials' ? 'bg-white text-elevate-primary shadow-sm ring-1 ring-black/5 font-black' : 'text-slate-500 hover:text-slate-700 font-bold'"
+                :class="lmsTab === 'materials' ? 'bg-elevate-primary text-white shadow-md border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent font-bold'"
                 class="px-6 py-2.5 rounded-xl text-[10px] uppercase tracking-wider transition-all flex items-center gap-2">
-                <i class="ph-bold ph-book-open-text text-lg"></i> Materi Belajar
+                <i class="ph-bold ph-book-open-text text-lg" :class="lmsTab === 'materials' ? 'text-sky-300' : 'text-slate-400'"></i> Materi Belajar
             </button>
         </div>
     </div>
 
     {{-- 3. KONTEN: TUGAS & KUIS --}}
     <div x-show="lmsTab === 'assignments'" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+        
+        {{-- FILTER PILIHAN TUGAS: PERLU DIKERJAKAN vs SUDAH SELESAI --}}
+        <div class="flex items-center justify-between gap-4 mb-6 px-2 flex-wrap">
+            <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-xs font-black uppercase tracking-wider text-slate-400">Filter Tugas:</span>
+                <div class="inline-flex p-1 bg-[#031d3d]/90 rounded-xl border border-white/15 text-[11px] font-bold gap-1 shadow-inner">
+                    <button @click="taskFilter = 'pending'"
+                            :class="taskFilter === 'pending' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                            class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span>Perlu Dikerjakan (Aktif)</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-300 border border-amber-400/30">{{ $pendingCount }}</span>
+                    </button>
+                    <button @click="taskFilter = 'completed'"
+                            :class="taskFilter === 'completed' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                            class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="ph-bold ph-check-circle text-emerald-400"></i>
+                        <span>Sudah Selesai (Riwayat)</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">{{ $submittedCount }}</span>
+                    </button>
+                    <button @click="taskFilter = 'all'"
+                            :class="taskFilter === 'all' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                            class="px-3.5 py-1.5 rounded-lg transition-all">
+                        <span>Semua ({{ $totalAssign }})</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         @if(isset($lms_assignments_grouped) && count($lms_assignments_grouped) > 0)
             @foreach($lms_assignments_grouped as $subjectName => $assignments)
                 @php
@@ -193,7 +222,8 @@
                                     : ($isLink ? ['bg' => 'from-rose-500 via-pink-700 to-slate-900', 'icon' => 'ph-link'] : $coverGrad);
                             @endphp
 
-                            <div class="group relative bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-dark/5 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:ring-2 {{ $t['ring'] }}"
+                            <div x-show="taskFilter === 'all' || (taskFilter === 'pending' && !{{ $isSubmitted ? 'true' : 'false' }}) || (taskFilter === 'completed' && {{ $isSubmitted ? 'true' : 'false' }})"
+                                 class="group relative bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-dark/5 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:ring-2 {{ $t['ring'] }}"
                                  x-data="{ openUpload: false, submissionType: '{{ ($mySubmission && $mySubmission->link_url) ? 'link' : 'file' }}' }">
 
                                 {{-- COVER THUMBNAIL --}}
@@ -366,6 +396,28 @@
 
     {{-- 4. KONTEN: MATERI BELAJAR --}}
     <div x-show="lmsTab === 'materials'" x-cloak x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+        
+        {{-- FILTER PILIHAN MATERI: TERKINI vs SEMUA / RIWAYAT --}}
+        <div class="flex items-center justify-between gap-4 mb-6 px-2 flex-wrap">
+            <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-xs font-black uppercase tracking-wider text-slate-400">Tampilan Materi:</span>
+                <div class="inline-flex p-1 bg-[#031d3d]/90 rounded-xl border border-white/15 text-[11px] font-bold gap-1 shadow-inner">
+                    <button @click="materialFilter = 'latest'"
+                            :class="materialFilter === 'latest' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                            class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="ph-fill ph-lightning text-amber-400"></i>
+                        <span>Materi Aktif Terkini</span>
+                    </button>
+                    <button @click="materialFilter = 'all'"
+                            :class="materialFilter === 'all' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                            class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+                        <i class="ph-bold ph-archive" :class="materialFilter === 'all' ? 'text-sky-300' : 'text-slate-400'"></i>
+                        <span>Semua & Riwayat Modul</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         @if(isset($lms_materials_grouped) && count($lms_materials_grouped) > 0)
             @foreach($lms_materials_grouped as $subjectName => $materials)
                 @php
@@ -418,10 +470,23 @@
                                 elseif($hasLink) { $fileUrl = $mainAttachment->file_path; $btnText = 'Buka Link'; $btnIcon = 'ph-link'; }
                             @endphp
 
-                            <div class="group relative bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-dark/5 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:ring-2 {{ $t['ring'] }}">
+                            <div x-show="materialFilter === 'all' || (materialFilter === 'latest' && {{ $loop->first ? 'true' : 'false' }})"
+                                 class="group relative bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-dark/5 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:ring-2 {{ $t['ring'] }}">
 
                                 {{-- COVER THUMBNAIL --}}
                                 <div class="relative h-36 overflow-hidden shrink-0">
+                                    {{-- Status Badge Overlay --}}
+                                    <div class="absolute top-3 left-3 z-20">
+                                        @if($loop->first)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-900/80 backdrop-blur-md border border-sky-400/40 text-sky-200 text-[10px] font-black shadow-sm">
+                                                <i class="ph-bold ph-sparkle text-amber-400"></i> Modul Terkini
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900/70 backdrop-blur-md border border-white/20 text-slate-300 text-[10px] font-black shadow-sm">
+                                                <i class="ph-bold ph-archive"></i> Arsip Modul
+                                            </span>
+                                        @endif
+                                    </div>
                                     @if($material->cover_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($material->cover_image))
                                         <img src="{{ asset('storage/' . $material->cover_image) }}" alt="{{ $material->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10"></div>

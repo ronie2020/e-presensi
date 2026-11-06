@@ -576,8 +576,12 @@ class StudentController extends Controller
         ]);
 
         $updateData = [
-            'face_descriptor'    => $request->embedding,
-            'face_registered_at' => now(),
+            'face_descriptor'     => $request->embedding,
+            'face_registered_at'  => now(),
+            'face_status'         => 'verified',
+            'face_verified_at'    => now(),
+            'face_verified_by'    => Auth::id(),
+            'face_rejection_note' => null,
         ];
 
         $photoUpdated = false;
@@ -616,8 +620,12 @@ class StudentController extends Controller
     public function deleteFaceEmbedding(Student $student)
     {
         $student->update([
-            'face_descriptor' => null,
-            'face_registered_at' => null,
+            'face_descriptor'     => null,
+            'face_registered_at'  => null,
+            'face_status'         => 'unregistered',
+            'face_verified_at'    => null,
+            'face_verified_by'    => null,
+            'face_rejection_note' => null,
         ]);
 
         // Invalidate face descriptors cache

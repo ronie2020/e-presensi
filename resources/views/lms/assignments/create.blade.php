@@ -237,7 +237,7 @@
                                 <div class="col-span-2 md:col-span-1 flex items-center mt-4">
                                     <label class="inline-flex items-center cursor-pointer group">
                                         <div class="relative">
-                                            <input type="checkbox" name="allow_late_submission" class="sr-only peer" {{ old('allow_late_submission') ? 'checked' : '' }}>
+                                            <input type="checkbox" name="allow_late_submission" class="sr-only peer" {{ old('allow_late_submission', true) ? 'checked' : '' }}>
                                             <div class="w-12 h-7 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-700 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-sky-500 shadow-inner"></div>
                                         </div>
                                         <span class="ml-3 text-sm font-bold text-slate-400 group-hover:text-sky-400 transition-colors">Izinkan pengumpulan terlambat</span>

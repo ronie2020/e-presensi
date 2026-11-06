@@ -16,6 +16,7 @@ class LmsSubmission extends Model
         'student_id',
         'file_path',       
         'link_url',        
+        'submission_type',
         'student_note',    
         'grade',           
         'teacher_feedback',

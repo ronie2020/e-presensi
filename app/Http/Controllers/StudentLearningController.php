@@ -39,7 +39,13 @@ class StudentLearningController extends Controller
             })
             ->get();
             
-       // 2. Gabungkan dan urutkan
+        // 2. Identifikasi Materi & Tugas Terbaru untuk Filter Sesi Aktif
+        $latestMaterial = $materials->sortByDesc('created_at')->first();
+        $latestAssignment = $assignments->sortByDesc('created_at')->first();
+        $latestMaterialId = $latestMaterial ? $latestMaterial->id : null;
+        $latestAssignmentId = $latestAssignment ? $latestAssignment->id : null;
+
+        // Gabungkan dan urutkan
         $combined = $materials->concat($assignments)->sortBy(function($item) {
             // Urutan 1: Nomor Bab (Topic Order)
             $topicOrder = $item->topic ? $item->topic->order_number : 999;
@@ -65,6 +71,11 @@ class StudentLearningController extends Controller
                                              ->where('student_id', $student->id)
                                              ->exists();
 
+                $isLatest = ($item->id === $latestMaterialId);
+                // Aturan: Materi lama yang SUDAH selesai disembunyikan (arsip), KECUALI kalau belum dikerjakan
+                $isArchived = (!$isLatest && $isCompleted);
+                $isPendingDebt = (!$isLatest && !$isCompleted);
+
                 // A. Item Teks Pengantar (Halaman Pertama)
                 $syllabus[] = [
                     'id' => 'm_' . $item->id . '_intro',
@@ -75,6 +86,9 @@ class StudentLearningController extends Controller
                     'content' => !empty($item->resume) ? $item->resume : 'Silakan klik tombol Lanjut (Next) di bawah untuk membuka lampiran materi ini.',
                     'completed' => $isCompleted,
                     'locked' => false,
+                    'is_latest' => $isLatest,
+                    'is_archived' => $isArchived,
+                    'is_pending_debt' => $isPendingDebt,
                 ];
 
                 // B. Item Lampiran (Halaman Kedua, Ketiga, dst setelah klik Next)
@@ -101,9 +115,11 @@ class StudentLearningController extends Controller
                         'file_url' => $attachmentUrl,
                         'completed' => $isCompleted, 
                         'locked' => false,
+                        'is_latest' => $isLatest,
+                        'is_archived' => $isArchived,
+                        'is_pending_debt' => $isPendingDebt,
                     ];
                 }            
-            
 
                 // C. Fallback: Jika tidak ada resume dan tidak ada lampiran
                 if (empty($item->resume) && $item->attachments->isEmpty()) {
@@ -116,6 +132,9 @@ class StudentLearningController extends Controller
                         'content' => 'Materi ini belum memiliki konten.',
                         'completed' => $isCompleted,
                         'locked' => false,
+                        'is_latest' => $isLatest,
+                        'is_archived' => $isArchived,
+                        'is_pending_debt' => $isPendingDebt,
                     ];
                 }
             } 
@@ -132,6 +151,15 @@ class StudentLearningController extends Controller
                          str_contains(strtolower($item->title ?? ''), 'cbt') || 
                          ($item->assignment_type === 'quiz' && $questionsCount === 0);
 
+                $isLatest = ($item->id === $latestAssignmentId) || 
+                            ($latestMaterial && $latestMaterial->topic_id && $item->topic_id === $latestMaterial->topic_id);
+                // Aturan: Tugas lama yang SUDAH dikerjakan disembunyikan (arsip), KECUALI kalau belum dikerjakan
+                $isArchived = (!$isLatest && $isCompleted);
+                $isPendingDebt = (!$isLatest && !$isCompleted);
+
+                $isExpired = $item->deadline ? now()->greaterThan($item->deadline) : false;
+                $allowLate = (bool) $item->allow_late_submission;
+
                 $syllabus[] = [
                     'id' => 'a_' . $item->id,
                     'db_id' => $item->id,
@@ -144,13 +172,34 @@ class StudentLearningController extends Controller
                     'link_url' => $item->link_url,
                     'attachment_file' => $item->file_path ? asset('storage/' . str_replace(['public/', 'public\\'], '', $item->file_path)) : null,
                     'attachment_name' => $item->file_name ?? 'Berkas Lampiran Tugas',
+                    'deadline_formatted' => $item->deadline ? \Carbon\Carbon::parse($item->deadline)->translatedFormat('d M Y, H:i') : '-',
+                    'is_expired' => $isExpired,
+                    'allow_late_submission' => $allowLate,
+                    'submission_file' => ($submission && $submission->file_path) ? asset('storage/' . str_replace(['public/', 'public\\'], '', $submission->file_path)) : null,
+                    'submission_link' => $submission->link_url ?? null,
+                    'submission_note' => $submission->student_note ?? null,
+                    'submitted_at' => ($submission && $submission->submitted_at) ? $submission->submitted_at->translatedFormat('d M Y, H:i') : null,
                     'grade' => $submission->grade ?? null,
                     'completed' => $isCompleted,
                     'locked' => false,
+                    'is_latest' => $isLatest,
+                    'is_archived' => $isArchived,
+                    'is_pending_debt' => $isPendingDebt,
                     'questions' => $item->questions, 
                     'questions_count' => $questionsCount,
                     'is_cbt' => $isCbt,
                 ];
+            }
+        }
+
+        // Jika semua materi/tugas diarsipkan (karena siswa sudah selesai semua),
+        // tetap tampilkan materi terbaru agar siswa tidak mendapati halaman kosong
+        $activeCount = collect($syllabus)->where('is_archived', false)->count();
+        if ($activeCount === 0 && count($syllabus) > 0) {
+            foreach ($syllabus as $idx => $sItem) {
+                if ($sItem['is_latest']) {
+                    $syllabus[$idx]['is_archived'] = false;
+                }
             }
         }
 

@@ -83,7 +83,8 @@ class StudentQuizController extends Controller
             ->first();
 
         if ($existing) {
-            return redirect()->route('students.learning.index')->with('error', 'Anda sudah mengerjakan tugas ini sebelumnya.');
+            return redirect()->route('students.learning.play', $assignment->subject_id)
+                ->with('error', 'Anda sudah mengerjakan kuis ini sebelumnya.');
         }
 
         // Cek Soal
@@ -101,6 +102,7 @@ class StudentQuizController extends Controller
             ->toArray();
 
         $earnedScore = 0;
+        $maxScore = 0;
         
         DB::beginTransaction();
         try {
@@ -108,9 +110,11 @@ class StudentQuizController extends Controller
             $submission = LmsSubmission::create([
                 'assignment_id' => $assignment->id,
                 'student_id' => $studentId,
+                'submission_type' => 'quiz',
                 'submitted_at' => now(),
                 'grade' => 0, 
                 'status' => 'submitted',
+                'student_note' => 'Kuis Online (Auto-graded)',
                 'teacher_feedback' => null
             ]);
 
@@ -119,12 +123,14 @@ class StudentQuizController extends Controller
                 $ansText = $studentAnswers[$q->id] ?? ($drafts[$q->id] ?? null);
                 $isCorrect = false; 
                 $points = 0;
+                $qPoints = $q->points > 0 ? $q->points : 10;
+                $maxScore += $qPoints;
 
                 if ($q->question_type == 'multiple_choice') {
                     // Penilaian Otomatis PG
-                    if ($ansText && $ansText == $q->correct_answer) {
+                    if ($ansText && strtoupper(trim($ansText)) == strtoupper(trim($q->correct_answer))) {
                         $isCorrect = true;
-                        $points = $q->points;
+                        $points = $qPoints;
                         $earnedScore += $points;
                     }
                 } elseif ($q->question_type == 'essay') {
@@ -142,8 +148,9 @@ class StudentQuizController extends Controller
                 ]);
             }
 
-            // 5. Update Nilai Total
-            $submission->update(['grade' => $earnedScore]);
+            // 5. Update Nilai Total (Skala 0-100)
+            $finalGrade = $maxScore > 0 ? round(($earnedScore / $maxScore) * 100) : $earnedScore;
+            $submission->update(['grade' => $finalGrade]);
 
             // Bersihkan draft jawaban kuis
             LmsQuizDraft::where('student_id', $studentId)
@@ -152,9 +159,9 @@ class StudentQuizController extends Controller
 
             DB::commit();
             
-            // Redirect SUKSES ke halaman daftar materi (Bukan kembali ke soal)
-            return redirect()->route('students.learning.index')
-                ->with('success', 'Jawaban berhasil dikirim! Nilai Pilihan Ganda: ' . $earnedScore);
+            // Redirect SUKSES kembali ke halaman Learning Player mata pelajaran tersebut
+            return redirect()->route('students.learning.play', $assignment->subject_id)
+                ->with('success', 'Jawaban kuis berhasil dikumpulkan! Nilai Anda: ' . $finalGrade);
 
         } catch (\Exception $e) {
             DB::rollBack();

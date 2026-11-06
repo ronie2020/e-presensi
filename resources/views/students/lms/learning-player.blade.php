@@ -19,11 +19,11 @@
         .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
         .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
         .prose li { margin-bottom: 0.5em; }
-        .prose h1, .prose h2, .prose h3 { font-weight: 900; margin-top: 1.5em; margin-bottom: 0.5em; color: #1e293b; line-height: 1.3; }
+        .prose h1, .prose h2, .prose h3 { font-weight: 900; margin-top: 1.5em; margin-bottom: 0.5em; color: #f8fafc; line-height: 1.3; }
         .prose h1 { font-size: 1.875rem; }
         .prose h2 { font-size: 1.5rem; }
-        .prose a { color: #0d52a1; text-decoration: underline; font-weight: bold; }
-        .prose strong { font-weight: 800; color: #0f172a; }
+        .prose a { color: #38bdf8; text-decoration: underline; font-weight: bold; }
+        .prose strong { font-weight: 800; color: #ffffff; }
         .prose em { font-style: italic; }
         .prose img { max-width: 100%; height: auto; border-radius: 0.75rem; margin: 1.5em 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
@@ -79,13 +79,33 @@
             <aside class="absolute md:static inset-y-0 left-0 w-[85%] max-w-[320px] md:w-80 bg-white border-r border-elevate-soft z-40 md:z-10 transform transition-transform duration-300 md:transform-none flex flex-col shadow-2xl md:shadow-none"
                    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
                 
-                <div class="p-5 border-b border-elevate-soft bg-elevate-soft/30 flex items-center justify-between">
-                    <h2 class="text-xs font-black text-elevate-primary uppercase tracking-widest flex items-center gap-2">
+                <div class="p-4 border-b border-white/10 bg-[#031d3d]/60 flex items-center justify-between">
+                    <h2 class="text-xs font-black text-sky-400 uppercase tracking-widest flex items-center gap-2">
                         <i class="ph-fill ph-list-numbers text-elevate-accent"></i> Daftar Isi
                     </h2>
-                    <button @click="sidebarOpen = false" class="md:hidden w-8 h-8 rounded-lg bg-white border border-elevate-soft text-elevate-primary flex items-center justify-center active:scale-95">
+                    <button @click="sidebarOpen = false" class="md:hidden w-8 h-8 rounded-lg bg-white/10 border border-white/15 text-sky-300 flex items-center justify-center active:scale-95">
                         <i class="ph-bold ph-x"></i>
                     </button>
+                </div>
+                
+                {{-- SAKLAR FOKUS MATERI TERKINI vs SEMUA / RIWAYAT --}}
+                <div class="p-3 border-b border-white/10 bg-[#021124]/60">
+                    <div class="flex p-1 bg-[#031d3d]/90 border border-white/10 rounded-xl text-[11px] font-bold w-full gap-1 shadow-inner">
+                        <button @click="viewMode = 'focus'"
+                                :class="viewMode === 'focus' ? 'bg-elevate-primary text-white shadow-md border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                                class="flex-1 py-2 px-2 rounded-lg text-center transition-all flex items-center justify-center gap-1.5">
+                            <i class="ph-fill ph-lightning text-amber-400"></i>
+                            <span>Fokus Aktif</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black" :class="viewMode === 'focus' ? 'bg-sky-400/25 text-sky-200 border border-sky-300/30' : 'bg-white/10 text-slate-300'" x-text="activeItemsCount"></span>
+                        </button>
+                        <button @click="viewMode = 'all'"
+                                :class="viewMode === 'all' ? 'bg-elevate-primary text-white shadow-md border border-sky-400/30 font-black' : 'text-slate-400 hover:text-white hover:bg-white/5 border border-transparent'"
+                                class="flex-1 py-2 px-2 rounded-lg text-center transition-all flex items-center justify-center gap-1.5">
+                            <i class="ph-bold ph-archive" :class="viewMode === 'all' ? 'text-sky-300' : 'text-slate-400'"></i>
+                            <span>Semua & Riwayat</span>
+                            <span class="px-1.5 py-0.5 rounded-full text-[9px] font-black" :class="viewMode === 'all' ? 'bg-sky-400/25 text-sky-200 border border-sky-300/30' : 'bg-white/10 text-slate-300'" x-text="syllabus.length"></span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="flex-1 overflow-y-auto no-scrollbar smooth-scroll p-3 space-y-5 bg-white">
@@ -93,18 +113,27 @@
                         <div>
                             {{-- Nama Induk Materi / Tugas --}}
                             <div class="px-3 mb-2 flex items-center gap-2">
-                                <div class="w-1.5 h-1.5 rounded-full bg-elevate-primary/30 shrink-0"></div>
-                                <h3 class="text-[10px] font-black text-elevate-dark/50 uppercase tracking-widest line-clamp-1" x-text="group.title"></h3>
+                                <div class="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0 shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
+                                <h3 class="text-[10px] font-black text-sky-300/80 uppercase tracking-widest line-clamp-1" x-text="group.title"></h3>
                             </div>
                             
                             {{-- Sub Item --}}
-                            <div class="space-y-1">
+                            <div class="space-y-1.5">
                                 <template x-for="(item, index) in group.items" :key="item.id">
-                                    <button @click="selectItem(item.id)" :disabled="item.locked" class="w-full text-left p-3 rounded-2xl transition-all duration-200 flex gap-3 relative group"
-                                            :class="{'bg-elevate-primary text-white shadow-lg shadow-elevate-primary/20': activeItem && activeItem.id === item.id, 'hover:bg-elevate-soft text-elevate-dark': activeItem && activeItem.id !== item.id && !item.locked, 'opacity-50 cursor-not-allowed bg-elevate-soft/50 text-elevate-dark/40': item.locked}">
+                                    <button @click="selectItem(item.id)" :disabled="item.locked" class="w-full text-left p-3 rounded-2xl transition-all duration-200 flex gap-3 relative group border"
+                                            :class="{
+                                                'bg-elevate-primary text-white border-sky-400/40 shadow-lg shadow-elevate-primary/30': activeItem && activeItem.id === item.id,
+                                                'hover:bg-white/10 text-slate-200 border-transparent hover:border-white/10': activeItem && activeItem.id !== item.id && !item.locked,
+                                                'opacity-45 cursor-not-allowed bg-white/[0.02] text-slate-500 border-transparent': item.locked
+                                            }">
                                         
                                         <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border transition-colors"
-                                             :class="{'bg-white/20 border-white/20 text-white': activeItem && activeItem.id === item.id, 'bg-[#DFF6DD] border-[#B7DFB9] text-[#107C10]': item.completed && (activeItem && activeItem.id !== item.id), 'bg-white border-elevate-soft text-elevate-primary': !item.completed && !item.locked && (activeItem && activeItem.id !== item.id), 'bg-elevate-soft border-transparent text-elevate-dark/30': item.locked}">
+                                             :class="{
+                                                 'bg-white/20 border-white/30 text-white': activeItem && activeItem.id === item.id,
+                                                 'bg-emerald-500/20 border-emerald-400/30 text-emerald-400': item.completed && (activeItem && activeItem.id !== item.id),
+                                                 'bg-sky-500/15 border-sky-400/30 text-sky-400': !item.completed && !item.locked && (activeItem && activeItem.id !== item.id),
+                                                 'bg-white/5 border-white/10 text-slate-500': item.locked
+                                             }">
                                             
                                             <i x-show="item.completed && (activeItem && activeItem.id !== item.id)" class="ph-bold ph-check"></i>
                                             <i x-show="item.locked" class="ph-bold ph-lock-key"></i>
@@ -122,9 +151,17 @@
                                         </div>
 
                                         <div class="flex-1 min-w-0 flex flex-col justify-center">
-                                            <span class="text-[10px] font-black uppercase tracking-wider mb-0.5" :class="(activeItem && activeItem.id === item.id) ? 'text-white/70' : 'text-elevate-dark/40'"
-                                                  x-text="item.type === 'assignment' ? (item.assignment_type === 'interactive_video' ? 'Video Interaktif' : 'Tugas') : (item.type === 'video' ? 'Video Belajar' : (item.type === 'file' ? 'Dokumen PDF' : (item.type === 'link' ? 'Tautan Eksternal' : 'Materi Pembuka')))"></span>
-                                            <h4 class="text-sm font-bold truncate leading-tight" :class="(activeItem && activeItem.id === item.id) ? 'text-white' : 'text-elevate-dark'" x-text="item.title"></h4>
+                                            <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                                                <span class="text-[10px] font-black uppercase tracking-wider" :class="(activeItem && activeItem.id === item.id) ? 'text-sky-200' : 'text-slate-400'"
+                                                      x-text="item.type === 'assignment' ? (item.assignment_type === 'interactive_video' ? 'Video Interaktif' : 'Tugas') : (item.type === 'video' ? 'Video Belajar' : (item.type === 'file' ? 'Dokumen PDF' : (item.type === 'link' ? 'Tautan Eksternal' : 'Materi Pembuka')))"></span>
+                                                <template x-if="item.is_pending_debt">
+                                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 shrink-0">Belum Tuntas</span>
+                                                </template>
+                                                <template x-if="item.is_latest && !item.is_pending_debt">
+                                                    <span class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-sky-500/25 text-sky-200 border border-sky-400/30 shrink-0">Materi Baru</span>
+                                                </template>
+                                            </div>
+                                            <h4 class="text-sm font-bold truncate leading-tight" :class="(activeItem && activeItem.id === item.id) ? 'text-white' : 'text-slate-100'" x-text="item.title"></h4>
                                         </div>
                                     </button>
                                 </template>
@@ -360,24 +397,95 @@
                                         </template>
 
                                         <template x-if="activeItem.completed">
-                                            <div class="bg-[#DFF6DD] text-[#107C10] p-5 md:p-6 rounded-2xl border border-[#B7DFB9] flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
-                                                <i class="ph-fill ph-check-circle text-4xl hidden sm:block"></i>
-                                                <div class="flex items-center gap-3 sm:hidden mb-2">
-                                                     <i class="ph-fill ph-check-circle text-3xl"></i>
-                                                     <p class="font-black text-lg">Tugas Selesai!</p>
-                                                </div>
-                                                <div class="w-full">
-                                                    <p class="font-black text-lg hidden sm:block">Tugas Selesai!</p>
-                                                    <p class="text-sm font-medium opacity-90">Kamu sudah menyelesaikan/mengumpulkan tugas ini.</p>
-                                                    <template x-if="activeItem.grade !== null">
-                                                        <p class="text-xs font-bold mt-2 bg-[#107C10] text-white px-3 py-1.5 rounded-lg w-fit shadow-sm border border-transparent">Nilai: <span x-text="activeItem.grade"></span></p>
+                                            <div class="space-y-4" x-data="{ editingSubmission: false, subMethod: activeItem.submission_link ? 'link' : 'file' }">
+                                                <div class="bg-emerald-500/15 text-emerald-300 p-5 md:p-6 rounded-2xl border border-emerald-400/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                                                    <div class="flex items-start sm:items-center gap-4">
+                                                        <i class="ph-fill ph-check-circle text-4xl text-emerald-400 hidden sm:block shrink-0"></i>
+                                                        <div>
+                                                            <div class="flex items-center gap-2 sm:hidden mb-1">
+                                                                <i class="ph-fill ph-check-circle text-2xl text-emerald-400"></i>
+                                                                <p class="font-black text-base text-white">Tugas Selesai!</p>
+                                                            </div>
+                                                            <p class="font-black text-lg text-white hidden sm:block">Tugas Berhasil Dikumpulkan!</p>
+                                                            <p class="text-sm font-medium text-emerald-200/90">Kamu sudah menyelesaikan/mengumpulkan tugas ini<span x-show="activeItem.submitted_at" x-text="' pada ' + activeItem.submitted_at"></span>.</p>
+                                                            
+                                                            <div class="flex flex-wrap items-center gap-2 mt-3">
+                                                                <template x-if="activeItem.grade !== null">
+                                                                    <span class="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-lg shadow-sm border border-emerald-400/40">Nilai: <span x-text="activeItem.grade"></span></span>
+                                                                </template>
+                                                                <template x-if="activeItem.submission_file">
+                                                                    <a :href="activeItem.submission_file" target="_blank" class="text-xs font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                                                                        <i class="ph-bold ph-file-arrow-down"></i> Lihat Berkas Jawabanmu
+                                                                    </a>
+                                                                </template>
+                                                                <template x-if="activeItem.submission_link">
+                                                                    <a :href="activeItem.submission_link" target="_blank" class="text-xs font-bold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                                                                        <i class="ph-bold ph-link"></i> Buka Link Jawabanmu
+                                                                    </a>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <template x-if="activeItem.grade === null && (activeItem.assignment_type === 'file_upload' || activeItem.assignment_type === 'link') && (!activeItem.is_expired || activeItem.allow_late_submission)">
+                                                        <button type="button" @click="editingSubmission = !editingSubmission" class="px-4 py-2.5 bg-emerald-500/20 text-emerald-200 border border-emerald-400/40 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-1.5 shrink-0 shadow-sm">
+                                                            <i class="ph-bold" :class="editingSubmission ? 'ph-x' : 'ph-pencil-simple'"></i>
+                                                            <span x-text="editingSubmission ? 'Batal Edit' : 'Ganti Jawaban'"></span>
+                                                        </button>
                                                     </template>
                                                 </div>
+
+                                                {{-- Form Ganti / Kirim Ulang Jawaban --}}
+                                                <template x-if="editingSubmission">
+                                                    <form x-data="{ submitting: false }"
+                                                          @submit="if($event.target.checkValidity()) { submitting = true; } else { $event.preventDefault(); }"
+                                                          :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'"
+                                                          method="POST" enctype="multipart/form-data"
+                                                          class="space-y-4 p-5 md:p-6 border-2 border-dashed border-sky-400/30 rounded-2xl bg-elevate-soft/30">
+                                                        @csrf
+                                                        <div class="flex p-1 bg-[#021124]/80 rounded-xl border border-white/10 w-fit">
+                                                            <button type="button" @click="subMethod = 'file'" :class="subMethod === 'file' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30' : 'text-slate-400 hover:text-white border border-transparent'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+                                                                <i class="ph-bold ph-upload-simple"></i> Upload Berkas
+                                                            </button>
+                                                            <button type="button" @click="subMethod = 'link'" :class="subMethod === 'link' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30' : 'text-slate-400 hover:text-white border border-transparent'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+                                                                <i class="ph-bold ph-link"></i> Tautan Link
+                                                            </button>
+                                                        </div>
+                                                        <input type="hidden" name="submission_type" :value="subMethod">
+
+                                                        <div x-show="subMethod === 'file'" class="space-y-1.5">
+                                                            <label class="block text-xs font-bold text-elevate-dark">Pilih Berkas Baru (Maks 20MB)</label>
+                                                            <input type="file" name="file" :required="subMethod === 'file'" :disabled="subMethod !== 'file'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.html,.htm,.zip,.rar,.7z" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                        </div>
+                                                        <div x-show="subMethod === 'link'" class="space-y-1.5">
+                                                            <label class="block text-xs font-bold text-elevate-dark">Masukkan URL Jawaban Baru</label>
+                                                            <input type="url" name="link_url" :required="subMethod === 'link'" :disabled="subMethod !== 'link'" :value="activeItem.submission_link || ''" placeholder="https://drive.google.com/..." class="w-full p-3.5 border border-elevate-soft rounded-xl bg-white text-elevate-dark text-sm">
+                                                        </div>
+                                                        <textarea name="student_note" rows="2" placeholder="Catatan tambahan..." class="w-full rounded-xl border border-elevate-soft p-3.5 text-elevate-dark bg-white text-sm" x-text="activeItem.submission_note || ''"></textarea>
+                                                        <button type="submit" :disabled="submitting" class="w-full py-3.5 bg-elevate-primary text-white font-bold rounded-xl shadow-lg hover:bg-elevate-dark transition-colors flex items-center justify-center gap-2">
+                                                            <i class="ph-bold ph-paper-plane-right"></i>
+                                                            <span x-text="submitting ? 'Menyimpan...' : 'Perbarui Jawaban Tugas'"></span>
+                                                        </button>
+                                                    </form>
+                                                </template>
                                             </div>
                                         </template>
 
                                         <template x-if="!activeItem.completed">
                                             <div>
+                                                {{-- PERINGATAN JIKA BATAS WAKTU SUDAH HABIS & TIDAK DIIZINKAN TERLAMBAT --}}
+                                                <template x-if="activeItem.is_expired && !activeItem.allow_late_submission && (activeItem.assignment_type === 'file_upload' || activeItem.assignment_type === 'quiz')">
+                                                    <div class="mb-6 p-5 bg-rose-500/15 border border-rose-400/30 rounded-2xl flex items-start gap-3.5 text-rose-200 shadow-sm">
+                                                        <i class="ph-fill ph-warning-octagon text-2xl text-rose-400 shrink-0 mt-0.5"></i>
+                                                        <div>
+                                                            <p class="text-sm font-black text-white">Batas Waktu Pengumpulan Telah Berakhir</p>
+                                                            <p class="text-xs font-medium text-rose-200/90 mt-1 leading-relaxed">
+                                                                Tenggat waktu tugas ini berakhir pada <b class="text-white" x-text="activeItem.deadline_formatted"></b> dan pengumpulan terlambat sedang dikunci. Silakan hubungi Guru Mata Pelajaran untuk mengaktifkan opsi <b>"Izinkan pengumpulan terlambat"</b> atau memperpanjang deadline tugas.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
                                                 {{-- OPSI 1A: KUIS ONLINE BIASA (DENGAN SOAL LMS) --}}
                                                 <template x-if="activeItem.assignment_type === 'quiz' && !activeItem.is_cbt && activeItem.questions_count > 0">
                                                     <a :href="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/quiz'" class="block w-full py-4 bg-elevate-primary text-white text-center font-bold rounded-2xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors active:scale-95">
@@ -409,25 +517,43 @@
 
                                                 {{-- OPSI 2: TUGAS UPLOAD & LINK --}}
                                                 <template x-if="activeItem.assignment_type === 'file_upload' || activeItem.assignment_type === 'link'">
-                                                    <form x-data="{ submitting: false }" 
+                                                    <form x-data="{ submitting: false, subMethod: activeItem.assignment_type === 'link' ? 'link' : 'file' }" 
                                                           @submit="if($event.target.checkValidity()) { submitting = true; } else { $event.preventDefault(); }" 
                                                           :action="'/students/learning/assignment/' + (activeItem.db_id || activeItem.id) + '/submit'" 
                                                           method="POST" enctype="multipart/form-data" 
-                                                          class="space-y-5 p-5 md:p-6 border-2 border-dashed border-elevate-primary/30 rounded-2xl bg-elevate-soft/30">
+                                                          class="space-y-5 p-5 md:p-6 border-2 border-dashed border-sky-400/30 rounded-2xl bg-elevate-soft/30">
                                                         @csrf
-                                                        <input type="hidden" name="submission_type" :value="activeItem.assignment_type === 'link' ? 'link' : 'file'">
-                                                        <template x-if="activeItem.assignment_type === 'link'">
-                                                            <div>
-                                                                <a :href="activeItem.link_url" target="_blank" class="text-elevate-primary font-bold mb-4 inline-flex items-center gap-2 bg-elevate-soft px-4 py-2 rounded-lg hover:bg-elevate-primary hover:text-white transition-colors"><i class="ph-link"></i> Buka Link Soal/Tugas</a>
-                                                                <input type="url" name="link_url" placeholder="Paste link jawaban kamu di sini..." required class="w-full p-4 border border-elevate-soft rounded-xl focus:ring-2 focus:ring-elevate-accent/20 focus:border-elevate-accent bg-white text-elevate-dark outline-none transition-all text-sm shadow-sm">
-                                                            </div>
-                                                        </template>
+                                                        
+                                                        {{-- Pilihan Metode Pengumpulan (Upload Berkas / Kirim Tautan Link) --}}
                                                         <template x-if="activeItem.assignment_type === 'file_upload'">
-                                                            <div class="space-y-1.5">
-                                                                <label class="block text-xs font-bold text-elevate-dark">Pilih Berkas Tugas (PDF, Word, Excel, Gambar, HTML/Web App, ZIP/RAR maks 20MB)</label>
-                                                                <input type="file" name="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.html,.htm,.zip,.rar,.7z" @change="if($event.target.files[0] && $event.target.files[0].size > 20 * 1024 * 1024) { Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 20MB. Silakan pilih file yang lebih kecil.', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem] font-sans' } }); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                            <div class="flex p-1 bg-[#021124]/80 rounded-xl border border-white/10 w-fit">
+                                                                <button type="button" @click="subMethod = 'file'" :class="subMethod === 'file' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30' : 'text-slate-400 hover:text-white border border-transparent'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+                                                                    <i class="ph-bold ph-upload-simple"></i> Upload Berkas
+                                                                </button>
+                                                                <button type="button" @click="subMethod = 'link'" :class="subMethod === 'link' ? 'bg-elevate-primary text-white shadow-sm border border-sky-400/30' : 'text-slate-400 hover:text-white border border-transparent'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+                                                                    <i class="ph-bold ph-link"></i> Kirim Tautan / Link
+                                                                </button>
                                                             </div>
                                                         </template>
+
+                                                        <input type="hidden" name="submission_type" :value="subMethod">
+
+                                                        <template x-if="activeItem.link_url">
+                                                            <div>
+                                                                <a :href="activeItem.link_url" target="_blank" class="text-elevate-primary font-bold inline-flex items-center gap-2 bg-elevate-soft px-4 py-2.5 rounded-xl hover:bg-elevate-primary hover:text-white transition-colors text-xs shadow-sm"><i class="ph-bold ph-link"></i> Buka Tautan Soal / Instruksi Guru</a>
+                                                            </div>
+                                                        </template>
+
+                                                        <div x-show="subMethod === 'file'" class="space-y-1.5">
+                                                            <label class="block text-xs font-bold text-elevate-dark">Pilih Berkas Tugas (PDF, Word, Excel, Gambar, HTML/Web App, ZIP/RAR maks 20MB)</label>
+                                                            <input type="file" name="file" :required="subMethod === 'file'" :disabled="subMethod !== 'file'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.webp,.html,.htm,.zip,.rar,.7z" @change="if($event.target.files[0] && $event.target.files[0].size > 20 * 1024 * 1024) { Swal.fire({ icon: 'warning', title: 'File Terlalu Besar!', text: 'Ukuran file maksimum adalah 20MB. Silakan pilih file yang lebih kecil.', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem] font-sans' } }); $event.target.value = ''; }" class="block w-full text-sm text-elevate-dark/60 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-primary file:text-white hover:file:bg-elevate-dark transition-colors border border-elevate-soft bg-white rounded-xl shadow-sm cursor-pointer">
+                                                        </div>
+
+                                                        <div x-show="subMethod === 'link'" class="space-y-1.5">
+                                                            <label class="block text-xs font-bold text-elevate-dark">Tautan / Link Jawaban Tugas (Google Drive, Canva, YouTube, dsb.)</label>
+                                                            <input type="url" name="link_url" :required="subMethod === 'link' && activeItem.assignment_type !== 'link'" :disabled="subMethod !== 'link'" placeholder="https://drive.google.com/..." class="w-full p-4 border border-elevate-soft rounded-xl focus:ring-2 focus:ring-elevate-accent/20 focus:border-elevate-accent bg-white text-elevate-dark outline-none transition-all text-sm shadow-sm">
+                                                        </div>
+
                                                         <textarea name="student_note" rows="3" placeholder="Tambahkan catatan opsional..." class="w-full rounded-xl border-elevate-soft p-4 focus:ring-2 focus:ring-elevate-accent/20 focus:border-elevate-accent text-elevate-dark bg-white outline-none transition-all text-sm resize-none shadow-sm"></textarea>
                                                         
                                                         <button type="submit" :disabled="submitting" class="w-full py-4 bg-elevate-primary text-white font-bold rounded-xl shadow-lg shadow-elevate-primary/20 hover:bg-elevate-dark transition-colors flex items-center justify-center gap-2" :class="submitting ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'">
@@ -688,10 +814,10 @@
                 </div>
 
                 {{-- TOMBOL KONTROL BAWAH --}}
-                <div class="bg-white border-t border-elevate-soft p-4 shadow-[0_-10px_40px_rgba(44,63,97,0.05)] z-20">
+                <div class="bg-[#031d3d]/95 border-t border-white/10 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] z-20">
                     <div class="max-w-4xl mx-auto flex flex-row items-center justify-between gap-3 md:gap-4">
                         
-                        <button @click="prevItem()" :disabled="currentIndex === 0" class="px-5 md:px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 transition-all shrink-0 active:scale-95" :class="currentIndex === 0 ? 'bg-elevate-soft/50 text-elevate-dark/30 border-transparent cursor-not-allowed' : 'bg-white border border-elevate-soft text-elevate-dark hover:bg-elevate-soft shadow-sm'">
+                        <button @click="prevItem()" :disabled="currentIndex === 0" class="px-5 md:px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 transition-all shrink-0 active:scale-95 border" :class="currentIndex === 0 ? 'bg-white/5 text-slate-500 border-white/5 cursor-not-allowed' : 'bg-[#021124] border-white/15 text-slate-200 hover:bg-white/10 hover:text-white shadow-sm'">
                             <i class="ph-bold ph-arrow-left text-lg"></i> <span class="hidden sm:inline">Kembali</span>
                         </button>
 
@@ -704,8 +830,8 @@
                         
                         {{-- WARNING ALERT --}}
                         <template x-if="activeItem && activeItem.type === 'assignment' && !activeItem.completed">
-                            <div class="flex-1 w-full px-4 md:px-8 py-3.5 bg-[#FDE7E9] text-[#D13438] font-bold rounded-2xl border border-[#F4C3C9] flex items-center justify-center gap-2 text-xs md:text-sm shadow-sm">
-                                <i class="ph-warning-circle shrink-0 text-lg"></i> <span class="truncate">Selesaikan tugas untuk lanjut.</span>
+                            <div class="flex-1 w-full px-4 md:px-8 py-3.5 bg-amber-500/15 text-amber-300 font-bold rounded-2xl border border-amber-400/30 flex items-center justify-center gap-2 text-xs md:text-sm shadow-sm">
+                                <i class="ph-fill ph-warning-circle shrink-0 text-lg text-amber-400"></i> <span class="truncate">Selesaikan tugas untuk lanjut ke materi berikutnya.</span>
                             </div>
                         </template>
 
@@ -717,7 +843,27 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // MENANGKAP ERROR VALIDASI LARAVEL SAAT PENGUMPULAN TUGAS (File kebesaran, ekstensi salah, dll)
+            // MENANGKAP PESAN SUKSES / ERROR SESSION & VALIDASI LARAVEL SAAT PENGUMPULAN TUGAS
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: @json(session('success')),
+                    confirmButtonColor: '#0d52a1',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Tidak Dapat Mengumpulkan Tugas',
+                    text: @json(session('error')),
+                    confirmButtonColor: '#0d52a1',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+            @endif
+
             @if($errors->any())
                 Swal.fire({
                     icon: 'error',
@@ -733,6 +879,7 @@
             Alpine.data('learningPlayer', () => ({
                 sidebarOpen: false,
                 isTransitioning: false,
+                viewMode: 'focus', // 'focus' | 'all'
                 syllabus: {!! $syllabusJson ?? '[]' !!}, 
                 activeItem: null,
 
@@ -754,11 +901,23 @@
                 timeSpent: 0,
                 lastLogTime: Date.now(),
 
+                get activeItemsCount() {
+                    return this.syllabus.filter(i => !i.is_archived).length;
+                },
+
                 get groupedSyllabus() {
                     let groups = [];
                     let currentGroup = null;
                     
-                    this.syllabus.forEach(item => {
+                    let items = this.syllabus;
+                    if (this.viewMode === 'focus') {
+                        let filtered = this.syllabus.filter(item => !item.is_archived);
+                        if (filtered.length > 0) {
+                            items = filtered;
+                        }
+                    }
+
+                    items.forEach(item => {
                         if (!currentGroup || currentGroup.title !== item.group_title) {
                             currentGroup = { title: item.group_title, items: [] };
                             groups.push(currentGroup);
@@ -828,7 +987,13 @@
                 
                  initPlayer() {
                     if(this.syllabus.length === 0) return;
-                    let target = this.syllabus.find(item => !item.completed && !item.locked);
+                    // Prioritas 1: Item fokus aktif yang belum selesai dan tidak terkunci
+                    let target = this.syllabus.find(item => !item.is_archived && !item.completed && !item.locked);
+                    // Prioritas 2: Item fokus aktif pertama
+                    if (!target) target = this.syllabus.find(item => !item.is_archived);
+                    // Prioritas 3: Item belum selesai manapun
+                    if (!target) target = this.syllabus.find(item => !item.completed && !item.locked);
+                    // Fallback item pertama
                     this.activeItem = target || this.syllabus[0];
 
                     if (this.activeItem.type === 'assignment' && this.activeItem.assignment_type === 'interactive_video') {

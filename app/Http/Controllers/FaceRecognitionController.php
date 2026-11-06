@@ -202,6 +202,10 @@ class FaceRecognitionController extends Controller
             // Simpan Vektor Wajah
             $student->face_descriptor = $request->descriptor;
             $student->face_registered_at = Carbon::now();
+            $student->face_status = 'verified';
+            $student->face_verified_at = Carbon::now();
+            $student->face_verified_by = Auth::id();
+            $student->face_rejection_note = null;
             $student->save();
 
             // Invalidate cache descriptor agar Kiosk & Scanner segera mendapatkan data teranyar
@@ -242,6 +246,10 @@ class FaceRecognitionController extends Controller
         try {
             $student->face_descriptor = null;
             $student->face_registered_at = null;
+            $student->face_status = 'unregistered';
+            $student->face_verified_at = null;
+            $student->face_verified_by = null;
+            $student->face_rejection_note = null;
             $student->save();
 
             // Invalidate cache descriptor
@@ -294,6 +302,16 @@ class FaceRecognitionController extends Controller
                     }
                 });
             }
+
+            // Sinkronisasi data legacy: siswa yang sudah punya descriptor namun face_status masih unregistered
+            Student::whereNotNull('face_descriptor')
+                ->where(function ($q) {
+                    $q->whereNull('face_status')->orWhere('face_status', 'unregistered');
+                })
+                ->update([
+                    'face_status' => 'verified',
+                    'face_verified_at' => now(),
+                ]);
         } catch (\Exception $e) {
             // Abaikan jika gagal cek schema
         }
@@ -440,13 +458,24 @@ class FaceRecognitionController extends Controller
     {
         self::ensureFaceColumnsExist();
 
-        $request->validate([
-            'descriptor'           => 'required|string',
-            'photo'                => 'required|string',
-            'update_profile_photo' => 'nullable|boolean',
-        ]);
+        $rawDescriptor = $request->input('descriptor', $request->input('face_descriptor'));
+        $rawPhoto = $request->input('photo', $request->input('face_photo_base64'));
 
-        $descriptorArray = json_decode($request->descriptor, true);
+        if (empty($rawDescriptor)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Data vektor wajah tidak boleh kosong.'
+            ], 422);
+        }
+
+        if (empty($rawPhoto)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Data foto wajah tidak boleh kosong.'
+            ], 422);
+        }
+
+        $descriptorArray = is_array($rawDescriptor) ? $rawDescriptor : json_decode((string) $rawDescriptor, true);
         if (!is_array($descriptorArray) || count($descriptorArray) !== 128) {
             return response()->json([
                 'status'  => 'error',
@@ -456,7 +485,7 @@ class FaceRecognitionController extends Controller
 
         $descriptorArray = array_map('floatval', array_values($descriptorArray));
 
-        $savedPhotoPath = $this->saveBase64Photo($request->photo, $student->student_id ?? $student->id);
+        $savedPhotoPath = $this->saveBase64Photo($rawPhoto, $student->student_id ?? $student->id);
         if (!$savedPhotoPath) {
             return response()->json([
                 'status'  => 'error',
@@ -491,10 +520,11 @@ class FaceRecognitionController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'status'     => 'success',
-                'message'    => "Data Face ID & Foto untuk {$student->name} berhasil disimpan dan diverifikasi.",
-                'photo_url'  => asset('storage/' . ($updateData['photo_path'] ?? $savedPhotoPath)),
-                'face_status'=> 'verified'
+                'status'      => 'success',
+                'success'     => true,
+                'message'     => "Data Face ID & Foto untuk {$student->name} berhasil disimpan dan diverifikasi.",
+                'photo_url'   => asset('storage/' . ($updateData['photo_path'] ?? $savedPhotoPath)),
+                'face_status' => 'verified'
             ]);
         }
 
