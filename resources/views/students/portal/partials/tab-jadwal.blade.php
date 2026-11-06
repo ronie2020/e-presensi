@@ -26,15 +26,15 @@
 
     {{-- TOGGLE SUB-MENU --}}
     <div class="flex justify-center mb-4">
-        <div class="bg-slate-100 p-1.5 rounded-[1.5rem] inline-flex shadow-inner border border-slate-200">
+        <div class="bg-[#021124]/80 p-1.5 rounded-[1.5rem] inline-flex shadow-inner border border-white/10">
             <button @click="viewMode = 'mingguan'" 
                 class="px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center gap-2"
-                :class="viewMode === 'mingguan' ? 'bg-white shadow-md text-elevate-primary ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'">
+                :class="viewMode === 'mingguan' ? 'bg-elevate-primary shadow-md text-white ring-1 ring-sky-400/30' : 'text-slate-400 hover:text-white'">
                 <i class="ph-bold ph-list-numbers text-lg"></i> Mingguan
             </button>
             <button @click="viewMode = 'kalender'; triggerCalendarResize()" 
                 class="px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center gap-2"
-                :class="viewMode === 'kalender' ? 'bg-white shadow-md text-elevate-primary ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700'">
+                :class="viewMode === 'kalender' ? 'bg-elevate-primary shadow-md text-white ring-1 ring-sky-400/30' : 'text-slate-400 hover:text-white'">
                 <i class="ph-bold ph-calendar-blank text-lg"></i> Kalender
             </button>
         </div>
@@ -48,14 +48,14 @@
          class="space-y-8">
          
         {{-- NAVIGASI HARI --}}
-        <div class="sticky top-20 z-30 bg-slate-50/90 backdrop-blur-md py-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:bg-transparent sm:backdrop-filter-none transition-all">
+        <div class="sticky top-20 z-30 bg-[#021124]/90 backdrop-blur-md py-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:bg-transparent sm:backdrop-filter-none transition-all">
             <div class="flex overflow-x-auto gap-3 no-scrollbar snap-x py-2 custom-scrollbar">
                 @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $day)
                     <button @click="activeDay = '{{ $day }}'" 
                         class="snap-start shrink-0 relative px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 border overflow-hidden group"
                         :class="activeDay === '{{ $day }}' 
-                            ? 'bg-elevate-dark text-white border-elevate-dark shadow-lg shadow-elevate-dark/30 scale-105' 
-                            : 'bg-white text-slate-500 border-slate-200 hover:border-elevate-accent/50 hover:text-elevate-primary'">
+                            ? 'bg-elevate-primary text-white border-sky-400/40 shadow-lg shadow-sky-500/20 scale-105' 
+                            : 'bg-[#031d3d]/80 text-slate-300 border-white/10 hover:border-elevate-accent/50 hover:text-white'">
                         
                         @if($day == $todayName)
                             <span class="absolute top-2 right-2 flex h-2 w-2">
@@ -291,14 +291,14 @@
 </div>
 
 <style>
-    .fc-theme-standard .fc-scrollgrid { border-color: #f1f5f9; border-radius: 1rem; overflow: hidden; }
-    .fc-theme-standard th, .fc-theme-standard td { border-color: #f1f5f9; }
-    .fc-col-header-cell { padding: 12px 0; background-color: #f8fafc; }
-    .fc-col-header-cell-cushion { color: #2c3f61; font-weight: 900; text-transform: uppercase; font-size: 0.75rem; text-decoration: none;}
-    .fc-daygrid-day-number { color: #2c3f61; font-weight: 700; font-size: 0.875rem; text-decoration: none; padding: 8px !important; }
-    .fc-day-today { background-color: #e5eff5 !important; }
+    .fc-theme-standard .fc-scrollgrid { border-color: rgba(255, 255, 255, 0.1) !important; border-radius: 1rem; overflow: hidden; }
+    .fc-theme-standard th, .fc-theme-standard td { border-color: rgba(255, 255, 255, 0.08) !important; }
+    .fc-col-header-cell { padding: 12px 0; background-color: rgba(2, 17, 36, 0.85) !important; }
+    .fc-col-header-cell-cushion { color: #38bdf8 !important; font-weight: 900; text-transform: uppercase; font-size: 0.75rem; text-decoration: none; }
+    .fc-daygrid-day-number { color: #e2e8f0 !important; font-weight: 700; font-size: 0.875rem; text-decoration: none; padding: 8px !important; }
+    .fc-day-today { background-color: rgba(56, 189, 248, 0.12) !important; }
     .fc-event { border-radius: 6px; padding: 2px 4px; font-size: 0.7rem; font-weight: bold; border: none; cursor: pointer; }
-    .fc .fc-button-primary { background-color: #fff; border-color: #e2e8f0; color: #2c3f61; font-weight: 700; text-transform: capitalize; border-radius: 0.75rem; }
-    .fc .fc-button-primary:not(:disabled):active, .fc .fc-button-primary:not(:disabled).fc-button-active { background-color: #e5eff5; border-color: #56bbf1; color: #0d52a1; }
-    .fc .fc-button-primary:hover { background-color: #f8fafc; color: #0d52a1; }
+    .fc .fc-button-primary { background-color: rgba(3, 29, 61, 0.9) !important; border-color: rgba(255, 255, 255, 0.15) !important; color: #e2e8f0 !important; font-weight: 700; text-transform: capitalize; border-radius: 0.75rem; }
+    .fc .fc-button-primary:not(:disabled):active, .fc .fc-button-primary:not(:disabled).fc-button-active { background-color: #0d52a1 !important; border-color: #56bbf1 !important; color: #ffffff !important; }
+    .fc .fc-button-primary:hover { background-color: #0d52a1 !important; color: #ffffff !important; }
 </style>

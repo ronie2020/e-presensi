@@ -237,20 +237,20 @@
                             <span class="text-white font-black uppercase tracking-wider text-[8px] mt-1">KALENDER</span>
                         </div>
                         {{-- Bagian Tengah (Angka Masehi) --}}
-                         <div class="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700/50 py-1.5 text-center px-1">
-                            <span class="text-[9px] font-bold text-elevate-primary dark:text-elevate-accent uppercase block mb-0.5">
-                                {{ $date->translatedFormat('l') }}
+                        <div class="py-3 text-center px-2 flex flex-col items-center justify-center bg-[#031d3d]/60">
+                            <span class="text-4xl font-black text-white leading-none tracking-tight">
+                                {{ $date->format('d') }}
                             </span>
-                            <span class="text-[8px] font-bold text-slate-400 dark:text-slate-500 block border-t border-slate-200 dark:border-slate-700/50 pt-0.5 mt-0.5">
-                                <i class="ph-bold ph-moon-stars text-elevate-accent mr-0.5"></i> {{ $hijriDateFull }}
+                            <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest mt-1">
+                                {{ $date->translatedFormat('M Y') }}
                             </span>
                         </div>
                         {{-- Bagian Bawah (Hari & Hijriyah Kecil) --}}
-                        <div class="bg-slate-50 border-t border-slate-100 py-1.5 text-center px-1">
-                            <span class="text-[9px] font-bold text-elevate-primary uppercase block mb-0.5">
+                        <div class="bg-[#021124]/80 border-t border-white/10 py-1.5 text-center px-1">
+                            <span class="text-[9px] font-bold text-elevate-accent uppercase block mb-0.5">
                                 {{ $date->translatedFormat('l') }}
                             </span>
-                            <span class="text-[8px] font-bold text-slate-400 block border-t border-slate-200 pt-0.5 mt-0.5">
+                            <span class="text-[8px] font-bold text-slate-400 block border-t border-white/10 pt-0.5 mt-0.5">
                                 <i class="ph-bold ph-moon-stars text-elevate-accent mr-0.5"></i> {{ $hijriDateFull }}
                             </span>
                         </div>

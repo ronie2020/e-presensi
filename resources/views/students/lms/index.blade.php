@@ -91,7 +91,7 @@
 
                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($prioritySubjects as $index => $subject)
-                        <a href="{{ route('students.learning.play', $subject->id) }}" class="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 border border-slate-100 hover:ring-2 {{ $subject->active_tasks_count > 0 ? 'hover:ring-rose-300/50' : 'hover:ring-sky-300/50' }}">
+                        <a href="{{ route('students.learning.play', $subject->id) }}" class="group relative flex flex-col bg-[#031d3d]/85 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 border border-white/10 hover:ring-2 {{ $subject->active_tasks_count > 0 ? 'hover:ring-rose-400/50' : 'hover:ring-sky-400/50' }}">
                             
                             {{-- Cover jika ada di prioritas --}}
                             @if($subject->priority_cover && \Illuminate\Support\Facades\Storage::disk('public')->exists($subject->priority_cover))
@@ -121,7 +121,7 @@
                                 {{-- Top Header jika tanpa cover --}}
                                 @if(!$subject->priority_cover || !\Illuminate\Support\Facades\Storage::disk('public')->exists($subject->priority_cover))
                                     <div class="flex justify-between items-start mb-3">
-                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br {{ $subject->active_tasks_count > 0 ? 'from-orange-50 to-rose-100 text-rose-600 border border-rose-200/50' : 'from-sky-50 to-blue-100 text-sky-600 border border-sky-200/50' }} flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
+                                        <div class="w-12 h-12 rounded-2xl {{ $subject->active_tasks_count > 0 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-sky-500/20 text-sky-400 border border-sky-500/30' }} flex items-center justify-center text-2xl shadow-inner group-hover:scale-110 transition-transform">
                                             <i class="ph-duotone {{ $subject->active_tasks_count > 0 ? 'ph-fire' : 'ph-book-open' }}"></i>
                                         </div>
                                         @if($subject->active_tasks_count > 0)
@@ -139,20 +139,20 @@
                                 @endif
 
                                 <div>
-                                    <h3 class="font-bold text-base text-elevate-dark mb-1 group-hover:text-elevate-primary transition-colors line-clamp-1">
+                                    <h3 class="font-bold text-base text-white mb-1 group-hover:text-sky-400 transition-colors line-clamp-1">
                                         {{ $subject->priority_item_title ?? $subject->name }}
                                     </h3>
-                                    <p class="text-xs text-slate-400 font-medium mb-4 line-clamp-2">
+                                    <p class="text-xs text-slate-300 font-medium mb-4 line-clamp-2">
                                         {{ $subject->active_tasks_count > 0 ? 'Mata pelajaran ' . $subject->name . ' • Ada tugas yang mendekati batas waktu.' : 'Mata pelajaran ' . $subject->name . ' • Modul baru siap dipelajari.' }}
                                     </p>
                                 </div>
 
                                 {{-- Footer Action --}}
-                                <div class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-                                    <span class="text-xs font-bold {{ $subject->active_tasks_count > 0 ? 'text-rose-600' : 'text-sky-600' }} group-hover:underline">
+                                <div class="mt-auto pt-3 border-t border-white/10 flex items-center justify-between">
+                                    <span class="text-xs font-bold {{ $subject->active_tasks_count > 0 ? 'text-rose-400' : 'text-sky-400' }} group-hover:underline">
                                         {{ $subject->active_tasks_count > 0 ? 'Kerjakan Sekarang' : 'Pelajari Sekarang' }}
                                     </span>
-                                    <i class="ph-bold ph-arrow-right {{ $subject->active_tasks_count > 0 ? 'text-rose-500' : 'text-sky-500' }} group-hover:translate-x-1 transition-transform"></i>
+                                    <i class="ph-bold ph-arrow-right {{ $subject->active_tasks_count > 0 ? 'text-rose-400' : 'text-sky-400' }} group-hover:translate-x-1 transition-transform"></i>
                                 </div>
                             </div>
                         </a>
@@ -227,7 +227,7 @@
 
                         {{-- SUBJECT CARD (Pure Gradient & Mapel Icon, Consistent & Elegant) --}}
                         <a href="{{ route('students.learning.play', $subject->id) }}" 
-                           class="group relative flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-dark/10 transition-all duration-300 hover:-translate-y-1.5 h-full border border-slate-100 hover:ring-2 ring-{{ explode('-', $selectedTheme)[0] }}-200/50">
+                           class="group relative flex flex-col bg-[#031d3d]/85 backdrop-blur-xl rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 h-full border border-white/10 hover:border-sky-400/40">
 
                             {{-- COVER THUMBNAIL (PURE THEMATIC GRADIENT) --}}
                             <div class="relative h-28 w-full overflow-hidden shrink-0">
@@ -262,16 +262,16 @@
                                 <div class="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-gradient-to-br {{ $t['bg'] }} opacity-[0.06] group-hover:opacity-[0.12] blur-2xl transition-opacity duration-500 pointer-events-none"></div>
 
                                 <div>
-                                    <h4 class="font-bold text-sm text-elevate-dark leading-snug mb-1 relative z-10 line-clamp-2 group-hover:text-elevate-primary transition-colors">
+                                    <h4 class="font-bold text-sm text-white leading-snug mb-1 relative z-10 line-clamp-2 group-hover:text-sky-400 transition-colors">
                                         {{ $subject->name }}
                                     </h4>
                                 </div>
 
-                                <div class="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100 relative z-10">
+                                <div class="flex items-center gap-2 mt-3 pt-2.5 border-t border-white/10 relative z-10">
                                     <div class="w-6 h-6 rounded-full bg-gradient-to-br {{ $t['bg'] }} flex items-center justify-center text-white text-[10px] font-black shadow-sm shrink-0">
                                         <i class="ph-bold ph-user"></i>
                                     </div>
-                                    <span class="text-[10px] font-bold text-slate-500 truncate flex-1">Tim Pengajar</span>
+                                    <span class="text-[10px] font-bold text-slate-300 truncate flex-1">Tim Pengajar</span>
                                     <span class="text-[9px] font-black text-white bg-gradient-to-r {{ $t['bg'] }} px-2.5 py-1 rounded-lg shadow-sm shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                         Masuk →
                                     </span>

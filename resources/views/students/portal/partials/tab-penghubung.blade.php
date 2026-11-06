@@ -15,9 +15,9 @@
             </div>
 
             {{-- INTERNAL TAB SWITCHER --}}
-            <div class="bg-white/10 backdrop-blur-xl p-1.5 rounded-2xl flex border border-white/10 w-full md:w-auto shadow-inner">
+            <div class="bg-[#021124]/60 backdrop-blur-xl p-1.5 rounded-2xl flex border border-white/10 w-full md:w-auto shadow-inner">
                 <button @click="mode = 'note'" 
-                    :class="mode === 'note' ? 'bg-white text-elevate-dark shadow-lg' : 'text-white/70 hover:bg-white/10'"
+                    :class="mode === 'note' ? 'bg-elevate-primary text-white shadow-lg border border-elevate-accent/30' : 'text-white/70 hover:bg-white/10'"
                     class="flex-1 md:flex-none px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2">
                     <i class="ph-fill ph-notebook text-lg"></i> Catatan
                 </button>

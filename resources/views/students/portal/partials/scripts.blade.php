@@ -86,16 +86,26 @@
                     datasets: [{
                         label: 'Nilai',
                         data: academicData.scores,
-                        backgroundColor: 'rgba(6, 182, 212, 0.2)', // Warna Cyan transparan
-                        borderColor: 'rgba(6, 182, 212, 1)',       // Warna Cyan solid
+                        backgroundColor: 'rgba(56, 189, 248, 0.25)',
+                        borderColor: 'rgba(56, 189, 248, 1)',
                         borderWidth: 2,
-                        borderRadius: 4
+                        borderRadius: 6
                     }]
                 },
                 options: { 
                     indexAxis: 'y', 
                     responsive: true, 
                     maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        },
+                        y: {
+                            ticks: { color: '#e2e8f0', font: { weight: 'bold' } },
+                            grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        }
+                    },
                     plugins: {
                         legend: { display: false }
                     }
@@ -114,7 +124,7 @@
                     labels: ['Hadir', 'Sakit', 'Izin', 'Alpa'],
                     datasets: [{
                         data: [attData.hadir, attData.sakit, attData.izin, attData.alpa],
-                        backgroundColor: ['#06b6d4', '#3b82f6', '#f59e0b', '#f43f5e'], // Cyan, Blue, Amber, Rose
+                        backgroundColor: ['#10b981', '#38bdf8', '#f59e0b', '#f43f5e'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
@@ -124,7 +134,10 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1', font: { weight: 'bold', size: 11 } }
+                        }
                     }
                 }
             });

@@ -27,7 +27,9 @@
        TRANSFORMASI GLOBAL ESTETIKA ELEVATE DARK GLASSMORPHISM UNTUK TAB PORTAL
        Menyelaraskan seluruh tab di dalam portal dengan desain utama website
        ========================================================================== */
-    #portal-content-wrapper .bg-white,
+    #portal-content-wrapper .bg-white:not(button):not(a),
+    #portal-content-wrapper .bg-white\/90:not(button):not(a),
+    #portal-content-wrapper .bg-white\/80:not(button):not(a),
     #portal-content-wrapper .dark\:bg-slate-800,
     #portal-content-wrapper .dark\:bg-slate-800\/80 {
         background-color: rgba(3, 29, 61, 0.85) !important;
@@ -38,10 +40,30 @@
         box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.45) !important;
     }
 
+    /* Fix khusus tombol & link dengan class bg-white di dalam portal agar tidak bentrok dengan app.css (dark-on-dark) */
+    #portal-content-wrapper button.bg-white,
+    #portal-content-wrapper a.bg-white {
+        background-color: rgba(13, 82, 161, 0.45) !important;
+        border: 1px solid rgba(86, 187, 241, 0.4) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    }
+    #portal-content-wrapper button.bg-white:hover,
+    #portal-content-wrapper a.bg-white:hover {
+        background-color: #0d52a1 !important;
+        border-color: #56bbf1 !important;
+        color: #ffffff !important;
+    }
+    #portal-content-wrapper button.bg-white *,
+    #portal-content-wrapper a.bg-white * {
+        color: #ffffff !important;
+    }
+
     #portal-content-wrapper .text-elevate-dark,
     #portal-content-wrapper .text-slate-800,
     #portal-content-wrapper .text-slate-900,
-    #portal-content-wrapper .text-slate-700 {
+    #portal-content-wrapper .text-slate-700,
+    #portal-content-wrapper .text-\[\#2A3B52\] {
         color: #ffffff !important;
     }
 
@@ -54,18 +76,22 @@
         color: #cbd5e1 !important;
     }
 
+    #portal-content-wrapper .border-slate-50,
     #portal-content-wrapper .border-slate-100,
     #portal-content-wrapper .border-slate-200,
     #portal-content-wrapper .border-slate-300,
+    #portal-content-wrapper .divide-slate-50 > * + *,
     #portal-content-wrapper .divide-slate-100 > * + *,
     #portal-content-wrapper .divide-slate-200 > * + * {
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
     }
 
     #portal-content-wrapper .bg-slate-50,
+    #portal-content-wrapper .bg-slate-50\/50,
+    #portal-content-wrapper .bg-slate-50\/30,
     #portal-content-wrapper .bg-slate-100 {
         background-color: rgba(2, 17, 36, 0.7) !important;
-        border-color: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
         color: #e2e8f0 !important;
     }
 
@@ -73,10 +99,102 @@
         background-color: rgba(255, 255, 255, 0.1) !important;
     }
 
-    #portal-content-wrapper .bg-elevate-soft {
+    #portal-content-wrapper .bg-elevate-soft,
+    #portal-content-wrapper .bg-elevate-soft\/50,
+    #portal-content-wrapper .bg-elevate-soft\/30 {
         background-color: rgba(56, 189, 248, 0.15) !important;
         color: #38bdf8 !important;
         border-color: rgba(56, 189, 248, 0.3) !important;
+    }
+
+    /* Override warna pastel terang (rose-50, emerald-50, amber-50, blue-50, dll) agar selaras dengan Dark Mode */
+    #portal-content-wrapper .bg-rose-50,
+    #portal-content-wrapper .bg-rose-50\/30,
+    #portal-content-wrapper .bg-rose-50\/50,
+    #portal-content-wrapper .bg-rose-100,
+    #portal-content-wrapper .bg-\[\#FDE7E9\] {
+        background-color: rgba(244, 63, 94, 0.15) !important;
+        border-color: rgba(244, 63, 94, 0.3) !important;
+    }
+    #portal-content-wrapper .bg-emerald-50,
+    #portal-content-wrapper .bg-emerald-50\/50,
+    #portal-content-wrapper .bg-emerald-100,
+    #portal-content-wrapper .bg-\[\#DFF6DD\] {
+        background-color: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    #portal-content-wrapper .bg-amber-50,
+    #portal-content-wrapper .bg-amber-50\/50,
+    #portal-content-wrapper .bg-amber-100,
+    #portal-content-wrapper .bg-yellow-50,
+    #portal-content-wrapper .bg-yellow-100,
+    #portal-content-wrapper .bg-orange-50,
+    #portal-content-wrapper .bg-orange-100,
+    #portal-content-wrapper .bg-\[\#FFEFD6\] {
+        background-color: rgba(245, 158, 11, 0.15) !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+    #portal-content-wrapper .bg-blue-50,
+    #portal-content-wrapper .bg-blue-50\/50,
+    #portal-content-wrapper .bg-blue-100,
+    #portal-content-wrapper .bg-sky-50,
+    #portal-content-wrapper .bg-sky-100,
+    #portal-content-wrapper .bg-indigo-50,
+    #portal-content-wrapper .bg-indigo-100,
+    #portal-content-wrapper .bg-\[\#F3F9FD\] {
+        background-color: rgba(56, 189, 248, 0.15) !important;
+        border-color: rgba(56, 189, 248, 0.3) !important;
+    }
+    #portal-content-wrapper .bg-purple-50,
+    #portal-content-wrapper .bg-purple-50\/50,
+    #portal-content-wrapper .bg-purple-100,
+    #portal-content-wrapper .bg-violet-50,
+    #portal-content-wrapper .bg-violet-100,
+    #portal-content-wrapper .bg-pink-50,
+    #portal-content-wrapper .bg-pink-100 {
+        background-color: rgba(168, 85, 247, 0.15) !important;
+        border-color: rgba(168, 85, 247, 0.3) !important;
+    }
+
+    /* Penyesuaian Teks Warna gelap agar tetap kontras di atas kartu gelap */
+    #portal-content-wrapper .text-rose-900,
+    #portal-content-wrapper .text-rose-800,
+    #portal-content-wrapper .text-rose-700,
+    #portal-content-wrapper .text-rose-600,
+    #portal-content-wrapper .text-\[\#D13438\] {
+        color: #fda4af !important;
+    }
+    #portal-content-wrapper .text-emerald-900,
+    #portal-content-wrapper .text-emerald-800,
+    #portal-content-wrapper .text-emerald-700,
+    #portal-content-wrapper .text-emerald-600,
+    #portal-content-wrapper .text-\[\#107C10\] {
+        color: #6ee7b7 !important;
+    }
+    #portal-content-wrapper .text-amber-900,
+    #portal-content-wrapper .text-amber-800,
+    #portal-content-wrapper .text-amber-700,
+    #portal-content-wrapper .text-amber-600,
+    #portal-content-wrapper .text-orange-700,
+    #portal-content-wrapper .text-orange-600,
+    #portal-content-wrapper .text-\[\#D83B01\] {
+        color: #fcd34d !important;
+    }
+    #portal-content-wrapper .text-blue-900,
+    #portal-content-wrapper .text-blue-800,
+    #portal-content-wrapper .text-blue-700,
+    #portal-content-wrapper .text-blue-600,
+    #portal-content-wrapper .text-sky-900,
+    #portal-content-wrapper .text-sky-800,
+    #portal-content-wrapper .text-sky-700,
+    #portal-content-wrapper .text-elevate-primary {
+        color: #7dd3fc !important;
+    }
+    #portal-content-wrapper .text-purple-700,
+    #portal-content-wrapper .text-purple-600,
+    #portal-content-wrapper .text-violet-700,
+    #portal-content-wrapper .text-violet-600 {
+        color: #d8b4fe !important;
     }
 
     /* Form Controls & Inputs */
@@ -150,25 +268,20 @@
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
         isTransitioning: false,
         
-        // --- LOGIKA DARK MODE ---
-        isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+        // --- LOGIKA DARK MODE (Selalu Aktif untuk Tema Elevate Dark Glassmorphism) ---
+        isDark: true,
         
         init() {
-            this.applyTheme();
-            this.$watch('isDark', value => this.applyTheme());
+            document.documentElement.classList.add('dark');
         },
         
         toggleTheme() {
-            this.isDark = !this.isDark;
-            localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+            this.isDark = true;
+            document.documentElement.classList.add('dark');
         },
         
         applyTheme() {
-            if (this.isDark) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            document.documentElement.classList.add('dark');
         },
         // ------------------------
 
