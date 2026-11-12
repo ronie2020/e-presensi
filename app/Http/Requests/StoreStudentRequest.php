@@ -26,7 +26,9 @@ class StoreStudentRequest extends FormRequest
                 'required', 
                 'string', 
                 'max:255', 
-                Rule::unique('students', 'student_id')->whereNull('deleted_at')
+                // Validasi unique DIHAPUS dari sini, karena logika duplikasi
+                // (restore soft-deleted, proteksi alumni, dll) sudah ditangani
+                // sepenuhnya di StudentController@store.
             ],
             'name' => 'required|string|max:255',
             'class_id' => 'required|integer|exists:classes,id',

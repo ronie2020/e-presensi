@@ -120,12 +120,10 @@ class StudentController extends Controller
 
     /**
      * Menyimpan data siswa baru (Quick Register & Full).
-     * PERUBAHAN: Menggunakan StoreStudentRequest
+     * Otomatis memulihkan jika terhapus, namun tetap melindungi arsip Alumni.
      */
     public function store(StoreStudentRequest $request)
     {
-        // AMAN! $data hanya berisi field yang sudah lolos validasi di StoreStudentRequest.
-        // Data 'siluman' akan otomatis dibuang.
         $data = $request->validated();
 
         // Generate Default Password (NISN)
@@ -137,11 +135,43 @@ class StudentController extends Controller
             $data['photo_path'] = $path;
         }
 
+        // Cari apakah student_id ini sudah ada di database (termasuk yang soft-deleted)
+        // Menggunakan query DB langsung untuk menghindari interferensi accessor/mutator
+        $existingStudent = Student::withTrashed()
+            ->whereRaw("student_id = ?", [$data['student_id']])
+            ->first();
+
+        if ($existingStudent) {
+            // PROTEKSI ALUMNI: Jika datanya berstatus 'graduated' dan tidak sedang terhapus
+            if ($existingStudent->status === 'graduated' && !$existingStudent->trashed()) {
+                return redirect()->route('students.index')
+                    ->with('error', 'Gagal! NISN/ID ' . $data['student_id'] . ' (' . $existingStudent->name . ') tercatat sebagai ALUMNI. Silakan cek di menu Arsip Alumni.');
+            }
+
+            // PROTEKSI SISWA AKTIF: Jika siswa masih aktif (bukan soft-deleted), tolak duplikasi
+            if (!$existingStudent->trashed()) {
+                return redirect()->route('students.index')
+                    ->with('error', 'Gagal! NISN/ID ' . $data['student_id'] . ' (' . $existingStudent->name . ') sudah terdaftar sebagai siswa aktif.');
+            }
+
+            // Jika siswa yang terhapus (soft deleted), pulihkan kembali
+            $existingStudent->restore();
+
+            // Pastikan statusnya aktif dan perbarui dengan data form terbaru
+            $data['status'] = 'active';
+            $existingStudent->update($data);
+
+            return redirect()->route('students.index')
+                ->with('success', 'Data siswa (' . $existingStudent->name . ') berhasil dipulihkan dan diperbarui ke kelas tujuan!');
+        }
+
+        // Jika benar-benar siswa baru, simpan sebagai siswa aktif
+        $data['status'] = 'active';
         Student::create($data);
 
         return redirect()->route('students.index')->with('success', 'Siswa berhasil ditambahkan.');
     }
-
+    
     /**
      * Menampilkan profil siswa beserta filter nilai yang dinamis.
      */
